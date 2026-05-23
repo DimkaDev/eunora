@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add Symptoms - Active Search</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary": "#814f45",
+                    "surface-tint": "#6a5c50",
+                    "on-secondary": "#ffffff",
+                    "on-surface-variant": "#4d453f",
+                    "primary": "#67594e",
+                    "surface-container-high": "#ede7e5",
+                    "on-primary-fixed-variant": "#51443a",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-fixed-dim": "#d6c3b5",
+                    "on-secondary-container": "#6c6074",
+                    "primary-fixed": "#f2dfd0",
+                    "surface-container-highest": "#e7e1df",
+                    "on-secondary-fixed": "#211828",
+                    "inverse-primary": "#d6c3b5",
+                    "error-container": "#ffdad6",
+                    "surface-dim": "#ded9d7",
+                    "on-tertiary-container": "#fffbff",
+                    "on-surface": "#1d1b1a",
+                    "on-primary-container": "#fffbff",
+                    "on-tertiary-fixed": "#341009",
+                    "surface-variant": "#e7e1df",
+                    "on-primary-fixed": "#231a11",
+                    "surface-container-low": "#f8f2f0",
+                    "tertiary-fixed-dim": "#f9b7a9",
+                    "on-tertiary-fixed-variant": "#683a31",
+                    "on-secondary-fixed-variant": "#4d4355",
+                    "secondary": "#655a6e",
+                    "primary-container": "#817266",
+                    "surface-container": "#f2edea",
+                    "secondary-fixed-dim": "#d0c1d8",
+                    "on-error-container": "#93000a",
+                    "secondary-container": "#edddf5",
+                    "outline": "#7f756e",
+                    "error": "#ba1a1a",
+                    "background": "#fef8f6",
+                    "on-primary": "#ffffff",
+                    "outline-variant": "#d0c4bc",
+                    "surface": "#fef8f6",
+                    "on-tertiary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "on-background": "#1d1b1a",
+                    "surface-bright": "#fef8f6",
+                    "secondary-fixed": "#edddf5",
+                    "inverse-on-surface": "#f5f0ed",
+                    "tertiary-container": "#9d675c",
+                    "tertiary-fixed": "#ffdad3",
+                    "inverse-surface": "#32302f"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif"],
+                    "body": ["Manrope"],
+                    "label": ["Manrope"]
+            }
+          },
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-search-ring {
+            border: 1.5px solid #6B4E8C;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface selection:bg-secondary-container">
+<!-- Top AppBar - Following JSON Structure but adjusted for screen context -->
+<header class="fixed top-0 w-full z-50 bg-[#fef8f6]/70 dark:bg-stone-900/70 backdrop-blur-md shadow-sm dark:shadow-none h-16 flex items-center justify-between px-6">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-[#67594e] dark:text-[#d8c9e0] hover:bg-[#f2edea] transition-colors p-2 rounded-full active:scale-95 duration-200 ease-in-out" data-icon="arrow_back">arrow_back</button>
+<h1 class="font-serif text-2xl font-medium tracking-tight text-[#67594e] dark:text-[#d8c9e0]">Symptom Library</h1>
+</div>
+<button class="material-symbols-outlined text-[#67594e] dark:text-[#d8c9e0] hover:bg-[#f2edea] transition-colors p-2 rounded-full active:scale-95 duration-200 ease-in-out" data-icon="search">search</button>
+</header>
+<main class="pt-24 pb-48 px-6 max-w-2xl mx-auto min-h-screen">
+<!-- Active Search Section -->
+<div class="mb-8">
+<div class="relative flex items-center">
+<div class="absolute left-4 flex items-center">
+<span class="material-symbols-outlined text-[#6B4E8C] text-[20px]" data-icon="search">search</span>
+</div>
+<input class="w-full h-12 pl-12 pr-12 bg-[#F0EEF5] active-search-ring rounded-[12px] text-[#1A1A2E] text-[16px] font-medium focus:outline-none" placeholder="Search symptoms..." type="text" value="joint"/>
+<button class="absolute right-4 flex items-center">
+<span class="material-symbols-outlined text-[#A090C0] text-[20px]" data-icon="close">close</span>
+</button>
+</div>
+<!-- Result Label -->
+<div class="mt-4 pl-1">
+<span class="text-[13px] text-[#767676] font-medium">1 result for 'joint'</span>
+</div>
+</div>
+<!-- Filtered Content Area (Physical Section Only) -->
+<section class="mb-12">
+<h2 class="font-serif text-xl font-semibold text-on-surface mb-6">Physical</h2>
+<div class="flex flex-wrap gap-3">
+<button class="px-5 py-2.5 bg-secondary-container text-on-secondary-container rounded-full text-sm font-semibold flex items-center gap-2 transition-transform active:scale-95">
+                    Joint pain
+                    <span class="material-symbols-outlined text-sm" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</button>
+</div>
+</section>
+<!-- Hidden Categories - Logic based on prompt to hide -->
+<!-- Hidden elements intentionally excluded to prioritize "joint" result canvas -->
+</main>
+<!-- Sticky Bottom Area -->
+<footer class="fixed bottom-0 left-0 w-full z-50 pointer-events-none">
+<div class="max-w-2xl mx-auto w-full px-6 pb-10 flex flex-col gap-4 pointer-events-auto">
+<!-- Add Own Symptom Button -->
+<button class="w-full py-4 bg-surface-container-low text-primary font-bold text-sm uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 hover:bg-surface-container transition-colors shadow-sm active:scale-[0.98] duration-150">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+                + Add your own symptom
+            </button>
+<!-- Active Save Action -->
+<button class="w-full py-5 bg-[#6B4E8C] text-white font-bold text-lg rounded-xl shadow-lg hover:opacity-90 transition-all active:scale-[0.98] duration-150 flex items-center justify-center gap-3">
+                Save (4 selected)
+            </button>
+</div>
+<!-- Bottom Navigation Shell - Following JSON Structure -->
+<nav aria-hidden="true" class="hidden md:hidden lg:hidden">
+<!-- Suppressed for transactional sub-page as per UX Goal rules -->
+</nav>
+</footer>
+<!-- Bottom Navigation Component (Mobile View Fallback - Logic check: Suppressed on focused task screens) -->
+<!-- The navigation is suppressed here because this is a task-focused screen (Add Symptoms) -->
+</body></html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync Dashboard - Daily Timeline</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;0,900;1,400&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "surface-container-highest": "#e7e1df",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "surface-dim": "#ded9d7",
+                        "surface-bright": "#fef8f6",
+                        "secondary": "#655a6e",
+                        "on-surface-variant": "#4d453f",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#ffdad3",
+                        "secondary-fixed": "#edddf5",
+                        "on-primary-fixed": "#231a11",
+                        "inverse-primary": "#d6c3b5",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "on-error": "#ffffff",
+                        "on-secondary-container": "#6c6074",
+                        "tertiary": "#814f45",
+                        "surface-container": "#f2edea",
+                        "surface-tint": "#6a5c50",
+                        "background": "#fef8f6",
+                        "primary": "#67594e",
+                        "on-surface": "#1d1b1a",
+                        "surface-variant": "#e7e1df",
+                        "surface": "#fef8f6",
+                        "outline-variant": "#d0c4bc",
+                        "secondary-container": "#edddf5",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "primary-fixed": "#f2dfd0",
+                        "on-tertiary": "#ffffff",
+                        "primary-container": "#817266",
+                        "on-primary-container": "#fffbff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-low": "#f8f2f0",
+                        "on-primary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-tertiary-container": "#fffbff",
+                        "inverse-on-surface": "#f5f0ed",
+                        "on-background": "#1d1b1a",
+                        "outline": "#7f756e",
+                        "on-tertiary-fixed": "#341009",
+                        "surface-container-high": "#ede7e5",
+                        "on-secondary-fixed": "#211828",
+                        "error-container": "#ffdad6",
+                        "inverse-surface": "#32302f",
+                        "tertiary-container": "#9d675c",
+                        "on-primary-fixed-variant": "#51443a"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #fef8f6;
+            color: #1d1b1a;
+            font-family: 'Manrope', sans-serif;
+        }
+        .editorial-header {
+            font-family: 'Noto Serif', serif;
+        }
+        .timeline-line {
+            position: absolute;
+            left: 24px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #edddf5;
+            z-index: 0;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: 19px;
+            width: 12px;
+            height: 12px;
+            background-color: #edddf5;
+            border: 2px solid white;
+            border-radius: 50%;
+            z-index: 10;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen pb-32">
+<header class="w-full top-0 sticky z-50 bg-stone-100/10 backdrop-blur-md flex justify-between items-center px-6 py-4">
+<div class="flex flex-col">
+<h1 class="font-['Noto_Serif'] font-bold text-2xl tracking-tight text-[#67594e]">Sarah's Day</h1>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="text-xs font-medium text-stone-500 font-body uppercase tracking-widest">Wednesday, March 19</span>
+<span class="w-1 h-1 rounded-full bg-stone-300"></span>
+<span class="text-[12px] text-stone-400 font-body lowercase italic">Day 7 in cycle</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-[#67594e] hover:opacity-80 transition-opacity active:scale-95 transition-transform">notifications</button>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-surface-container">
+<img alt="Sarah's Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcyvRmigFQWEnghTEoPCUvu6Lls83qWwGf81JXXAHmxs_PI1albuWzfyX8hJHYDK2oDWVWOWPMCqACZzrOSiUrEriDUDMizBdlzmoikkKEMsviNymTb1SmeDL2M5mjpE7ZBB0lVSTa1Di99-xd5i_L5XTTvhH9uNbS-BEM4dPF7EevWWNXW_jzlWxSVjPjBZ3OPwiDpUtKeUmcOYd5ry2dtceFPJ-WL6Bp-ZEtlShywIcbEgix84xxFqoBGr1QXN6ehV00Hjb-W4c"/>
+</div>
+</div>
+</header>
+<main class="px-5 mt-2 space-y-6">
+<section class="bg-surface-container-low rounded-3xl p-4 flex items-center justify-between">
+<div class="flex gap-4 items-center">
+<div class="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center">
+<span class="material-symbols-outlined text-[#E8A89B]">calendar_today</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Daily Narrative</p>
+<p class="text-[11px] text-stone-500">Your flow from morning until now</p>
+</div>
+</div>
+<button class="bg-primary text-white text-[11px] font-bold px-4 py-2 rounded-full shadow-sm">Log Event</button>
+</section>
+<section class="relative pl-12 pr-2 py-4">
+<div class="timeline-line"></div>
+<div class="space-y-10">
+<div class="relative group">
+<div class="timeline-dot top-4"></div>
+<div class="flex flex-col gap-1">
+<span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">07:30 AM • Morning Routine</span>
+<div class="bg-white rounded-2xl p-4 shadow-sm border border-stone-100 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-[#edddf5] flex items-center justify-center">
+<span class="material-symbols-outlined text-[#4d4355] text-xl">medication</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Estradiol Patch</p>
+<p class="text-[11px] text-stone-500">Applied new patch</p>
+</div>
+</div>
+<span class="px-2 py-1 bg-green-100 text-[#2d402d] text-[10px] font-bold rounded-md uppercase">Completed</span>
+</div>
+</div>
+</div>
+<div class="relative group">
+<div class="timeline-dot top-4"></div>
+<div class="flex flex-col gap-1">
+<span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">08:45 AM • Breakfast</span>
+<div class="bg-white rounded-2xl p-4 shadow-sm border border-stone-100 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-[#f2dfd0] flex items-center justify-center">
+<span class="material-symbols-outlined text-[#817266] text-xl">coffee</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Caffeine Intake</p>
+<p class="text-[11px] text-stone-500">2 cups of coffee</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-stone-300">edit</span>
+</div>
+</div>
+</div>
+<div class="relative group">
+<div class="timeline-dot top-4"></div>
+<div class="flex flex-col gap-1">
+<span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">12:15 PM • Midday</span>
+<div class="bg-[#fef8f6] rounded-2xl p-4 shadow-sm border border-[#E8A89B]/20 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-[#ffdad3] flex items-center justify-center">
+<span class="material-symbols-outlined text-[#814f45] text-xl">thermostat</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Hot Flashes</p>
+<div class="flex items-center gap-1.5 mt-0.5">
+<div class="flex gap-0.5">
+<div class="w-1.5 h-3 bg-[#814f45] rounded-full"></div>
+<div class="w-1.5 h-3 bg-[#814f45] rounded-full"></div>
+<div class="w-1.5 h-3 bg-[#814f45]/20 rounded-full"></div>
+</div>
+<span class="text-[10px] font-bold text-[#814f45]">Moderate</span>
+</div>
+</div>
+</div>
+<button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-stone-100">
+<span class="material-symbols-outlined text-stone-400 text-sm">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+<div class="relative group">
+<div class="timeline-dot top-4"></div>
+<div class="flex flex-col gap-1">
+<span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">03:30 PM • Work Session</span>
+<div class="bg-white rounded-2xl p-4 shadow-sm border border-stone-100 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-[#f9b7a9]/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-[#814f45] text-xl">psychology</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Stressful Meeting</p>
+<p class="text-[11px] text-stone-500">High cognitive load</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="relative group">
+<div class="timeline-dot top-4"></div>
+<div class="flex flex-col gap-1">
+<span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">06:00 PM • Evening</span>
+<div class="bg-[#ede7e5] rounded-2xl p-4 shadow-sm border-none flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+<span class="material-symbols-outlined text-[#67594e] text-xl">bedtime</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Sleep Quality</p>
+<p class="text-[11px] text-stone-500 italic">"Feeling tired but restless."</p>
+</div>
+</div>
+<button class="bg-white w-8 h-8 rounded-full shadow-sm flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm">add</span>
+</button>
+</div>
+</div>
+</div>
+<div class="relative pb-8">
+<div class="timeline-dot top-2 bg-stone-300"></div>
+<div class="flex flex-col gap-1 opacity-50">
+<span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">10:00 PM • Bedtime</span>
+<p class="text-[11px] text-stone-400 italic">Awaiting Progesterone log...</p>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-[#E8F0E8] rounded-3xl p-5 shadow-sm border border-green-100/50 mx-1">
+<div class="flex items-center gap-2 mb-3">
+<span class="text-lg">💡</span>
+<h3 class="font-body font-bold text-sm text-[#2d402d]">Daily Insight</h3>
+</div>
+<p class="text-sm text-[#4a5e4a] leading-relaxed mb-4">
+            Sarah, you noticed <span class="font-bold">Hot Flashes</span> about 3 hours after your caffeine intake today. This pattern matches your logs from Monday.
+        </p>
+<div class="flex justify-between items-center">
+<a class="text-xs font-bold text-primary underline underline-offset-4 decoration-primary/30" href="#">Deep Dive</a>
+<button class="material-symbols-outlined text-[#2d402d] text-sm opacity-50">close</button>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-[#f2edea]/80 backdrop-blur-xl shadow-[0_-4px_24px_rgba(29,27,26,0.06)] rounded-t-[2rem] border-t border-white/20">
+<a class="flex flex-col items-center justify-center bg-[#67594e] text-white rounded-full px-5 py-2 active:scale-95 transition-all" href="#">
+<span class="material-symbols-outlined mb-0.5" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-['Manrope'] font-bold text-[9px] uppercase tracking-wider">Today</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 px-5 py-2 hover:bg-stone-200/30 rounded-full transition-all" href="#">
+<span class="material-symbols-outlined mb-0.5">edit_calendar</span>
+<span class="font-['Manrope'] font-medium text-[9px] uppercase tracking-wider">Log</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 px-5 py-2 hover:bg-stone-200/30 rounded-full transition-all" href="#">
+<span class="material-symbols-outlined mb-0.5">insights</span>
+<span class="font-['Manrope'] font-medium text-[9px] uppercase tracking-wider">Trends</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 px-5 py-2 hover:bg-stone-200/30 rounded-full transition-all" href="#">
+<span class="material-symbols-outlined mb-0.5">medical_services</span>
+<span class="font-['Manrope'] font-medium text-[9px] uppercase tracking-wider">Clinic</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 px-5 py-2 hover:bg-stone-200/30 rounded-full transition-all" href="#">
+<span class="material-symbols-outlined mb-0.5">person</span>
+<span class="font-['Manrope'] font-medium text-[9px] uppercase tracking-wider">Profile</span>
+</a>
+</nav>
+
+</body></html>

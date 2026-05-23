@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync AI Insights</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#d0c4bc",
+                        "on-secondary-container": "#6c6074",
+                        "on-surface-variant": "#4d453f",
+                        "background": "#fef8f6",
+                        "surface-dim": "#ded9d7",
+                        "surface-variant": "#e7e1df",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#341009",
+                        "tertiary-container": "#9d675c",
+                        "on-error-container": "#93000a",
+                        "surface": "#fef8f6",
+                        "primary-fixed": "#f2dfd0",
+                        "inverse-surface": "#32302f",
+                        "secondary-fixed": "#edddf5",
+                        "surface-bright": "#fef8f6",
+                        "on-primary": "#ffffff",
+                        "outline": "#7f756e",
+                        "on-tertiary-container": "#fffbff",
+                        "on-primary-fixed-variant": "#51443a",
+                        "secondary": "#655a6e",
+                        "surface-container": "#f2edea",
+                        "primary": "#67594e",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "surface-tint": "#6a5c50",
+                        "inverse-primary": "#d6c3b5",
+                        "inverse-on-surface": "#f5f0ed",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "error": "#ba1a1a",
+                        "primary-container": "#817266",
+                        "on-primary-fixed": "#231a11",
+                        "on-background": "#1d1b1a",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f8f2f0",
+                        "on-secondary-fixed": "#211828",
+                        "tertiary": "#814f45",
+                        "on-surface": "#1d1b1a",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "secondary-container": "#edddf5",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed": "#ffdad3",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-high": "#ede7e5",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "surface-container-highest": "#e7e1df",
+                        "on-primary-container": "#fffbff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; background-color: #fef8f6; }
+        .serif { font-family: 'Noto Serif', serif; }
+        .glass { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased flex flex-col min-h-screen">
+<!-- Top AppBar (from Shared Components) -->
+<header class="fixed top-0 w-full z-50 bg-[#fef8f6]/70 dark:bg-[#1d1b1a]/70 backdrop-blur-md flex justify-between items-center px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#67594e] dark:text-[#f2edea]">menu</span>
+<span class="font-serif italic text-2xl text-[#67594e] dark:text-[#f2edea]">MenoSync</span>
+</div>
+<span class="material-symbols-outlined text-[#67594e] dark:text-[#f2edea]">account_circle</span>
+</header>
+<main class="flex-grow pt-20 pb-28 px-5 max-w-[375px] mx-auto overflow-x-hidden">
+<!-- Header Section -->
+<header class="mb-6 px-1">
+<h1 class="font-headline font-bold text-[22px] tracking-tight text-on-surface">Your Insights</h1>
+<p class="font-body text-[15px] text-outline">Based on 34 days of your data</p>
+</header>
+<!-- AI Capability Banner -->
+<section class="mb-4 relative overflow-hidden p-5 rounded-2xl bg-gradient-to-br from-primary via-primary-container to-secondary shadow-lg">
+<div class="flex justify-between items-start">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-white text-[20px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<div>
+<h2 class="text-white font-semibold text-[16px] leading-tight mb-1">MenoSync AI has found 5 patterns in your data</h2>
+<p class="text-white/70 text-[13px]">Minimum 7 events required per insight · Updated weekly</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-white/40 text-[18px]">colors_spark</span>
+</div>
+<!-- Decorative Glow -->
+<div class="absolute -bottom-10 -right-10 w-32 h-32 bg-secondary-fixed opacity-20 blur-3xl rounded-full"></div>
+</section>
+<!-- Medical Disclaimer Bar -->
+<section class="mb-8 p-3 rounded-xl bg-[#FFF9E6] flex items-start gap-2 border border-[#856404]/10">
+<span class="material-symbols-outlined text-[#856404] text-[18px]" style="font-variation-settings: 'FILL' 1;">warning</span>
+<p class="text-[13px] text-[#856404] leading-tight">These patterns are for informational purposes only. Not medical advice. Discuss with your doctor.</p>
+</section>
+<!-- Correlation Cards (Vertical Stack) -->
+<div class="space-y-4">
+<!-- Card 1: Negative Correlation -->
+<article class="bg-surface-container-lowest rounded-2xl p-5 shadow-[0_4px_24px_rgba(29,27,26,0.04)] border-l-4 border-red-400">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-3">
+<span class="text-[32px]">🍷</span>
+<h3 class="font-semibold text-[18px] text-on-surface">Red wine</h3>
+</div>
+<span class="bg-red-50 text-red-600 px-3 py-1 rounded-full text-[12px] font-bold tracking-tight">Strong link</span>
+</div>
+<div class="mb-4">
+<p class="text-[16px] font-medium text-on-surface">→ +4.2 hot flashes the next morning</p>
+</div>
+<div class="space-y-1 mb-4">
+<div class="flex justify-between text-[13px] text-outline">
+<span>79% correlation</span>
+<span>Based on 12 events</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 79%"></div>
+</div>
+</div>
+<p class="text-[13px] text-on-surface-variant italic font-headline">
+                    You logged red wine on 12 evenings. Next-morning hot flash count was higher 9 of those times.
+                </p>
+</article>
+<!-- Card 2: Positive Correlation -->
+<article class="bg-surface-container-lowest rounded-2xl p-5 shadow-[0_4px_24px_rgba(29,27,26,0.04)] border-l-4 border-green-400">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-green-600 text-[32px]">directions_run</span>
+<h3 class="font-semibold text-[17px] text-on-surface">30+ min exercise</h3>
+</div>
+<span class="bg-green-50 text-green-700 px-3 py-1 rounded-full text-[12px] font-bold tracking-tight">Protective factor</span>
+</div>
+<div class="mb-4 flex items-center gap-2">
+<span class="text-red-400 line-through text-[14px]">Hot flash intensity</span>
+<span class="text-green-600 font-semibold text-[16px]">−1.4 that day</span>
+</div>
+<div class="flex items-center gap-2 text-[13px] text-outline">
+<span class="material-symbols-outlined text-[16px]">query_stats</span>
+<span>73% correlation · 11 events</span>
+</div>
+</article>
+<!-- Card 3: Mood Correlation -->
+<article class="bg-surface-container-lowest rounded-2xl p-5 shadow-[0_4px_24px_rgba(29,27,26,0.04)] border-l-4 border-amber-400">
+<div class="flex items-center gap-3 mb-3">
+<span class="material-symbols-outlined text-amber-500 text-[32px]">psychology_alt</span>
+<h3 class="font-semibold text-[17px] text-on-surface">High stress days</h3>
+</div>
+<div class="mb-4">
+<p class="text-[16px] font-medium text-on-surface">→ Anxiety score +2.1 the same day</p>
+</div>
+<div class="flex items-center gap-2 text-[13px] text-outline">
+<span class="material-symbols-outlined text-[16px]">link</span>
+<span>68% correlation · 9 events</span>
+</div>
+</article>
+<!-- Card 4: Teaser / Building Data -->
+<article class="bg-surface-container rounded-2xl p-5 border border-outline-variant/20 opacity-80">
+<div class="flex items-center gap-3 mb-3">
+<span class="material-symbols-outlined text-outline text-[32px]">coffee</span>
+<h3 class="font-semibold text-[17px] text-outline">Coffee in the morning</h3>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-[13px] text-outline">
+<span>Building data…</span>
+<span>5 of 7 events needed</span>
+</div>
+<div class="h-1.5 w-full bg-white/50 rounded-full overflow-hidden flex gap-0.5">
+<div class="h-full bg-outline-variant w-[14%]"></div>
+<div class="h-full bg-outline-variant w-[14%]"></div>
+<div class="h-full bg-outline-variant w-[14%]"></div>
+<div class="h-full bg-outline-variant w-[14%]"></div>
+<div class="h-full bg-outline-variant w-[14%]"></div>
+<div class="h-full bg-surface-variant w-[14%]"></div>
+<div class="h-full bg-surface-variant w-[14%]"></div>
+</div>
+</div>
+<p class="mt-3 text-[13px] text-outline">Keep logging to unlock this insight</p>
+</article>
+<!-- Card 5: Weather Correlation -->
+<article class="bg-surface-container-lowest rounded-2xl p-5 shadow-[0_4px_24px_rgba(29,27,26,0.04)] border-l-4 border-primary-container">
+<div class="flex items-center gap-3 mb-3">
+<span class="material-symbols-outlined text-primary text-[32px]">thermostat</span>
+<h3 class="font-semibold text-[17px] text-on-surface">Hot/humid days</h3>
+</div>
+<div class="mb-4">
+<p class="text-[16px] font-medium text-on-surface">→ 2× more hot flashes reported</p>
+</div>
+<div class="flex items-center gap-2 text-[13px] text-outline">
+<span class="material-symbols-outlined text-[16px]">wb_sunny</span>
+<span>71% · 8 events</span>
+</div>
+</article>
+</div>
+<!-- Bottom Link -->
+<footer class="mt-10 mb-8 flex justify-center">
+<button class="text-secondary font-semibold text-[14px] flex items-center gap-1 hover:opacity-80 transition-opacity">
+                How are these calculated?
+                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</footer>
+</main>
+<!-- Bottom Navigation Bar (from Shared Components) -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-3xl border-t border-[#9B8B7E]/10 bg-[#fef8f6]/70 dark:bg-[#1d1b1a]/70 backdrop-blur-md flex justify-around items-center px-6 pb-6 pt-3 shadow-[0_-4px_24px_rgba(29,27,26,0.06)]">
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] dark:text-[#817266] px-4 py-2 hover:text-[#67594e] dark:hover:text-[#f2edea] transition-colors" href="#">
+<span class="material-symbols-outlined mb-1">calendar_today</span>
+<span class="font-sans text-[11px] font-medium uppercase tracking-wider">Today</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-[#817266] text-white rounded-2xl px-4 py-2 tap-highlight-none scale-95 duration-150" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-sans text-[11px] font-medium uppercase tracking-wider">Insights</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] dark:text-[#817266] px-4 py-2 hover:text-[#67594e] dark:hover:text-[#f2edea] transition-colors" href="#">
+<span class="material-symbols-outlined mb-1">auto_stories</span>
+<span class="font-sans text-[11px] font-medium uppercase tracking-wider">Library</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] dark:text-[#817266] px-4 py-2 hover:text-[#67594e] dark:hover:text-[#f2edea] transition-colors" href="#">
+<span class="material-symbols-outlined mb-1">edit_note</span>
+<span class="font-sans text-[11px] font-medium uppercase tracking-wider">Journal</span>
+</a>
+</nav>
+</body></html>

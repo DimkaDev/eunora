@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Surgical Menopause Health Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style type="text/tailwindcss">
+        :root {
+            --bg-color: #F7F5F0;
+            --primary: #4A453E;
+            --accent: #6B7C6B;
+            --lavender: #E8E0F0;
+            --sage: #E8F0E8;
+            --charcoal: #333333;
+        }
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: var(--bg-color);
+            -webkit-font-smoothing: antialiased;
+        }
+        .font-serif {
+            font-family: 'Noto Serif', serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+            font-size: 20px;
+        }input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #4A453E;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }details summary::-webkit-details-marker {
+            display: none;
+        }
+        details[open] .expand-icon {
+            transform: rotate(180deg);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-charcoal min-h-screen pb-40">
+<header class="sticky top-0 w-full z-50 bg-[#F7F5F0]/90 backdrop-blur-md flex items-center px-4 h-14 border-b border-stone-200">
+<div class="flex items-center justify-between w-full">
+<div class="flex items-center gap-3">
+<button class="material-symbols-outlined text-charcoal">arrow_back</button>
+<h1 class="font-serif text-lg font-semibold text-charcoal">Surgical Profile</h1>
+</div>
+<div class="flex items-center gap-2">
+<div class="bg-orange-100 text-orange-800 px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
+<span class="material-symbols-outlined !text-[12px]">warning</span>
+                    RAPID ONSET
+                </div>
+</div>
+</div>
+</header>
+<main class="px-4 py-6 max-w-lg mx-auto space-y-4">
+<header class="mb-6">
+<div class="flex justify-between items-center mb-2">
+<span class="text-[10px] font-bold tracking-widest text-stone-500 uppercase">Profile Completion</span>
+<span class="text-[10px] font-bold text-stone-500">Step 2d of 7</span>
+</div>
+<div class="w-full bg-stone-200 h-1 rounded-full overflow-hidden">
+<div class="bg-accent h-full w-[35%]"></div>
+</div>
+<h2 class="font-serif text-xl font-bold mt-4 text-charcoal">Surgical Menopause</h2>
+<p class="text-stone-500 text-xs mt-1">Efficiently track your surgical history and immediate symptom onset.</p>
+</header>
+<div class="space-y-2">
+<details class="bg-white border border-stone-200 rounded-lg group overflow-hidden" open="">
+<summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-stone-50 transition-colors list-none">
+<div class="flex items-center gap-3">
+<span class="w-6 h-6 rounded bg-stone-100 flex items-center justify-center text-[11px] font-bold text-stone-600">01</span>
+<span class="text-[13px] font-bold">Procedure Date</span>
+</div>
+<span class="material-symbols-outlined text-stone-400 expand-icon transition-transform">expand_more</span>
+</summary>
+<div class="px-4 pb-5 pt-1 space-y-3">
+<div class="relative">
+<input class="w-full bg-stone-50 border-stone-200 rounded-md py-2.5 px-4 text-sm focus:ring-1 focus:ring-accent/50 focus:border-accent" type="month" value="2023-10"/>
+</div>
+<p class="text-[10px] text-stone-400">Baseline for tracking your specific symptom timeline.</p>
+</div>
+</details>
+<details class="bg-white border border-stone-200 rounded-lg group overflow-hidden">
+<summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-stone-50 transition-colors list-none">
+<div class="flex items-center gap-3">
+<span class="w-6 h-6 rounded bg-stone-100 flex items-center justify-center text-[11px] font-bold text-stone-600">02</span>
+<span class="text-[13px] font-bold">Type of Procedure</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[10px] text-stone-400 italic">Optional</span>
+<span class="material-symbols-outlined text-stone-400 expand-icon transition-transform">expand_more</span>
+</div>
+</summary>
+<div class="px-4 pb-5 pt-1 space-y-2">
+<div class="grid grid-cols-1 gap-2">
+<label class="flex items-center gap-3 p-3 rounded border border-stone-100 bg-stone-50/50 hover:bg-stone-50 cursor-pointer">
+<input class="w-4 h-4 text-accent border-stone-300 focus:ring-accent" name="procedure" type="radio"/>
+<span class="text-[13px]">Hysterectomy</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded border border-stone-100 bg-stone-50/50 hover:bg-stone-50 cursor-pointer">
+<input class="w-4 h-4 text-accent border-stone-300 focus:ring-accent" name="procedure" type="radio"/>
+<span class="text-[13px]">Bilateral oophorectomy</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded border border-stone-100 bg-stone-50/50 hover:bg-stone-50 cursor-pointer">
+<input class="w-4 h-4 text-accent border-stone-300 focus:ring-accent" name="procedure" type="radio"/>
+<span class="text-[13px]">Both</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded border border-stone-100 bg-stone-50/50 hover:bg-stone-50 cursor-pointer">
+<input class="w-4 h-4 text-accent border-stone-300 focus:ring-accent" name="procedure" type="radio"/>
+<span class="text-[13px]">Other / Prefer not to say</span>
+</label>
+</div>
+</div>
+</details>
+<details class="bg-[var(--lavender)] border border-purple-200 rounded-lg group overflow-hidden">
+<summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-purple-100/50 transition-colors list-none">
+<div class="flex items-center gap-3">
+<span class="w-6 h-6 rounded bg-white/60 flex items-center justify-center text-[11px] font-bold text-purple-700">03</span>
+<span class="text-[13px] font-bold text-purple-900">HRT Status</span>
+</div>
+<span class="material-symbols-outlined text-purple-400 expand-icon transition-transform">expand_more</span>
+</summary>
+<div class="px-4 pb-5 pt-1 space-y-4">
+<p class="text-[11px] text-purple-800/70 leading-tight">HRT is typically recommended post-surgery to manage rapid hormone decline.</p>
+<div class="space-y-1.5">
+<select class="w-full bg-white/80 border-purple-200 rounded-md py-2.5 px-4 text-sm focus:ring-1 focus:ring-purple-400 focus:border-purple-400 text-purple-900">
+<option>Yes - started immediately</option>
+<option>Yes - started later</option>
+<option>No prescription yet</option>
+<option>Not sure</option>
+</select>
+</div>
+<div class="pt-3 border-t border-purple-200">
+<label class="block text-[11px] font-bold text-purple-900 mb-2 uppercase tracking-wide">Start Date Detail</label>
+<div class="grid grid-cols-2 gap-2">
+<button class="bg-white/60 py-2 px-3 rounded text-[12px] font-medium text-purple-800 border border-purple-200">Immediate</button>
+<button class="bg-white/40 py-2 px-3 rounded text-[12px] font-medium text-purple-800 border border-purple-100">Delayed</button>
+</div>
+</div>
+</div>
+</details>
+<details class="bg-white border border-stone-200 rounded-lg group overflow-hidden">
+<summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-stone-50 transition-colors list-none">
+<div class="flex items-center gap-3">
+<span class="w-6 h-6 rounded bg-stone-100 flex items-center justify-center text-[11px] font-bold text-stone-600">04</span>
+<span class="text-[13px] font-bold">Primary Symptoms</span>
+</div>
+<span class="material-symbols-outlined text-stone-400 expand-icon transition-transform">expand_more</span>
+</summary>
+<div class="px-4 pb-5 pt-1">
+<p class="text-[11px] text-stone-500 mb-3">Select symptoms with rapid onset since surgery.</p>
+<div class="grid grid-cols-2 gap-2">
+<label class="flex items-center gap-2 p-2.5 rounded bg-stone-50 border border-stone-100 cursor-pointer">
+<input class="w-4 h-4 text-accent border-stone-300 rounded focus:ring-accent" type="checkbox"/>
+<span class="text-[11px] font-medium">Hot Flashes</span>
+</label>
+<label class="flex items-center gap-2 p-2.5 rounded bg-stone-50 border border-stone-100 cursor-pointer">
+<input class="w-4 h-4 text-accent border-stone-300 rounded focus:ring-accent" type="checkbox"/>
+<span class="text-[11px] font-medium">Night Sweats</span>
+</label>
+<label class="flex items-center gap-2 p-2.5 rounded bg-stone-50 border border-stone-100 cursor-pointer">
+<input class="w-4 h-4 text-accent border-stone-300 rounded focus:ring-accent" type="checkbox"/>
+<span class="text-[11px] font-medium">Mood Swings</span>
+</label>
+<label class="flex items-center gap-2 p-2.5 rounded bg-stone-50 border border-stone-100 cursor-pointer">
+<input class="w-4 h-4 text-accent border-stone-300 rounded focus:ring-accent" type="checkbox"/>
+<span class="text-[11px] font-medium">Sleep Issues</span>
+</label>
+<label class="flex items-center gap-2 p-2.5 rounded bg-stone-50 border border-stone-100 cursor-pointer">
+<input class="w-4 h-4 text-accent border-stone-300 rounded focus:ring-accent" type="checkbox"/>
+<span class="text-[11px] font-medium">Joint Pain</span>
+</label>
+<label class="flex items-center gap-2 p-2.5 rounded bg-stone-50 border border-stone-100 cursor-pointer">
+<input class="w-4 h-4 text-accent border-stone-300 rounded focus:ring-accent" type="checkbox"/>
+<span class="text-[11px] font-medium">Vaginal Dryness</span>
+</label>
+</div>
+<input class="w-full mt-3 bg-stone-50 border-stone-200 rounded-md py-2 px-4 text-[12px] focus:ring-1 focus:ring-accent" placeholder="Other symptoms..." type="text"/>
+</div>
+</details>
+<details class="bg-white border border-stone-200 rounded-lg group overflow-hidden">
+<summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-stone-50 transition-colors list-none">
+<div class="flex items-center gap-3">
+<span class="w-6 h-6 rounded bg-stone-100 flex items-center justify-center text-[11px] font-bold text-stone-600">05</span>
+<span class="text-[13px] font-bold">Overall Wellbeing Score</span>
+</div>
+<span class="material-symbols-outlined text-stone-400 expand-icon transition-transform">expand_more</span>
+</summary>
+<div class="px-4 pb-6 pt-2">
+<div class="flex justify-between items-center mb-6 px-1">
+<span class="text-[10px] font-bold text-stone-400">POST-SURGERY BASELINE</span>
+<div class="flex items-baseline gap-1">
+<span class="text-2xl font-bold text-accent">7</span>
+<span class="text-[10px] text-stone-400">/ 10</span>
+</div>
+</div>
+<div class="relative h-1.5 w-full bg-stone-100 rounded-full mb-4">
+<div class="absolute inset-0 bg-gradient-to-r from-red-400 via-yellow-400 to-green-500 rounded-full opacity-60"></div>
+<input class="absolute inset-0 w-full h-1.5 appearance-none bg-transparent cursor-pointer z-10" max="10" min="1" type="range" value="7"/>
+</div>
+<div class="flex justify-between text-[10px] text-stone-400 font-medium">
+<span>STRUGGLING</span>
+<span>THRIVING</span>
+</div>
+</div>
+</details>
+</div>
+<div class="bg-[var(--sage)] border border-emerald-100 p-4 rounded-lg flex gap-3 items-center">
+<div class="bg-white/60 p-1.5 rounded text-emerald-800">
+<span class="material-symbols-outlined !text-[18px]">favorite</span>
+</div>
+<p class="text-[11px] text-emerald-900 leading-tight">
+                Our analytical engine uses this data to adjust your health forecast.
+            </p>
+</div>
+</main>
+<nav class="fixed bottom-0 left-0 w-full bg-white border-t border-stone-200 px-6 pt-4 pb-8 z-50 flex flex-col gap-3">
+<button class="w-full py-3.5 bg-[#4A453E] text-white rounded-md font-bold shadow-sm active:scale-[0.98] transition-all text-[12px] uppercase tracking-widest">
+            Save &amp; Continue
+        </button>
+<button class="w-full text-stone-500 font-semibold text-[11px] flex items-center justify-center gap-1">
+<span class="material-symbols-outlined !text-[14px]">description</span>
+            Review Support Resources
+        </button>
+</nav>
+
+</body></html>

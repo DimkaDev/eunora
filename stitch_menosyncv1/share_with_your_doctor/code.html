@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline": "#7f756e",
+                        "surface-container-low": "#f8f2f0",
+                        "on-primary-fixed-variant": "#51443a",
+                        "on-error-container": "#93000a",
+                        "secondary": "#655a6e",
+                        "on-secondary-container": "#6c6074",
+                        "on-background": "#1d1b1a",
+                        "background": "#fef8f6",
+                        "inverse-primary": "#d6c3b5",
+                        "surface-dim": "#ded9d7",
+                        "surface": "#fef8f6",
+                        "secondary-container": "#edddf5",
+                        "on-tertiary-container": "#fffbff",
+                        "surface-variant": "#e7e1df",
+                        "on-secondary-fixed": "#211828",
+                        "tertiary-container": "#9d675c",
+                        "on-surface-variant": "#4d453f",
+                        "outline-variant": "#d0c4bc",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#32302f",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#e7e1df",
+                        "on-tertiary": "#ffffff",
+                        "inverse-on-surface": "#f5f0ed",
+                        "on-primary-fixed": "#231a11",
+                        "surface-container": "#f2edea",
+                        "tertiary-fixed": "#ffdad3",
+                        "primary-container": "#817266",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#fef8f6",
+                        "on-primary-container": "#fffbff",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "on-surface": "#1d1b1a",
+                        "surface-tint": "#6a5c50",
+                        "on-primary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#edddf5",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "primary": "#67594e",
+                        "tertiary": "#814f45",
+                        "primary-fixed": "#f2dfd0",
+                        "on-tertiary-fixed": "#341009",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "surface-container-high": "#ede7e5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-gradient-brand {
+            background: linear-gradient(135deg, #67594e 0%, #817266 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface antialiased mb-24">
+<!-- Top App Bar -->
+<header class="sticky top-0 w-full z-50 bg-[#fef8f6]/70 dark:bg-[#1d1b1a]/70 backdrop-blur-xl shadow-sm shadow-[#1d1b1a]/5 flex items-center justify-between px-5 h-16">
+<button class="hover:opacity-80 transition-opacity active:scale-95 duration-200 text-[#67594e] dark:text-[#D8C9E0]">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-serif text-2xl font-semibold tracking-tight text-[#67594e] dark:text-[#D8C9E0]">Doctor Reports</h1>
+<div class="w-10"></div> <!-- Spacer for centering -->
+</header>
+<main class="max-w-2xl mx-auto px-5 py-8 space-y-10">
+<!-- Hero Header -->
+<div class="space-y-2">
+<h2 class="font-headline text-3xl font-bold tracking-tight text-primary">Share with Your Doctor</h2>
+<p class="text-on-surface-variant font-medium opacity-80 leading-relaxed">Generate a professional report to bring to your appointment.</p>
+</div>
+<!-- Section 1: Quick Stats Bento -->
+<section class="grid grid-cols-2 gap-4">
+<div class="col-span-2 bg-surface-container-lowest p-6 rounded-2xl shadow-sm space-y-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-tertiary-container" style="font-variation-settings: 'FILL' 1;">insights</span>
+<h3 class="font-bold text-sm uppercase tracking-widest text-primary">Quick Stats Summary</h3>
+</div>
+<div class="grid grid-cols-2 gap-6">
+<div class="space-y-1">
+<span class="text-xs font-bold text-outline uppercase tracking-wider">Days Tracked</span>
+<p class="text-xl font-headline font-bold text-primary">24/30</p>
+</div>
+<div class="space-y-1 text-right sm:text-left">
+<span class="text-xs font-bold text-outline uppercase tracking-wider">Avg Severity</span>
+<p class="text-xl font-headline font-bold text-primary">5.2/10</p>
+</div>
+<div class="space-y-1">
+<span class="text-xs font-bold text-outline uppercase tracking-wider">Most Common</span>
+<p class="text-xl font-headline font-bold text-primary">Hot Flashes</p>
+</div>
+<div class="space-y-1 text-right sm:text-left">
+<span class="text-xs font-bold text-outline uppercase tracking-wider">Trend</span>
+<div class="flex items-center justify-end sm:justify-start gap-1">
+<span class="material-symbols-outlined text-emerald-600 text-sm">trending_down</span>
+<p class="text-xl font-headline font-bold text-emerald-600">18% better</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 2: Date Range Selector -->
+<section class="space-y-6">
+<h3 class="font-headline text-xl text-primary font-semibold">Select Timeframe</h3>
+<div class="bg-surface-container rounded-2xl p-2 space-y-1">
+<label class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-xl cursor-pointer shadow-sm">
+<span class="font-semibold text-on-surface">Last 30 days</span>
+<input checked="" class="w-5 h-5 text-primary border-outline-variant focus:ring-primary" name="timeframe" type="radio"/>
+</label>
+<label class="flex items-center justify-between p-4 hover:bg-surface-container-high rounded-xl cursor-pointer transition-colors">
+<span class="font-semibold text-on-surface">Last 90 days</span>
+<input class="w-5 h-5 text-primary border-outline-variant focus:ring-primary" name="timeframe" type="radio"/>
+</label>
+<label class="flex items-center justify-between p-4 hover:bg-surface-container-high rounded-xl cursor-pointer transition-colors">
+<span class="font-semibold text-on-surface">Last 6 months</span>
+<input class="w-5 h-5 text-primary border-outline-variant focus:ring-primary" name="timeframe" type="radio"/>
+</label>
+<label class="flex items-center justify-between p-4 hover:bg-surface-container-high rounded-xl cursor-pointer transition-colors">
+<span class="font-semibold text-on-surface">Custom date range</span>
+<span class="material-symbols-outlined text-outline">calendar_month</span>
+</label>
+</div>
+</section>
+<!-- Section 3: Report Content Options -->
+<section class="space-y-6">
+<h3 class="font-headline text-xl text-primary font-semibold">Report Content</h3>
+<div class="space-y-3">
+<div class="flex items-center gap-4 p-4 bg-surface-container-lowest rounded-2xl shadow-sm">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary-container">list_alt</span>
+</div>
+<div class="flex-1">
+<p class="font-bold text-on-surface">Daily symptom log summary</p>
+</div>
+<input checked="" class="w-6 h-6 rounded-lg text-primary border-outline-variant focus:ring-primary" type="checkbox"/>
+</div>
+<div class="flex items-center gap-4 p-4 bg-surface-container-lowest rounded-2xl shadow-sm">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary-container">monitoring</span>
+</div>
+<div class="flex-1">
+<p class="font-bold text-on-surface">Symptom severity trends</p>
+</div>
+<input checked="" class="w-6 h-6 rounded-lg text-primary border-outline-variant focus:ring-primary" type="checkbox"/>
+</div>
+</div>
+</section>
+<!-- Section 4: Optional Doctor Info -->
+<section class="space-y-6">
+<div class="flex items-end justify-between">
+<h3 class="font-headline text-xl text-primary font-semibold">Doctor Information</h3>
+<span class="text-xs font-bold text-outline uppercase tracking-widest">Optional</span>
+</div>
+<div class="space-y-4">
+<div class="space-y-1.5">
+<label class="text-xs font-bold text-outline uppercase tracking-wider ml-4">Doctor's Name</label>
+<input class="w-full bg-surface-container-highest border-none rounded-full px-6 py-4 focus:ring-2 focus:ring-primary placeholder:text-outline/50" placeholder="Dr. Elizabeth Chen" type="text"/>
+</div>
+<div class="space-y-1.5">
+<label class="text-xs font-bold text-outline uppercase tracking-wider ml-4">Clinic/Hospital</label>
+<input class="w-full bg-surface-container-highest border-none rounded-full px-6 py-4 focus:ring-2 focus:ring-primary placeholder:text-outline/50" placeholder="Oak Valley Wellness" type="text"/>
+</div>
+<div class="space-y-1.5">
+<label class="text-xs font-bold text-outline uppercase tracking-wider ml-4">Appointment Date</label>
+<input class="w-full bg-surface-container-highest border-none rounded-full px-6 py-4 focus:ring-2 focus:ring-primary text-on-surface-variant" type="date"/>
+</div>
+</div>
+</section>
+<!-- Section 5: Privacy & Security -->
+<section class="bg-primary/5 rounded-3xl p-6 border border-primary/10">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">lock</span>
+</div>
+<h3 class="font-bold text-primary tracking-tight">Privacy &amp; Security</h3>
+</div>
+<ul class="space-y-3 text-sm text-on-surface-variant">
+<li class="flex items-start gap-3">
+<span class="text-primary mt-0.5">•</span>
+<span>All reports are encrypted using HIPAA-compliant standards.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="text-primary mt-0.5">•</span>
+<span>Generated links expire automatically after 7 days.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="text-primary mt-0.5">•</span>
+<span>MenoSync never shares your health data with third parties.</span>
+</li>
+</ul>
+</section>
+<!-- Section 6: Action Buttons -->
+<section class="grid grid-cols-1 gap-4 pt-4">
+<button class="w-full bg-gradient-brand text-on-primary py-5 rounded-full font-bold shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">picture_as_pdf</span>
+                Download as PDF
+            </button>
+<button class="w-full bg-secondary-container text-primary py-5 rounded-full font-bold active:scale-95 transition-transform flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">ios_share</span>
+                Share Secure Link
+            </button>
+</section>
+<!-- Section 7: About the Report -->
+<section class="bg-surface-container-low rounded-3xl p-6">
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-primary-container">info</span>
+<div class="space-y-2">
+<p class="font-headline italic text-primary leading-relaxed">
+                        "Sharing your data helps your doctor identify patterns that might be missed during a quick office visit. It empowers both of you to make more informed decisions about your wellness journey."
+                    </p>
+</div>
+</div>
+</section>
+<!-- Footer Links -->
+<footer class="flex justify-center gap-8 py-10">
+<a class="text-xs font-bold text-primary uppercase tracking-widest hover:underline underline-offset-4" href="#">See Sample Report</a>
+<a class="text-xs font-bold text-primary uppercase tracking-widest hover:underline underline-offset-4" href="#">Privacy Policy</a>
+</footer>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pt-2 pb-6 bg-[#fef8f6]/70 dark:bg-[#1d1b1a]/70 backdrop-blur-xl shadow-[0_-4px_24px_0_rgba(29,27,26,0.06)] rounded-t-3xl border-t border-[#9B8B7E]/15">
+<div class="flex flex-col items-center justify-center text-[#9B8B7E] px-5 py-1.5 hover:bg-[#f2edea] dark:hover:bg-white/5 rounded-2xl transition-all active:scale-90 duration-300 ease-out cursor-pointer">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-sans text-[10px] font-bold uppercase tracking-widest mt-1">Today</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#9B8B7E] px-5 py-1.5 hover:bg-[#f2edea] dark:hover:bg-white/5 rounded-2xl transition-all active:scale-90 duration-300 ease-out cursor-pointer">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="font-sans text-[10px] font-bold uppercase tracking-widest mt-1">Trends</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-[#D8C9E0] dark:bg-[#67594e]/30 text-[#67594e] dark:text-[#D8C9E0] rounded-2xl px-5 py-1.5 active:scale-90 duration-300 ease-out cursor-pointer">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">description</span>
+<span class="font-sans text-[10px] font-bold uppercase tracking-widest mt-1">Reports</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#9B8B7E] px-5 py-1.5 hover:bg-[#f2edea] dark:hover:bg-white/5 rounded-2xl transition-all active:scale-90 duration-300 ease-out cursor-pointer">
+<span class="material-symbols-outlined">edit_note</span>
+<span class="font-sans text-[10px] font-bold uppercase tracking-widest mt-1">Journal</span>
+</div>
+</nav>
+</body></html>

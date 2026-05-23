@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Symptom Library</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'brand-bg': '#F9F7F5',
+            'brand-text': '#4A3B32',
+            'brand-muted': '#8E857F',
+            'brand-accent': '#E5D9D3',
+            'brand-lavender': '#E8E4F2',
+            'brand-lavender-dark': '#B5A6D9',
+            'brand-border': '#EAE6E1',
+            'brand-card': '#FFFFFF',
+            'brand-card-selected': '#F2EFEB',
+          },
+          fontFamily: {
+            'serif': ['"Playfair Display"', 'serif'],
+            'sans': ['"Inter"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-utilities">
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600&display=swap');
+    
+    body {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-brand-bg text-brand-text font-sans min-h-screen flex flex-col">
+<!-- BEGIN: Header -->
+<header class="sticky top-0 z-10 bg-brand-bg/90 backdrop-blur-sm px-4 pt-12 pb-4 border-b border-brand-border" data-purpose="app-header">
+<div class="flex items-center justify-between mb-4">
+<button class="w-10 h-10 flex items-center justify-center text-brand-text">
+<i class="fa-solid fa-arrow-left text-xl"></i>
+</button>
+<h1 class="text-2xl font-serif font-semibold text-brand-text">Symptom Library</h1>
+<button class="w-10 h-10 flex items-center justify-center text-brand-text">
+<i class="fa-solid fa-magnifying-glass text-xl"></i>
+</button>
+</div>
+<!-- Search Bar -->
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<i class="fa-solid fa-magnifying-glass text-brand-muted text-sm"></i>
+</div>
+<input class="block w-full pl-10 pr-3 py-3 border-none rounded-xl leading-5 bg-black/5 placeholder-brand-muted focus:outline-none focus:ring-1 focus:ring-brand-lavender-dark sm:text-sm" placeholder="Search all symptoms..." type="text"/>
+</div>
+</header>
+<!-- END: Header -->
+<!-- BEGIN: Main Content -->
+<main class="flex-1 overflow-y-auto pb-24" data-purpose="main-content">
+<!-- Add Custom Symptom Button -->
+<div class="px-4 py-6">
+<button class="w-full bg-brand-card rounded-2xl p-4 flex items-center justify-between shadow-sm border border-brand-border">
+<div class="flex items-center space-x-3">
+<div class="w-10 h-10 rounded-full bg-brand-bg flex items-center justify-center text-brand-text">
+<i class="fa-solid fa-plus"></i>
+</div>
+<span class="font-medium text-brand-text">Add your own symptom</span>
+</div>
+<i class="fa-solid fa-chevron-right text-brand-muted text-sm"></i>
+</button>
+</div>
+<!-- Category Tabs -->
+<div class="sticky top-[132px] z-10 bg-brand-bg/90 backdrop-blur-sm border-y border-brand-border px-4 py-3" data-purpose="category-tabs">
+<div class="flex space-x-2 overflow-x-auto hide-scrollbar snap-x">
+<button class="snap-start whitespace-nowrap px-5 py-2 rounded-full text-sm font-medium bg-brand-lavender text-brand-text shadow-sm border border-brand-lavender-dark/20">Physical</button>
+<button class="snap-start whitespace-nowrap px-5 py-2 rounded-full text-sm font-medium bg-transparent text-brand-muted border border-transparent hover:bg-black/5">Mood</button>
+<button class="snap-start whitespace-nowrap px-5 py-2 rounded-full text-sm font-medium bg-transparent text-brand-muted border border-transparent hover:bg-black/5">Sleep</button>
+<button class="snap-start whitespace-nowrap px-5 py-2 rounded-full text-sm font-medium bg-transparent text-brand-muted border border-transparent hover:bg-black/5">Other</button>
+</div>
+</div>
+<!-- Symptom Grid - Physical (Active Tab Content) -->
+<div class="px-4 py-6" data-purpose="symptom-grid">
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-xl font-serif font-semibold text-brand-text">Physical Wellbeing</h2>
+<div class="h-px bg-brand-border flex-1 ml-4"></div>
+</div>
+<div class="grid grid-cols-3 gap-3">
+<!-- Item 1 (Selected) -->
+<button class="relative bg-brand-card-selected border border-brand-accent rounded-2xl p-4 flex flex-col items-center justify-center aspect-square shadow-sm">
+<div class="absolute top-2 right-2 text-brand-text text-sm">
+<i class="fa-solid fa-circle-check"></i>
+</div>
+<i class="fa-solid fa-person-arrow-up-from-line text-2xl text-brand-text mb-2"></i>
+<span class="text-xs font-medium text-center leading-tight">Joint pain</span>
+</button>
+<!-- Item 2 -->
+<button class="relative bg-brand-card border border-brand-border rounded-2xl p-4 flex flex-col items-center justify-center aspect-square shadow-sm">
+<div class="absolute top-2 right-2 text-brand-border text-sm">
+<i class="fa-regular fa-circle"></i>
+</div>
+<i class="fa-solid fa-skull text-2xl text-brand-text mb-2 opacity-80"></i>
+<span class="text-xs font-medium text-center leading-tight">Headaches</span>
+</button>
+<!-- Item 3 (Selected) -->
+<button class="relative bg-brand-card-selected border border-brand-accent rounded-2xl p-4 flex flex-col items-center justify-center aspect-square shadow-sm">
+<div class="absolute top-2 right-2 text-brand-text text-sm">
+<i class="fa-solid fa-circle-check"></i>
+</div>
+<i class="fa-solid fa-battery-quarter text-2xl text-brand-text mb-2"></i>
+<span class="text-xs font-medium text-center leading-tight">Fatigue</span>
+</button>
+<!-- Item 4 -->
+<button class="relative bg-brand-card border border-brand-border rounded-2xl p-4 flex flex-col items-center justify-center aspect-square shadow-sm">
+<div class="absolute top-2 right-2 text-brand-border text-sm">
+<i class="fa-regular fa-circle"></i>
+</div>
+<i class="fa-solid fa-heart-pulse text-2xl text-brand-text mb-2 opacity-80"></i>
+<span class="text-xs font-medium text-center leading-tight">Heart<br/>palpitation</span>
+</button>
+<!-- Item 5 -->
+<button class="relative bg-brand-card border border-brand-border rounded-2xl p-4 flex flex-col items-center justify-center aspect-square shadow-sm">
+<div class="absolute top-2 right-2 text-brand-border text-sm">
+<i class="fa-regular fa-circle"></i>
+</div>
+<i class="fa-solid fa-droplet-slash text-2xl text-brand-text mb-2 opacity-80"></i>
+<span class="text-xs font-medium text-center leading-tight">Dry skin</span>
+</button>
+<!-- Item 6 -->
+<button class="relative bg-brand-card border border-brand-border rounded-2xl p-4 flex flex-col items-center justify-center aspect-square shadow-sm">
+<div class="absolute top-2 right-2 text-brand-border text-sm">
+<i class="fa-regular fa-circle"></i>
+</div>
+<i class="fa-solid fa-temperature-arrow-up text-2xl text-brand-text mb-2 opacity-80"></i>
+<span class="text-xs font-medium text-center leading-tight">Hot flashes</span>
+</button>
+</div>
+</div>
+</main>
+<!-- END: Main Content -->
+<!-- BEGIN: Bottom Navigation -->
+<nav class="fixed bottom-0 w-full bg-brand-card border-t border-brand-border px-6 py-4 flex justify-between items-center rounded-t-3xl shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-20" data-purpose="bottom-nav">
+<!-- Nav Item 1 -->
+<a class="flex flex-col items-center text-brand-muted hover:text-brand-text transition-colors" href="#">
+<i class="fa-solid fa-book-open text-xl mb-1"></i>
+<span class="text-[10px] font-bold tracking-wider uppercase">Journal</span>
+</a>
+<!-- Nav Item 2 (Active) -->
+<a class="flex flex-col items-center text-brand-text relative" href="#">
+<div class="absolute -top-4 w-8 h-1 bg-brand-text rounded-full"></div>
+<i class="fa-solid fa-book-bookmark text-xl mb-1"></i>
+<span class="text-[10px] font-bold tracking-wider uppercase">Library</span>
+</a>
+<!-- Nav Item 3 -->
+<a class="flex flex-col items-center text-brand-muted hover:text-brand-text transition-colors" href="#">
+<i class="fa-solid fa-chart-line text-xl mb-1"></i>
+<span class="text-[10px] font-bold tracking-wider uppercase">Insights</span>
+</a>
+<!-- Nav Item 4 -->
+<a class="flex flex-col items-center text-brand-muted hover:text-brand-text transition-colors" href="#">
+<i class="fa-solid fa-user text-xl mb-1"></i>
+<span class="text-[10px] font-bold tracking-wider uppercase">Profile</span>
+</a>
+</nav>
+<!-- END: Bottom Navigation -->
+</body></html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Symptom Tracker - Triggers</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#d6c3b5",
+                        "primary": "#67594e",
+                        "on-secondary-fixed": "#211828",
+                        "on-primary": "#ffffff",
+                        "surface-dim": "#ded9d7",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#1d1b1a",
+                        "surface-container-high": "#ede7e5",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "error": "#ba1a1a",
+                        "surface-tint": "#6a5c50",
+                        "secondary": "#655a6e",
+                        "outline": "#7f756e",
+                        "on-secondary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-bright": "#fef8f6",
+                        "on-tertiary-container": "#fffbff",
+                        "primary-fixed": "#f2dfd0",
+                        "surface-variant": "#e7e1df",
+                        "surface": "#fef8f6",
+                        "surface-container-highest": "#e7e1df",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-on-surface": "#f5f0ed",
+                        "tertiary-container": "#9d675c",
+                        "on-primary-fixed-variant": "#51443a",
+                        "on-surface-variant": "#4d453f",
+                        "secondary-fixed": "#edddf5",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "on-error": "#ffffff",
+                        "surface-container-low": "#f8f2f0",
+                        "on-tertiary-fixed": "#341009",
+                        "surface-container": "#f2edea",
+                        "on-error-container": "#93000a",
+                        "on-primary-container": "#fffbff",
+                        "outline-variant": "#d0c4bc",
+                        "background": "#fef8f6",
+                        "on-background": "#1d1b1a",
+                        "on-secondary-container": "#6c6074",
+                        "tertiary-fixed": "#ffdad3",
+                        "on-primary-fixed": "#231a11",
+                        "secondary-container": "#edddf5",
+                        "inverse-surface": "#32302f",
+                        "tertiary": "#814f45",
+                        "primary-container": "#817266",
+                        "inverse-primary": "#d6c3b5",
+                        "on-secondary-fixed-variant": "#4d4355"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif", "serif"],
+                        "display": ["Noto Serif", "serif"],
+                        "body": ["Manrope", "sans-serif"],
+                        "label": ["Manrope", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body antialiased min-h-screen flex flex-col pb-24">
+<!-- TopAppBar -->
+<header class="bg-stone-50/70 dark:bg-stone-900/70 backdrop-blur-xl fixed top-0 w-full z-50 flex justify-between items-center w-full px-6 py-4 flat no-shadows">
+<button class="text-stone-700 dark:text-stone-300 hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</button>
+<h1 class="text-3xl font-serif text-stone-800 dark:text-stone-100 font-headline">Daily Reflection</h1>
+<div class="w-10 h-10 rounded-full bg-surface-container overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="Portrait of a person in soft natural lighting, elegant and serene" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmTQfQOGwZbG-Wfs8yguic318F-4zAQp3qKwuXTlLxPsW3EIPtN4KCF8CprrvV0rDrFIqQqeJ_mJY2JzawIP_wb4iOqtwV6QhQAJpHLfufg1dH5yniRHO9DqyEgBgQSYULiY0v7FJ6oPOCpndTQ1yC9IS2pZWNooUGRTKi-ONyG_hA9zwTpHrNyMDlKHtZAD5QZz9kyFN0HJY1CQIB76iqJzRoeJV0lVgdQaK7JtMRjjyFxNdnOnWOqo8F5eV2IZ6X0_ZL4urg-T0"/>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-24 px-5 md:px-8 max-w-4xl mx-auto w-full flex flex-col gap-8">
+<!-- Hero Section / Context -->
+<section class="flex flex-col gap-2 pl-2">
+<h2 class="font-display text-[2.5rem] leading-tight text-on-surface">What's on your mind?</h2>
+<p class="font-body text-lg text-on-surface-variant">Select any factors that might be influencing how you feel today.</p>
+</section>
+<!-- Triggers Selection Card -->
+<section class="bg-surface-container-lowest rounded-[2rem] p-6 shadow-[0_8px_24px_rgba(29,27,26,0.06)] relative overflow-hidden">
+<!-- Decorative gradient orb -->
+<div class="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-tertiary-fixed-dim/20 to-transparent rounded-full blur-2xl"></div>
+<div class="relative z-10">
+<h3 class="font-headline text-2xl text-on-surface mb-6">Common Triggers</h3>
+<div class="flex flex-wrap gap-3">
+<!-- Unselected Chip -->
+<button class="bg-surface-container-high text-on-surface px-5 py-3 rounded-full font-label text-sm font-medium hover:bg-surface-variant transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-lg opacity-70">wb_sunny</span>
+                        Weather
+                    </button>
+<!-- Selected Chip (Stress) -->
+<button class="bg-secondary-container text-on-secondary-container px-5 py-3 rounded-full font-label text-sm font-semibold shadow-sm flex items-center gap-2 transition-transform transform scale-[1.02]">
+<span class="material-symbols-outlined text-lg fill">psychology</span>
+                        Stress
+                    </button>
+<!-- Unselected Chips -->
+<button class="bg-surface-container-high text-on-surface px-5 py-3 rounded-full font-label text-sm font-medium hover:bg-surface-variant transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-lg opacity-70">restaurant</span>
+                        Diet
+                    </button>
+<button class="bg-surface-container-high text-on-surface px-5 py-3 rounded-full font-label text-sm font-medium hover:bg-surface-variant transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-lg opacity-70">bedtime</span>
+                        Sleep
+                    </button>
+<button class="bg-surface-container-high text-on-surface px-5 py-3 rounded-full font-label text-sm font-medium hover:bg-surface-variant transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-lg opacity-70">fitness_center</span>
+                        Exercise
+                    </button>
+<button class="bg-surface-container-high text-on-surface px-5 py-3 rounded-full font-label text-sm font-medium hover:bg-surface-variant transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-lg opacity-70">calendar_month</span>
+                        Cycle
+                    </button>
+<!-- Add Custom Chip -->
+<button class="bg-surface text-on-surface outline outline-1 outline-outline-variant/30 px-5 py-3 rounded-full font-label text-sm font-medium hover:bg-surface-container-low transition-colors flex items-center gap-2 border-dashed">
+<span class="material-symbols-outlined text-lg">add</span>
+                        Custom
+                    </button>
+</div>
+</div>
+</section>
+<!-- Reflection Text Area -->
+<section class="bg-surface-container-lowest rounded-[1.5rem] p-5">
+<textarea class="w-full bg-transparent border-none outline-none resize-none font-headline italic text-lg text-on-surface placeholder:text-outline/50 focus:ring-0 min-h-[120px]" placeholder="Journal your thoughts today..."></textarea>
+</section>
+<!-- Action Area -->
+<div class="mt-4 flex justify-end">
+<button class="bg-gradient-to-br from-primary to-primary-container text-on-primary px-8 py-4 rounded-xl font-label text-base font-semibold shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity">
+                Save Reflection
+            </button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="bg-stone-50/70 dark:bg-stone-900/70 backdrop-blur-xl fixed bottom-0 w-full z-50 rounded-t-[2rem] shadow-[0_-4px_24px_rgba(29,27,26,0.06)] fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3">
+<a class="flex flex-col items-center justify-center bg-stone-200 dark:bg-stone-800 text-stone-900 dark:text-stone-50 rounded-2xl px-6 py-2 hover:text-stone-700 dark:hover:text-stone-200 Active: translate-y-[-2px] transition-transform" href="#">
+<span class="material-symbols-outlined mb-1">auto_stories</span>
+<span class="font-sans text-[10px] uppercase tracking-widest font-label">Journal</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 dark:text-stone-400 px-6 py-2 hover:text-stone-700 dark:hover:text-stone-200" href="#">
+<span class="material-symbols-outlined mb-1">analytics</span>
+<span class="font-sans text-[10px] uppercase tracking-widest font-label">Insights</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 dark:text-stone-400 px-6 py-2 hover:text-stone-700 dark:hover:text-stone-200" href="#">
+<span class="material-symbols-outlined mb-1">spa</span>
+<span class="font-sans text-[10px] uppercase tracking-widest font-label">Library</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 dark:text-stone-400 px-6 py-2 hover:text-stone-700 dark:hover:text-stone-200" href="#">
+<span class="material-symbols-outlined mb-1">person</span>
+<span class="font-sans text-[10px] uppercase tracking-widest font-label">Profile</span>
+</a>
+</nav>
+</body></html>

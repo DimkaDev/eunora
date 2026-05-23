@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync v3 - HRT Setup</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#9B8B7E",
+                    "secondary": "#D8C9E0",
+                    "on-secondary": "#4A3E54",
+                    "background": "#FAF7F5",
+                    "surface": "#FFFFFF",
+                    "surface-container": "#F2EDE9",
+                    "surface-container-high": "#EBE4DF",
+                    "outline": "#D1C7C0",
+                    "on-surface": "#2D2926",
+                    "on-surface-variant": "#6B625B",
+                    "tertiary-container": "#F5E9E2",
+                    "on-tertiary-container": "#5D4037",
+                    "accent-soft": "#E9F2F1"
+            },
+            "borderRadius": {
+                    "xl": "1.25rem",
+                    "2xl": "1.5rem",
+                    "3xl": "2rem"
+            },
+            "fontFamily": {
+                    "serif": ["Noto Serif", "serif"],
+                    "sans": ["Manrope", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style type="text/tailwindcss">
+    @layer base {
+        body { @apply bg-background text-on-surface font-sans antialiased; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen flex flex-col">
+<header class="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md flex items-center justify-between px-6 py-4 border-b border-outline/20">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer">arrow_back</span>
+<h1 class="font-serif text-xl font-semibold text-on-surface">Set up HRT</h1>
+</div>
+<span class="text-on-surface-variant text-sm font-medium">2 of 3</span>
+<div class="absolute bottom-0 left-0 w-full h-1 bg-surface-container">
+<div class="bg-primary h-full w-[66%] transition-all duration-700 ease-out"></div>
+</div>
+</header>
+<main class="flex-1 mt-16 px-6 pb-40 max-w-md mx-auto w-full">
+<section class="mt-8 bg-tertiary-container rounded-2xl p-4 flex gap-4 items-start shadow-sm border border-white/50">
+<div class="w-10 h-10 bg-white rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">pill</span>
+</div>
+<div>
+<h3 class="font-semibold text-on-tertiary-container text-sm leading-tight mb-1">Your HRT is MenoSync's core feature.</h3>
+<p class="text-xs text-on-tertiary-container/80 leading-relaxed">Logging once unlocks dose tracking and personalized before/after analysis.</p>
+</div>
+</section>
+<div class="mt-10">
+<div class="flex items-center gap-3 mb-2">
+<div class="w-8 h-8 rounded-full bg-secondary/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary text-lg">search</span>
+</div>
+<h2 class="text-lg font-serif text-on-surface">What are you taking?</h2>
+</div>
+<p class="text-sm text-on-surface-variant mb-4 ml-11">Searching for your specific medication helps us give you accurate insights.</p>
+<div class="relative">
+<div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline">search</span>
+</div>
+<input class="w-full h-14 pl-12 pr-4 bg-surface border border-outline rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-on-surface placeholder-on-surface-variant/40" placeholder="Medication name" type="text"/>
+<label class="absolute -top-2 left-3 px-1 bg-background text-[10px] font-bold uppercase tracking-wider text-primary">Medication name</label>
+</div>
+<p class="mt-2 text-xs text-on-surface-variant italic px-1">Try 'Estradiol', 'Utrogestan', 'Evorel'…</p>
+<div class="mt-4 bg-surface rounded-2xl overflow-hidden border border-outline shadow-sm">
+<div class="flex items-center h-[52px] px-4 gap-3 cursor-pointer hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-primary/60 text-[20px]">pill</span>
+<div class="flex-1">
+<span class="text-on-surface font-medium text-sm">Estradiol</span>
+<span class="text-on-surface-variant text-xs ml-1">· oestrogen</span>
+</div>
+<span class="material-symbols-outlined text-outline text-sm">chevron_right</span>
+</div>
+<div class="h-[1px] bg-outline/20 mx-4"></div>
+<div class="flex items-center h-[52px] px-4 gap-3 cursor-pointer hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-primary/60 text-[20px]">pill</span>
+<div class="flex-1">
+<span class="text-on-surface font-medium text-sm">Utrogestan</span>
+<span class="text-on-surface-variant text-xs ml-1">· progesterone</span>
+</div>
+<span class="material-symbols-outlined text-outline text-sm">chevron_right</span>
+</div>
+<div class="h-[1px] bg-outline/20 mx-4"></div>
+<div class="flex items-center h-[52px] px-4 gap-3 cursor-pointer hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-primary/60 text-[20px]">pill</span>
+<div class="flex-1">
+<span class="text-on-surface font-medium text-sm">Evorel</span>
+<span class="text-on-surface-variant text-xs ml-1">· oestrogen patch</span>
+</div>
+<span class="material-symbols-outlined text-outline text-sm">chevron_right</span>
+</div>
+<div class="h-[1px] bg-outline/20 mx-4"></div>
+<div class="flex items-center h-[52px] px-4 gap-3 cursor-pointer hover:bg-surface-container transition-colors">
+<span class="flex-1 text-primary text-xs font-semibold italic">+ Add custom medication</span>
+</div>
+</div>
+</div>
+<div class="mt-10">
+<div class="flex items-center gap-3 mb-2">
+<div class="w-8 h-8 rounded-full bg-secondary/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary text-lg">category</span>
+</div>
+<span class="font-bold text-[11px] tracking-[1px] text-primary uppercase">FORM</span>
+</div>
+<p class="text-sm text-on-surface-variant mb-4 ml-11">How is your medication delivered? This affects how it's absorbed.</p>
+<div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide px-1">
+<button class="flex-shrink-0 px-6 py-2.5 bg-secondary text-on-secondary rounded-full text-sm font-semibold shadow-sm">Patch</button>
+<button class="flex-shrink-0 px-6 py-2.5 bg-white border border-outline text-on-surface-variant rounded-full text-sm font-medium hover:bg-surface-container transition-colors">Tablet</button>
+<button class="flex-shrink-0 px-6 py-2.5 bg-white border border-outline text-on-surface-variant rounded-full text-sm font-medium hover:bg-surface-container transition-colors">Gel</button>
+<button class="flex-shrink-0 px-6 py-2.5 bg-white border border-outline text-on-surface-variant rounded-full text-sm font-medium hover:bg-surface-container transition-colors">Spray</button>
+<button class="flex-shrink-0 px-6 py-2.5 bg-white border border-outline text-on-surface-variant rounded-full text-sm font-medium hover:bg-surface-container transition-colors">Injection</button>
+</div>
+</div>
+<div class="mt-10">
+<div class="flex items-center gap-3 mb-2">
+<div class="w-8 h-8 rounded-full bg-secondary/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary text-lg">science</span>
+</div>
+<span class="font-bold text-[11px] tracking-[1px] text-primary uppercase">DOSE</span>
+</div>
+<p class="text-sm text-on-surface-variant mb-4 ml-11">Your precise dose ensures we can track your progress accurately over time.</p>
+<div class="flex gap-3">
+<div class="w-[70%] relative">
+<input class="w-full h-14 px-4 bg-white border border-outline rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary text-on-surface" type="text" value="50"/>
+<label class="absolute -top-2 left-3 px-1 bg-background text-[10px] font-bold uppercase tracking-wider text-primary">Dose</label>
+</div>
+<div class="w-[30%] relative">
+<div class="w-full h-14 px-4 flex items-center justify-between bg-white border border-outline rounded-xl cursor-pointer">
+<span class="text-on-surface font-medium">mcg</span>
+<span class="material-symbols-outlined text-outline">expand_more</span>
+</div>
+<label class="absolute -top-2 left-3 px-1 bg-background text-[10px] font-bold uppercase tracking-wider text-primary">Unit</label>
+</div>
+</div>
+</div>
+<div class="mt-10">
+<div class="flex items-center gap-3 mb-2">
+<div class="w-8 h-8 rounded-full bg-secondary/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary text-lg">calendar_today</span>
+</div>
+<span class="font-bold text-[11px] tracking-[1px] text-primary uppercase">FREQUENCY</span>
+</div>
+<p class="text-sm text-on-surface-variant mb-4 ml-11">Tell us how often you apply or take it to set up your schedule.</p>
+<div class="grid grid-cols-2 gap-3">
+<button class="px-4 py-3 bg-white border border-outline text-on-surface-variant rounded-2xl text-sm font-medium hover:bg-surface-container transition-colors">Daily</button>
+<button class="px-4 py-3 bg-secondary text-on-secondary rounded-2xl text-sm font-semibold shadow-sm">Twice weekly</button>
+<button class="px-4 py-3 bg-white border border-outline text-on-surface-variant rounded-2xl text-sm font-medium hover:bg-surface-container transition-colors">Weekly</button>
+<button class="px-4 py-3 bg-white border border-outline text-on-surface-variant rounded-2xl text-sm font-medium hover:bg-surface-container transition-colors">Other</button>
+</div>
+</div>
+<div class="mt-10 bg-surface rounded-2xl p-4 flex items-center border border-outline/30 shadow-sm">
+<div class="w-12 h-12 rounded-full bg-accent-soft flex items-center justify-center mr-4">
+<span class="material-symbols-outlined text-[#26A69A]">notifications_active</span>
+</div>
+<div class="flex-1">
+<p class="font-semibold text-on-surface text-sm">Daily reminder</p>
+<p class="text-xs text-on-surface-variant">We'll gently nudge you to log.</p>
+</div>
+<div class="relative inline-flex items-center cursor-pointer">
+<div class="w-12 h-6 bg-[#26A69A] rounded-full transition-colors"></div>
+<div class="absolute left-6.5 right-1 top-1 bg-white w-4 h-4 rounded-full shadow-sm transition-all transform translate-x-0.5"></div>
+</div>
+</div>
+</main>
+<footer class="fixed bottom-0 w-full p-6 bg-gradient-to-t from-background via-background/95 to-transparent">
+<div class="max-w-md mx-auto flex flex-col gap-3">
+<button class="w-full h-14 bg-primary text-white rounded-full font-bold shadow-lg shadow-primary/25 active:scale-[0.98] transition-all">
+            Add medication
+        </button>
+<button class="w-full py-2 text-on-surface-variant font-semibold text-sm hover:text-primary transition-colors">
+            Skip — I'm not on HRT
+        </button>
+</div>
+</footer>
+
+</body></html>

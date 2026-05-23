@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - March 2025</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                "background": "#FFFFFF",
+                "surface": "#FFFFFF",
+                "primary": "#1E293B","accent-blue": "#0F172A","slate-muted": "#64748B",
+                "slate-border": "#E2E8F0",
+                "teal-clinical": "#0D9488",
+                "rose-clinical": "#E11D48",
+                "rose-light": "#F43F5E",
+                "today-blue": "#3B82F6"
+              },
+              "fontFamily": {
+                "sans": ["Inter", "sans-serif"],
+                "body": ["Inter", "sans-serif"],
+                "label": ["Inter", "sans-serif"]
+              }
+            },
+          }
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body { 
+                @apply bg-white text-slate-900 antialiased font-sans;
+                min-height: max(884px, 100dvh);
+            }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .calendar-grid-border {
+            box-shadow: -1px -1px 0 0 #E2E8F0;
+        }
+        .calendar-cell {
+            box-shadow: 1px 1px 0 0 #E2E8F0;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-white">
+<header class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-border">
+<div class="flex justify-between items-center px-4 h-14 w-full max-w-screen-xl mx-auto">
+<button class="text-slate-muted hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
+</button>
+<h1 class="text-lg font-bold tracking-tight text-primary">March 2025</h1>
+<button class="text-slate-muted hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</header>
+<main class="pt-20 pb-64 px-4 max-w-screen-xl mx-auto">
+<div class="grid grid-cols-7 mb-0">
+<div class="text-center py-2 text-slate-muted font-bold text-[10px] uppercase tracking-wider">Mon</div>
+<div class="text-center py-2 text-slate-muted font-bold text-[10px] uppercase tracking-wider">Tue</div>
+<div class="text-center py-2 text-slate-muted font-bold text-[10px] uppercase tracking-wider">Wed</div>
+<div class="text-center py-2 text-slate-muted font-bold text-[10px] uppercase tracking-wider">Thu</div>
+<div class="text-center py-2 text-slate-muted font-bold text-[10px] uppercase tracking-wider">Fri</div>
+<div class="text-center py-2 text-slate-muted font-bold text-[10px] uppercase tracking-wider">Sat</div>
+<div class="text-center py-2 text-slate-muted font-bold text-[10px] uppercase tracking-wider">Sun</div>
+</div>
+<div class="grid grid-cols-7 calendar-grid-border border-r border-b border-slate-border">
+<div class="aspect-square bg-slate-50 calendar-cell"></div>
+<div class="aspect-square bg-slate-50 calendar-cell"></div>
+<div class="aspect-square bg-slate-50 calendar-cell"></div>
+<div class="aspect-square bg-slate-50 calendar-cell"></div>
+<div class="aspect-square bg-slate-50 calendar-cell"></div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">1</span>
+<div class="flex flex-col items-center gap-1">
+<div class="w-1.5 h-1.5 bg-rose-light"></div>
+<div class="w-4 h-1 bg-teal-clinical"></div>
+</div>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">2</span>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">3</span>
+<div class="w-1.5 h-1.5 bg-rose-light mb-1"></div>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">4</span>
+<div class="w-2.5 h-2.5 bg-rose-clinical mb-1"></div>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">5</span>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">6</span>
+<div class="flex flex-col items-center gap-1">
+<div class="w-1.5 h-1.5 bg-rose-light"></div>
+<div class="w-4 h-1 bg-teal-clinical"></div>
+</div>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">7</span>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">8</span>
+<div class="w-1.5 h-1.5 bg-rose-light mb-1"></div>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">9</span>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">10</span>
+<div class="w-1.5 h-1.5 bg-rose-light mb-1"></div>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">11</span>
+</div>
+<div class="aspect-square bg-primary calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-bold text-white">12</span>
+<div class="flex flex-col items-center gap-1">
+<div class="w-1.5 h-1.5 bg-white"></div>
+<div class="w-4 h-1 bg-teal-clinical brightness-150"></div>
+</div>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">13</span>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">14</span>
+<div class="w-1.5 h-1.5 bg-rose-light mb-1"></div>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<div class="absolute top-1 right-1">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="bolt" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+<span class="text-xs font-medium text-slate-500">15</span>
+<div class="w-4 h-1 bg-teal-clinical mb-1"></div>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">16</span>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">17</span>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">18</span>
+<div class="w-2.5 h-2.5 bg-rose-clinical mb-1"></div>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<div class="absolute inset-1 border-[1.5px] border-today-blue"></div>
+<span class="text-xs font-bold text-today-blue relative">19</span>
+<div class="w-1.5 h-1.5 bg-rose-light mb-1 relative"></div>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">20</span>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">21</span>
+<div class="flex flex-col items-center gap-1">
+<div class="w-1.5 h-1.5 bg-rose-light"></div>
+<div class="w-4 h-1 bg-teal-clinical"></div>
+</div>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">22</span>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">23</span>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">24</span>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">25</span>
+<div class="w-1.5 h-1.5 bg-rose-light mb-1"></div>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">26</span>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">27</span>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">28</span>
+<div class="w-4 h-1 bg-teal-clinical mb-1"></div>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">29</span>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">30</span>
+<div class="w-1.5 h-1.5 bg-rose-light mb-1"></div>
+</div>
+<div class="aspect-square bg-white calendar-cell flex flex-col items-center justify-between py-2 relative">
+<span class="text-xs font-medium text-slate-500">31</span>
+</div>
+</div>
+</main>
+<section class="fixed bottom-0 left-0 w-full z-40">
+<div class="max-w-screen-xl mx-auto">
+<div class="bg-white border-t border-slate-border pt-2 pb-24 px-6 shadow-2xl">
+<div class="w-8 h-1 bg-slate-200 rounded-full mx-auto mb-4"></div>
+<div class="flex justify-between items-start mb-6">
+<div>
+<h2 class="text-xl font-extrabold text-primary">Wednesday, 12 March</h2>
+<div class="flex items-center gap-2 mt-1.5 text-teal-clinical font-bold text-xs uppercase tracking-tight">
+<span class="material-symbols-outlined text-[16px]" data-icon="check_circle">check_circle</span>
+<span>Estradiol · Utrogestan</span>
+</div>
+</div>
+<button class="text-blue-600 font-bold text-xs flex items-center gap-1 py-1 px-2 border border-blue-100 rounded bg-blue-50 hover:bg-blue-100 transition-colors">
+                        EDIT LOG
+                        <span class="material-symbols-outlined text-xs" data-icon="edit">edit</span>
+</button>
+</div>
+<div class="grid grid-cols-1 gap-6">
+<div class="border-t border-slate-border pt-4">
+<span class="text-[10px] font-black uppercase tracking-widest text-slate-muted block mb-3">Recorded Symptoms</span>
+<div class="flex flex-wrap gap-2">
+<div class="bg-slate-50 border border-slate-border px-3 py-1.5 rounded flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-muted text-[16px]" data-icon="thermostat">thermostat</span>
+<span class="text-slate-800 text-xs font-bold uppercase">Hot flashes <span class="text-rose-clinical">3/5</span></span>
+</div>
+<div class="bg-slate-50 border border-slate-border px-3 py-1.5 rounded flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-muted text-[16px]" data-icon="bedtime">bedtime</span>
+<span class="text-slate-800 text-xs font-bold uppercase">Sleep <span class="text-rose-clinical">2/5</span></span>
+</div>
+<div class="bg-slate-50 border border-slate-border px-3 py-1.5 rounded flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-muted text-[16px]" data-icon="mood">mood</span>
+<span class="text-slate-800 text-xs font-bold uppercase">Mood <span class="text-rose-clinical">3/5</span></span>
+</div>
+</div>
+</div>
+<div class="border-t border-slate-border pt-4">
+<span class="text-[10px] font-black uppercase tracking-widest text-slate-muted block mb-3">Triggers</span>
+<div class="flex flex-wrap gap-2">
+<div class="bg-primary text-white px-3 py-1.5 rounded flex items-center gap-2">
+<span class="text-xs">🍷</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Alcohol</span>
+</div>
+<div class="bg-primary text-white px-3 py-1.5 rounded flex items-center gap-2">
+<span class="text-xs">😰</span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Stress</span>
+</div>
+</div>
+</div>
+<div class="border-t border-slate-border pt-4">
+<span class="text-[10px] font-black uppercase tracking-widest text-slate-muted block mb-2">Journal Note</span>
+<p class="text-slate-600 text-sm font-medium leading-relaxed bg-slate-50 p-3 border-l-4 border-slate-400">"Had a work presentation today"</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<nav class="fixed bottom-0 left-0 w-full px-6 pb-6 pt-3 flex justify-around items-center bg-white border-t border-slate-border z-50">
+<button class="flex flex-col items-center justify-center text-slate-muted hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="today">today</span>
+<span class="text-[9px] font-bold uppercase tracking-tighter mt-1">Today</span>
+</button>
+<button class="flex flex-col items-center justify-center text-primary">
+<span class="material-symbols-outlined text-primary" data-icon="calendar_month" style="font-variation-settings: 'FILL' 1;">calendar_month</span>
+<span class="text-[9px] font-black uppercase tracking-tighter mt-1">Calendar</span>
+<div class="w-1 h-1 bg-primary rounded-full mt-0.5"></div>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-muted hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="text-[9px] font-bold uppercase tracking-tighter mt-1">Insights</span>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-muted hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="auto_stories">auto_stories</span>
+<span class="text-[9px] font-bold uppercase tracking-tighter mt-1">Journal</span>
+</button>
+</nav>
+
+</body></html>

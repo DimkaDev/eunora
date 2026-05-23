@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Create Your Account</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-low": "#f8f2f0",
+                      "on-tertiary-fixed": "#341009",
+                      "surface-dim": "#ded9d7",
+                      "surface-container": "#f2edea",
+                      "secondary-fixed-dim": "#d0c1d8",
+                      "surface-container-high": "#ede7e5",
+                      "on-error-container": "#93000a",
+                      "surface-variant": "#e7e1df",
+                      "surface-container-highest": "#e7e1df",
+                      "on-primary": "#ffffff",
+                      "tertiary-container": "#9d675c",
+                      "tertiary": "#814f45",
+                      "secondary-container": "#edddf5",
+                      "inverse-surface": "#32302f",
+                      "on-tertiary": "#ffffff",
+                      "inverse-on-surface": "#f5f0ed",
+                      "background": "#fef8f6",
+                      "tertiary-fixed": "#ffdad3",
+                      "on-tertiary-container": "#fffbff",
+                      "on-tertiary-fixed-variant": "#683a31",
+                      "on-background": "#1d1b1a",
+                      "secondary": "#655a6e",
+                      "on-secondary-fixed": "#211828",
+                      "on-primary-container": "#fffbff",
+                      "on-surface": "#1d1b1a",
+                      "on-primary-fixed": "#231a11",
+                      "surface-tint": "#6a5c50",
+                      "inverse-primary": "#d6c3b5",
+                      "primary": "#67594e",
+                      "outline": "#7f756e",
+                      "on-surface-variant": "#4d453f",
+                      "tertiary-fixed-dim": "#f9b7a9",
+                      "primary-container": "#817266",
+                      "on-secondary-container": "#6c6074",
+                      "error": "#ba1a1a",
+                      "secondary-fixed": "#edddf5",
+                      "primary-fixed-dim": "#d6c3b5",
+                      "primary-fixed": "#f2dfd0",
+                      "on-error": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "on-primary-fixed-variant": "#51443a",
+                      "surface-container-lowest": "#ffffff",
+                      "outline-variant": "#d0c4bc",
+                      "on-secondary": "#ffffff",
+                      "surface-bright": "#fef8f6",
+                      "on-secondary-fixed-variant": "#4d4355",
+                      "surface": "#fef8f6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Noto Serif"],
+                      "body": ["Manrope"],
+                      "label": ["Manrope"]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Manrope', sans-serif; }
+        h1, h2, h3 { font-family: 'Noto Serif', serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#F7F5F0] text-on-surface min-h-screen flex flex-col">
+<!-- Top Navigation Shell Suppressed per "Task-Focused" rule, custom header used -->
+<header class="w-full max-w-2xl mx-auto px-6 pt-12 pb-8 flex items-center justify-between">
+<button aria-label="Go back" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">arrow_back</span>
+</button>
+<div class="flex-grow flex justify-center pr-10">
+<h1 class="text-2xl font-semibold text-on-surface tracking-tight">Create Your Account</h1>
+</div>
+</header>
+<main class="flex-grow flex flex-col items-center px-6 pb-20 w-full max-w-md mx-auto">
+<!-- Brand/Hero Visual - Subtle Asymmetry -->
+<div class="w-full mb-10 relative">
+<div class="absolute -top-4 -right-4 w-24 h-24 bg-secondary-container/40 rounded-full blur-2xl"></div>
+<div class="bg-surface-container-lowest p-8 rounded-3xl shadow-[0_8px_30px_rgba(155,139,126,0.06)] relative overflow-hidden">
+<div class="flex flex-col gap-2 relative z-10">
+<span class="text-primary font-bold tracking-widest text-[10px] uppercase">Welcome to MenoSync</span>
+<p class="text-on-surface-variant text-sm leading-relaxed">Join a sanctuary designed for your wellness journey. High-end insights, curated for you.</p>
+</div>
+<div class="absolute right-[-10%] bottom-[-20%] opacity-20">
+<span class="material-symbols-outlined text-8xl text-secondary-fixed-dim">spa</span>
+</div>
+</div>
+</div>
+<form class="w-full space-y-6">
+<!-- Email Field -->
+<div class="space-y-2">
+<label class="block text-[12px] font-bold text-on-surface-variant px-1 uppercase tracking-wider">Email Address</label>
+<input class="w-full px-6 py-4 bg-[#ede7e5] border-transparent focus:border-primary-container focus:ring-0 rounded-full text-on-surface placeholder-on-surface-variant/40 transition-all duration-300" placeholder="example@wellness.com" type="email"/>
+</div>
+<!-- Password Field -->
+<div class="space-y-2">
+<label class="block text-[12px] font-bold text-on-surface-variant px-1 uppercase tracking-wider">Password</label>
+<div class="relative">
+<input class="w-full px-6 py-4 bg-[#ede7e5] border-transparent focus:border-primary-container focus:ring-0 rounded-full text-on-surface placeholder-on-surface-variant/40 transition-all duration-300" placeholder="••••••••" type="password"/>
+<button class="absolute right-5 top-1/2 -translate-y-1/2 text-on-surface-variant/60 hover:text-on-surface" type="button">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</div>
+<p class="text-[10px] text-on-surface-variant/60 px-4 leading-tight">Use 8+ characters with a mix of letters, numbers &amp; symbols.</p>
+</div>
+<!-- Confirm Password Field -->
+<div class="space-y-2">
+<label class="block text-[12px] font-bold text-on-surface-variant px-1 uppercase tracking-wider">Confirm Password</label>
+<input class="w-full px-6 py-4 bg-[#ede7e5] border-transparent focus:border-primary-container focus:ring-0 rounded-full text-on-surface placeholder-on-surface-variant/40 transition-all duration-300" placeholder="••••••••" type="password"/>
+</div>
+<!-- Main CTA -->
+<button class="w-full py-4 mt-4 bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold rounded-full text-sm tracking-wide shadow-lg shadow-primary/20 hover:scale-[1.01] active:scale-[0.98] transition-all duration-300" type="submit">
+                Create Account
+            </button>
+</form>
+<!-- Divider -->
+<div class="w-full flex items-center gap-4 my-10">
+<div class="flex-grow h-px bg-outline-variant/30"></div>
+<span class="text-[11px] font-medium text-on-surface-variant/50 uppercase tracking-[0.2em] whitespace-nowrap">Or sign up with</span>
+<div class="flex-grow h-px bg-outline-variant/30"></div>
+</div>
+<!-- Social Auth Buttons -->
+<div class="w-full space-y-4">
+<button class="w-full flex items-center justify-center gap-3 py-3.5 bg-surface-container-lowest border border-outline-variant/30 rounded-full hover:bg-surface-container-low transition-all">
+<img alt="Google" class="w-5 h-5" data-alt="Official Google G logo in bright primary colors against a transparent background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfzJ6wDN0PUbgPXTCtSibXRjadUD4u7CzGLIBcPdxfCYDSxbR0kbWhUXTz7lxq9j9i6cR_xx8grUZmhP76g6vMujG-CfBXpkIrsCxbKfDjCVNikebjTcVZ9DCvrK09oMuk3LdvV_jkOQHT_1p6z-ufJJZ-fFWf-Nx7aPw9DjYQaVtia-GNPXefWUKVp3BlaBNq5gmLiioKpwZ42-tnjZt_5EKpmsWDzPRiJZhiqk3T5i8NEeWiQrDhDTVPQVAMkq2sf5YKQItI5oA"/>
+<span class="text-sm font-semibold text-on-surface">Continue with Google</span>
+</button>
+<button class="w-full flex items-center justify-center gap-3 py-3.5 bg-surface-container-lowest border border-on-surface rounded-full hover:bg-on-surface hover:text-white group transition-all">
+<span class="material-symbols-outlined text-[20px] group-hover:text-white transition-colors" data-weight="fill">ios</span>
+<span class="text-sm font-semibold group-hover:text-white transition-colors">Continue with Apple</span>
+</button>
+</div>
+<!-- Footer -->
+<footer class="mt-12 text-center">
+<p class="text-[13px] text-on-surface-variant">
+                Already have an account? 
+                <a class="text-primary font-bold hover:underline ml-1" href="#">Sign in</a>
+</p>
+</footer>
+</main>
+<!-- Decoration Element (Asymmetric soft shape) -->
+<div class="fixed bottom-0 right-0 -z-10 pointer-events-none">
+<div class="w-64 h-64 bg-tertiary-fixed/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
+</div>
+</body></html>

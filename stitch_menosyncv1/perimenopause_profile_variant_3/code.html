@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>Perimenopause Profile - Simplified Elevated</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400..700;1,400..700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#93000a",
+                    "on-tertiary-fixed": "#341009",
+                    "surface-container-highest": "#e7e1df",
+                    "secondary-fixed-dim": "#d0c1d8",
+                    "primary-fixed": "#f2dfd0",
+                    "inverse-surface": "#32302f",
+                    "tertiary-container": "#9d675c",
+                    "on-tertiary-container": "#fffbff",
+                    "surface-container-low": "#f8f2f0",
+                    "surface-container-high": "#ede7e5",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "on-surface": "#1d1b1a",
+                    "on-secondary-container": "#6c6074",
+                    "outline-variant": "#d0c4bc",
+                    "on-secondary-fixed-variant": "#4d4355",
+                    "primary-fixed-dim": "#d6c3b5",
+                    "on-primary-fixed-variant": "#51443a",
+                    "surface-variant": "#e7e1df",
+                    "inverse-on-surface": "#f5f0ed",
+                    "on-secondary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "tertiary-fixed": "#ffdad3",
+                    "secondary": "#655a6e",
+                    "outline": "#7f756e",
+                    "on-background": "#1d1b1a",
+                    "error": "#ba1a1a",
+                    "surface": "#fef8f6",
+                    "on-primary": "#ffffff",
+                    "secondary-fixed": "#edddf5",
+                    "primary-container": "#817266",
+                    "on-error": "#ffffff",
+                    "tertiary": "#814f45",
+                    "surface-dim": "#ded9d7",
+                    "secondary-container": "#edddf5",
+                    "surface-container": "#f2edea",
+                    "tertiary-fixed-dim": "#f9b7a9",
+                    "primary": "#67594e",
+                    "inverse-primary": "#d6c3b5",
+                    "on-secondary-fixed": "#211828",
+                    "surface-tint": "#6a5c50",
+                    "surface-bright": "#fef8f6",
+                    "on-tertiary-fixed-variant": "#683a31",
+                    "on-surface-variant": "#4d453f",
+                    "on-primary-fixed": "#231a11",
+                    "on-primary-container": "#fffbff",
+                    "background": "#fef8f6"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {},
+            "fontFamily": {
+                    "headline": [
+                            "Noto Serif"
+                    ],
+                    "display": [
+                            "Noto Serif"
+                    ],
+                    "body": [
+                            "Manrope"
+                    ],
+                    "label": [
+                            "Manrope"
+                    ]
+            },
+            "fontSize": {}
+    },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body antialiased min-h-screen flex flex-col pb-[100px]">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#fef8f6] dark:bg-stone-950 flex items-center px-5 h-16 max-w-screen-xl mx-auto">
+<button class="flex items-center justify-center p-2 -ml-2 text-[#67594e] dark:text-[#d8c9e0] hover:opacity-80 transition-opacity active:scale-95 duration-150" type="button">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+</button>
+<h1 class="ml-4 font-headline text-lg font-semibold tracking-tight text-[#67594e] dark:text-[#d8c9e0]">Health Profile</h1>
+<div class="bg-[#f2edea] dark:bg-stone-900 h-[2px] w-full mt-auto absolute bottom-0 left-0"></div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-grow pt-24 px-5 max-w-screen-xl mx-auto w-full pb-8">
+<!-- Header Text -->
+<div class="mb-8 pl-2 pr-6">
+<h2 class="font-headline text-3xl font-semibold text-primary mb-3 leading-tight tracking-tight">Your Health Journey</h2>
+<p class="font-body text-on-surface-variant text-base leading-relaxed max-w-lg">
+                Please update your perimenopause tracking details below to help us tailor your experience.
+            </p>
+</div>
+<!-- Elevated Input Container -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_8px_32px_rgba(29,27,26,0.04)] p-6 mb-8 relative z-10 before:absolute before:inset-0 before:rounded-xl before:border before:border-outline-variant/15 before:pointer-events-none">
+<form class="space-y-8 relative z-20">
+<!-- Irregular Periods Select -->
+<div class="space-y-3">
+<label class="block font-body text-sm font-semibold text-on-surface ml-1" for="irregular-periods">Irregular Periods</label>
+<div class="relative">
+<select class="block w-full bg-surface-container-highest border-none rounded-full py-3.5 pl-5 pr-10 text-on-surface focus:ring-2 focus:ring-primary focus:outline-none appearance-none font-body text-base" id="irregular-periods" name="irregular-periods">
+<option value="yes" {{data:if:condition_822}}="">Yes</option>
+<option value="no" {{data:if:condition_823}}="">No</option>
+<option value="not_sure" {{data:if:condition_824}}="">Not Sure</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-on-surface-variant">
+<span class="material-symbols-outlined text-xl">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Hormone Treatment Select -->
+<div class="space-y-3">
+<label class="block font-body text-sm font-semibold text-on-surface ml-1" for="hormone-treatment">Hormone Treatment</label>
+<div class="relative">
+<select class="block w-full bg-surface-container-highest border-none rounded-full py-3.5 pl-5 pr-10 text-on-surface focus:ring-2 focus:ring-primary focus:outline-none appearance-none font-body text-base" id="hormone-treatment" name="hormone-treatment">
+<option value="none" {{data:if:condition_825}}="">None</option>
+<option value="hrt" {{data:if:condition_826}}="">HRT</option>
+<option value="birth_control" {{data:if:condition_827}}="">Birth Control</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-on-surface-variant">
+<span class="material-symbols-outlined text-xl">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Timeline / Experience Input -->
+<div class="space-y-3">
+<label class="block font-body text-sm font-semibold text-on-surface ml-1" for="timeline">Current Experience</label>
+<textarea class="block w-full bg-surface-container-highest border-none rounded-xl py-3.5 px-5 text-on-surface focus:ring-2 focus:ring-primary focus:outline-none font-body text-base resize-none" id="timeline" name="timeline" placeholder="Briefly describe your current experience..." rows="3">{{DATA:TEXT:TEXT_828}}</textarea>
+</div>
+<!-- Save Action -->
+<div class="pt-4">
+<button class="w-full flex items-center justify-center bg-gradient-to-br from-primary to-primary-container text-white rounded-xl py-4 px-6 font-body text-base font-semibold shadow-[0_4px_14px_rgba(103,89,78,0.2)] hover:brightness-110 active:scale-[0.98] transition-all duration-200" type="submit">
+<span>Save Profile</span>
+</button>
+</div>
+</form>
+</div>
+</main>
+<!-- BottomNavBar -->
+<!-- Suppressed on transactional/form page as per intent logic, but JSON provided so we render it per literal instruction, though strictly it should be suppressed on a focused data entry screen. Including it per JSON requirement, but normally this would be hidden. -->
+<!-- Implementing BottomNavBar from JSON -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-[1.5rem] bg-white/70 dark:bg-stone-900/70 backdrop-blur-xl shadow-[0_-4px_24px_rgba(29,27,26,0.06)] left-0 flex justify-center items-center pb-safe md:hidden">
+<div class="w-full pt-4 pb-2">
+<!-- Active item using the specific style class from JSON -->
+<button class="flex items-center justify-center bg-gradient-to-br from-[#67594e] to-[#817266] text-white rounded-[1.5rem] px-8 py-4 w-[90%] mx-auto mb-6 hover:brightness-110 transition-all active:scale-[0.98] duration-200 shadow-inner" type="button">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">arrow_forward</span>
+</button>
+</div>
+</nav>
+</body></html>

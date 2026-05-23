@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Daily Logging</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "inverse-on-surface": "#f5f0ed",
+                      "surface-container-low": "#f8f2f0",
+                      "surface-container-high": "#ede7e5",
+                      "on-secondary-fixed": "#211828",
+                      "secondary": "#655a6e",
+                      "primary-fixed-dim": "#d6c3b5",
+                      "tertiary": "#814f45",
+                      "on-surface": "#1d1b1a",
+                      "surface": "#fef8f6",
+                      "error": "#ba1a1a",
+                      "primary": "#67594e",
+                      "on-secondary-fixed-variant": "#4d4355",
+                      "on-primary-container": "#fffbff",
+                      "inverse-surface": "#32302f",
+                      "surface-bright": "#fef8f6",
+                      "secondary-fixed-dim": "#d0c1d8",
+                      "tertiary-fixed": "#ffdad3",
+                      "tertiary-container": "#9d675c",
+                      "on-tertiary-fixed-variant": "#683a31",
+                      "surface-container-lowest": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "error-container": "#ffdad6",
+                      "background": "#fef8f6",
+                      "surface-tint": "#6a5c50",
+                      "on-tertiary-fixed": "#341009",
+                      "primary-container": "#817266",
+                      "surface-dim": "#ded9d7",
+                      "primary-fixed": "#f2dfd0",
+                      "inverse-primary": "#d6c3b5",
+                      "surface-variant": "#e7e1df",
+                      "on-secondary-container": "#6c6074",
+                      "on-secondary": "#ffffff",
+                      "outline-variant": "#d0c4bc",
+                      "on-primary-fixed-variant": "#51443a",
+                      "on-error": "#ffffff",
+                      "on-background": "#1d1b1a",
+                      "surface-container-highest": "#e7e1df",
+                      "secondary-fixed": "#edddf5",
+                      "on-primary-fixed": "#231a11",
+                      "on-primary": "#ffffff",
+                      "tertiary-fixed-dim": "#f9b7a9",
+                      "on-tertiary-container": "#fffbff",
+                      "secondary-container": "#edddf5",
+                      "on-tertiary": "#ffffff",
+                      "surface-container": "#f2edea",
+                      "outline": "#7f756e",
+                      "on-surface-variant": "#4d453f"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Noto Serif"],
+                      "body": ["Manrope"],
+                      "label": ["Manrope"]
+              }
+            },
+          }
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #67594e 0%, #817266 100%);
+        }
+      </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface antialiased min-h-screen flex flex-col">
+<!-- Top Navigation Anchor -->
+<header class="bg-[#fef8f6] flex justify-between items-center w-full px-5 py-4 sticky top-0 z-40">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#9B8B7E]">arrow_back</span>
+<h1 class="font-headline text-xl font-bold text-[#67594e]">Daily Sync</h1>
+</div>
+<span class="material-symbols-outlined text-[#9B8B7E]">more_vert</span>
+</header>
+<!-- Background Content (Dashboard Preview) -->
+<main class="flex-1 px-6 pt-4 pb-32 space-y-8 blur-[2px] pointer-events-none overflow-hidden">
+<section class="space-y-2">
+<h2 class="font-headline text-3xl font-bold">Good morning, Helena.</h2>
+<p class="text-on-surface-variant font-medium">Step 3 of 3: Medication Check</p>
+</section>
+<!-- Dummy Bento Grid for Background Depth -->
+<div class="grid grid-cols-2 gap-4">
+<div class="col-span-2 aspect-[2/1] bg-surface-container rounded-xl p-5 flex flex-col justify-end">
+<p class="text-sm uppercase tracking-widest text-on-surface-variant mb-1">Cycle Day</p>
+<p class="text-4xl font-headline font-bold">Day 14</p>
+</div>
+<div class="aspect-square bg-surface-container-low rounded-xl p-5">
+<span class="material-symbols-outlined text-primary mb-2">device_thermostat</span>
+<p class="text-2xl font-bold">36.5°</p>
+</div>
+<div class="aspect-square bg-surface-container-high rounded-xl p-5">
+<span class="material-symbols-outlined text-primary mb-2">water_drop</span>
+<p class="text-2xl font-bold">Low</p>
+</div>
+</div>
+</main>
+<!-- Bottom Sheet Modal Overlay -->
+<div class="fixed inset-0 bg-on-surface/20 backdrop-blur-sm z-50 flex items-end">
+<div class="w-full bg-surface-container-lowest rounded-t-[32px] shadow-2xl max-h-[751px] flex flex-col">
+<!-- Sheet Handle -->
+<div class="w-full flex justify-center py-3">
+<div class="w-8 h-1 rounded-full bg-[#E0DEDA]"></div>
+</div>
+<!-- Header Section -->
+<div class="px-6 pb-6 pt-2">
+<h3 class="text-xl font-bold text-[#1A1A2E]">HRT Today</h3>
+<p class="text-sm text-[#767676]">Confirm your medications for today</p>
+</div>
+<!-- Content Area -->
+<div class="flex-1 overflow-y-auto px-6 space-y-4">
+<!-- Card 1: Taken State -->
+<div class="h-[72px] bg-[#F0FAF5] border-l-4 border-[#4CAF82] rounded-[20px] px-4 flex items-center justify-between shadow-sm">
+<div class="flex flex-col">
+<h4 class="font-bold text-[#1A1A2E] text-[15px]">Estradiol / 75 mcg</h4>
+<p class="text-xs text-on-surface-variant">Patch · Twice weekly</p>
+</div>
+<div class="flex items-center gap-3">
+<div class="bg-white/60 px-2 py-1 rounded-lg flex items-center gap-1">
+<span class="text-[11px] font-bold text-[#4CAF82]">08:15</span>
+</div>
+<!-- Toggle ON -->
+<div class="w-10 h-6 bg-[#4CAF82] rounded-full relative flex items-center justify-end p-0.5 cursor-pointer">
+<div class="w-5 h-5 bg-white rounded-full shadow-sm"></div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/50 text-[20px]">more_vert</span>
+</div>
+</div>
+<!-- Card 2: Not Yet Taken State -->
+<div class="h-[72px] bg-white border-l-4 border-[#E0DEDA] rounded-[20px] px-4 flex items-center justify-between shadow-sm ring-1 ring-black/5">
+<div class="flex flex-col">
+<h4 class="font-bold text-[#1A1A2E] text-[15px]">Utrogestan / 100 mg</h4>
+<p class="text-xs text-on-surface-variant">Tablet · Daily</p>
+</div>
+<div class="flex items-center gap-3">
+<div class="bg-surface-container-low px-2 py-1 rounded-lg flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">schedule</span>
+</div>
+<!-- Toggle OFF -->
+<div class="w-10 h-6 bg-[#E0DEDA] rounded-full relative flex items-center justify-start p-0.5 cursor-pointer">
+<div class="w-5 h-5 bg-white rounded-full shadow-sm"></div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/50 text-[20px]">more_vert</span>
+</div>
+</div>
+<!-- Footer Action -->
+<div class="pt-2 border-t border-outline-variant/15 flex justify-center">
+<button class="flex items-center gap-2 text-[#6B4E8C] font-semibold text-sm hover:opacity-80 transition-opacity py-3">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                        Add medication
+                    </button>
+</div>
+</div>
+<!-- Bottom Action Area -->
+<div class="p-6 pb-10 bg-surface-container-lowest">
+<button class="w-full h-[52px] bg-[#6B4E8C] text-white font-bold rounded-[14px] shadow-lg shadow-[#6B4E8C]/20 hover:scale-[0.98] transition-transform active:scale-95">
+                    Save &amp; Complete Log
+                </button>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation Shell (Inactive Background) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-6 pb-6 pt-3 bg-[#fef8f6]/70 backdrop-blur-xl z-30 border-t border-[#9B8B7E]/15 shadow-[0_-4px_24px_rgba(29,27,26,0.06)]">
+<div class="flex flex-col items-center justify-center bg-[#817266]/10 text-[#67594e] rounded-xl px-3 py-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">edit_note</span>
+<span class="font-manrope text-[11px] font-medium tracking-wide">Journal</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#9B8B7E]">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-manrope text-[11px] font-medium tracking-wide">Insights</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#9B8B7E]">
+<span class="material-symbols-outlined">spa</span>
+<span class="font-manrope text-[11px] font-medium tracking-wide">Support</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#9B8B7E]">
+<span class="material-symbols-outlined">auto_stories</span>
+<span class="font-manrope text-[11px] font-medium tracking-wide">Library</span>
+</div>
+</nav>
+</body></html>

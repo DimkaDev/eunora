@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync Daily Control Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;0,900;1,400&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "surface-container-highest": "#e7e1df",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "surface-dim": "#ded9d7",
+                        "surface-bright": "#fef8f6",
+                        "secondary": "#655a6e",
+                        "on-surface-variant": "#4d453f",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#ffdad3",
+                        "secondary-fixed": "#edddf5",
+                        "on-primary-fixed": "#231a11",
+                        "inverse-primary": "#d6c3b5",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "on-error": "#ffffff",
+                        "on-secondary-container": "#6c6074",
+                        "tertiary": "#814f45",
+                        "surface-container": "#f2edea",
+                        "surface-tint": "#6a5c50",
+                        "background": "#fef8f6",
+                        "primary": "#67594e",
+                        "on-surface": "#1d1b1a",
+                        "surface-variant": "#e7e1df",
+                        "surface": "#fef8f6",
+                        "outline-variant": "#d0c4bc",
+                        "secondary-container": "#edddf5",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "primary-fixed": "#f2dfd0",
+                        "on-tertiary": "#ffffff",
+                        "primary-container": "#817266",
+                        "on-primary-container": "#fffbff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-low": "#f8f2f0",
+                        "on-primary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-tertiary-container": "#fffbff",
+                        "inverse-on-surface": "#f5f0ed",
+                        "on-background": "#1d1b1a",
+                        "outline": "#7f756e",
+                        "on-tertiary-fixed": "#341009",
+                        "surface-container-high": "#ede7e5",
+                        "on-secondary-fixed": "#211828",
+                        "error-container": "#ffdad6",
+                        "inverse-surface": "#32302f",
+                        "tertiary-container": "#9d675c",
+                        "on-primary-fixed-variant": "#51443a"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #fef8f6;
+            color: #1d1b1a;
+            font-family: 'Manrope', sans-serif;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen pb-32">
+<header class="w-full top-0 sticky z-50 bg-white/80 backdrop-blur-md flex justify-between items-center px-5 py-3 border-b border-stone-100">
+<div class="flex flex-col">
+<h1 class="font-['Noto_Serif'] font-bold text-lg text-[#67594e]">Daily Control Center</h1>
+<span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Wednesday, March 19</span>
+</div>
+<div class="flex items-center gap-3">
+<button class="material-symbols-outlined text-[#67594e] text-xl">notifications</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-stone-200">
+<img alt="Sarah" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcyvRmigFQWEnghTEoPCUvu6Lls83qWwGf81JXXAHmxs_PI1albuWzfyX8hJHYDK2oDWVWOWPMCqACZzrOSiUrEriDUDMizBdlzmoikkKEMsviNymTb1SmeDL2M5mjpE7ZBB0lVSTa1Di99-xd5i_L5XTTvhH9uNbS-BEM4dPF7EevWWNXW_jzlWxSVjPjBZ3OPwiDpUtKeUmcOYd5ry2dtceFPJ-WL6Bp-ZEtlShywIcbEgix84xxFqoBGr1QXN6ehV00Hjb-W4c"/>
+</div>
+</div>
+</header>
+<main class="px-4 mt-4 space-y-4">
+<section>
+<div class="flex justify-between items-end mb-3">
+<h3 class="text-xs font-extrabold text-stone-500 uppercase tracking-wider">Today's Intensity</h3>
+<button class="text-[10px] font-bold text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">edit</span> EDIT
+            </button>
+</div>
+<div class="flex gap-4 overflow-x-auto no-scrollbar pb-1">
+<div class="flex flex-col items-center flex-shrink-0">
+<div class="relative w-16 h-16 flex items-center justify-center">
+<svg class="w-full h-full">
+<circle class="text-stone-100" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-[#E8A89B] progress-ring-circle" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-dasharray="175.9" stroke-dashoffset="35" stroke-linecap="round" stroke-width="4"></circle>
+</svg>
+<span class="absolute material-symbols-outlined text-[#814f45] text-lg">local_fire_department</span>
+</div>
+<span class="text-[10px] font-bold mt-1 text-stone-600">Hot Flashes</span>
+<span class="text-[9px] text-stone-400 font-medium">Severe</span>
+</div>
+<div class="flex flex-col items-center flex-shrink-0">
+<div class="relative w-16 h-16 flex items-center justify-center">
+<svg class="w-full h-full">
+<circle class="text-stone-100" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-[#D0C1D8] progress-ring-circle" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-dasharray="175.9" stroke-dashoffset="120" stroke-linecap="round" stroke-width="4"></circle>
+</svg>
+<span class="absolute material-symbols-outlined text-[#655a6e] text-lg">bedtime</span>
+</div>
+<span class="text-[10px] font-bold mt-1 text-stone-600">Sleep</span>
+<span class="text-[9px] text-stone-400 font-medium">Mild</span>
+</div>
+<div class="flex flex-col items-center flex-shrink-0">
+<div class="relative w-16 h-16 flex items-center justify-center">
+<svg class="w-full h-full">
+<circle class="text-stone-100" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-[#A9C7F9] progress-ring-circle" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-dasharray="175.9" stroke-dashoffset="80" stroke-linecap="round" stroke-width="4"></circle>
+</svg>
+<span class="absolute material-symbols-outlined text-blue-600 text-lg">psychology</span>
+</div>
+<span class="text-[10px] font-bold mt-1 text-stone-600">Brain Fog</span>
+<span class="text-[9px] text-stone-400 font-medium">Moderate</span>
+</div>
+<button class="w-16 h-16 flex-shrink-0 rounded-full border-2 border-dashed border-stone-200 flex items-center justify-center text-stone-300">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</section>
+<section class="bg-surface-container-low rounded-3xl p-4">
+<div class="flex justify-between items-center mb-3">
+<h3 class="text-xs font-extrabold text-stone-500 uppercase tracking-wider flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">pill</span> Medicine Cabinet
+            </h3>
+<span class="text-[10px] font-bold text-stone-400">1 of 3 Taken</span>
+</div>
+<div class="flex gap-3 overflow-x-auto no-scrollbar -mx-1 px-1">
+<div class="min-w-[140px] bg-white rounded-2xl p-3 shadow-sm border border-stone-100">
+<div class="flex justify-between items-start mb-2">
+<div class="w-8 h-8 rounded-full bg-secondary-container/50 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-base">medication</span>
+</div>
+<div class="w-8 h-5 bg-primary rounded-full relative">
+<div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-sm"></div>
+</div>
+</div>
+<p class="text-[11px] font-bold text-stone-800 leading-tight">Estradiol Patch</p>
+<p class="text-[9px] text-stone-500 mt-1">Applied • Today</p>
+</div>
+<div class="min-w-[140px] bg-white rounded-2xl p-3 shadow-sm border border-stone-100">
+<div class="flex justify-between items-start mb-2">
+<div class="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center">
+<span class="material-symbols-outlined text-stone-400 text-base">medication_liquid</span>
+</div>
+<div class="w-8 h-5 bg-stone-200 rounded-full relative">
+<div class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-sm"></div>
+</div>
+</div>
+<p class="text-[11px] font-bold text-stone-800 leading-tight">Progesterone</p>
+<p class="text-[9px] text-stone-500 mt-1">100mg • Bedtime</p>
+</div>
+<div class="min-w-[140px] bg-white rounded-2xl p-3 shadow-sm border border-stone-100">
+<div class="flex justify-between items-start mb-2">
+<div class="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center">
+<span class="material-symbols-outlined text-stone-400 text-base">nutrition</span>
+</div>
+<div class="w-8 h-5 bg-stone-200 rounded-full relative">
+<div class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-sm"></div>
+</div>
+</div>
+<p class="text-[11px] font-bold text-stone-800 leading-tight">Magnesium</p>
+<p class="text-[9px] text-stone-500 mt-1">200mg • Evening</p>
+</div>
+</div>
+</section>
+<section>
+<div class="flex justify-between items-center mb-3">
+<h3 class="text-xs font-extrabold text-stone-500 uppercase tracking-wider">Quick Log Triggers</h3>
+<span class="text-[10px] font-bold text-stone-400">3 ACTIVE</span>
+</div>
+<div class="grid grid-cols-4 gap-2">
+<button class="flex flex-col items-center justify-center p-2 rounded-2xl bg-tertiary-fixed/40 border border-tertiary-fixed-dim/30">
+<span class="material-symbols-outlined text-tertiary text-xl mb-1">psychology</span>
+<span class="text-[9px] font-bold text-tertiary">Stress</span>
+</button>
+<button class="flex flex-col items-center justify-center p-2 rounded-2xl bg-[#E0D0C1]/30 border border-[#D0C4BC]/30">
+<span class="material-symbols-outlined text-[#817266] text-xl mb-1">coffee</span>
+<span class="text-[9px] font-bold text-[#817266]">Caffeine</span>
+</button>
+<button class="flex flex-col items-center justify-center p-2 rounded-2xl bg-[#D0C1D8]/30 border border-[#C0B1C8]/30">
+<span class="material-symbols-outlined text-secondary text-xl mb-1">wine_bar</span>
+<span class="text-[9px] font-bold text-secondary">Alcohol</span>
+</button>
+<button class="flex flex-col items-center justify-center p-2 rounded-2xl bg-stone-50 border border-stone-100">
+<span class="material-symbols-outlined text-stone-300 text-xl mb-1">fitness_center</span>
+<span class="text-[9px] font-bold text-stone-400">Exercise</span>
+</button>
+<button class="flex flex-col items-center justify-center p-2 rounded-2xl bg-stone-50 border border-stone-100">
+<span class="material-symbols-outlined text-stone-300 text-xl mb-1">bakery_dining</span>
+<span class="text-[9px] font-bold text-stone-400">Sugar</span>
+</button>
+<button class="flex flex-col items-center justify-center p-2 rounded-2xl bg-stone-50 border border-stone-100">
+<span class="material-symbols-outlined text-stone-300 text-xl mb-1">restaurant</span>
+<span class="text-[9px] font-bold text-stone-400">Spicy</span>
+</button>
+<button class="flex flex-col items-center justify-center p-2 rounded-2xl border-2 border-dashed border-stone-200">
+<span class="material-symbols-outlined text-stone-300">add</span>
+</button>
+</div>
+</section>
+<section class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-lowest rounded-2xl p-3 border border-stone-100">
+<h4 class="text-[10px] font-extrabold text-stone-400 uppercase mb-2">Week Trend</h4>
+<div class="flex items-end gap-1.5 h-12 mb-1">
+<div class="w-2 bg-stone-100 h-2/3 rounded-full"></div>
+<div class="w-2 bg-stone-100 h-full rounded-full"></div>
+<div class="w-2 bg-primary h-4/5 rounded-full"></div>
+<div class="w-2 bg-stone-100 h-1/2 rounded-full"></div>
+<div class="w-2 bg-stone-100 h-1/4 rounded-full"></div>
+</div>
+<p class="text-[8px] font-bold text-stone-500">60% Avg. Intensity</p>
+</div>
+<div class="bg-[#E8F0E8] rounded-2xl p-3 border border-green-100">
+<h4 class="text-[10px] font-extrabold text-[#2d402d] uppercase mb-1">Insight</h4>
+<p class="text-[9px] text-[#4a5e4a] leading-tight">Stress levels correlate with Hot Flashes today.</p>
+<a class="text-[8px] font-bold text-primary underline mt-1 inline-block" href="#">View More</a>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-white/90 backdrop-blur-xl border-t border-stone-100">
+<a class="flex flex-col items-center justify-center text-primary" href="#">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-[10px] font-bold mt-0.5 uppercase tracking-tighter">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-400" href="#">
+<span class="material-symbols-outlined text-2xl">edit_calendar</span>
+<span class="text-[10px] font-bold mt-0.5 uppercase tracking-tighter">Log</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-400" href="#">
+<span class="material-symbols-outlined text-2xl">insights</span>
+<span class="text-[10px] font-bold mt-0.5 uppercase tracking-tighter">Trends</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-400" href="#">
+<span class="material-symbols-outlined text-2xl">medical_services</span>
+<span class="text-[10px] font-bold mt-0.5 uppercase tracking-tighter">Health</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-400" href="#">
+<span class="material-symbols-outlined text-2xl">settings</span>
+<span class="text-[10px] font-bold mt-0.5 uppercase tracking-tighter">Settings</span>
+</a>
+</nav>
+
+</body></html>

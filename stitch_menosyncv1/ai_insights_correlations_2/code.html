@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync AI | Your Narrative</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#67594e",
+                        "primary-container": "#817266",
+                        "secondary": "#655a6e",
+                        "background": "#fef8f6",
+                        "surface": "#fef8f6",
+                        "on-surface": "#1d1b1a",
+                        "outline": "#7f756e",
+                        "surface-container-low": "#f8f2f0",
+                        "surface-container-lowest": "#ffffff",
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                    }
+                }
+            }
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body { font-family: 'Manrope', sans-serif; @apply bg-background text-on-surface antialiased; }
+            .serif { font-family: 'Noto Serif', serif; }
+        }
+        .insight-panel {
+            min-height: calc(100vh - 180px);
+            scroll-snap-align: start;
+        }
+        .scroll-container {
+            scroll-snap-type: y mandatory;
+            overflow-y: auto;
+            height: calc(100vh - 140px);
+        }.scroll-container::-webkit-scrollbar { display: none; }
+        .scroll-container { -ms-overflow-style: none; scrollbar-width: none; }
+        .warm-gradient-1 { background: linear-gradient(180deg, rgba(254,248,246,0) 0%, rgba(255,218,211,0.2) 100%); }
+        .warm-gradient-2 { background: linear-gradient(180deg, rgba(254,248,246,0) 0%, rgba(232,245,233,0.3) 100%); }
+        .warm-gradient-3 { background: linear-gradient(180deg, rgba(254,248,246,0) 0%, rgba(255,249,230,0.4) 100%); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col h-screen overflow-hidden">
+<header class="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md flex justify-between items-center px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">menu</span>
+<span class="font-serif italic text-2xl text-primary">MenoSync</span>
+</div>
+<span class="material-symbols-outlined text-primary">account_circle</span>
+</header>
+<main class="flex-grow pt-16 pb-24">
+<div class="scroll-container px-4">
+<section class="insight-panel flex flex-col justify-center items-center text-center px-4 pt-8" id="intro">
+<div class="mb-6 inline-flex p-4 bg-primary/5 rounded-full">
+<span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<h1 class="font-headline font-bold text-3xl mb-4 leading-tight">Your Body's Story</h1>
+<p class="text-outline text-lg mb-8 leading-relaxed max-w-[280px]">
+                    MenoSync AI has carefully reviewed your last 34 days. We've found 5 meaningful patterns to share with you today.
+                </p>
+<div class="bg-[#FFF9E6] p-4 rounded-2xl border border-[#856404]/10 mb-8 flex items-start gap-3 text-left">
+<span class="material-symbols-outlined text-[#856404] text-xl" style="font-variation-settings: 'FILL' 1;">warning</span>
+<p class="text-[12px] text-[#856404] leading-snug">
+                        These insights are for your awareness and reflection, not a medical diagnosis.
+                    </p>
+</div>
+<a class="w-full bg-primary text-white font-bold py-4 rounded-2xl shadow-lg shadow-primary/20 flex justify-center items-center gap-2" href="#panel1">
+                    Start Your Story
+                    <span class="material-symbols-outlined">arrow_downward</span>
+</a>
+</section>
+<section class="insight-panel flex flex-col justify-between py-10 warm-gradient-1" id="panel1">
+<div class="flex flex-col items-center text-center">
+<div class="w-48 h-48 bg-white rounded-full shadow-inner flex items-center justify-center mb-8 relative">
+<span class="material-symbols-outlined text-red-300 text-[100px] opacity-40 absolute">wine_bar</span>
+<span class="material-symbols-outlined text-red-500 text-[80px]" style="font-variation-settings: 'opsz' 48;">wine_bar</span>
+</div>
+<span class="text-xs uppercase tracking-widest text-red-500 font-bold mb-2">A Notable Connection</span>
+<h2 class="font-headline text-2xl font-bold mb-4 px-4 text-primary">Evening Rituals &amp; Mornings</h2>
+<p class="text-outline leading-relaxed px-6 text-[16px]">
+                        It seems like your body is quite sensitive to <span class="text-on-surface font-semibold">red wine</span>. We noticed that after you enjoy a glass, your morning hot flashes tend to be a bit more frequent—about <span class="text-red-600 font-bold">4.2 more</span> than usual.
+                    </p>
+</div>
+<div class="px-2 mt-8">
+<div class="bg-white/60 p-4 rounded-xl mb-6 text-sm text-center italic font-headline text-primary/80">
+                        "This pattern was present in 9 out of the 12 times you logged wine."
+                    </div>
+<a class="w-full bg-white border-2 border-primary/10 text-primary font-bold py-4 rounded-2xl flex justify-center items-center gap-2" href="#panel2">
+                        Explore Next Insight
+                        <span class="material-symbols-outlined">arrow_downward</span>
+</a>
+</div>
+</section>
+<section class="insight-panel flex flex-col justify-between py-10 warm-gradient-2" id="panel2">
+<div class="flex flex-col items-center text-center">
+<div class="w-48 h-48 bg-white rounded-full shadow-inner flex items-center justify-center mb-8 relative">
+<span class="material-symbols-outlined text-green-200 text-[100px] opacity-40 absolute">self_care</span>
+<span class="material-symbols-outlined text-green-600 text-[80px]">directions_run</span>
+</div>
+<span class="text-xs uppercase tracking-widest text-green-600 font-bold mb-2">Your Protective Ally</span>
+<h2 class="font-headline text-2xl font-bold mb-4 px-4 text-primary">The Power of Movement</h2>
+<p class="text-outline leading-relaxed px-6 text-[16px]">
+                        Movement is acting as a gentle buffer for you. On days with <span class="text-on-surface font-semibold">30+ minutes of exercise</span>, the intensity of your hot flashes noticeably eases by <span class="text-green-600 font-bold">1.4 points</span>.
+                    </p>
+</div>
+<div class="px-2 mt-8">
+<div class="bg-white/60 p-4 rounded-xl mb-6 text-sm text-center italic font-headline text-primary/80">
+                        "A consistent pattern found across 11 active days."
+                    </div>
+<a class="w-full bg-white border-2 border-primary/10 text-primary font-bold py-4 rounded-2xl flex justify-center items-center gap-2" href="#panel3">
+                        Explore Next Insight
+                        <span class="material-symbols-outlined">arrow_downward</span>
+</a>
+</div>
+</section>
+<section class="insight-panel flex flex-col justify-between py-10 warm-gradient-3" id="panel3">
+<div class="flex flex-col items-center text-center">
+<div class="w-48 h-48 bg-white rounded-full shadow-inner flex items-center justify-center mb-8 relative">
+<span class="material-symbols-outlined text-amber-200 text-[100px] opacity-40 absolute">cloud</span>
+<span class="material-symbols-outlined text-amber-500 text-[80px]">psychology_alt</span>
+</div>
+<span class="text-xs uppercase tracking-widest text-amber-600 font-bold mb-2">Mind-Body Link</span>
+<h2 class="font-headline text-2xl font-bold mb-4 px-4 text-primary">Stress &amp; Stillness</h2>
+<p class="text-outline leading-relaxed px-6 text-[16px]">
+                        When your plate feels full, your mind feels it too. On high-stress days, your <span class="text-on-surface font-semibold">anxiety score</span> tends to climb by <span class="text-amber-700 font-bold">2.1 points</span>. You're not alone in this—it's a very common link.
+                    </p>
+</div>
+<div class="px-2 mt-8">
+<div class="bg-white/60 p-4 rounded-xl mb-6 text-sm text-center italic font-headline text-primary/80">
+                        "This connection was clear on 9 high-stress days."
+                    </div>
+<button class="w-full bg-primary text-white font-bold py-4 rounded-2xl flex justify-center items-center gap-2">
+                        Finish Your Narrative
+                        <span class="material-symbols-outlined">check_circle</span>
+</button>
+<p class="text-center mt-4 text-[13px] text-outline italic">2 more insights are still building data...</p>
+</div>
+</section>
+</div>
+</main>
+<nav class="fixed bottom-0 w-full z-50 rounded-t-3xl border-t border-primary/10 bg-background/80 backdrop-blur-md flex justify-around items-center px-6 pb-6 pt-3 shadow-[0_-4px_24px_rgba(29,27,26,0.06)]">
+<a class="flex flex-col items-center justify-center text-outline px-4 py-2" href="#">
+<span class="material-symbols-outlined mb-1">calendar_today</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Today</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary rounded-2xl px-4 py-2" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Insights</span>
+</a>
+<a class="flex flex-col items-center justify-center text-outline px-4 py-2" href="#">
+<span class="material-symbols-outlined mb-1">auto_stories</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Library</span>
+</a>
+<a class="flex flex-col items-center justify-center text-outline px-4 py-2" href="#">
+<span class="material-symbols-outlined mb-1">edit_note</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Journal</span>
+</a>
+</nav>
+
+</body></html>

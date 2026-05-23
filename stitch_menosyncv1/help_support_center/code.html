@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync Help &amp; Support</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&amp;family=Manrope:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#e7e1df",
+                        "secondary": "#655a6e",
+                        "on-surface-variant": "#4d453f",
+                        "secondary-fixed": "#edddf5",
+                        "primary-fixed": "#f2dfd0",
+                        "on-error-container": "#93000a",
+                        "on-primary-fixed": "#231a11",
+                        "surface-container-high": "#ede7e5",
+                        "surface-container-low": "#f8f2f0",
+                        "on-secondary-container": "#6c6074",
+                        "on-primary-fixed-variant": "#51443a",
+                        "background": "#fef8f6",
+                        "surface-container-highest": "#e7e1df",
+                        "surface-bright": "#fef8f6",
+                        "surface": "#fef8f6",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "on-tertiary-fixed": "#341009",
+                        "outline": "#7f756e",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "inverse-on-surface": "#f5f0ed",
+                        "tertiary-container": "#9d675c",
+                        "secondary-container": "#edddf5",
+                        "outline-variant": "#d0c4bc",
+                        "surface-container": "#f2edea",
+                        "on-tertiary-container": "#fffbff",
+                        "on-secondary-fixed": "#211828",
+                        "on-primary-container": "#fffbff",
+                        "on-secondary": "#ffffff",
+                        "inverse-primary": "#d6c3b5",
+                        "tertiary-fixed": "#ffdad3",
+                        "on-background": "#1d1b1a",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "on-surface": "#1d1b1a",
+                        "error": "#ba1a1a",
+                        "surface-dim": "#ded9d7",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#814f45",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "surface-tint": "#6a5c50",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#817266",
+                        "primary": "#67594e",
+                        "inverse-surface": "#32302f",
+                        "secondary-fixed-dim": "#d0c1d8"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen pb-32">
+<!-- TopAppBar Shell Mapping -->
+<header class="fixed top-0 w-full z-50 bg-[#fef8f6]/70 dark:bg-[#1d1b1a]/70 backdrop-blur-xl flex items-center justify-between px-6 py-4 w-full">
+<div class="flex items-center gap-4">
+<button class="active:scale-95 transition-transform text-[#67594e] dark:text-[#D8C9E0] hover:opacity-80 transition-opacity duration-300">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<div>
+<h1 class="font-['Noto_Serif'] text-xl font-semibold tracking-tight text-[#67594e] dark:text-[#D8C9E0]">Help &amp; Support</h1>
+<p class="font-['Manrope'] text-[12px] text-on-surface-variant/70">Find answers and get help when you need it</p>
+</div>
+</div>
+<button class="active:scale-95 transition-transform text-[#67594e] dark:text-[#D8C9E0] hover:opacity-80 transition-opacity duration-300">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+</header>
+<main class="pt-28 px-6 space-y-8 max-w-2xl mx-auto">
+<!-- Section 1: Quick Search -->
+<section>
+<div class="bg-surface-container-lowest rounded-xl p-2 shadow-sm">
+<div class="flex items-center gap-3 px-4 py-2 bg-surface-container-low rounded-full">
+<span class="material-symbols-outlined text-primary" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-on-surface font-body w-full placeholder:text-outline/60" placeholder="Search FAQs..." type="text"/>
+</div>
+</div>
+</section>
+<!-- Section 2: FAQ Accordion -->
+<section class="space-y-4">
+<h2 class="font-body font-bold text-[13px] uppercase tracking-wider text-primary px-1">Frequently Asked Questions</h2>
+<div class="space-y-3">
+<!-- FAQ Item 1 -->
+<div class="group bg-surface-container-lowest rounded-xl overflow-hidden">
+<button class="w-full flex items-center justify-between p-5 text-left active:bg-surface-container-low transition-colors">
+<span class="font-body font-semibold text-on-surface text-[15px]">How do I track my symptoms daily?</span>
+<span class="material-symbols-outlined text-outline" data-icon="expand_more">expand_more</span>
+</button>
+<div class="bg-secondary-container/30 px-5 py-4 border-t border-outline-variant/10">
+<p class="text-sm text-on-secondary-container leading-relaxed">Simply tap the '+' icon on your home dashboard. You can select symptoms, intensity levels, and add personal notes to your journal.</p>
+</div>
+</div>
+<!-- FAQ Item 2 -->
+<div class="group bg-surface-container-lowest rounded-xl overflow-hidden">
+<button class="w-full flex items-center justify-between p-5 text-left active:bg-surface-container-low transition-colors">
+<span class="font-body font-semibold text-on-surface text-[15px]">Is my health data private and secure?</span>
+<span class="material-symbols-outlined text-outline" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+<!-- FAQ Item 3 -->
+<div class="group bg-surface-container-lowest rounded-xl overflow-hidden">
+<button class="w-full flex items-center justify-between p-5 text-left active:bg-surface-container-low transition-colors">
+<span class="font-body font-semibold text-on-surface text-[15px]">Can I export my data for my doctor?</span>
+<span class="material-symbols-outlined text-outline" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+<!-- FAQ Item 4 -->
+<div class="group bg-surface-container-lowest rounded-xl overflow-hidden">
+<button class="w-full flex items-center justify-between p-5 text-left active:bg-surface-container-low transition-colors">
+<span class="font-body font-semibold text-on-surface text-[15px]">How does MenoSync predict cycles?</span>
+<span class="material-symbols-outlined text-outline" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+<!-- FAQ Item 5 -->
+<div class="group bg-surface-container-lowest rounded-xl overflow-hidden">
+<button class="w-full flex items-center justify-between p-5 text-left active:bg-surface-container-low transition-colors">
+<span class="font-body font-semibold text-on-surface text-[15px]">What are "Insights" and how do they help?</span>
+<span class="material-symbols-outlined text-outline" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+<!-- FAQ Item 6 -->
+<div class="group bg-surface-container-lowest rounded-xl overflow-hidden">
+<button class="w-full flex items-center justify-between p-5 text-left active:bg-surface-container-low transition-colors">
+<span class="font-body font-semibold text-on-surface text-[15px]">How do I sync with Apple Health?</span>
+<span class="material-symbols-outlined text-outline" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+<!-- FAQ Item 7 -->
+<div class="group bg-surface-container-lowest rounded-xl overflow-hidden">
+<button class="w-full flex items-center justify-between p-5 text-left active:bg-surface-container-low transition-colors">
+<span class="font-body font-semibold text-on-surface text-[15px]">Can I change my notification settings?</span>
+<span class="material-symbols-outlined text-outline" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+<!-- FAQ Item 8 -->
+<div class="group bg-surface-container-lowest rounded-xl overflow-hidden">
+<button class="w-full flex items-center justify-between p-5 text-left active:bg-surface-container-low transition-colors">
+<span class="font-body font-semibold text-on-surface text-[15px]">Is MenoSync suitable for perimenopause?</span>
+<span class="material-symbols-outlined text-outline" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Section 3: Helpful Resources -->
+<section class="space-y-4">
+<h2 class="font-body font-bold text-[13px] uppercase tracking-wider text-primary px-1">Helpful Resources</h2>
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden">
+<a class="flex items-center gap-4 p-5 hover:bg-surface-container-low transition-colors border-b border-outline-variant/10" href="#">
+<span class="material-symbols-outlined text-primary" data-icon="menu_book">menu_book</span>
+<span class="flex-grow font-body text-on-surface">Understanding Menopause Stages</span>
+<span class="material-symbols-outlined text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</a>
+<a class="flex items-center gap-4 p-5 hover:bg-surface-container-low transition-colors border-b border-outline-variant/10" href="#">
+<span class="material-symbols-outlined text-primary" data-icon="local_library">local_library</span>
+<span class="flex-grow font-body text-on-surface">Nutrition &amp; Hormonal Balance Guide</span>
+<span class="material-symbols-outlined text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</a>
+<a class="flex items-center gap-4 p-5 hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined text-primary" data-icon="play_circle">play_circle</span>
+<span class="flex-grow font-body text-on-surface">Video Tutorials: Getting Started</span>
+<span class="material-symbols-outlined text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</a>
+</div>
+</section>
+<!-- Section 4: Contact Support -->
+<section class="space-y-4">
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm flex flex-col gap-4">
+<div class="space-y-1">
+<h3 class="font-headline text-lg font-bold text-on-surface">Still need help?</h3>
+<p class="text-sm text-on-surface-variant">Our support team is here for you 24/7.</p>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+<button class="bg-primary hover:bg-primary-container text-on-primary py-3 px-6 rounded-full font-body font-bold text-sm flex items-center justify-center gap-2 transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="chat">chat</span>
+                        Chat with Support
+                    </button>
+<button class="bg-transparent border-2 border-primary text-primary hover:bg-surface-container-low py-3 px-6 rounded-full font-body font-bold text-sm flex items-center justify-center gap-2 transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="mail">mail</span>
+                        Email Support
+                    </button>
+</div>
+</div>
+</section>
+<!-- Section 5: Additional Links -->
+<section class="pb-8">
+<div class="bg-surface-container rounded-xl overflow-hidden">
+<a class="flex items-center justify-between p-4 border-b border-outline-variant/10 hover:bg-surface-container-high transition-colors" href="#">
+<span class="text-sm font-body text-on-surface-variant">Privacy Policy</span>
+<span class="material-symbols-outlined text-outline-variant text-[18px]" data-icon="open_in_new">open_in_new</span>
+</a>
+<a class="flex items-center justify-between p-4 border-b border-outline-variant/10 hover:bg-surface-container-high transition-colors" href="#">
+<span class="text-sm font-body text-on-surface-variant">Terms of Service</span>
+<span class="material-symbols-outlined text-outline-variant text-[18px]" data-icon="open_in_new">open_in_new</span>
+</a>
+<a class="flex items-center justify-between p-4 hover:bg-surface-container-high transition-colors" href="#">
+<span class="text-sm font-body text-on-surface-variant">Read our Blog</span>
+<span class="material-symbols-outlined text-outline-variant text-[18px]" data-icon="chevron_right">chevron_right</span>
+</a>
+</div>
+<div class="mt-8 text-center">
+<p class="text-[10px] uppercase tracking-[0.2em] font-bold text-outline">MenoSync v2.4.0 • Made with care</p>
+</div>
+</section>
+</main>
+<!-- BottomNavBar Shell Mapping -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-2 bg-[#fef8f6]/70 dark:bg-[#1d1b1a]/70 backdrop-blur-xl z-50 rounded-t-[1.5rem] shadow-[0_-4px_24px_0_rgba(29,27,26,0.06)]">
+<!-- Home -->
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] dark:text-[#9B8B7E] px-5 py-2 hover:text-[#67594e] dark:hover:text-[#fef8f6] transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-['Manrope'] text-[10px] uppercase tracking-widest font-bold mt-1">Home</span>
+</a>
+<!-- Insights -->
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] dark:text-[#9B8B7E] px-5 py-2 hover:text-[#67594e] dark:hover:text-[#fef8f6] transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-['Manrope'] text-[10px] uppercase tracking-widest font-bold mt-1">Insights</span>
+</a>
+<!-- Support (ACTIVE) -->
+<a class="flex flex-col items-center justify-center bg-[#D8C9E0] dark:bg-[#67594e] text-[#1d1b1a] dark:text-[#fef8f6] rounded-[1.5rem] px-5 py-2 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="support_agent" style="font-variation-settings: 'FILL' 1;">support_agent</span>
+<span class="font-['Manrope'] text-[10px] uppercase tracking-widest font-bold mt-1">Support</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] dark:text-[#9B8B7E] px-5 py-2 hover:text-[#67594e] dark:hover:text-[#fef8f6] transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-['Manrope'] text-[10px] uppercase tracking-widest font-bold mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

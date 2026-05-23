@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary-purple": "#6B4E8C",
+                        "coral": "#E8734A",
+                        "soft-bg": "#FAFAF8",
+                        "surface": "#ffffff",
+                        "on-surface": "#1d1b1a",
+                        "on-surface-variant": "#4d453f",
+                        "outline-variant": "#d0c4bc",
+                        "secondary": "#655a6e",
+                        "tertiary": "#814f45",
+                    },
+                    borderRadius: {
+                        "3xl": "1.5rem",
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                    }
+                }
+            }
+        }
+    </script>
+<style type="text/tailwindcss">
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Manrope', sans-serif; background-color: #FAFAF8; }
+        h1, h2, h3 { font-family: 'Noto Serif', serif; }
+        .insight-card-glow {
+            box-shadow: 0 10px 40px -10px rgba(107, 78, 140, 0.15);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface min-h-screen pb-32">
+<header class="bg-[#FAFAF8] sticky top-0 z-40">
+<div class="flex justify-between items-center w-full px-5 py-6 max-w-xl mx-auto">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-purple flex items-center justify-center text-white font-bold" data-alt="C">
+                C
+            </div>
+<div>
+<h1 class="font-serif text-xl font-bold text-primary-purple">Good evening, Claire</h1>
+<p class="font-sans text-xs text-secondary/60">Monday, 13 Apr</p>
+</div>
+</div>
+<button class="text-secondary/60 hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</header>
+<main class="max-w-xl mx-auto px-5 space-y-6">
+<div class="flex">
+<div class="bg-[#FFF0E8] text-coral px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="warning">warning</span>
+            Partial — you haven't logged HRT today
+        </div>
+</div>
+<section class="bg-surface rounded-3xl p-5 shadow-sm border border-black/[0.03]">
+<div class="flex justify-between items-center mb-4">
+<h2 class="text-sm font-bold uppercase tracking-wider text-secondary/70">Logging Adherence</h2>
+<span class="text-[10px] font-bold text-primary-purple">85% Weekly</span>
+</div>
+<div class="flex justify-between items-center px-1">
+<div class="flex flex-col items-center gap-2">
+<span class="text-[10px] font-bold text-secondary/40">M</span>
+<div class="w-8 h-8 rounded-full bg-primary-purple flex items-center justify-center text-white shadow-sm">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+</div>
+<div class="flex flex-col items-center gap-2">
+<span class="text-[10px] font-bold text-secondary/40">T</span>
+<div class="w-8 h-8 rounded-full bg-primary-purple flex items-center justify-center text-white shadow-sm">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+</div>
+<div class="flex flex-col items-center gap-2">
+<span class="text-[10px] font-bold text-secondary/40">W</span>
+<div class="w-8 h-8 rounded-full bg-primary-purple flex items-center justify-center text-white shadow-sm">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+</div>
+<div class="flex flex-col items-center gap-2">
+<span class="text-[10px] font-bold text-secondary/40">T</span>
+<div class="w-8 h-8 rounded-full bg-primary-purple flex items-center justify-center text-white shadow-sm">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+</div>
+<div class="flex flex-col items-center gap-2">
+<span class="text-[10px] font-bold text-secondary/40">F</span>
+<div class="w-8 h-8 rounded-full bg-primary-purple flex items-center justify-center text-white shadow-sm">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+</div>
+<div class="flex flex-col items-center gap-2">
+<span class="text-[10px] font-bold text-secondary/40">S</span>
+<div class="w-8 h-8 rounded-full bg-primary-purple/10 flex items-center justify-center text-primary-purple border-2 border-dashed border-primary-purple/30">
+<span class="text-[10px] font-bold">11</span>
+</div>
+</div>
+<div class="flex flex-col items-center gap-2">
+<span class="text-[10px] font-bold text-primary-purple">S</span>
+<div class="w-8 h-8 rounded-full bg-coral/10 flex items-center justify-center text-coral ring-2 ring-coral/20">
+<span class="text-[10px] font-bold">12</span>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-surface rounded-3xl p-8 insight-card-glow relative border-2 border-primary-purple/5 overflow-hidden">
+<div class="absolute top-0 right-0 p-4">
+<span class="material-symbols-outlined text-primary-purple opacity-40" data-icon="lock" style="font-variation-settings: 'FILL' 1;">lock</span>
+</div>
+<div class="mb-8">
+<span class="bg-primary-purple/10 text-primary-purple text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-widest mb-4 inline-block">Proactive Insight</span>
+<h3 class="text-2xl leading-tight font-headline text-on-surface">Top Pattern: Red wine → +4.2 hot flashes next day</h3>
+<p class="text-sm text-secondary/70 mt-3 font-body">Based on your past 30 days of data, evening alcohol consumption is the primary driver of night-time intensity spikes.</p>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-secondary uppercase tracking-tighter">Correlation Strength</span>
+<span class="text-3xl font-headline text-primary-purple">79%</span>
+</div>
+<div class="text-right">
+<span class="text-[10px] font-bold text-secondary uppercase tracking-tighter">Confidence</span>
+<p class="text-xs font-semibold text-green-600">High Reliability</p>
+</div>
+</div>
+<div class="w-full h-3 bg-soft-bg rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary-purple to-coral rounded-full" style="width: 79%"></div>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t border-black/[0.03]">
+<button class="w-full bg-primary-purple text-white py-4 rounded-2xl font-bold shadow-lg shadow-primary-purple/20 flex items-center justify-center gap-2">
+                Analyze Next Pattern <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</section>
+<div class="grid grid-cols-2 gap-4">
+<section class="bg-surface rounded-3xl p-5 shadow-sm border border-black/[0.03]">
+<div class="flex flex-col h-full">
+<div class="flex justify-between items-center mb-3">
+<span class="material-symbols-outlined text-coral" data-icon="monitoring">monitoring</span>
+<span class="text-[10px] font-bold text-coral">+12%</span>
+</div>
+<h2 class="text-sm font-bold text-secondary mb-1">Symptoms</h2>
+<p class="text-xs text-secondary/60 mb-3">3 new this week</p>
+<div class="mt-auto">
+<button class="text-[11px] font-bold text-primary-purple flex items-center gap-1">
+                        View trend <span class="material-symbols-outlined text-xs">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+<section class="bg-surface rounded-3xl p-5 shadow-sm border border-black/[0.03]">
+<div class="flex flex-col h-full">
+<div class="flex justify-between items-center mb-3">
+<span class="material-symbols-outlined text-primary-purple" data-icon="bolt">bolt</span>
+<span class="text-[10px] font-bold text-green-600">-4%</span>
+</div>
+<h2 class="text-sm font-bold text-secondary mb-1">Triggers</h2>
+<p class="text-xs text-secondary/60 mb-3">Active: Red wine, Stress</p>
+<div class="mt-auto">
+<button class="text-[11px] font-bold text-primary-purple flex items-center gap-1">
+                        View trend <span class="material-symbols-outlined text-xs">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+</div>
+<section class="bg-surface rounded-3xl p-6 shadow-sm border border-black/[0.03]">
+<div class="flex justify-between items-center mb-4">
+<h2 class="text-lg font-bold">Protocol Adherence</h2>
+<button class="text-primary-purple text-xs font-bold">Impact →</button>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="text-sm font-semibold">Estradiol Patch</h3>
+<p class="text-[10px] text-secondary/50">Dose change 18d ago</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded">ON TRACK</span>
+<div class="w-10 h-5 bg-primary-purple rounded-full relative">
+<div class="absolute right-1 top-1 w-3 h-3 bg-white rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<button class="fixed bottom-24 right-6 w-[60px] h-[60px] bg-primary-purple text-white rounded-full flex items-center justify-center shadow-xl z-50 hover:scale-105 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-3xl" data-icon="add">add</span>
+</button>
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-4 bg-white/80 backdrop-blur-xl border-t border-black/[0.05]">
+<a class="flex flex-col items-center justify-center text-primary-purple p-2" href="#">
+<span class="material-symbols-outlined" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-[10px] font-bold mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary/40 p-2" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="text-[10px] font-medium mt-1">Insights</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary/40 p-2" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+<span class="text-[10px] font-medium mt-1">Journal</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary/40 p-2" href="#">
+<span class="material-symbols-outlined" data-icon="library_books">library_books</span>
+<span class="text-[10px] font-medium mt-1">Library</span>
+</a>
+</nav>
+
+</body></html>

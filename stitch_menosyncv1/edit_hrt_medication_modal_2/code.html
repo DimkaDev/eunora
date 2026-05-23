@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#ffdad3",
+                    "on-background": "#1d1b1a",
+                    "primary-container": "#817266",
+                    "surface-dim": "#ded9d7",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed": "#edddf5",
+                    "surface-tint": "#6a5c50",
+                    "tertiary": "#814f45",
+                    "on-error-container": "#93000a",
+                    "error": "#ba1a1a",
+                    "on-surface": "#1d1b1a",
+                    "outline-variant": "#d0c4bc",
+                    "inverse-surface": "#32302f",
+                    "on-secondary-fixed-variant": "#4d4355",
+                    "on-error": "#ffffff",
+                    "on-primary-fixed": "#231a11",
+                    "tertiary-fixed-dim": "#f9b7a9",
+                    "secondary-container": "#edddf5",
+                    "secondary": "#655a6e",
+                    "on-tertiary-fixed-variant": "#683a31",
+                    "primary-fixed": "#f2dfd0",
+                    "on-primary-container": "#fffbff",
+                    "inverse-primary": "#d6c3b5",
+                    "inverse-on-surface": "#f5f0ed",
+                    "outline": "#7f756e",
+                    "surface-container-highest": "#e7e1df",
+                    "surface-container-high": "#ede7e5",
+                    "on-secondary-container": "#6c6074",
+                    "primary": "#67594e",
+                    "surface-variant": "#e7e1df",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed": "#341009",
+                    "on-secondary-fixed": "#211828",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-container": "#fffbff",
+                    "surface": "#fef8f6",
+                    "background": "#fef8f6",
+                    "primary-fixed-dim": "#d6c3b5",
+                    "on-primary-fixed-variant": "#51443a",
+                    "surface-container": "#f2edea",
+                    "surface-bright": "#fef8f6",
+                    "on-primary": "#ffffff",
+                    "tertiary-container": "#9d675c",
+                    "surface-container-low": "#f8f2f0",
+                    "secondary-fixed-dim": "#d0c1d8",
+                    "on-tertiary": "#ffffff",
+                    "on-surface-variant": "#4d453f"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif"],
+                    "body": ["Manrope"],
+                    "label": ["Manrope"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Manrope', sans-serif; }
+        .serif { font-family: 'Noto Serif', serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen relative overflow-hidden">
+<!-- Main App Background (Simulated) -->
+<main class="p-6 space-y-8 opacity-40 grayscale-[0.2]">
+<header class="flex justify-between items-center">
+<h1 class="serif text-3xl font-bold tracking-tight text-primary">MenoSync</h1>
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary-container">person</span>
+</div>
+</header>
+<section class="space-y-4">
+<h2 class="serif text-xl">Today's Schedule</h2>
+<div class="bg-surface-container rounded-xl p-5 space-y-4">
+<div class="flex items-center gap-4 bg-surface-container-lowest p-4 rounded-xl">
+<div class="bg-primary-fixed p-3 rounded-lg">
+<span class="material-symbols-outlined text-primary">medication</span>
+</div>
+<div>
+<p class="font-bold">Estradiol Patch</p>
+<p class="text-sm text-outline">08:30 AM • 50 mcg</p>
+</div>
+</div>
+</div>
+</section>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-low p-6 rounded-xl aspect-square flex flex-col justify-between">
+<span class="material-symbols-outlined text-primary text-3xl">water_drop</span>
+<p class="font-serif text-lg">Hydration</p>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl aspect-square flex flex-col justify-between">
+<span class="material-symbols-outlined text-tertiary text-3xl">favorite</span>
+<p class="font-serif text-lg">Vitals</p>
+</div>
+</div>
+</main>
+<!-- Modal Backdrop -->
+<div class="fixed inset-0 bg-on-surface/30 backdrop-blur-[2px] z-40"></div>
+<!-- Modal Bottom Sheet -->
+<div class="fixed bottom-0 left-0 right-0 z-50 transform transition-transform duration-300">
+<!-- Content Container -->
+<div class="bg-surface-container w-full max-w-2xl mx-auto rounded-t-[2.5rem] shadow-2xl pb-10 px-6 pt-2">
+<!-- Handle -->
+<div class="w-12 h-1 bg-outline-variant/40 rounded-full mx-auto mt-2 mb-6"></div>
+<!-- Header Component (From JSON Schema) -->
+<header class="flex justify-between items-center w-full py-4 mb-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#f2edea] transition-colors">
+<span class="material-symbols-outlined text-[#9B8B7E]">close</span>
+</button>
+<div class="text-center">
+<h2 class="serif text-[1.75rem] leading-tight text-on-surface">Estradiol Patch</h2>
+<p class="font-body text-[10px] uppercase tracking-widest text-outline mt-1">Today's Log</p>
+</div>
+<button class="font-bold text-[#67594e] px-2 py-1">Save</button>
+</header>
+<!-- Modal Body -->
+<div class="space-y-8 mt-4">
+<!-- Time Selector Field -->
+<div class="space-y-3">
+<label class="text-xs font-bold uppercase tracking-widest text-outline ml-2">Time Taken</label>
+<div class="bg-surface-container-lowest p-6 rounded-xl flex items-center justify-between cursor-pointer hover:bg-surface-bright transition-all active:scale-[0.98]">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary scale-110">schedule</span>
+<span class="text-2xl font-medium tracking-tight text-on-surface">08:30 AM</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+</div>
+<!-- Dose Amount Field -->
+<div class="space-y-3">
+<label class="text-xs font-bold uppercase tracking-widest text-outline ml-2">Dose Amount</label>
+<div class="flex gap-4">
+<div class="flex-grow relative">
+<input class="w-full bg-surface-container-highest border-none rounded-full py-4 px-6 text-xl font-semibold focus:ring-2 focus:ring-primary-container/20 text-on-surface" type="number" value="50"/>
+</div>
+<div class="flex bg-surface-container-high rounded-full p-1 h-[56px] items-center">
+<button class="px-6 h-full rounded-full bg-secondary-container text-on-secondary-container font-bold text-sm shadow-sm">mcg</button>
+<button class="px-6 h-full rounded-full text-outline font-medium text-sm">mg</button>
+</div>
+</div>
+</div>
+<!-- Visual Cue / Editorial Element -->
+<div class="bg-primary-fixed/30 p-6 rounded-xl border border-primary-fixed-dim/20">
+<div class="flex gap-4 items-start">
+<span class="material-symbols-outlined text-primary" data-weight="fill">lightbulb</span>
+<p class="text-sm leading-relaxed text-on-primary-fixed-variant">
+                            Consistency is key for hormone stability. Try to apply your patch within the same hour window each time.
+                        </p>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="pt-4 flex flex-col gap-4">
+<button class="w-full py-4 rounded-xl bg-gradient-to-br from-[#67594e] to-[#817266] text-white font-bold text-lg shadow-lg active:scale-[0.97] transition-transform">
+                        Save changes
+                    </button>
+<button class="w-full py-3 rounded-xl text-primary font-semibold hover:bg-surface-container-high transition-colors">
+                        Cancel
+                    </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Nav Bar (From JSON Schema - Suppressed/Inactive behind modal but visible) -->
+<nav class="fixed bottom-0 left-0 w-full z-10 flex justify-around items-center px-4 pb-6 pt-2 bg-[#f2edea]/70 backdrop-blur-md rounded-t-[1.5rem] opacity-30">
+<div class="flex flex-col items-center justify-center text-[#9B8B7E] p-3">
+<span class="material-symbols-outlined">auto_stories</span>
+<span class="font-body text-[10px] uppercase tracking-wider mt-1">Journal</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#9B8B7E] p-3">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-body text-[10px] uppercase tracking-wider mt-1">Insights</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-gradient-to-br from-[#67594e] to-[#817266] text-white rounded-[1.5rem] p-3">
+<span class="material-symbols-outlined">medication</span>
+<span class="font-body text-[10px] uppercase tracking-wider mt-1">Medication</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#9B8B7E] p-3">
+<span class="material-symbols-outlined">person</span>
+<span class="font-body text-[10px] uppercase tracking-wider mt-1">Profile</span>
+</div>
+</nav>
+</body></html>

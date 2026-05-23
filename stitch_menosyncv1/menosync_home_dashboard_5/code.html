@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-surface": "#32302f",
+                        "surface-bright": "#fef8f6",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "surface": "#fef8f6",
+                        "error": "#ba1a1a",
+                        "primary": "#67594e",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "on-primary-container": "#fffbff",
+                        "surface-container-low": "#f8f2f0",
+                        "surface-container-high": "#ede7e5",
+                        "on-secondary-fixed": "#211828",
+                        "secondary": "#655a6e",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "tertiary": "#814f45",
+                        "on-surface": "#1d1b1a",
+                        "inverse-on-surface": "#f5f0ed",
+                        "background": "#fef8f6",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#ffdad3",
+                        "tertiary-container": "#9d675c",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "outline-variant": "#d0c4bc",
+                        "on-primary-fixed-variant": "#51443a",
+                        "on-error": "#ffffff",
+                        "on-background": "#1d1b1a",
+                        "surface-container-highest": "#e7e1df",
+                        "inverse-primary": "#d6c3b5",
+                        "surface-variant": "#e7e1df",
+                        "on-secondary-container": "#6c6074",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed": "#f2dfd0",
+                        "surface-tint": "#6a5c50",
+                        "on-tertiary-fixed": "#341009",
+                        "primary-container": "#817266",
+                        "surface-dim": "#ded9d7",
+                        "on-tertiary": "#ffffff",
+                        "surface-container": "#f2edea",
+                        "outline": "#7f756e",
+                        "on-surface-variant": "#4d453f",
+                        "on-primary-fixed": "#231a11",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "on-tertiary-container": "#fffbff",
+                        "secondary-container": "#edddf5",
+                        "secondary-fixed": "#edddf5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-nav {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .serif-italic { font-family: 'Noto Serif'; font-style: italic; }
+        .asymmetric-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 1.5rem;
+        }
+        @media (max-width: 768px) {
+            .asymmetric-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface selection:bg-secondary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-[#fef8f6] dark:bg-stone-950">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Softly lit portrait of a woman in her late 40s with a warm, serene expression against a neutral studio background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHn4J2uGRd_0j9f-JfZaKVwqZKsyLRFC1D881lGyCGzbqNkx3ORF1tdkbnLPS0CYHE7OtKB1QoBUX9B2nNOqJNJK-w50yA6sBsYLHHx_SzYJRGQRHzHch44FQc19eEcR8-vrvpkbN7r6sHeqAbvfk1JVCJ4CsQMZTpJUJeCDf4bnbDM3a6UWtnDJjVwryG4OUJtt6A1TdghE8AOT-lCVGoRYz34H75qJBNWx__kP6_TvV7ozV9jsvfXcFNNlmK01MKl2wIlSseOWM"/>
+</div>
+<span class="font-['Noto_Serif'] italic text-[#67594e] dark:text-stone-200 text-2xl">MenoSync</span>
+</div>
+<button class="text-[#9B8B7E] hover:opacity-80 transition-opacity active:scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<div class="absolute bottom-0 left-0 bg-[#f2edea] dark:bg-stone-900 h-[1px] w-full"></div>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-5xl mx-auto space-y-8">
+<!-- Header Greeting -->
+<section class="space-y-1">
+<h1 class="font-headline text-3xl font-bold text-on-surface">Good morning, Sarah</h1>
+<div class="flex justify-between items-end">
+<p class="font-headline text-lg text-on-surface-variant">Wednesday, March 19</p>
+<span class="bg-primary-fixed text-on-primary-fixed text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">1 week in cycle</span>
+</div>
+</section>
+<!-- Quick Log Card (Hero) -->
+<section class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#E8C9E0] to-[#D8C9E0] p-8 shadow-sm">
+<div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+<div class="space-y-2 max-w-md">
+<h2 class="font-headline text-2xl font-bold text-on-surface">Log Today's Symptoms</h2>
+<p class="text-on-surface-variant leading-relaxed">Take 2 minutes to track how you're feeling and maintain your wellness journal.</p>
+<button class="mt-4 flex items-center gap-2 bg-primary text-on-primary px-6 py-3 rounded-full font-bold text-sm transition-all hover:shadow-lg active:scale-95">
+                        Start Logging
+                        <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<div class="bg-[#E8A89B] w-20 h-20 rounded-full flex items-center justify-center text-white shadow-xl">
+<span class="material-symbols-outlined text-4xl" data-icon="add" style="font-variation-settings: 'FILL' 0, 'wght' 500;">add</span>
+</div>
+</div>
+<!-- Subtle wave illustration -->
+<svg class="absolute bottom-0 left-0 w-full opacity-20 pointer-events-none" preserveaspectratio="none" viewbox="0 0 1440 320">
+<path d="M0,160L48,176C96,192,192,224,288,224C384,224,480,192,576,165.3C672,139,768,117,864,133.3C960,149,1056,203,1152,213.3C1248,224,1344,192,1392,176L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z" fill="#ffffff"></path>
+</svg>
+</section>
+<!-- Insights Bento Grid -->
+<div class="asymmetric-grid">
+<!-- Today's Symptoms -->
+<section class="bg-surface-container-lowest rounded-2xl p-6 shadow-[0_4px_24px_rgba(29,27,26,0.04)] space-y-4">
+<div class="flex justify-between items-center">
+<h3 class="font-headline text-xl font-semibold">Today's Symptoms</h3>
+<span class="material-symbols-outlined text-tertiary-container" data-icon="spa">spa</span>
+</div>
+<div class="flex flex-wrap gap-3">
+<div class="bg-tertiary-fixed text-primary px-4 py-2 rounded-full flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="text-sm font-bold">Hot Flashes (Severe)</span>
+</div>
+<div class="bg-tertiary-fixed text-primary px-4 py-2 rounded-full flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#E8A89B]"></span>
+<span class="text-sm font-bold">Sleep Issues (Mild)</span>
+</div>
+</div>
+<div class="pt-4 border-t border-outline-variant/10">
+<div class="p-4 bg-surface-container-low rounded-xl">
+<p class="serif-italic text-on-surface-variant text-sm">"Feeling slightly better after the evening walk. Trying to stay hydrated."</p>
+</div>
+</div>
+</section>
+<!-- Insight Card -->
+<section class="bg-[#E8F0E8] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+<div class="space-y-3">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-xl" data-icon="lightbulb">lightbulb</span>
+<h3 class="font-bold uppercase tracking-wider text-xs">Insight</h3>
+</div>
+<p class="text-on-surface leading-relaxed font-medium">You logged more severe symptoms on days with higher stress.</p>
+</div>
+<a class="mt-6 text-primary font-bold text-sm flex items-center gap-1 hover:underline" href="#">
+                    View All Insights
+                    <span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+</a>
+</section>
+</div>
+<!-- Trends Section -->
+<section class="bg-surface-container-lowest rounded-2xl p-8 shadow-[0_4px_24px_rgba(29,27,26,0.04)] space-y-8">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="space-y-1">
+<h3 class="font-headline text-xl font-semibold">This Week's Patterns</h3>
+<p class="text-sm text-on-surface-variant">Most common: <span class="font-bold text-primary">Hot Flashes (6 days)</span></p>
+</div>
+<div class="flex gap-2">
+<span class="w-3 h-3 rounded-full bg-gradient-to-r from-[#E8A89B] to-tertiary-container"></span>
+<span class="text-[10px] font-bold uppercase text-on-surface-variant tracking-tighter">Severity Scale</span>
+</div>
+</div>
+<!-- Custom Bar Chart -->
+<div class="grid grid-cols-7 gap-2 md:gap-6 h-48 items-end">
+<div class="flex flex-col items-center gap-3 group">
+<div class="w-full bg-gradient-to-t from-[#E8A89B] to-tertiary-container rounded-t-lg transition-all group-hover:opacity-80" style="height: 60%;"></div>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase">Mon</span>
+</div>
+<div class="flex flex-col items-center gap-3 group">
+<div class="w-full bg-gradient-to-t from-[#E8A89B] to-tertiary-container rounded-t-lg transition-all group-hover:opacity-80" style="height: 40%;"></div>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase">Tue</span>
+</div>
+<div class="flex flex-col items-center gap-3 group">
+<div class="w-full bg-gradient-to-t from-[#E8A89B] to-tertiary-container rounded-t-lg transition-all group-hover:opacity-80" style="height: 85%;"></div>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase">Wed</span>
+</div>
+<div class="flex flex-col items-center gap-3 group">
+<div class="w-full bg-gradient-to-t from-[#E8A89B] to-tertiary-container rounded-t-lg transition-all group-hover:opacity-80" style="height: 55%;"></div>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase">Thu</span>
+</div>
+<div class="flex flex-col items-center gap-3 group">
+<div class="w-full bg-gradient-to-t from-[#E8A89B] to-tertiary-container rounded-t-lg transition-all group-hover:opacity-80" style="height: 30%;"></div>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase">Fri</span>
+</div>
+<div class="flex flex-col items-center gap-3 group">
+<div class="w-full bg-gradient-to-t from-[#E8A89B] to-tertiary-container rounded-t-lg transition-all group-hover:opacity-80" style="height: 70%;"></div>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase">Sat</span>
+</div>
+<div class="flex flex-col items-center gap-3 group">
+<div class="w-full bg-gradient-to-t from-[#E8A89B] to-tertiary-container rounded-t-lg transition-all group-hover:opacity-80" style="height: 50%;"></div>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase">Sun</span>
+</div>
+</div>
+</section>
+<!-- Community Section Placeholder -->
+<section class="asymmetric-grid">
+<div class="relative rounded-2xl overflow-hidden aspect-[4/3] md:aspect-auto">
+<img class="w-full h-full object-cover" data-alt="Group of diverse women laughing and having tea together in a bright, modern living room with soft natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjB54ogCm3Q8wDR-9N8g5oAxbW5S8T2g_ljA_nT4FinFAdRHaYTtO7MwSmJgr1LGhCe-1bVWNdASMf-M6WbFGA7sOBtvPvetx59Jjs0KRi9uoWQqVZTt11nVE7pZWmeeu-BMdLXx1pv_CaXSpaiYoXtBptZopb4Hc5ljTlS-Z73UvhZaQgCPd9OUrvVZOm8viCmSRki8G27j0PyCVkQI3b-iQZ4tV9ncZ8IxPMph1AGMvYiKUJe6CHuLa9i6jyf7Awcz5PaXO_6wQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-6">
+<h4 class="text-white font-headline text-lg font-bold">Join the Conversation</h4>
+<p class="text-white/80 text-sm">Connect with others on similar journeys.</p>
+</div>
+</div>
+<div class="bg-secondary-container rounded-2xl p-6 flex flex-col justify-center gap-4">
+<h4 class="font-headline text-lg font-bold text-on-secondary-container text-center">Ready for your consultation?</h4>
+<button class="bg-primary text-on-primary w-full py-4 rounded-xl font-bold uppercase tracking-widest text-xs">Book Doctor Visit</button>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-[#fef8f6]/70 dark:bg-stone-950/70 backdrop-blur-xl border-t border-[#9B8B7E]/15 dark:border-stone-800 shadow-[0_-4px_24px_rgba(29,27,26,0.06)] rounded-t-[1.5rem]">
+<a class="flex flex-col items-center justify-center bg-[#edddf5] dark:bg-purple-900/30 text-[#67594e] dark:text-[#D8C9E0] rounded-2xl px-4 py-1.5 transition-all scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-['Manrope'] text-[10px] font-bold uppercase tracking-widest mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] dark:text-stone-500 px-4 py-1.5 hover:bg-[#f2edea] dark:hover:bg-stone-800 rounded-2xl transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+<span class="font-['Manrope'] text-[10px] font-bold uppercase tracking-widest mt-1">Tracker</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] dark:text-stone-500 px-4 py-1.5 hover:bg-[#f2edea] dark:hover:bg-stone-800 rounded-2xl transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+<span class="font-['Manrope'] text-[10px] font-bold uppercase tracking-widest mt-1">Analytics</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] dark:text-stone-500 px-4 py-1.5 hover:bg-[#f2edea] dark:hover:bg-stone-800 rounded-2xl transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="medical_services">medical_services</span>
+<span class="font-['Manrope'] text-[10px] font-bold uppercase tracking-widest mt-1">Doctor</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] dark:text-stone-500 px-4 py-1.5 hover:bg-[#f2edea] dark:hover:bg-stone-800 rounded-2xl transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-['Manrope'] text-[10px] font-bold uppercase tracking-widest mt-1">Settings</span>
+</a>
+</nav>
+</body></html>

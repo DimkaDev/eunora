@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Guided Health Interview</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;500;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background": "#F7F5F0",
+                        "on-tertiary-fixed": "#341009",
+                        "secondary-container": "#edddf5",
+                        "primary-container": "#817266",
+                        "outline": "#7f756e",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#ede7e5",
+                        "on-surface-variant": "#6b7280",
+                        "surface-container-low": "#f8f2f0",
+                        "secondary": "#655a6e",
+                        "primary": "#67594e",
+                        "on-surface": "#1d1b1a",
+                        "tertiary": "#814f45",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#e7e1df",
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1.5rem",
+                        "2xl": "2rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "serif": ["Noto Serif"],
+                        "sans": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .chip-checkbox:checked + .chip-label {
+                @apply bg-primary text-white border-primary shadow-md;
+            }
+            .chip-checkbox:checked + .chip-label .chip-helper {
+                @apply text-stone-200;
+            }
+        }
+        body { font-family: 'Manrope', sans-serif; background-color: #F7F5F0; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .chip-label {
+            @apply flex flex-col items-center text-center p-4 rounded-2xl border-2 border-stone-200 bg-white cursor-pointer transition-all active:scale-95 hover:border-primary/50;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface leading-relaxed antialiased">
+<header class="bg-[#F7F5F0]/80 backdrop-blur-xl sticky top-0 z-50 border-b border-stone-200/50">
+<div class="flex items-center justify-between px-6 py-4 w-full max-w-2xl mx-auto">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-stone-700 cursor-pointer">arrow_back</span>
+<h1 class="font-serif text-2xl font-medium tracking-tight text-stone-800">Health Setup</h1>
+</div>
+<div class="text-[11px] font-bold uppercase tracking-widest text-primary">Step 2 of 4</div>
+</div>
+</header>
+<main class="max-w-2xl mx-auto px-5 pt-8 pb-40">
+<div class="mb-10 text-center">
+<h2 class="font-serif text-3xl text-stone-800 mb-3">Tell us about your health</h2>
+<p class="text-sm text-stone-500 max-w-sm mx-auto leading-relaxed">This helps us provide safer, more personalized recommendations. It's a gentle conversation about your history.</p>
+</div>
+<div class="space-y-12">
+<section>
+<header class="mb-6">
+<h3 class="font-serif text-lg text-stone-800">Vascular &amp; Metabolic Health</h3>
+<p class="text-xs text-stone-400 font-medium italic">Important for evaluating HRT suitability</p>
+</header>
+<div class="grid grid-cols-1 gap-3">
+<label class="relative cursor-pointer">
+<input class="sr-only chip-checkbox" type="checkbox"/>
+<div class="chip-label text-left items-start px-5">
+<span class="text-sm font-bold">Heart disease or high blood pressure</span>
+<span class="chip-helper text-[10px] uppercase tracking-wider mt-1 opacity-80">Affects HRT suitability</span>
+</div>
+</label>
+<label class="relative cursor-pointer">
+<input class="sr-only chip-checkbox" type="checkbox"/>
+<div class="chip-label text-left items-start px-5">
+<span class="text-sm font-bold">Diabetes or blood sugar issues</span>
+<span class="chip-helper text-[10px] uppercase tracking-wider mt-1 opacity-80">May influence recommendations</span>
+</div>
+</label>
+<label class="relative cursor-pointer">
+<input class="sr-only chip-checkbox" type="checkbox"/>
+<div class="chip-label text-left items-start px-5">
+<span class="text-sm font-bold">Blood clots (DVT/PE)</span>
+<span class="chip-helper text-[10px] uppercase tracking-wider mt-1 opacity-80">May restrict certain HRT types</span>
+</div>
+</label>
+</div>
+</section>
+<section>
+<header class="mb-6">
+<h3 class="font-serif text-lg text-stone-800">Medical History</h3>
+<p class="text-xs text-stone-400 font-medium italic">Conditions that shape your treatment plan</p>
+</header>
+<div class="grid grid-cols-1 gap-3">
+<label class="relative cursor-pointer">
+<input class="sr-only chip-checkbox" type="checkbox"/>
+<div class="chip-label text-left items-start px-5">
+<span class="text-sm font-bold">Breast cancer (current or history)</span>
+<span class="chip-helper text-[10px] uppercase tracking-wider mt-1 opacity-80">Important for treatment planning</span>
+</div>
+</label>
+<div class="flex flex-wrap gap-2">
+<label class="flex-1 min-w-[140px] relative cursor-pointer">
+<input class="sr-only chip-checkbox" type="checkbox"/>
+<div class="chip-label py-3 px-4">
+<span class="text-xs font-bold">Endometriosis</span>
+</div>
+</label>
+<label class="flex-1 min-w-[140px] relative cursor-pointer">
+<input class="sr-only chip-checkbox" type="checkbox"/>
+<div class="chip-label py-3 px-4">
+<span class="text-xs font-bold">Uterine fibroids</span>
+</div>
+</label>
+</div>
+<div class="flex flex-wrap gap-2">
+<label class="flex-1 min-w-[140px] relative cursor-pointer">
+<input class="sr-only chip-checkbox" type="checkbox"/>
+<div class="chip-label py-3 px-4">
+<span class="text-xs font-bold">Liver disease</span>
+</div>
+</label>
+<label class="flex-1 min-w-[140px] relative cursor-pointer">
+<input class="sr-only chip-checkbox" type="checkbox"/>
+<div class="chip-label py-3 px-4">
+<span class="text-xs font-bold">Thyroid disorder</span>
+</div>
+</label>
+</div>
+</div>
+</section>
+<section>
+<header class="mb-6">
+<h3 class="font-serif text-lg text-stone-800">Wellness &amp; Neurological</h3>
+<p class="text-xs text-stone-400 font-medium italic">Your holistic wellbeing matters</p>
+</header>
+<div class="grid grid-cols-1 gap-3">
+<label class="relative cursor-pointer">
+<input class="sr-only chip-checkbox" type="checkbox"/>
+<div class="chip-label text-left items-start px-5">
+<span class="text-sm font-bold">Migraines with aura</span>
+<span class="chip-helper text-[10px] uppercase tracking-wider mt-1 opacity-80">Important for estrogen decisions</span>
+</div>
+</label>
+<label class="relative cursor-pointer">
+<input class="sr-only chip-checkbox" type="checkbox"/>
+<div class="chip-label text-left items-start px-5">
+<span class="text-sm font-bold">Depression or anxiety disorder</span>
+<span class="chip-helper text-[10px] uppercase tracking-wider mt-1 opacity-80">Helps us monitor mood changes</span>
+</div>
+</label>
+</div>
+</section>
+<section>
+<div class="space-y-4">
+<label class="relative cursor-pointer block">
+<input checked="" class="sr-only chip-checkbox" type="checkbox"/>
+<div class="chip-label py-3 px-4 flex-row justify-between">
+<span class="text-xs font-bold">Other condition</span>
+<span class="material-symbols-outlined text-sm opacity-40">edit_note</span>
+</div>
+</label>
+<div class="animate-in fade-in slide-in-from-top-2 duration-300">
+<textarea class="w-full bg-white border border-stone-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:italic" placeholder="Please briefly describe..." rows="3"></textarea>
+</div>
+<label class="relative cursor-pointer block">
+<input class="sr-only chip-checkbox" type="checkbox"/>
+<div class="chip-label py-3 px-4 bg-stone-100/50 border-stone-200">
+<span class="text-xs font-bold text-stone-500 uppercase tracking-widest">None of the above</span>
+</div>
+</label>
+</div>
+</section>
+<section class="bg-stone-100/30 p-6 rounded-3xl">
+<header class="mb-6">
+<h3 class="font-serif text-lg text-stone-800">Family History</h3>
+<p class="text-xs text-stone-400 font-medium italic">Shared history can provide clues</p>
+</header>
+<div class="flex flex-wrap gap-2">
+<label class="w-full relative cursor-pointer">
+<input class="sr-only chip-checkbox" type="checkbox"/>
+<div class="chip-label py-3 px-4">
+<span class="text-xs font-bold">Family history of breast cancer</span>
+</div>
+</label>
+<label class="w-full relative cursor-pointer">
+<input class="sr-only chip-checkbox" type="checkbox"/>
+<div class="chip-label py-3 px-4">
+<span class="text-xs font-bold">Family history of early menopause</span>
+</div>
+</label>
+</div>
+</section>
+<div class="bg-[#E0E8F0]/60 rounded-2xl p-5 flex gap-4 items-start">
+<div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-primary text-xl">security</span>
+</div>
+<div>
+<p class="text-[12px] text-stone-700 leading-relaxed">
+                    These conditions don't disqualify you from our community. They help us provide appropriate guidance and encourage shared decision-making with your doctor.
+                </p>
+</div>
+</div>
+<div class="relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-sm">
+<img alt="Serene plant" class="w-full h-full object-cover grayscale opacity-60 mix-blend-multiply" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCC_zF3dVp656qylYGVFSBVls1COmGvTFk44g_ckmmYX3ViXOkDjGGp78K_igbc5kjjxdlmQ4V0BswqUUHxurF4C71IskRR34-6DDUyly6Uv4iWorFU2NBaH3D5k-SoNcMW1YiAdzdaUhvIS3jT8v8dXXKeLPv3VCML_ZbgqMvg5f8IPz3KBbuPkFGbwn-6j7JLMY-5Q5cxCZEujpxsc1c01jfTc8WjqWjN2vnx5E9wGq9E4D2XQTXKQRtUKHAlwleZcX1G0ONaYbw"/>
+<div class="absolute inset-0 bg-gradient-to-t from-stone-900/40 to-transparent"></div>
+<div class="absolute bottom-4 left-6 right-6">
+<h4 class="font-serif text-white text-xl">Your health is unique.</h4>
+<p class="text-[10px] text-white/80 uppercase tracking-widest mt-1">We respect your privacy</p>
+</div>
+</div>
+</div>
+</main>
+<footer class="fixed bottom-0 left-0 w-full bg-[#F7F5F0]/90 backdrop-blur-md px-6 py-8 border-t border-stone-200/50 flex flex-col items-center gap-4 z-[60]">
+<button class="w-full max-w-2xl bg-primary hover:bg-primary/90 text-white py-4 rounded-full font-sans font-bold text-base shadow-xl shadow-primary/20 active:scale-[0.98] transition-all">
+        Continue
+    </button>
+<button class="text-[11px] text-stone-400 underline decoration-stone-300 underline-offset-4 font-medium hover:text-primary transition-colors">
+        I'd rather not share this right now
+    </button>
+</footer>
+
+</body></html>

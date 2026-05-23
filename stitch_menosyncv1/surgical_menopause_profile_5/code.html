@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Mindful Reflection</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&amp;family=Quicksand:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style type="text/tailwindcss">:root {
+    --cream-bg: #F7F5F0;
+    --soft-lavender: #F2EFF7;
+    --soft-green: #F0F4F0;
+    --soft-rose: #F9F4F4;
+    --charcoal: #3A3633;
+    --muted-gray: #7A7470;
+    --journal-accent: #A69486
+    }
+body {
+    font-family: "Quicksand", sans-serif;
+    background-color: var(--cream-bg);
+    color: var(--charcoal);
+    -webkit-font-smoothing: antialiased
+    }
+.font-serif {
+    font-family: "Crimson Pro", serif
+    }
+.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 300, "GRAD" 0, "opsz" 24;
+    vertical-align: middle
+    }
+.continuous-scroll-section {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    transition: background 0.5s ease
+    }.journal-texture {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuAkBtdWrVG-UcTcRXIaewHNT06T1YYyWaZHbUmYYZVxWrSn64IcCfzOESsuM6cmceHsan9OnckSVPGdjF0rAlPQiRpz-DUAPo9UOhyLHhxvpYW4pBfBR0QRVsxDivt9EuFifBQ7YdW3R_UuQYGsOoFkWjd2hlRq-rkEnZzSXoLySzLLZYwYndXuv8G9CL7Ut_EhFFTtWnZHMxcorfoCD8DFiaFsScAqQ74cgLlj6hZjgKN_SXrKFDYuGQ4hCW5KQvKcKBMCyQaPvkE);
+    background-attachment: fixed
+    }
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 28px;
+    height: 28px;
+    background: white;
+    border: 1px solid var(--journal-accent);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05)
+    }
+.custom-radio:checked + span {
+    color: var(--charcoal);
+    font-weight: 600
+    }
+.custom-radio:checked {
+    border-color: var(--journal-accent);
+    background-color: var(--journal-accent)
+    }.bg-gradient-soft-purple {
+    background: linear-gradient(180deg, rgba(247, 245, 240, 0) 0%, rgba(242, 239, 247, 0.6) 50%, rgba(247, 245, 240, 0) 100%)
+    }
+.bg-gradient-soft-green {
+    background: linear-gradient(180deg, rgba(247, 245, 240, 0) 0%, rgba(240, 244, 240, 0.6) 50%, rgba(247, 245, 240, 0) 100%)
+    }</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="journal-texture min-h-screen">
+<header class="fixed top-0 w-full z-50 bg-white/40 backdrop-blur-md flex items-center px-6 h-16 border-b border-stone-200/30">
+<div class="flex items-center justify-between w-full">
+<button class="material-symbols-outlined text-[var(--muted-gray)]">arrow_back</button>
+<span class="text-[10px] font-medium uppercase tracking-[0.2em] text-[var(--muted-gray)]">Step 2d of 7</span>
+<div class="w-6"></div>
+</div>
+</header>
+<main class="pt-24 pb-48">
+<section class="px-8 mb-16 text-center max-w-xl mx-auto">
+<div class="inline-flex items-center gap-2 mb-4 px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-[10px] font-semibold tracking-wide uppercase">
+<span class="material-symbols-outlined text-[14px]">waves</span>
+                Rapid Onset Awareness
+            </div>
+<h1 class="font-serif text-3xl font-light text-[var(--charcoal)] mb-4 leading-snug">Your Surgical <br/>Menopause Profile</h1>
+<p class="text-[var(--muted-gray)] text-sm leading-relaxed font-light italic">
+                Surgical menopause has its own rhythm and intensity. We’re here to help you navigate this unique timeline.
+            </p>
+</section>
+<section class="continuous-scroll-section px-8 max-w-xl mx-auto">
+<div class="space-y-6">
+<label class="block font-serif text-xl text-[var(--charcoal)] text-center">When did you have your procedure?</label>
+<div class="relative group">
+<input class="w-full bg-white/60 border-none rounded-2xl py-5 px-8 text-center text-lg focus:ring-1 focus:ring-[var(--journal-accent)] shadow-sm placeholder-stone-300" placeholder="Select month &amp; year" type="month"/>
+</div>
+<p class="text-[11px] text-center text-[var(--muted-gray)] italic">Understanding your timeline helps us personalize your recovery insights.</p>
+</div>
+</section>
+<section class="continuous-scroll-section bg-gradient-soft-purple px-8">
+<div class="max-w-xl mx-auto space-y-8">
+<div class="text-center">
+<label class="font-serif text-xl text-[var(--charcoal)]">What type of procedure did you receive?</label>
+<span class="block text-[10px] text-[var(--muted-gray)] mt-1 uppercase tracking-widest">Optional Reflection</span>
+</div>
+<div class="grid grid-cols-1 gap-3">
+<label class="flex items-center justify-between p-4 rounded-2xl bg-white/40 border border-white/60 hover:bg-white/80 transition-all cursor-pointer group">
+<span class="text-[15px] font-medium text-[var(--muted-gray)] group-hover:text-[var(--charcoal)]">Hysterectomy</span>
+<input class="w-4 h-4 rounded-full border-stone-300 text-[var(--journal-accent)] focus:ring-0" name="procedure" type="radio"/>
+</label>
+<label class="flex items-center justify-between p-4 rounded-2xl bg-white/40 border border-white/60 hover:bg-white/80 transition-all cursor-pointer group">
+<span class="text-[15px] font-medium text-[var(--muted-gray)] group-hover:text-[var(--charcoal)]">Bilateral oophorectomy</span>
+<input class="w-4 h-4 rounded-full border-stone-300 text-[var(--journal-accent)] focus:ring-0" name="procedure" type="radio"/>
+</label>
+<label class="flex items-center justify-between p-4 rounded-2xl bg-white/40 border border-white/60 hover:bg-white/80 transition-all cursor-pointer group">
+<span class="text-[15px] font-medium text-[var(--muted-gray)] group-hover:text-[var(--charcoal)]">Both procedures</span>
+<input class="w-4 h-4 rounded-full border-stone-300 text-[var(--journal-accent)] focus:ring-0" name="procedure" type="radio"/>
+</label>
+<label class="flex items-center justify-between p-4 rounded-2xl bg-white/40 border border-white/60 hover:bg-white/80 transition-all cursor-pointer group">
+<span class="text-[15px] font-medium text-[var(--muted-gray)] group-hover:text-[var(--charcoal)]">Other</span>
+<input class="w-4 h-4 rounded-full border-stone-300 text-[var(--journal-accent)] focus:ring-0" name="procedure" type="radio"/>
+</label>
+</div>
+</div>
+</section>
+<section class="continuous-scroll-section px-8">
+<div class="max-w-xl mx-auto space-y-8">
+<div class="text-center">
+<label class="font-serif text-xl text-[var(--charcoal)] leading-snug italic">"Were you prescribed HRT following your surgery?"</label>
+<p class="text-[12px] text-[var(--muted-gray)] mt-3 leading-relaxed max-w-xs mx-auto">Many find that hormone replacement provides essential balance during this shift.</p>
+</div>
+<div class="space-y-2">
+<div class="flex flex-wrap justify-center gap-2">
+<button class="px-6 py-3 rounded-full bg-white/60 border border-stone-200 text-sm hover:border-[var(--journal-accent)] transition-colors">Yes, immediately</button>
+<button class="px-6 py-3 rounded-full bg-white/60 border border-stone-200 text-sm hover:border-[var(--journal-accent)] transition-colors">Yes, delayed</button>
+<button class="px-6 py-3 rounded-full bg-white/60 border border-stone-200 text-sm hover:border-[var(--journal-accent)] transition-colors">No</button>
+<button class="px-6 py-3 rounded-full bg-white/60 border border-stone-200 text-sm hover:border-[var(--journal-accent)] transition-colors">I'm not sure</button>
+</div>
+</div>
+<div class="pt-6 border-t border-stone-200/50">
+<p class="text-center text-[12px] text-[var(--muted-gray)] mb-4">When did your HRT journey begin?</p>
+<select class="w-full bg-transparent border-b border-stone-300 border-t-0 border-l-0 border-r-0 py-3 text-center text-[var(--charcoal)] focus:ring-0 focus:border-[var(--journal-accent)] italic">
+<option>Immediately after surgery</option>
+<option>A few weeks later</option>
+<option>Select a specific date</option>
+</select>
+</div>
+</div>
+</section>
+<section class="continuous-scroll-section bg-gradient-soft-green px-8">
+<div class="max-w-xl mx-auto space-y-8">
+<div class="text-center">
+<label class="font-serif text-xl text-[var(--charcoal)]">Which symptoms feel most intense right now?</label>
+<p class="text-[11px] text-[var(--muted-gray)] mt-2 font-medium tracking-wide">Choose any that resonate with your current state</p>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<label class="flex flex-col items-center justify-center p-4 h-28 text-center rounded-3xl bg-white/50 border border-white/60 hover:bg-white/90 transition-all cursor-pointer">
+<input class="hidden peer" type="checkbox"/>
+<span class="text-xs font-medium text-[var(--muted-gray)] peer-checked:text-[var(--charcoal)] peer-checked:font-bold">Severe hot flashes</span>
+</label>
+<label class="flex flex-col items-center justify-center p-4 h-28 text-center rounded-3xl bg-white/50 border border-white/60 hover:bg-white/90 transition-all cursor-pointer">
+<input class="hidden peer" type="checkbox"/>
+<span class="text-xs font-medium text-[var(--muted-gray)] peer-checked:text-[var(--charcoal)] peer-checked:font-bold">Intense night sweats</span>
+</label>
+<label class="flex flex-col items-center justify-center p-4 h-28 text-center rounded-3xl bg-white/50 border border-white/60 hover:bg-white/90 transition-all cursor-pointer">
+<input class="hidden peer" type="checkbox"/>
+<span class="text-xs font-medium text-[var(--muted-gray)] peer-checked:text-[var(--charcoal)] peer-checked:font-bold">Mood changes</span>
+</label>
+<label class="flex flex-col items-center justify-center p-4 h-28 text-center rounded-3xl bg-white/50 border border-white/60 hover:bg-white/90 transition-all cursor-pointer">
+<input class="hidden peer" type="checkbox"/>
+<span class="text-xs font-medium text-[var(--muted-gray)] peer-checked:text-[var(--charcoal)] peer-checked:font-bold">Sleep disruption</span>
+</label>
+<label class="flex flex-col items-center justify-center p-4 h-28 text-center rounded-3xl bg-white/50 border border-white/60 hover:bg-white/90 transition-all cursor-pointer">
+<input class="hidden peer" type="checkbox"/>
+<span class="text-xs font-medium text-[var(--muted-gray)] peer-checked:text-[var(--charcoal)] peer-checked:font-bold">Vaginal dryness</span>
+</label>
+<label class="flex flex-col items-center justify-center p-4 h-28 text-center rounded-3xl bg-white/50 border border-white/60 hover:bg-white/90 transition-all cursor-pointer">
+<input class="hidden peer" type="checkbox"/>
+<span class="text-xs font-medium text-[var(--muted-gray)] peer-checked:text-[var(--charcoal)] peer-checked:font-bold">Joint discomfort</span>
+</label>
+</div>
+<div class="mt-4">
+<input class="w-full bg-transparent border-b border-stone-300 py-3 text-sm focus:ring-0 focus:border-[var(--journal-accent)] italic text-center placeholder-stone-400" placeholder="Anything else you're noticing?" type="text"/>
+</div>
+</div>
+</section>
+<section class="continuous-scroll-section px-8">
+<div class="max-w-xl mx-auto space-y-12">
+<div class="text-center">
+<label class="font-serif text-xl text-[var(--charcoal)]">How are you feeling overall since your surgery?</label>
+<p class="text-[12px] text-[var(--muted-gray)] italic mt-2">A moment to check in with yourself.</p>
+</div>
+<div class="relative px-4">
+<div class="flex justify-between items-center mb-8">
+<div class="flex flex-col items-center gap-2 opacity-40">
+<span class="material-symbols-outlined text-4xl">cloud</span>
+<span class="text-[10px] uppercase tracking-tighter">Overwhelmed</span>
+</div>
+<div class="text-center">
+<span class="font-serif text-5xl font-light text-[var(--journal-accent)]">7</span>
+<span class="block text-[10px] text-[var(--muted-gray)] mt-2 font-semibold">GENTLE STEPS</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<span class="material-symbols-outlined text-4xl text-amber-500" style="font-variation-settings: 'FILL' 1">sunny</span>
+<span class="text-[10px] uppercase tracking-tighter font-bold">Resilient</span>
+</div>
+</div>
+<div class="relative h-1.5 w-full bg-stone-200 rounded-full overflow-hidden">
+<div class="absolute top-0 left-0 h-full bg-gradient-to-r from-stone-300 via-[var(--journal-accent)] to-amber-300 w-[70%]"></div>
+</div>
+<input class="absolute top-0 left-0 w-full h-1.5 opacity-0 cursor-pointer appearance-none z-10" max="10" min="1" type="range" value="7"/>
+</div>
+</div>
+</section>
+<section class="px-8 mt-12 mb-20 max-w-xl mx-auto">
+<div class="bg-[var(--soft-green)] border border-white/50 p-8 rounded-[40px] text-center shadow-inner">
+<span class="material-symbols-outlined text-[var(--journal-accent)] text-3xl mb-4" style="font-variation-settings: 'FILL' 1">favorite</span>
+<p class="font-serif text-lg leading-relaxed text-[var(--charcoal)]">
+                    This transition is deeply personal. We’re honored to walk beside you as you rediscover your balance.
+                </p>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 w-full p-8 bg-white/20 backdrop-blur-xl z-50">
+<div class="max-w-xl mx-auto space-y-4">
+<button class="w-full py-5 bg-[var(--charcoal)] text-white rounded-full font-medium shadow-xl active:scale-[0.98] transition-transform text-sm tracking-[0.15em] uppercase">
+                Continue Reflection
+            </button>
+<div class="text-center">
+<a class="text-[var(--muted-gray)] text-xs font-medium border-b border-transparent hover:border-stone-300 pb-1 inline-block transition-all" href="#">
+                    Access Guidance &amp; Resources
+                </a>
+</div>
+</div>
+</nav>
+
+</body></html>

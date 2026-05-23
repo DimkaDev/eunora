@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Clinical Clarity - PCOS &amp; Hormone Condition Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Roboto+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<style type="text/tailwindcss">
+        :root {
+            --clinical-blue: #0A2540;
+            --clinical-gray-dark: #30313D;
+            --clinical-gray-muted: #697386;
+            --clinical-bg: #F7F9FC;
+            --clinical-border: #E3E8EE;
+            --clinical-accent: #0055D2;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--clinical-bg);
+            color: var(--clinical-blue);
+        }
+        .mono-stat {
+            font-family: 'Roboto Mono', monospace;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+        }
+        input[type="checkbox"]:checked,
+        input[type="radio"]:checked {
+            background-color: var(--clinical-accent);
+            border-color: var(--clinical-accent);
+        }
+        .card-shadow {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased">
+<div class="relative flex h-auto min-h-screen w-full flex-col max-w-md mx-auto bg-[#F7F9FC] border-x border-[var(--clinical-border)]">
+<header class="sticky top-0 z-10 bg-white border-b border-[var(--clinical-border)] px-5 py-4">
+<div class="flex items-start gap-3">
+<button aria-label="Go back" class="mt-1 text-[var(--clinical-blue)] hover:bg-gray-100 p-1 rounded transition-colors">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</button>
+<div class="flex-1">
+<div class="flex justify-between items-baseline mb-1">
+<span class="mono-stat text-[10px] font-medium text-[var(--clinical-gray-muted)] uppercase tracking-widest">Step 2e of 7</span>
+<span class="mono-stat text-[10px] font-bold text-[var(--clinical-accent)] uppercase">Status: In Progress</span>
+</div>
+<h1 class="text-xl font-bold text-[var(--clinical-blue)] leading-tight tracking-tight">Your PCOS &amp; Hormone Condition Profile</h1>
+<p class="text-[13px] text-[var(--clinical-gray-muted)] mt-2 font-medium">Categorization and clinical history data entry. Please select all applicable parameters.</p>
+</div>
+</div>
+</header>
+<main class="flex-1 px-5 pb-40 pt-6 flex flex-col gap-4">
+<section class="bg-white border border-[var(--clinical-border)] rounded-sm p-5 card-shadow">
+<h2 class="text-[13px] font-bold uppercase tracking-wider text-[var(--clinical-blue)] mb-4 border-b border-gray-100 pb-2">01. Condition Classification</h2>
+<div class="space-y-4">
+<label class="flex items-start gap-3 cursor-pointer group">
+<input class="mt-1 w-4 h-4 rounded-sm border-[var(--clinical-border)] text-[var(--clinical-accent)] focus:ring-[var(--clinical-accent)]" type="checkbox"/>
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-[var(--clinical-blue)]">PCOS</span>
+<span class="text-xs text-[var(--clinical-gray-muted)]">Polycystic Ovary Syndrome (Irregular cycles, hyperandrogenism)</span>
+</div>
+</label>
+<label class="flex items-start gap-3 cursor-pointer group">
+<input class="mt-1 w-4 h-4 rounded-sm border-[var(--clinical-border)] text-[var(--clinical-accent)] focus:ring-[var(--clinical-accent)]" type="checkbox"/>
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-[var(--clinical-blue)]">PMDD</span>
+<span class="text-xs text-[var(--clinical-gray-muted)]">Premenstrual Dysphoric Disorder (Luteal phase mood severity)</span>
+</div>
+</label>
+<div class="grid grid-cols-1 gap-3">
+<label class="flex items-center gap-3 cursor-pointer"><input class="w-4 h-4 rounded-sm border-[var(--clinical-border)] text-[var(--clinical-accent)]" type="checkbox"/><span class="text-sm font-medium">Thyroid disorder</span></label>
+<label class="flex items-center gap-3 cursor-pointer"><input class="w-4 h-4 rounded-sm border-[var(--clinical-border)] text-[var(--clinical-accent)]" type="checkbox"/><span class="text-sm font-medium">Insulin resistance</span></label>
+<label class="flex items-center gap-3 cursor-pointer"><input class="w-4 h-4 rounded-sm border-[var(--clinical-border)] text-[var(--clinical-accent)]" type="checkbox"/><span class="text-sm font-medium">Hyperprolactinemia</span></label>
+</div>
+<div class="pt-2">
+<label class="flex items-center gap-3 cursor-pointer mb-2">
+<input class="w-4 h-4 rounded-sm border-[var(--clinical-border)] text-[var(--clinical-accent)]" type="checkbox"/>
+<span class="text-sm font-medium">Other condition</span>
+</label>
+<input class="w-full border border-[var(--clinical-border)] bg-[#FBFBFC] px-3 py-2 text-sm rounded-sm focus:border-[var(--clinical-accent)] focus:ring-0 placeholder:text-gray-300" placeholder="Specify clinical diagnosis" type="text"/>
+</div>
+</div>
+</section>
+<section class="bg-white border border-[var(--clinical-border)] rounded-sm p-5 card-shadow">
+<h2 class="text-[13px] font-bold uppercase tracking-wider text-[var(--clinical-blue)] mb-4 border-b border-gray-100 pb-2">02. Menstrual Cycle Parameters</h2>
+<div class="grid grid-cols-1 gap-2.5">
+<label class="flex items-center justify-between p-2 border border-[var(--clinical-border)] rounded-sm hover:bg-gray-50 transition-colors">
+<span class="text-sm font-medium">Irregular intervals</span>
+<input class="w-4 h-4 rounded-sm border-[var(--clinical-border)] text-[var(--clinical-accent)]" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-2 border border-[var(--clinical-border)] rounded-sm hover:bg-gray-50 transition-colors">
+<span class="text-sm font-medium">Menorrhagia (Heavy flow)</span>
+<input class="w-4 h-4 rounded-sm border-[var(--clinical-border)] text-[var(--clinical-accent)]" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-2 border border-[var(--clinical-border)] rounded-sm hover:bg-gray-50 transition-colors">
+<span class="text-sm font-medium">Hypomenorrhea (Light flow)</span>
+<input class="w-4 h-4 rounded-sm border-[var(--clinical-border)] text-[var(--clinical-accent)]" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-2 border border-[var(--clinical-border)] rounded-sm hover:bg-gray-50 transition-colors">
+<span class="text-sm font-medium">Amenorrhea (Absent)</span>
+<input class="w-4 h-4 rounded-sm border-[var(--clinical-border)] text-[var(--clinical-accent)]" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-2 border border-[var(--clinical-border)] rounded-sm hover:bg-gray-50 transition-colors">
+<span class="text-sm font-medium">Persistent spotting</span>
+<input class="w-4 h-4 rounded-sm border-[var(--clinical-border)] text-[var(--clinical-accent)]" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-2 border border-[var(--clinical-border)] rounded-sm hover:bg-gray-50 transition-colors">
+<span class="text-sm font-medium">Polymenorrhea (Frequent)</span>
+<input class="w-4 h-4 rounded-sm border-[var(--clinical-border)] text-[var(--clinical-accent)]" type="checkbox"/>
+</label>
+</div>
+</section>
+<section class="bg-white border border-[var(--clinical-border)] rounded-sm p-5 card-shadow">
+<h2 class="text-[13px] font-bold uppercase tracking-wider text-[var(--clinical-blue)] mb-4 border-b border-gray-100 pb-2">03. Pharmacological History</h2>
+<div class="grid grid-cols-2 gap-x-4 gap-y-3 mb-4">
+<label class="flex items-center gap-2"><input checked="" class="w-4 h-4 rounded-sm border-[var(--clinical-border)] text-[var(--clinical-accent)]" type="checkbox"/><span class="text-[13px]">Birth control</span></label>
+<label class="flex items-center gap-2"><input class="w-4 h-4 rounded-sm border-[var(--clinical-border)] text-[var(--clinical-accent)]" type="checkbox"/><span class="text-[13px]">Metformin</span></label>
+<label class="flex items-center gap-2"><input checked="" class="w-4 h-4 rounded-sm border-[var(--clinical-border)] text-[var(--clinical-accent)]" type="checkbox"/><span class="text-[13px]">Spironolactone</span></label>
+<label class="flex items-center gap-2"><input class="w-4 h-4 rounded-sm border-[var(--clinical-border)] text-[var(--clinical-accent)]" type="checkbox"/><span class="text-[13px]">Inositol</span></label>
+<label class="flex items-center gap-2"><input class="w-4 h-4 rounded-sm border-[var(--clinical-border)] text-[var(--clinical-accent)]" type="checkbox"/><span class="text-[13px]">HRT</span></label>
+<label class="flex items-center gap-2"><input class="w-4 h-4 rounded-sm border-[var(--clinical-border)] text-[var(--clinical-accent)]" type="checkbox"/><span class="text-[13px]">Thyroid meds</span></label>
+</div>
+<div class="bg-[#F1F4F9] p-4 rounded-sm border border-[var(--clinical-border)] flex flex-col gap-3">
+<div class="text-[11px] font-bold text-[var(--clinical-blue)] uppercase tracking-tighter mb-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">medical_information</span> Active Medications
+                    </div>
+<div class="flex gap-2">
+<input class="flex-1 text-[13px] border-[var(--clinical-border)] rounded-sm p-2 bg-white font-medium" placeholder="Name" type="text" value="Spironolactone"/>
+<input class="w-20 text-[13px] border-[var(--clinical-border)] rounded-sm p-2 bg-white" placeholder="Dose" type="text" value="50mg"/>
+</div>
+<button class="text-xs font-bold text-[var(--clinical-accent)] flex items-center gap-1 hover:underline">
+<span class="material-symbols-outlined text-sm">add_circle</span> Add another medication
+                    </button>
+</div>
+</section>
+<section class="bg-white border border-[var(--clinical-border)] rounded-sm p-5 card-shadow">
+<h2 class="text-[13px] font-bold uppercase tracking-wider text-[var(--clinical-blue)] mb-4 border-b border-gray-100 pb-2">04. Symptom Tracking Priorities</h2>
+<div class="grid grid-cols-2 gap-3">
+<label class="flex items-center gap-2 text-[13px]"><input class="w-4 h-4 rounded-sm border-[var(--clinical-border)]" type="checkbox"/><span class="truncate">Hormonal acne</span></label>
+<label class="flex items-center gap-2 text-[13px]"><input class="w-4 h-4 rounded-sm border-[var(--clinical-border)]" type="checkbox"/><span class="truncate">Weight mgmt</span></label>
+<label class="flex items-center gap-2 text-[13px]"><input class="w-4 h-4 rounded-sm border-[var(--clinical-border)]" type="checkbox"/><span class="truncate">Hirsutism</span></label>
+<label class="flex items-center gap-2 text-[13px]"><input class="w-4 h-4 rounded-sm border-[var(--clinical-border)]" type="checkbox"/><span class="truncate">Fertility tracking</span></label>
+<label class="flex items-center gap-2 text-[13px]"><input class="w-4 h-4 rounded-sm border-[var(--clinical-border)]" type="checkbox"/><span class="truncate">Ovulation signs</span></label>
+<label class="flex items-center gap-2 text-[13px]"><input class="w-4 h-4 rounded-sm border-[var(--clinical-border)]" type="checkbox"/><span class="truncate">Fatigue/Energy</span></label>
+</div>
+</section>
+<section class="bg-white border border-[var(--clinical-border)] rounded-sm p-5 card-shadow">
+<h2 class="text-[13px] font-bold uppercase tracking-wider text-[var(--clinical-blue)] mb-4 border-b border-gray-100 pb-2">05. Professional Care</h2>
+<div class="space-y-3">
+<div class="grid grid-cols-1 gap-2">
+<label class="flex items-center gap-3 text-sm"><input class="w-4 h-4 text-[var(--clinical-accent)] border-[var(--clinical-border)]" name="specialist" type="radio"/><span>Endocrinologist</span></label>
+<label class="flex items-center gap-3 text-sm"><input checked="" class="w-4 h-4 text-[var(--clinical-accent)] border-[var(--clinical-border)]" name="specialist" type="radio"/><span>Gynecologist</span></label>
+<label class="flex items-center gap-3 text-sm"><input class="w-4 h-4 text-[var(--clinical-accent)] border-[var(--clinical-border)]" name="specialist" type="radio"/><span>Primary Care</span></label>
+</div>
+<div class="mt-4 pt-4 border-t border-dashed border-gray-200">
+<input class="w-full border border-[var(--clinical-border)] bg-[#FBFBFC] px-3 py-2 text-sm rounded-sm mb-3" placeholder="Doctor's name (Optional)" type="text"/>
+<label class="flex items-center gap-2 text-xs font-medium text-[var(--clinical-gray-muted)]">
+<input class="w-3.5 h-3.5 rounded-sm border-[var(--clinical-border)]" type="checkbox"/>
+<span>Enable specialist-focused reporting metrics</span>
+</label>
+</div>
+</div>
+</section>
+<section class="bg-[#F1F9F1] border border-[#D5E6D5] rounded-sm p-5 card-shadow">
+<h2 class="text-[13px] font-bold uppercase tracking-wider text-[var(--clinical-blue)] mb-4 border-b border-[#D5E6D5] pb-2">06. Reproductive Planning</h2>
+<div class="space-y-3">
+<label class="flex items-center gap-3 text-sm font-medium"><input class="w-4 h-4 text-[#2E7D32] border-[#D5E6D5]" name="fertility" type="radio"/><span>Currently TTC (Trying to Conceive)</span></label>
+<label class="flex items-center gap-3 text-sm font-medium"><input class="w-4 h-4 text-[#2E7D32] border-[#D5E6D5]" name="fertility" type="radio"/><span>Long-term planning</span></label>
+<label class="flex items-center gap-3 text-sm font-medium"><input checked="" class="w-4 h-4 text-[#2E7D32] border-[#D5E6D5]" name="fertility" type="radio"/><span>Not applicable / No planning</span></label>
+</div>
+</section>
+<section class="bg-white border border-[var(--clinical-border)] rounded-sm p-5 card-shadow">
+<h2 class="text-[13px] font-bold uppercase tracking-wider text-[var(--clinical-blue)] mb-4 border-b border-gray-100 pb-2">07. Data &amp; Education Preferences</h2>
+<div class="space-y-3">
+<label class="flex items-center gap-3 text-sm"><input checked="" class="w-4 h-4 rounded-sm text-[var(--clinical-accent)] border-[var(--clinical-border)]" type="checkbox"/><span>Clinical research and articles</span></label>
+<label class="flex items-center gap-3 text-sm"><input class="w-4 h-4 rounded-sm text-[var(--clinical-accent)] border-[var(--clinical-border)]" type="checkbox"/><span>Patient community access</span></label>
+<label class="flex items-center gap-3 text-sm"><input class="w-4 h-4 rounded-sm text-[var(--clinical-accent)] border-[var(--clinical-border)]" type="checkbox"/><span>Maintain strict privacy / No notifications</span></label>
+</div>
+</section>
+</main>
+<div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-[var(--clinical-border)] p-5 pb-8 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+<button class="w-full bg-[var(--clinical-blue)] text-white font-bold py-4 rounded-sm uppercase tracking-widest text-sm hover:bg-black transition-colors">
+                Validate &amp; Continue
+            </button>
+<div class="mt-4 text-center">
+<button class="text-[var(--clinical-gray-muted)] text-[11px] font-bold uppercase tracking-wider hover:text-[var(--clinical-blue)] underline underline-offset-4">Skip detailed profile setup</button>
+</div>
+</div>
+</div>
+
+</body></html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Conversational Log</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "brand-cream": "#F7F5F0",
+            "brand-taupe": "#9B8B7E",
+            "brand-lavender": "#D8C9E0",
+            "brand-peach": "#E8A89B",
+            "on-surface": "#3A3A3A",
+            "outline": "#7f756e",
+          },
+          fontFamily: {
+            "headline": ["Noto Serif", "serif"],
+            "body": ["Manrope", "sans-serif"],
+          },
+        },
+      },
+    }
+  </script>
+<style type="text/tailwindcss">
+    @layer base {
+      body {
+        @apply bg-brand-cream font-body text-on-surface antialiased;
+      }
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+    }
+    .chat-bubble-system {
+      @apply bg-white rounded-2xl rounded-tl-none p-5 shadow-sm border border-brand-taupe/10 max-w-[85%] self-start;
+    }
+    .chat-bubble-user {
+      @apply bg-brand-taupe text-white rounded-2xl rounded-tr-none p-4 shadow-md max-w-[80%] self-end font-medium;
+    }
+    .option-card {
+      @apply bg-white border border-brand-taupe/10 rounded-2xl p-4 flex flex-col items-center gap-2 transition-all active:scale-95 shadow-sm hover:shadow-md cursor-pointer;
+    }
+    .option-card.selected {
+      @apply border-brand-taupe bg-brand-taupe/5 ring-1 ring-brand-taupe;
+    }
+    .gradient-slider-track {
+      background: linear-gradient(90deg, #F3EFE9 0%, #E8A89B 50%, #9B8B7E 100%);
+    }.no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col h-screen overflow-hidden">
+<header class="flex-none bg-brand-cream/80 backdrop-blur-md px-6 pt-12 pb-4 flex items-center justify-between border-b border-brand-taupe/10 z-50">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-sm text-brand-taupe">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="text-center">
+<h1 class="font-headline text-lg font-bold">Daily Check-in</h1>
+<p class="text-[10px] text-brand-taupe uppercase tracking-widest font-bold">Tuesday, 10:45 AM</p>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-sm text-brand-taupe">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</header>
+<main class="flex-1 overflow-y-auto px-6 py-8 space-y-8 flex flex-col no-scrollbar">
+<div class="flex gap-3">
+<div class="w-8 h-8 rounded-full bg-brand-lavender flex items-center justify-center flex-shrink-0 mt-1">
+<span class="material-symbols-outlined text-white text-sm">auto_awesome</span>
+</div>
+<div class="chat-bubble-system">
+<p class="text-sm leading-relaxed">Hi Sarah, I'm here to help you log your journey. How are you feeling today?</p>
+</div>
+</div>
+<div class="chat-bubble-user">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">thermometer</span>
+<span>Hot Flashes</span>
+</div>
+</div>
+<div class="flex gap-3">
+<div class="w-8 h-8 rounded-full bg-brand-lavender flex items-center justify-center flex-shrink-0 mt-1">
+<span class="material-symbols-outlined text-white text-sm">auto_awesome</span>
+</div>
+<div class="chat-bubble-system">
+<p class="text-sm leading-relaxed mb-4">I'm sorry you're dealing with those. Can you tell me how intense it felt?</p>
+<div class="bg-brand-cream/50 rounded-xl p-4 space-y-4">
+<div class="flex justify-between items-center">
+<span class="text-2xl font-headline font-bold text-brand-taupe">7</span>
+<span class="text-[10px] font-bold text-brand-taupe/60 uppercase tracking-widest">Intense</span>
+</div>
+<div class="relative py-2">
+<div class="h-2 w-full bg-gray-200 rounded-full overflow-hidden gradient-slider-track"></div>
+<div class="absolute top-1/2 left-[70%] -mt-3 -ml-3 w-6 h-6 bg-white border-4 border-brand-taupe rounded-full shadow-md"></div>
+</div>
+<button class="w-full py-2 bg-brand-taupe text-white text-xs font-bold rounded-lg mt-2">Set Intensity</button>
+</div>
+</div>
+</div>
+<div class="chat-bubble-user">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">bolt</span>
+<span>Intensity: 7/10</span>
+</div>
+</div>
+<div class="flex flex-col gap-6 active-turn pt-4">
+<div class="flex gap-3">
+<div class="w-8 h-8 rounded-full bg-brand-lavender flex items-center justify-center flex-shrink-0 mt-1">
+<span class="material-symbols-outlined text-white text-sm">auto_awesome</span>
+</div>
+<div class="chat-bubble-system">
+<p class="text-sm leading-relaxed">Is there anything else you'd like to log for today? Tapping an option will add it to your log.</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3 pb-20">
+<div class="option-card">
+<span class="material-symbols-outlined text-3xl text-brand-taupe">sentiment_satisfied</span>
+<span class="text-xs font-bold">Mood Shift</span>
+</div>
+<div class="option-card">
+<span class="material-symbols-outlined text-3xl text-brand-peach">bedtime</span>
+<span class="text-xs font-bold">Poor Sleep</span>
+</div>
+<div class="option-card">
+<span class="material-symbols-outlined text-3xl text-brand-taupe">water_drop</span>
+<span class="text-xs font-bold">Dryness</span>
+</div>
+<div class="option-card">
+<span class="material-symbols-outlined text-3xl text-brand-taupe">fitness_center</span>
+<span class="text-xs font-bold">Joint Pain</span>
+</div>
+<div class="option-card">
+<span class="material-symbols-outlined text-3xl text-brand-taupe/40">pill</span>
+<span class="text-xs font-bold">Medications</span>
+</div>
+<div class="option-card border-dashed bg-transparent">
+<span class="material-symbols-outlined text-3xl text-brand-taupe/30">add</span>
+<span class="text-xs font-bold text-brand-taupe/60">Other</span>
+</div>
+</div>
+</div>
+</main>
+<footer class="flex-none px-6 pb-10 pt-4 bg-gradient-to-t from-brand-cream via-brand-cream/95 to-transparent">
+<div class="max-w-md mx-auto">
+<div class="flex flex-col items-center gap-4">
+<div class="flex items-center gap-2 text-[10px] font-bold text-brand-taupe/50 uppercase tracking-[0.2em]">
+<span class="material-symbols-outlined text-[12px]">lock</span>
+          End-to-end Encrypted
+        </div>
+<div class="w-full flex items-center gap-3">
+<div class="flex-1 bg-white rounded-2xl border border-brand-taupe/10 px-4 py-3 text-sm text-brand-taupe/40 shadow-sm flex items-center justify-between">
+<span>Add a note...</span>
+<span class="material-symbols-outlined text-lg">mic</span>
+</div>
+<button class="bg-brand-taupe text-white w-12 h-12 rounded-2xl shadow-lg flex items-center justify-center active:scale-90 transition-transform">
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+<div class="bg-brand-lavender/20 rounded-xl p-3 w-full border border-brand-lavender/30">
+<p class="text-[11px] italic text-brand-taupe text-center">
+            "Logging help us spot patterns in your journey. You're doing great!"
+          </p>
+</div>
+</div>
+</div>
+</footer>
+
+</body></html>

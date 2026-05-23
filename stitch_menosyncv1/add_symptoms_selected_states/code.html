@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Symptom Library | MenoSync</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary": "#814f45",
+                      "background": "#fef8f6",
+                      "surface-dim": "#ded9d7",
+                      "tertiary-fixed": "#ffdad3",
+                      "outline-variant": "#d0c4bc",
+                      "tertiary-container": "#9d675c",
+                      "secondary-fixed-dim": "#d0c1d8",
+                      "inverse-on-surface": "#f5f0ed",
+                      "on-surface-variant": "#4d453f",
+                      "on-secondary-fixed": "#211828",
+                      "surface-container-high": "#ede7e5",
+                      "on-primary-container": "#fffbff",
+                      "outline": "#7f756e",
+                      "tertiary-fixed-dim": "#f9b7a9",
+                      "surface-variant": "#e7e1df",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-fixed-variant": "#51443a",
+                      "inverse-surface": "#32302f",
+                      "surface-bright": "#fef8f6",
+                      "surface": "#fef8f6",
+                      "secondary-fixed": "#edddf5",
+                      "on-error": "#ffffff",
+                      "on-primary-fixed": "#231a11",
+                      "surface-container": "#f2edea",
+                      "on-primary": "#ffffff",
+                      "on-background": "#1d1b1a",
+                      "primary-fixed-dim": "#d6c3b5",
+                      "on-tertiary-container": "#fffbff",
+                      "inverse-primary": "#d6c3b5",
+                      "on-secondary": "#ffffff",
+                      "on-tertiary-fixed": "#341009",
+                      "secondary-container": "#edddf5",
+                      "surface-container-low": "#f8f2f0",
+                      "surface-tint": "#6a5c50",
+                      "primary": "#67594e",
+                      "on-secondary-fixed-variant": "#4d4355",
+                      "on-tertiary-fixed-variant": "#683a31",
+                      "on-surface": "#1d1b1a",
+                      "error": "#ba1a1a",
+                      "primary-fixed": "#f2dfd0",
+                      "on-secondary-container": "#6c6074",
+                      "surface-container-highest": "#e7e1df",
+                      "surface-container-lowest": "#ffffff",
+                      "primary-container": "#817266",
+                      "error-container": "#ffdad6",
+                      "secondary": "#655a6e",
+                      "on-error-container": "#93000a",
+                      "selected-purple": "#6B4E8C",
+                      "chip-border": "#D4C9E8",
+                      "chip-text": "#1A1A2E"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "1.5rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Noto Serif"],
+                      "body": ["Manrope"],
+                      "label": ["Manrope"]
+              }
+            },
+          }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Manrope', sans-serif; background-color: #fef8f6; }
+        .font-serif { font-family: 'Noto Serif', serif; }
+        .font-sans { font-family: 'Manrope', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen pb-32">
+<!-- Top Navigation Anchor -->
+<header class="fixed top-0 w-full z-50 bg-[#fef8f6]/70 dark:bg-stone-900/70 backdrop-blur-md shadow-sm dark:shadow-none flex items-center justify-between px-6 h-16 w-full">
+<div class="flex items-center gap-4">
+<button class="text-[#67594e] dark:text-[#d8c9e0] hover:bg-[#f2edea] dark:hover:bg-stone-800 transition-colors p-2 rounded-full scale-95 duration-200 ease-in-out">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-serif text-2xl font-medium tracking-tight text-[#67594e] dark:text-[#d8c9e0]">Symptom Library</h1>
+</div>
+<button class="text-[#67594e] dark:text-[#d8c9e0] hover:bg-[#f2edea] dark:hover:bg-stone-800 transition-colors p-2 rounded-full scale-95 duration-200 ease-in-out">
+<span class="material-symbols-outlined">search</span>
+</button>
+</header>
+<main class="pt-24 px-6 max-w-2xl mx-auto">
+<!-- Search Bar Section -->
+<section class="mb-10">
+<div class="relative group">
+<div class="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline">search</span>
+</div>
+<input class="w-full bg-surface-container-highest border-none rounded-full py-4 pl-14 pr-6 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary/20 transition-all font-sans" placeholder="Search all symptoms..." type="text"/>
+</div>
+</section>
+<!-- Editorial Hero Intro -->
+<section class="mb-12">
+<h2 class="font-serif text-4xl mb-4 leading-tight">Your Body, <br/><span class="italic">In Focus</span></h2>
+<p class="text-on-surface-variant leading-relaxed max-w-md">Understanding your shifts is the first step toward balance. Select the symptoms you're noticing to track patterns over time.</p>
+</section>
+<!-- Symptom Categories -->
+<div class="space-y-12">
+<!-- Category: Vasomotor -->
+<section>
+<div class="flex items-baseline justify-between mb-6">
+<h3 class="font-serif text-2xl text-primary">Vasomotor Symptoms</h3>
+<div class="h-px flex-1 bg-outline-variant/30 ml-4"></div>
+</div>
+<div class="grid gap-3">
+<!-- SELECTED STATE: Hot flashes -->
+<label class="group flex items-center justify-between p-5 bg-selected-purple border border-selected-purple rounded-xl transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="text-white text-xs">✓</span>
+<span class="font-sans font-medium text-lg text-white">Hot flashes</span>
+</div>
+<input checked="" class="w-6 h-6 rounded-full border-white/30 text-white focus:ring-white/20 bg-transparent" type="checkbox"/>
+</label>
+<!-- SELECTED STATE: Night sweats -->
+<label class="group flex items-center justify-between p-5 bg-selected-purple border border-selected-purple rounded-xl transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="text-white text-xs">✓</span>
+<span class="font-sans font-medium text-lg text-white">Night sweats</span>
+</div>
+<input checked="" class="w-6 h-6 rounded-full border-white/30 text-white focus:ring-white/20 bg-transparent" type="checkbox"/>
+</label>
+<label class="group flex items-center justify-between p-5 bg-surface-container-lowest border border-chip-border rounded-xl hover:bg-surface-container transition-all cursor-pointer">
+<span class="font-sans font-medium text-lg text-chip-text">Cold flashes</span>
+<input class="w-6 h-6 rounded-full border-outline text-primary focus:ring-primary/20" type="checkbox"/>
+</label>
+</div>
+</section>
+<!-- Category: Emotional & Cognitive -->
+<section>
+<div class="flex items-baseline justify-between mb-6">
+<h3 class="font-serif text-2xl text-primary">Emotional &amp; Cognitive</h3>
+<div class="h-px flex-1 bg-outline-variant/30 ml-4"></div>
+</div>
+<div class="grid gap-3">
+<label class="group flex items-center justify-between p-5 bg-surface-container-lowest border border-chip-border rounded-xl hover:bg-surface-container transition-all cursor-pointer">
+<span class="font-sans font-medium text-lg text-chip-text">Anxiety</span>
+<input class="w-6 h-6 rounded-full border-outline text-primary focus:ring-primary/20" type="checkbox"/>
+</label>
+<label class="group flex items-center justify-between p-5 bg-surface-container-lowest border border-chip-border rounded-xl hover:bg-surface-container transition-all cursor-pointer">
+<span class="font-sans font-medium text-lg text-chip-text">Irritability</span>
+<input class="w-6 h-6 rounded-full border-outline text-primary focus:ring-primary/20" type="checkbox"/>
+</label>
+<label class="group flex items-center justify-between p-5 bg-surface-container-lowest border border-chip-border rounded-xl hover:bg-surface-container transition-all cursor-pointer">
+<span class="font-sans font-medium text-lg text-chip-text">Mood swings</span>
+<input class="w-6 h-6 rounded-full border-outline text-primary focus:ring-primary/20" type="checkbox"/>
+</label>
+<!-- SELECTED STATE: Brain fog -->
+<label class="group flex items-center justify-between p-5 bg-selected-purple border border-selected-purple rounded-xl transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="text-white text-xs">✓</span>
+<span class="font-sans font-medium text-lg text-white">Brain fog</span>
+</div>
+<input checked="" class="w-6 h-6 rounded-full border-white/30 text-white focus:ring-white/20 bg-transparent" type="checkbox"/>
+</label>
+<label class="group flex items-center justify-between p-5 bg-surface-container-lowest border border-chip-border rounded-xl hover:bg-surface-container transition-all cursor-pointer">
+<span class="font-sans font-medium text-lg text-chip-text">Memory lapses</span>
+<input class="w-6 h-6 rounded-full border-outline text-primary focus:ring-primary/20" type="checkbox"/>
+</label>
+</div>
+</section>
+<!-- Aesthetic Break Card -->
+<div class="relative w-full h-48 rounded-xl overflow-hidden my-8 group">
+<img class="w-full h-full object-cover" data-alt="soft close up of delicate white flowers with soft sunlight filtered through green leaves in a serene morning garden" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6M7qq0dXFeYf5TqF_ioq73MsAjnKil3pR5clsDxPtvdcB7S_OCEf06VuBAmY3MhPJBqrINmTyuCX3LRv_cNS2Tce4kvOoLt4OAA4Ur7AGT8XjVSecBBiSKlwgY2x9sV3MxybiM6Vms2t5VrfV0bNCc-knlgKeolaIYeduXLgVUoiSCUNpa5wvJENtLI2ZW6gtthtM_7ZPDdaLueBFMbdjvGgQ6st9biXvwTBKl4La6j7z73F4pDB58_5Z52yj1z0mSoTx2Hr-ZtE"/>
+<div class="absolute inset-0 bg-primary/20 backdrop-blur-[2px] flex items-center justify-center p-8">
+<p class="text-white font-serif italic text-xl text-center leading-relaxed">"Self-care is how you take your power back."</p>
+</div>
+</div>
+<!-- Category: Physical Wellbeing -->
+<section>
+<div class="flex items-baseline justify-between mb-6">
+<h3 class="font-serif text-2xl text-primary">Physical Wellbeing</h3>
+<div class="h-px flex-1 bg-outline-variant/30 ml-4"></div>
+</div>
+<div class="grid gap-3">
+<label class="group flex items-center justify-between p-5 bg-surface-container-lowest border border-chip-border rounded-xl hover:bg-surface-container transition-all cursor-pointer">
+<span class="font-sans font-medium text-lg text-chip-text">Joint pain</span>
+<input class="w-6 h-6 rounded-full border-outline text-primary focus:ring-primary/20" type="checkbox"/>
+</label>
+<label class="group flex items-center justify-between p-5 bg-surface-container-lowest border border-chip-border rounded-xl hover:bg-surface-container transition-all cursor-pointer">
+<span class="font-sans font-medium text-lg text-chip-text">Headaches</span>
+<input class="w-6 h-6 rounded-full border-outline text-primary focus:ring-primary/20" type="checkbox"/>
+</label>
+<label class="group flex items-center justify-between p-5 bg-surface-container-lowest border border-chip-border rounded-xl hover:bg-surface-container transition-all cursor-pointer">
+<span class="font-sans font-medium text-lg text-chip-text">Fatigue</span>
+<input class="w-6 h-6 rounded-full border-outline text-primary focus:ring-primary/20" type="checkbox"/>
+</label>
+<label class="group flex items-center justify-between p-5 bg-surface-container-lowest border border-chip-border rounded-xl hover:bg-surface-container transition-all cursor-pointer">
+<span class="font-sans font-medium text-lg text-chip-text">Heart palpitations</span>
+<input class="w-6 h-6 rounded-full border-outline text-primary focus:ring-primary/20" type="checkbox"/>
+</label>
+<label class="group flex items-center justify-between p-5 bg-surface-container-lowest border border-chip-border rounded-xl hover:bg-surface-container transition-all cursor-pointer">
+<span class="font-sans font-medium text-lg text-chip-text">Dry skin</span>
+<input class="w-6 h-6 rounded-full border-outline text-primary focus:ring-primary/20" type="checkbox"/>
+</label>
+</div>
+</section>
+<!-- Category: Sleep & Energy -->
+<section class="pb-12">
+<div class="flex items-baseline justify-between mb-6">
+<h3 class="font-serif text-2xl text-primary">Sleep &amp; Energy</h3>
+<div class="h-px flex-1 bg-outline-variant/30 ml-4"></div>
+</div>
+<div class="grid gap-3">
+<label class="group flex items-center justify-between p-5 bg-surface-container-lowest border border-chip-border rounded-xl hover:bg-surface-container transition-all cursor-pointer">
+<span class="font-sans font-medium text-lg text-chip-text">Difficulty falling asleep</span>
+<input class="w-6 h-6 rounded-full border-outline text-primary focus:ring-primary/20" type="checkbox"/>
+</label>
+<!-- SELECTED STATE: Poor sleep quality (Renamed from Waking in night to match request context if intended, or just applied to Waking in night as proxy) -->
+<label class="group flex items-center justify-between p-5 bg-selected-purple border border-selected-purple rounded-xl transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="text-white text-xs">✓</span>
+<span class="font-sans font-medium text-lg text-white">Poor sleep quality</span>
+</div>
+<input checked="" class="w-6 h-6 rounded-full border-white/30 text-white focus:ring-white/20 bg-transparent" type="checkbox"/>
+</label>
+<label class="group flex items-center justify-between p-5 bg-surface-container-lowest border border-chip-border rounded-xl hover:bg-surface-container transition-all cursor-pointer">
+<span class="font-sans font-medium text-lg text-chip-text">Low energy</span>
+<input class="w-6 h-6 rounded-full border-outline text-primary focus:ring-primary/20" type="checkbox"/>
+</label>
+</div>
+</section>
+</div>
+</main>
+<!-- Sticky Action Container -->
+<div class="fixed bottom-0 left-0 w-full z-40 px-6 pb-10 pt-4 bg-gradient-to-t from-background via-background/95 to-transparent">
+<button class="w-full py-5 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl shadow-lg shadow-on-surface/5 font-sans font-semibold tracking-wide flex items-center justify-center gap-3 active:scale-95 transition-transform">
+<span>Save Selection</span>
+<span class="material-symbols-outlined text-[20px]">check_circle</span>
+</button>
+</div>
+<!-- Bottom Navigation Shell (Filter: Top-level Destination) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-2 bg-[#fef8f6]/70 dark:bg-stone-900/70 backdrop-blur-md rounded-t-[1.5rem] shadow-[0_-4px_24px_rgba(29,27,26,0.06)] z-50">
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] dark:text-stone-400 p-2 hover:bg-[#f2edea] dark:hover:bg-stone-800 transition-colors tap-highlight-none active:scale-95" href="#">
+<span class="material-symbols-outlined mb-1">edit_note</span>
+<span class="font-sans text-[11px] font-medium uppercase tracking-wider">Journal</span>
+</a>
+<!-- Active Library Tab -->
+<a class="flex flex-col items-center justify-center bg-[#edddf5] dark:bg-stone-800 text-[#67594e] dark:text-[#d8c9e0] rounded-2xl p-2 min-w-[64px] transition-transform active:scale-95" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+<span class="font-sans text-[11px] font-bold uppercase tracking-wider">Library</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] dark:text-stone-400 p-2 hover:bg-[#f2edea] dark:hover:bg-stone-800 transition-colors tap-highlight-none active:scale-95" href="#">
+<span class="material-symbols-outlined mb-1">auto_graph</span>
+<span class="font-sans text-[11px] font-medium uppercase tracking-wider">Insights</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] dark:text-stone-400 p-2 hover:bg-[#f2edea] dark:hover:bg-stone-800 transition-colors tap-highlight-none active:scale-95" href="#">
+<span class="material-symbols-outlined mb-1">person</span>
+<span class="font-sans text-[11px] font-medium uppercase tracking-wider">Profile</span>
+</a>
+</nav>
+</body></html>

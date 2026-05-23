@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync Calendar View</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-surface-variant": "#4a454f",
+              "inverse-surface": "#303031",
+              "on-tertiary-container": "#410e0b",
+              "on-secondary-container": "#156f74",
+              "surface-container-highest": "#e3e2e2",
+              "secondary": "#06696e",
+              "on-primary-container": "#ffffff",
+              "outline": "#7c7580",
+              "surface-tint": "#6B4E8C",
+              "primary-fixed-dim": "#dbb8ff",
+              "on-tertiary-fixed-variant": "#7b2e1c",
+              "inverse-on-surface": "#f2f0f0",
+              "surface-container": "#efeded",
+              "secondary-fixed-dim": "#86d3d8",
+              "surface-dim": "#dbdad9",
+              "on-error": "#ffffff",
+              "outline-variant": "#ccc3d0",
+              "tertiary-container": "#ffdad6",
+              "tertiary": "#ba1a1a",
+              "secondary-fixed": "#a2f0f5",
+              "secondary-container": "#a2f0f5",
+              "on-background": "#1b1c1c",
+              "inverse-primary": "#dbb8ff",
+              "error": "#ba1a1a",
+              "on-primary-fixed": "#280a47",
+              "surface-bright": "#fbf9f9",
+              "on-tertiary-fixed": "#3d0600",
+              "tertiary-fixed-dim": "#ffb4a3",
+              "background": "#fbf9f9",
+              "on-secondary-fixed-variant": "#004f53",
+              "on-primary-fixed-variant": "#563976",
+              "on-tertiary": "#ffffff",
+              "surface-container-lowest": "#ffffff",
+              "primary-fixed": "#efdbff",
+              "surface-container-low": "#f5f3f3",
+              "on-surface": "#1b1c1c",
+              "surface-container-high": "#e9e8e7",
+              "on-error-container": "#93000a",
+              "tertiary-fixed": "#ffdad2",
+              "on-secondary-fixed": "#002022",
+              "surface-variant": "#e3e2e2",
+              "primary": "#6B4E8C",
+              "on-primary": "#ffffff",
+              "on-secondary": "#ffffff",
+              "surface": "#fbf9f9",
+              "error-container": "#ffdad6",
+              "primary-container": "#6B4E8C"
+            },
+            fontFamily: {
+              "headline": ["Inter", "sans-serif"],
+              "body": ["Inter", "sans-serif"],
+              "label": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.5rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body { font-family: 'Inter', sans-serif; }
+      .calendar-dot { width: 4px; height: 4px; border-radius: 9999px; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation Bar -->
+<nav class="fixed top-0 left-0 w-full z-50 bg-[#fbf9f9] dark:bg-stone-950 flex justify-between items-center px-8 h-16">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary dark:text-[#c0aed4] cursor-pointer" data-icon="arrow_back">arrow_back</span>
+<h1 class="font-Inter text-[22px] font-bold tracking-tight text-primary dark:text-[#c0aed4]">March 2025</h1>
+</div>
+<div class="flex items-center gap-6">
+<span class="material-symbols-outlined text-[#1b1c1c]/60 dark:text-stone-400 cursor-pointer hover:bg-[#f5f3f3] p-1 rounded-full transition-colors" data-icon="chevron_left">chevron_left</span>
+<span class="material-symbols-outlined text-[#1b1c1c]/60 dark:text-stone-400 cursor-pointer hover:bg-[#f5f3f3] p-1 rounded-full transition-colors" data-icon="chevron_right">chevron_right</span>
+<span class="material-symbols-outlined text-primary dark:text-[#c0aed4] cursor-pointer" data-icon="calendar_month">calendar_month</span>
+</div>
+</nav>
+<main class="pt-16 pb-32 min-h-screen bg-surface">
+<!-- Calendar Grid Container -->
+<section class="mt-4 px-4">
+<!-- Day Headers -->
+<div class="grid grid-cols-7 mb-2">
+<div class="text-center font-semibold text-[13px] text-on-surface-variant opacity-60">Mon</div>
+<div class="text-center font-semibold text-[13px] text-on-surface-variant opacity-60">Tue</div>
+<div class="text-center font-semibold text-[13px] text-on-surface-variant opacity-60">Wed</div>
+<div class="text-center font-semibold text-[13px] text-on-surface-variant opacity-60">Thu</div>
+<div class="text-center font-semibold text-[13px] text-on-surface-variant opacity-60">Fri</div>
+<div class="text-center font-semibold text-[13px] text-on-surface-variant opacity-60 text-tertiary">Sat</div>
+<div class="text-center font-semibold text-[13px] text-on-surface-variant opacity-60 text-tertiary">Sun</div>
+</div>
+<!-- Calendar Cells -->
+<div class="grid grid-cols-7 gap-y-2">
+<!-- February Overflow -->
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface-variant/30 text-[17px]">24</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface-variant/30 text-[17px]">25</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface-variant/30 text-[17px]">26</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface-variant/30 text-[17px]">27</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface-variant/30 text-[17px] relative">
+                    28
+                    <div class="absolute bottom-1.5 flex gap-1">
+<div class="calendar-dot bg-green-500"></div>
+</div>
+</div>
+<!-- March Days -->
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">
+                    1
+                </div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">
+                    2
+                </div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">
+                    3
+                </div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">
+                    4
+                    <div class="absolute bottom-1.5 flex gap-1">
+<div class="calendar-dot bg-green-500"></div>
+</div>
+</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">
+                    5
+                    <div class="absolute bottom-1.5 flex gap-1">
+<div class="calendar-dot bg-red-500"></div>
+</div>
+</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">
+                    6
+                </div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">
+                    7
+                    <div class="absolute bottom-1.5 flex gap-1">
+<div class="calendar-dot bg-primary/40"></div>
+</div>
+</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">
+                    8
+                </div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">
+                    9
+                </div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">
+                    10
+                    <div class="absolute bottom-1.5 flex gap-1">
+<div class="calendar-dot bg-green-500"></div>
+<div class="calendar-dot bg-red-500"></div>
+</div>
+</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">
+                    11
+                </div>
+<!-- Selected Day: 12 March -->
+<div class="h-[48px] bg-primary text-on-primary rounded-xl flex flex-col items-center justify-center text-[17px] relative shadow-md">
+                    12
+                    <div class="absolute bottom-1.5 flex gap-1">
+<div class="calendar-dot bg-on-primary"></div>
+</div>
+</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">
+                    13
+                </div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">
+                    14
+                    <div class="absolute bottom-1.5 flex gap-1">
+<div class="calendar-dot bg-green-500"></div>
+</div>
+</div>
+<!-- Today: 15 March -->
+<div class="h-[48px] border-2 border-primary-container/20 rounded-full flex flex-col items-center justify-center text-[17px] text-primary font-bold">15</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">16</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">17</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">18</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">19</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">20</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">21</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">22</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">23</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">24</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">25</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">26</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">27</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">28</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">29</div>
+<div class="h-[48px] flex flex-col items-center justify-center text-on-surface text-[17px] relative">30</div>
+</div>
+</section>
+<!-- Selected Day Detail Panel -->
+<section class="mt-8 mx-4 bg-surface-container-lowest rounded-3xl p-6 shadow-[0_-4px_32px_rgba(107,78,140,0.06)] border border-surface-container-high relative overflow-hidden">
+<!-- Handle bar -->
+<div class="w-12 h-1 bg-outline-variant/30 rounded-full mx-auto mb-6"></div>
+<div class="flex justify-between items-start mb-4">
+<div>
+<h2 class="text-[17px] font-semibold text-primary">Wednesday, 12 March</h2>
+<p class="text-[15px] font-medium text-secondary mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="medication">medication</span>
+                        Estradiol ✓ · Utrogestan ✓
+                    </p>
+</div>
+<button class="text-[14px] font-semibold text-primary flex items-center gap-1 hover:opacity-80 transition-opacity">
+                    Edit log <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<!-- Symptom Summary -->
+<div class="flex flex-wrap gap-2 mb-6">
+<div class="bg-surface-container-low px-3 py-1.5 rounded-full flex items-center gap-2">
+<span class="text-[14px]">🔥</span>
+<span class="text-[14px] font-semibold text-on-surface">3/5</span>
+</div>
+<div class="bg-surface-container-low px-3 py-1.5 rounded-full flex items-center gap-2">
+<span class="text-[14px]">😴</span>
+<span class="text-[14px] font-semibold text-on-surface">2/5</span>
+</div>
+<div class="bg-surface-container-low px-3 py-1.5 rounded-full flex items-center gap-2">
+<span class="text-[14px]">🌡️</span>
+<span class="text-[14px] font-semibold text-on-surface">3/5</span>
+</div>
+</div>
+<!-- Triggers -->
+<div class="mb-6">
+<h3 class="text-[12px] uppercase tracking-wider text-on-surface-variant font-bold mb-3">Daily Triggers</h3>
+<div class="flex gap-2">
+<span class="px-3 py-1 rounded-full border border-red-200 bg-red-50 text-red-700 text-[13px] font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="wine_bar">wine_bar</span> Alcohol
+                    </span>
+<span class="px-3 py-1 rounded-full border border-red-200 bg-red-50 text-red-700 text-[13px] font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="psychology_alt">psychology_alt</span> Stress
+                    </span>
+</div>
+</div>
+<!-- Notes Field -->
+<div class="bg-surface-container-low p-4 rounded-2xl border-b-2 border-primary/10">
+<p class="text-[14px] text-on-surface-variant italic leading-relaxed">
+                    "Had a work presentation today. Felt a bit anxious in the morning but the Estradiol seems to be helping with focus. Minor flush around 3pm."
+                </p>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<footer class="fixed bottom-0 left-0 w-full z-50 bg-[#ffffff]/80 dark:bg-stone-900/80 backdrop-blur-md rounded-t-3xl border-t border-[#1b1c1c]/10 dark:border-stone-800 shadow-[0_-4px_32px_rgba(107,78,140,0.04)] flex justify-around items-center px-6 pb-6 pt-3">
+<div class="flex flex-col items-center justify-center text-[#1b1c1c]/50 dark:text-stone-500 hover:opacity-80 cursor-pointer transition-transform active:scale-95">
+<span class="material-symbols-outlined" data-icon="today">today</span>
+<span class="font-Inter text-[11px] font-medium">Today</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary/10 dark:bg-primary/20 text-primary rounded-xl px-3 py-1 hover:opacity-80 cursor-pointer transition-transform active:scale-95">
+<span class="material-symbols-outlined" data-icon="calendar_month" style="font-variation-settings: 'FILL' 1;">calendar_month</span>
+<span class="font-Inter text-[11px] font-medium">Calendar</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#1b1c1c]/50 dark:text-stone-500 hover:opacity-80 cursor-pointer transition-transform active:scale-95">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-Inter text-[11px] font-medium">Insights</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#1b1c1c]/50 dark:text-stone-500 hover:opacity-80 cursor-pointer transition-transform active:scale-95">
+<span class="material-symbols-outlined" data-icon="more_horiz">more_horiz</span>
+<span class="font-Inter text-[11px] font-medium">More</span>
+</div>
+</footer>
+</body></html>

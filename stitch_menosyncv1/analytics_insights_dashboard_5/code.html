@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync Insights - Bento Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;500;700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-surface-variant": "#4d453f",
+              "on-primary-fixed": "#231a11",
+              "inverse-on-surface": "#f5f0ed",
+              "primary-container": "#817266",
+              "secondary-fixed": "#edddf5",
+              "surface-dim": "#ded9d7",
+              "on-error": "#ffffff",
+              "background": "#F7F5F0",
+              "tertiary-container": "#9d675c",
+              "surface": "#F7F5F0",
+              "on-secondary-fixed": "#211828",
+              "on-surface": "#1d1b1a",
+              "inverse-primary": "#d6c3b5",
+              "tertiary-fixed-dim": "#f9b7a9",
+              "surface-container-highest": "#e7e1df",
+              "surface-bright": "#fef8f6",
+              "on-primary-fixed-variant": "#51443a",
+              "tertiary": "#814f45",
+              "surface-container": "#f2edea",
+              "secondary": "#655a6e",
+              "on-background": "#1d1b1a",
+              "surface-container-low": "#f8f2f0",
+              "primary": "#67594e",
+              "outline-variant": "#d0c4bc",
+              "on-tertiary-container": "#fffbff",
+              "surface-container-high": "#ede7e5",
+              "surface-variant": "#e7e1df",
+              "on-error-container": "#93000a",
+              "tertiary-fixed": "#ffdad3",
+              "surface-container-lowest": "#ffffff",
+              "on-primary-container": "#fffbff",
+              "primary-fixed-dim": "#d6c3b5",
+              "on-secondary": "#ffffff",
+              "on-secondary-fixed-variant": "#4d4355",
+              "on-secondary-container": "#6c6074",
+              "secondary-fixed-dim": "#d0c1d8",
+              "on-tertiary": "#ffffff",
+              "secondary-container": "#edddf5",
+              "on-tertiary-fixed": "#341009",
+              "primary-fixed": "#f2dfd0",
+              "error": "#ba1a1a",
+              "outline": "#7f756e",
+              "surface-tint": "#6a5c50",
+              "inverse-surface": "#32302f",
+              "on-tertiary-fixed-variant": "#683a31",
+              "error-container": "#ffdad6",
+              "on-primary": "#ffffff"
+            },
+            fontFamily: {
+              "headline": ["Noto Serif"],
+              "body": ["Manrope"],
+              "label": ["Manrope"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "10px", "xl": "12px", "2xl": "16px", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style type="text/tailwindcss">
+    @layer utilities {
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-nav {
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+      .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    }
+</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background font-body text-on-surface min-h-screen pb-32">
+<header class="fixed top-0 w-full z-50 bg-[#F7F5F0]/80 backdrop-blur-xl flex justify-between items-center px-6 h-16">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer active:scale-95 transition-transform" data-icon="menu">menu</span>
+<h1 class="font-headline text-xl font-medium tracking-tight text-primary">Your Insights</h1>
+</div>
+<span class="material-symbols-outlined text-primary cursor-pointer active:scale-95 transition-transform" data-icon="account_circle">account_circle</span>
+</header>
+<main class="mt-20 px-4 space-y-4">
+<section class="mb-2">
+<h2 class="font-headline text-2xl font-bold tracking-tight text-primary">Body Rhythm</h2>
+<p class="text-on-surface-variant text-sm mt-1">Daily patterns and long-term correlations.</p>
+</section>
+<div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+<button class="px-5 py-2 rounded-full bg-surface-container-high text-on-surface-variant font-bold text-xs whitespace-nowrap transition-all active:scale-95">Last 7 days</button>
+<button class="px-5 py-2 rounded-full bg-primary text-white font-bold text-xs shadow-sm whitespace-nowrap transition-all active:scale-95 border border-primary">Last 30 days</button>
+<button class="px-5 py-2 rounded-full bg-surface-container-high text-on-surface-variant font-bold text-xs whitespace-nowrap transition-all active:scale-95">Last 90 days</button>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="col-span-2 bg-surface-container-lowest p-5 rounded-2xl shadow-sm border border-[#9B8B7E]/10">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h3 class="font-bold text-sm text-primary mb-1">Symptom Activity</h3>
+<p class="text-[11px] text-outline font-medium">18 days logged this month</p>
+</div>
+<div class="flex gap-1">
+<div class="w-2 h-2 rounded-full bg-surface-container-highest"></div>
+<div class="w-2 h-2 rounded-full bg-tertiary-fixed"></div>
+<div class="w-2 h-2 rounded-full bg-primary-container"></div>
+</div>
+</div>
+<div class="flex flex-col md:flex-row gap-6">
+<div class="flex-1">
+<div class="grid grid-cols-7 gap-1.5 mb-3">
+<div class="aspect-square rounded-[3px] bg-surface-container-highest"></div>
+<div class="aspect-square rounded-[3px] bg-tertiary-fixed"></div>
+<div class="aspect-square rounded-[3px] bg-primary-container opacity-40"></div>
+<div class="aspect-square rounded-[3px] bg-surface-container-highest"></div>
+<div class="aspect-square rounded-[3px] bg-tertiary-fixed-dim"></div>
+<div class="aspect-square rounded-[3px] bg-tertiary-fixed"></div>
+<div class="aspect-square rounded-[3px] bg-surface-container-highest"></div>
+<div class="aspect-square rounded-[3px] bg-tertiary-fixed-dim"></div>
+<div class="aspect-square rounded-[3px] bg-primary-container opacity-80"></div>
+<div class="aspect-square rounded-[3px] bg-surface-container-highest"></div>
+<div class="aspect-square rounded-[3px] bg-surface-container-highest"></div>
+<div class="aspect-square rounded-[3px] bg-tertiary-fixed-dim"></div>
+<div class="aspect-square rounded-[3px] bg-primary-container"></div>
+<div class="aspect-square rounded-[3px] bg-tertiary-fixed"></div>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-[9px] font-bold text-outline uppercase tracking-wider">Low Frequency</span>
+<span class="text-[9px] font-bold text-outline uppercase tracking-wider">High</span>
+</div>
+</div>
+<div class="flex-1 space-y-3">
+<div class="space-y-1">
+<div class="flex justify-between text-[10px] font-bold text-on-surface-variant">
+<span>Hot Flashes</span>
+<span class="text-primary">14d</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-1.5">
+<div class="bg-gradient-to-r from-tertiary-fixed to-tertiary-fixed-dim h-1.5 rounded-full" style="width: 85%"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[10px] font-bold text-on-surface-variant">
+<span>Sleep Issues</span>
+<span class="text-primary">12d</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-1.5">
+<div class="bg-gradient-to-r from-tertiary-fixed to-tertiary-fixed-dim h-1.5 rounded-full" style="width: 70%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="col-span-1 bg-surface-container-lowest p-5 rounded-2xl shadow-sm border border-[#9B8B7E]/10 flex flex-col justify-between">
+<div>
+<h3 class="font-bold text-sm text-primary mb-1">Severity</h3>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-green-600 text-xs" data-icon="trending_down">trending_down</span>
+<span class="text-[11px] font-bold text-green-600">-21%</span>
+</div>
+</div>
+<div class="h-16 w-full relative mt-4">
+<svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+<path d="M0 60 Q 25 50, 50 75 T 100 45 V 100 H 0 Z" fill="rgba(216, 201, 224, 0.25)"></path>
+<path d="M0 60 Q 25 50, 50 75 T 100 45" fill="none" stroke="#9B8B7E" stroke-width="3"></path>
+<circle cx="100" cy="45" fill="#E8A89B" r="4"></circle>
+</svg>
+</div>
+</div>
+<div class="col-span-1 bg-surface-container-lowest p-5 rounded-2xl shadow-sm border border-[#9B8B7E]/10 flex flex-col justify-between">
+<div>
+<h3 class="font-bold text-sm text-primary mb-1">Impact</h3>
+<p class="text-[10px] text-outline leading-tight">Caffeine has a high correlation with your night sweats.</p>
+</div>
+<div class="flex items-center justify-center pt-2">
+<div class="w-12 h-12 rounded-full bg-error-container/20 flex items-center justify-center relative">
+<span class="material-symbols-outlined text-tertiary text-2xl" data-icon="coffee">coffee</span>
+<div class="absolute -top-1 -right-1 bg-white p-0.5 rounded-full shadow-sm">
+<span class="material-symbols-outlined text-error text-[14px]" data-icon="warning" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+</div>
+</div>
+</div>
+<div class="col-span-2 bg-surface-container-lowest p-5 rounded-2xl shadow-sm border border-[#9B8B7E]/10">
+<h3 class="font-bold text-sm text-primary mb-4">What Affects You?</h3>
+<div class="grid grid-cols-1 gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed/50 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-lg" data-icon="bedtime">bedtime</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center">
+<span class="text-xs font-bold">Deep Sleep</span>
+<span class="text-[10px] font-bold text-green-700 bg-green-50 px-1.5 py-0.5 rounded">HELPS</span>
+</div>
+<p class="text-[11px] text-on-surface-variant">Reduces severity by 15%</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed/50 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-lg" data-icon="exercise">exercise</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center">
+<span class="text-xs font-bold">Exercise</span>
+<span class="text-[10px] font-bold text-green-700 bg-green-50 px-1.5 py-0.5 rounded">STABILIZES</span>
+</div>
+<p class="text-[11px] text-on-surface-variant">Stabilizes mood swings</p>
+</div>
+</div>
+</div>
+</div>
+<div class="col-span-2 bg-[#E8F0E8] p-5 rounded-2xl border border-green-200/50 shadow-sm">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-green-800 text-lg" data-icon="lightbulb">lightbulb</span>
+<h3 class="font-bold text-sm text-green-900">Recommended for You</h3>
+</div>
+<div class="space-y-3 mb-4">
+<p class="text-[12px] text-green-900 leading-snug">
+<strong class="text-green-950">Evening Yoga:</strong> Shown 20% correlation with better sleep for you.
+                </p>
+<p class="text-[12px] text-green-900 leading-snug">
+<strong class="text-green-950">Hydration:</strong> +2 glasses today helps body temperature regulation.
+                </p>
+</div>
+<div class="flex gap-4">
+<button class="text-[10px] font-bold text-green-800 uppercase tracking-widest bg-white/50 px-3 py-1.5 rounded-lg border border-green-200">Learn More</button>
+<button class="text-[10px] font-bold text-green-800 uppercase tracking-widest bg-green-800 text-white px-3 py-1.5 rounded-lg">Add to Tracker</button>
+</div>
+</div>
+<div class="col-span-2 bg-surface-container-lowest p-5 rounded-2xl shadow-sm border border-[#9B8B7E]/10 flex flex-col items-center text-center">
+<h3 class="font-bold text-sm text-primary mb-2">Doctor's Report</h3>
+<p class="text-[11px] text-on-surface-variant mb-4 max-w-[220px]">Ready to share your trends for your next appointment?</p>
+<button class="w-full bg-primary py-3 rounded-xl text-white font-bold text-xs shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="picture_as_pdf">picture_as_pdf</span>
+                Download PDF Report
+            </button>
+</div>
+</div>
+</main>
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-2 bg-[#F7F5F0]/90 backdrop-blur-xl z-50 rounded-t-[2.5rem] border-t border-[#9B8B7E]/10 shadow-[0_-4px_20px_rgba(0,0,0,0.04)]">
+<div class="flex flex-col items-center justify-center text-[#9B8B7E] p-2">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+<span class="text-[10px] font-bold uppercase tracking-widest mt-1">Journal</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary text-white rounded-full w-14 h-14 -mt-6 shadow-lg border-4 border-[#F7F5F0]">
+<span class="material-symbols-outlined" data-icon="analytics" style="font-variation-settings: 'FILL' 1;">analytics</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#9B8B7E] p-2">
+<span class="material-symbols-outlined" data-icon="auto_stories">auto_stories</span>
+<span class="text-[10px] font-bold uppercase tracking-widest mt-1">Library</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#9B8B7E] p-2">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-[10px] font-bold uppercase tracking-widest mt-1">Profile</span>
+</div>
+</nav>
+
+</body></html>

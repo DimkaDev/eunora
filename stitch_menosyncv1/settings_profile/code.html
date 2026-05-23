@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Profile &amp; Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Manrope', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        h1, h2, h3, .serif-text {
+            font-family: 'Noto Serif', serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #d0c4bc;
+            border-radius: 10px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "on-error": "#ffffff",
+                "secondary-fixed-dim": "#d0c1d8",
+                "tertiary-fixed": "#ffdad3",
+                "on-primary-fixed": "#231a11",
+                "surface-container-highest": "#e7e1df",
+                "inverse-surface": "#32302f",
+                "inverse-primary": "#d6c3b5",
+                "outline": "#7f756e",
+                "error": "#ba1a1a",
+                "surface-container-high": "#ede7e5",
+                "surface": "#fef8f6",
+                "secondary-fixed": "#edddf5",
+                "on-surface": "#1d1b1a",
+                "tertiary-container": "#9d675c",
+                "on-secondary-fixed": "#211828",
+                "on-tertiary-fixed": "#341009",
+                "surface-tint": "#6a5c50",
+                "surface-container-lowest": "#ffffff",
+                "tertiary": "#814f45",
+                "on-secondary-container": "#6c6074",
+                "on-surface-variant": "#4d453f",
+                "on-tertiary-fixed-variant": "#683a31",
+                "on-primary-fixed-variant": "#51443a",
+                "outline-variant": "#d0c4bc",
+                "on-primary-container": "#fffbff",
+                "primary-fixed": "#f2dfd0",
+                "on-secondary-fixed-variant": "#4d4355",
+                "tertiary-fixed-dim": "#f9b7a9",
+                "surface-variant": "#e7e1df",
+                "surface-container-low": "#f8f2f0",
+                "primary": "#67594e",
+                "primary-fixed-dim": "#d6c3b5",
+                "surface-bright": "#fef8f6",
+                "background": "#fef8f6",
+                "on-secondary": "#ffffff",
+                "inverse-on-surface": "#f5f0ed",
+                "on-tertiary-container": "#fffbff",
+                "surface-container": "#f2edea",
+                "primary-container": "#817266",
+                "surface-dim": "#ded9d7",
+                "on-tertiary": "#ffffff",
+                "on-primary": "#ffffff",
+                "on-error-container": "#93000a",
+                "secondary-container": "#edddf5",
+                "secondary": "#655a6e",
+                "on-background": "#1d1b1a",
+                "error-container": "#ffdad6"
+              },
+              fontFamily: {
+                "headline": ["Noto Serif"],
+                "body": ["Manrope"],
+                "label": ["Manrope"]
+              },
+              borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            },
+          },
+        }
+      </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface custom-scrollbar overflow-x-hidden min-h-screen">
+<!-- Top AppBar -->
+<header class="sticky top-0 w-full z-50 bg-[#fef8f6]/80 backdrop-blur-md shadow-[0_4px_24px_rgba(29,27,26,0.06)]">
+<div class="flex justify-between items-center w-full px-6 py-4">
+<button class="text-primary hover:bg-surface-container-high transition-colors p-2 rounded-full">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-serif text-2xl text-on-surface tracking-tight">Profile</h1>
+<button class="text-primary hover:bg-surface-container-high transition-colors p-2 rounded-full">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</header>
+<main class="max-w-2xl mx-auto px-6 pt-8 pb-32 space-y-8">
+<!-- Section 1: Profile -->
+<section>
+<div class="bg-surface-container-lowest rounded-[2rem] p-8 shadow-[0_4px_24px_rgba(29,27,26,0.04)] flex flex-col items-center text-center">
+<div class="w-24 h-24 rounded-full bg-gradient-to-br from-secondary-fixed to-primary-fixed flex items-center justify-center mb-4">
+<span class="text-2xl font-bold text-primary italic">SJ</span>
+</div>
+<h2 class="text-2xl font-serif text-on-surface mb-1">Sarah Johnson</h2>
+<p class="text-on-surface-variant text-sm mb-6">sarah@email.com</p>
+<button class="px-8 py-3 bg-gradient-to-r from-primary to-primary-container text-on-primary rounded-full font-semibold text-sm shadow-lg hover:opacity-90 transition-all active:scale-95">
+                    Edit Profile
+                </button>
+</div>
+</section>
+<!-- Section 2: Menopause Journey -->
+<section class="space-y-4">
+<div class="flex justify-between items-end px-2">
+<h3 class="text-xl font-serif text-on-surface">Menopause Journey</h3>
+<button class="text-sm font-semibold text-primary underline underline-offset-4">Update</button>
+</div>
+<div class="bg-surface-container-lowest rounded-[2rem] overflow-hidden shadow-[0_4px_24px_rgba(29,27,26,0.04)]">
+<div class="p-6 flex justify-between items-center">
+<span class="text-on-surface-variant font-medium">Stage</span>
+<span class="text-on-surface font-semibold">Early Menopause</span>
+</div>
+<div class="h-px bg-surface-container-low mx-6"></div>
+<div class="p-6 flex justify-between items-center">
+<span class="text-on-surface-variant font-medium">Age</span>
+<span class="text-on-surface font-semibold">51</span>
+</div>
+<div class="h-px bg-surface-container-low mx-6"></div>
+<div class="p-6 flex justify-between items-center">
+<span class="text-on-surface-variant font-medium">Years in Stage</span>
+<span class="text-on-surface font-semibold">~2 years</span>
+</div>
+</div>
+</section>
+<!-- Section 3: Notifications -->
+<section class="space-y-4">
+<h3 class="text-xl font-serif text-on-surface px-2">Notifications</h3>
+<div class="bg-surface-container-lowest rounded-[2rem] p-6 shadow-[0_4px_24px_rgba(29,27,26,0.04)] space-y-6">
+<div class="flex items-center justify-between">
+<div class="flex-1 pr-4">
+<p class="text-on-surface font-semibold">Daily Reminder</p>
+<p class="text-on-surface-variant text-xs leading-relaxed">Receive a gentle nudge for your daily journal entry.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex-1 pr-4">
+<p class="text-on-surface font-semibold">Weekly Digest</p>
+<p class="text-on-surface-variant text-xs leading-relaxed">Summarized insights delivered every Monday.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex-1 pr-4">
+<p class="text-on-surface font-semibold">Alerts</p>
+<p class="text-on-surface-variant text-xs leading-relaxed">Critical updates about your health trends.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</section>
+<!-- Section 4: Data & Privacy -->
+<section class="space-y-4">
+<h3 class="text-xl font-serif text-on-surface px-2">Data &amp; Privacy</h3>
+<div class="bg-surface-container-lowest rounded-[2rem] overflow-hidden shadow-[0_4px_24px_rgba(29,27,26,0.04)]">
+<div class="p-6 flex justify-between items-center">
+<span class="text-on-surface-variant font-medium">Data Backup</span>
+<span class="text-primary font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="verified">verified</span>
+                        Secure
+                    </span>
+</div>
+<div class="h-px bg-surface-container-low mx-6"></div>
+<div class="p-6 flex justify-between items-center">
+<span class="text-on-surface-variant font-medium">Privacy Mode</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="h-px bg-surface-container-low mx-6"></div>
+<button class="w-full p-6 flex justify-between items-center hover:bg-surface-container transition-colors">
+<span class="text-on-surface-variant font-medium">Download Your Data</span>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="download">download</span>
+</button>
+<div class="h-px bg-surface-container-low mx-6"></div>
+<button class="w-full p-6 flex justify-start items-center hover:bg-error-container/20 transition-colors">
+<span class="text-error font-semibold">Delete Account</span>
+</button>
+</div>
+</section>
+<!-- Section 5: Integrations -->
+<section class="space-y-4">
+<h3 class="text-xl font-serif text-on-surface px-2">Integrations</h3>
+<div class="bg-surface-container-lowest rounded-[2rem] p-6 shadow-[0_4px_24px_rgba(29,27,26,0.04)] space-y-6">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="p-2 rounded-xl bg-surface-container-low">
+<span class="material-symbols-outlined text-primary" data-icon="health_metrics">health_metrics</span>
+</div>
+<span class="text-on-surface font-semibold">Apple Health</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="p-2 rounded-xl bg-surface-container-low">
+<span class="material-symbols-outlined text-primary" data-icon="fitness_center">fitness_center</span>
+</div>
+<span class="text-on-surface font-semibold">Google Fit</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<button class="w-full py-4 bg-surface-container-high text-on-surface rounded-2xl font-semibold text-sm hover:bg-surface-container-highest transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="add_link">add_link</span>
+                    Link Doctor Account
+                </button>
+</div>
+</section>
+<!-- Section 6: Support -->
+<section class="space-y-4">
+<h3 class="text-xl font-serif text-on-surface px-2">Support &amp; Legal</h3>
+<div class="bg-surface-container-lowest rounded-[2rem] overflow-hidden shadow-[0_4px_24px_rgba(29,27,26,0.04)]">
+<button class="w-full p-5 flex justify-between items-center hover:bg-surface-container transition-colors">
+<span class="text-on-surface-variant font-medium">FAQ</span>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</button>
+<div class="h-px bg-surface-container-low mx-5"></div>
+<button class="w-full p-5 flex justify-between items-center hover:bg-surface-container transition-colors">
+<span class="text-on-surface-variant font-medium">Contact Support</span>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</button>
+<div class="h-px bg-surface-container-low mx-5"></div>
+<button class="w-full p-5 flex justify-between items-center hover:bg-surface-container transition-colors">
+<span class="text-on-surface-variant font-medium">Blog &amp; Resources</span>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</button>
+<div class="h-px bg-surface-container-low mx-5"></div>
+<button class="w-full p-5 flex justify-between items-center hover:bg-surface-container transition-colors">
+<span class="text-on-surface-variant font-medium">Privacy Policy</span>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</button>
+<div class="h-px bg-surface-container-low mx-5"></div>
+<button class="w-full p-5 flex justify-between items-center hover:bg-surface-container transition-colors">
+<span class="text-on-surface-variant font-medium">Terms of Service</span>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</section>
+<!-- Section 7: App Info -->
+<section class="text-center py-8">
+<p class="text-on-surface-variant text-sm font-medium">Version 2.4.1 (Build 108)</p>
+<p class="text-primary text-sm mt-2 font-medium">Made with ❤️ for women</p>
+</section>
+<!-- Sign Out Button -->
+<section class="pb-12">
+<button class="w-full py-5 rounded-[2rem] border-2 border-primary-fixed-dim text-error font-bold tracking-wide hover:bg-error-container hover:border-error transition-all active:scale-[0.98]">
+                SIGN OUT
+            </button>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-8 pb-8 pt-4 bg-[#fef8f6]/70 backdrop-blur-xl rounded-t-[2rem] shadow-[0_-8px_32px_rgba(29,27,26,0.04)] z-50">
+<a class="flex flex-col items-center justify-center text-stone-400 opacity-60 hover:text-[#9B8B7E] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="auto_stories">auto_stories</span>
+<span class="font-sans text-[10px] uppercase tracking-widest font-medium mt-1">Journal</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-400 opacity-60 hover:text-[#9B8B7E] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span class="font-sans text-[10px] uppercase tracking-widest font-medium mt-1">Insights</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-400 opacity-60 hover:text-[#9B8B7E] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="sync">sync</span>
+<span class="font-sans text-[10px] uppercase tracking-widest font-medium mt-1">Sync</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] scale-110 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="person" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-sans text-[10px] uppercase tracking-widest font-medium mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

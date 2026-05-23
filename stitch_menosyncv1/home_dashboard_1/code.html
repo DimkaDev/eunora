@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "inverse-on-surface": "#f5f0ed",
+                        "secondary": "#655a6e",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "surface-container-low": "#f8f2f0",
+                        "surface-container-high": "#ede7e5",
+                        "on-secondary-fixed": "#211828",
+                        "tertiary": "#814f45",
+                        "on-surface": "#1d1b1a",
+                        "primary": "#67594e",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "surface": "#fef8f6",
+                        "error": "#ba1a1a",
+                        "on-primary-container": "#fffbff",
+                        "inverse-surface": "#32302f",
+                        "surface-bright": "#fef8f6",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "tertiary-fixed": "#ffdad3",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "tertiary-container": "#9d675c",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-error-container": "#93000a",
+                        "background": "#fef8f6",
+                        "primary-container": "#817266",
+                        "surface-tint": "#6a5c50",
+                        "on-tertiary-fixed": "#341009",
+                        "surface-dim": "#ded9d7",
+                        "primary-fixed": "#f2dfd0",
+                        "surface-variant": "#e7e1df",
+                        "on-secondary-container": "#6c6074",
+                        "on-secondary": "#ffffff",
+                        "inverse-primary": "#d6c3b5",
+                        "on-primary-fixed-variant": "#51443a",
+                        "outline-variant": "#d0c4bc",
+                        "surface-container-highest": "#e7e1df",
+                        "on-error": "#ffffff",
+                        "on-background": "#1d1b1a",
+                        "secondary-fixed": "#edddf5",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "on-tertiary-container": "#fffbff",
+                        "on-primary-fixed": "#231a11",
+                        "on-primary": "#ffffff",
+                        "secondary-container": "#edddf5",
+                        "surface-container": "#f2edea",
+                        "on-tertiary": "#ffffff",
+                        "outline": "#7f756e",
+                        "on-surface-variant": "#4d453f"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1.25rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Manrope', sans-serif; }
+        h1, h2, h3 { font-family: 'Noto Serif', serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="bg-[#fef8f6] dark:bg-[#1d1b1a] sticky top-0 z-40">
+<div class="flex justify-between items-center w-full px-5 py-4 max-w-xl mx-auto">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed font-bold" data-alt="Claire's profile photo placeholder with initial C">
+                    C
+                </div>
+<div>
+<h1 class="font-serif text-xl font-bold text-[#67594e] dark:text-[#D8C9E0]">Good evening, Claire</h1>
+<p class="font-sans text-xs text-[#9B8B7E] dark:text-[#D8C9E0]">Monday, 13 Apr</p>
+</div>
+</div>
+<button class="text-[#9B8B7E] hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</header>
+<main class="max-w-xl mx-auto px-5 mt-4 space-y-6">
+<!-- Status Badge -->
+<div class="flex">
+<div class="bg-tertiary-fixed text-on-tertiary-fixed-variant px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="warning">warning</span>
+                Partial — you haven't logged HRT today
+            </div>
+</div>
+<!-- Symptoms Card -->
+<section class="bg-surface-container-lowest rounded-3xl p-6 shadow-sm">
+<div class="flex justify-between items-center mb-5">
+<h2 class="text-xl font-bold">Today's symptoms</h2>
+<button class="text-primary text-sm font-semibold hover:opacity-70">Edit</button>
+</div>
+<div class="flex flex-wrap gap-2 mb-4">
+<div class="bg-surface-container-high px-3 py-2 rounded-xl flex items-center gap-2 text-sm">
+<span>Hot flashes <span class="font-bold ml-1">4/5</span></span>
+<span class="material-symbols-outlined text-sm opacity-50 cursor-pointer" data-icon="close">close</span>
+</div>
+<!-- Optional more symptoms would go here -->
+</div>
+<button class="text-primary font-bold text-sm flex items-center gap-1 hover:opacity-80">
+<span class="material-symbols-outlined text-lg" data-icon="add">add</span>
+                Add symptom
+            </button>
+</section>
+<!-- HRT Card -->
+<section class="bg-surface-container-lowest rounded-3xl p-6 shadow-sm">
+<div class="flex justify-between items-center mb-6">
+<h2 class="text-xl font-bold">HRT today</h2>
+<button class="text-primary text-sm font-semibold hover:opacity-70">+ Add medication</button>
+</div>
+<div class="space-y-6">
+<!-- Med 1 -->
+<div class="flex items-start justify-between">
+<div class="flex-1">
+<h3 class="font-sans text-sm font-semibold">Estradiol, 75 mcg · Patch</h3>
+<div class="inline-flex mt-1 items-center bg-[#e8f5ed] text-[#2d6a4f] px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider">
+                            Taken 08:15
+                        </div>
+</div>
+<div class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</div>
+</div>
+<!-- Med 2 -->
+<div class="flex items-start justify-between">
+<div class="flex-1">
+<h3 class="font-sans text-sm font-semibold">Utrogestan, 100 mg · Tablet</h3>
+<div class="inline-flex mt-1 items-center bg-tertiary-fixed text-on-tertiary-fixed-variant px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider">
+                            Not taken
+                        </div>
+</div>
+<div class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-outline-variant/15 flex justify-between items-center text-xs text-[#9B8B7E]">
+<span>Dose changed 18 days ago</span>
+<button class="text-primary font-bold flex items-center">
+                    See impact <span class="material-symbols-outlined text-sm ml-0.5" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</section>
+<!-- Triggers Card -->
+<section class="bg-surface-container-lowest rounded-3xl p-6 shadow-sm">
+<div class="flex justify-between items-center mb-5">
+<h2 class="text-xl font-bold">Today's triggers</h2>
+<button class="text-primary text-sm font-semibold hover:opacity-70">Edit</button>
+</div>
+<div class="flex flex-wrap gap-2 mb-4">
+<div class="bg-tertiary-fixed/30 text-on-tertiary-fixed-variant px-3 py-2 rounded-xl flex items-center gap-2 text-sm font-medium">
+                    Stress
+                    <span class="material-symbols-outlined text-sm opacity-50 cursor-pointer" data-icon="close">close</span>
+</div>
+<div class="bg-tertiary-fixed/30 text-on-tertiary-fixed-variant px-3 py-2 rounded-xl flex items-center gap-2 text-sm font-medium">
+                    Red wine
+                    <span class="material-symbols-outlined text-sm opacity-50 cursor-pointer" data-icon="close">close</span>
+</div>
+<div class="bg-tertiary-fixed/30 text-on-tertiary-fixed-variant px-3 py-2 rounded-xl flex items-center gap-2 text-sm font-medium">
+                    Poor sleep
+                    <span class="material-symbols-outlined text-sm opacity-50 cursor-pointer" data-icon="close">close</span>
+</div>
+</div>
+<button class="text-primary font-bold text-sm flex items-center gap-1 hover:opacity-80">
+<span class="material-symbols-outlined text-lg" data-icon="add">add</span>
+                Add trigger
+            </button>
+</section>
+<!-- Insights Card Teaser -->
+<section class="bg-surface-container-lowest rounded-3xl p-6 shadow-sm overflow-hidden relative border border-secondary-fixed/30">
+<div class="flex justify-between items-start mb-4">
+<div>
+<span class="bg-secondary-fixed text-on-secondary-fixed text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest mb-2 inline-block">Insights Teaser</span>
+<h3 class="text-lg leading-tight font-headline">Top pattern: Red wine → +4.2 hot flashes next day</h3>
+</div>
+<span class="material-symbols-outlined text-secondary" data-icon="lock" style="font-variation-settings: 'FILL' 1;">lock</span>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-semibold">
+<span class="text-on-surface-variant">Correlation strength</span>
+<span class="text-primary">79%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container rounded-full">
+<div class="h-full bg-gradient-to-r from-primary to-primary-container rounded-full" style="width: 79%"></div>
+</div>
+</div>
+<div class="mt-4 blur-[1px] select-none opacity-40">
+<p class="text-xs italic font-headline">Drinking red wine in the evening is followed by a significant increase in night sweat intensity...</p>
+</div>
+<!-- Premium Upgrade CTA Overlay -->
+<div class="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-white via-white/90 to-transparent flex flex-col items-center">
+<button class="bg-gradient-to-br from-[#67594e] to-[#817266] text-white text-xs font-bold py-2 px-6 rounded-full shadow-lg hover:scale-105 transition-transform active:scale-95">
+                    Unlock Premium Insights
+                </button>
+</div>
+</section>
+</main>
+<!-- FAB -->
+<button class="fixed bottom-24 right-6 w-[60px] h-[60px] bg-secondary text-white rounded-full flex items-center justify-center shadow-[0_4px_24px_rgba(101,90,110,0.3)] z-50 hover:scale-105 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-3xl" data-icon="add">add</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-[#f2edea]/70 dark:bg-[#2a2827]/70 backdrop-blur-md shadow-[0_-4px_24px_rgba(29,27,26,0.06)] rounded-t-3xl border-t border-[#9B8B7E]/15">
+<a class="flex flex-col items-center justify-center bg-gradient-to-br from-[#67594e] to-[#817266] text-white rounded-2xl p-2 scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-sans text-[10px] font-medium Manrope mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] p-2 hover:text-[#67594e] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-sans text-[10px] font-medium Manrope mt-1">Insights</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] p-2 hover:text-[#67594e] transition-colors" href="#">
+<span class="material-symbols-outlined text-3xl" data-icon="add_circle">add_circle</span>
+<span class="font-sans text-[10px] font-medium Manrope mt-1">Log</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] p-2 hover:text-[#67594e] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="font-sans text-[10px] font-medium Manrope mt-1">Library</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] p-2 hover:text-[#67594e] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span class="font-sans text-[10px] font-medium Manrope mt-1">Community</span>
+</a>
+</nav>
+</body></html>

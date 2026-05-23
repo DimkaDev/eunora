@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync | Doctor Report Preview</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface": "#1d1b1a",
+                        "on-tertiary-container": "#fffbff",
+                        "on-primary-container": "#fffbff",
+                        "primary-container": "#817266",
+                        "surface-container-highest": "#e7e1df",
+                        "surface-container-high": "#ede7e5",
+                        "background": "#fef8f6",
+                        "tertiary": "#814f45",
+                        "primary-fixed": "#f2dfd0",
+                        "surface-variant": "#e7e1df",
+                        "surface": "#fef8f6",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-container": "#9d675c",
+                        "secondary": "#655a6e",
+                        "on-tertiary-fixed": "#341009",
+                        "inverse-primary": "#d6c3b5",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-bright": "#fef8f6",
+                        "on-secondary-fixed": "#211828",
+                        "outline": "#7f756e",
+                        "on-surface-variant": "#4d453f",
+                        "surface-container": "#f2edea",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#f8f2f0",
+                        "inverse-on-surface": "#f5f0ed",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "outline-variant": "#d0c4bc",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#ffdad3",
+                        "on-secondary-container": "#6c6074",
+                        "on-secondary": "#ffffff",
+                        "surface-tint": "#6a5c50",
+                        "surface-dim": "#ded9d7",
+                        "on-primary-fixed": "#231a11",
+                        "on-background": "#1d1b1a",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "on-primary-fixed-variant": "#51443a",
+                        "secondary-container": "#edddf5",
+                        "primary": "#67594e",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#32302f",
+                        "secondary-fixed": "#edddf5",
+                        "on-tertiary-fixed-variant": "#683a31"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24
+    }
+.paper-texture {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuBsbcfLBa_QR6PsJ_sgUnd2sTKf2Lx5tpiA_hcHE6eNoNG8BMUmYp_hMZeTu4-2YiQJP2oXzf9F6zehlNlSD-kXVK5HjU0UG4j2eBZyQLLScIHi9kT48f0eauhytNhy_uhs_WAhtT5-cO7_udTJfzXeSxWaqibo8kZvZlSVZsxwC9eSjeNbRkmFTNmENvfHgLQnrYlQ4Vg7AIJmCLOSc-7AnFXInL5oQqiSY-qjXQm0K55ObahxSQ1KXjm4FovbbNrIYrpT46Q7qtg)
+    }
+.tonal-shift {
+    background-color: rgba(242, 237, 234, 0.5)
+    }</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface antialiased">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#fef8f6] dark:bg-stone-950/70 backdrop-blur-md border-b border-stone-200/15 dark:border-stone-800/15 shadow-sm shadow-[#1d1b1a]/5 flex items-center px-5 h-16 w-full">
+<div class="flex items-center gap-4 w-full">
+<button class="material-symbols-outlined text-[#67594e] dark:text-[#D8C9E0] hover:bg-stone-200/50 dark:hover:bg-stone-800/50 transition-colors active:scale-95 duration-200 p-2 rounded-full" data-icon="arrow_back">arrow_back</button>
+<h1 class="font-['Noto_Serif'] font-semibold text-lg text-[#67594e] dark:text-[#D8C9E0]">Report Preview</h1>
+<div class="ml-auto flex items-center gap-2">
+<span class="text-xs font-medium px-2 py-1 rounded-full bg-secondary-container text-on-secondary-container">DRAFT</span>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-32 px-4 md:px-8 max-w-4xl mx-auto min-h-screen">
+<!-- The "PDF" Container -->
+<div class="relative bg-surface-container-lowest shadow-[0_10px_40px_-15px_rgba(29,27,26,0.12)] rounded-xl overflow-hidden paper-texture border border-outline-variant/10">
+<!-- PDF Header -->
+<div class="p-8 md:p-12 border-b border-surface-container-high">
+<div class="flex justify-between items-start mb-10">
+<div class="space-y-1">
+<p class="text-primary font-bold tracking-tighter text-sm uppercase">MenoSync</p>
+<h2 class="font-headline text-3xl text-on-surface leading-tight">Patient Symptom Report</h2>
+</div>
+<div class="text-right">
+<div class="w-12 h-12 bg-secondary-container rounded-full flex items-center justify-center mb-2 ml-auto">
+<span class="material-symbols-outlined text-on-secondary-container" data-icon="medical_services">medical_services</span>
+</div>
+<p class="text-[10px] text-outline font-bold uppercase tracking-widest">Confidential Document</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-8 pt-6">
+<div class="space-y-1">
+<p class="text-[11px] text-outline font-bold uppercase tracking-wider">Patient Name</p>
+<p class="font-headline text-xl text-on-surface">Sarah Johnson</p>
+</div>
+<div class="space-y-1">
+<p class="text-[11px] text-outline font-bold uppercase tracking-wider">Reporting Period</p>
+<p class="font-body text-base text-on-surface-variant font-medium">March 1 – March 30, 2026</p>
+</div>
+</div>
+</div>
+<div class="p-8 md:p-12 space-y-12">
+<!-- Section 1: Executive Summary (Bento Style) -->
+<section>
+<h3 class="font-headline text-lg text-primary mb-6 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed"></span>
+                        Executive Summary
+                    </h3>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/5">
+<p class="text-[10px] font-bold text-outline uppercase tracking-widest mb-2">Adherence</p>
+<div class="flex items-baseline gap-1">
+<span class="text-3xl font-headline text-on-surface">24</span>
+<span class="text-outline text-sm">/ 30 days</span>
+</div>
+<div class="mt-4 w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[80%]"></div>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/5">
+<p class="text-[10px] font-bold text-outline uppercase tracking-widest mb-2">Avg. Severity</p>
+<div class="flex items-baseline gap-1">
+<span class="text-3xl font-headline text-on-surface">5.2</span>
+<span class="text-outline text-sm">/ 10</span>
+</div>
+<p class="mt-4 text-xs text-on-surface-variant italic">Moderate baseline</p>
+</div>
+<div class="bg-secondary-container/30 p-6 rounded-xl border border-secondary-container/10">
+<p class="text-[10px] font-bold text-on-secondary-fixed-variant uppercase tracking-widest mb-2">Primary Symptom</p>
+<p class="text-lg font-headline text-on-surface mb-1">Hot Flashes</p>
+<span class="inline-block px-2 py-0.5 bg-tertiary-container text-white text-[10px] font-bold rounded uppercase">Severe</span>
+</div>
+</div>
+</section>
+<!-- Section 2: Severity Trends (Visual) -->
+<section>
+<div class="flex justify-between items-end mb-6">
+<h3 class="font-headline text-lg text-primary flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                            Severity Trends
+                        </h3>
+<p class="text-[10px] text-outline font-bold uppercase">Daily Aggregation</p>
+</div>
+<div class="bg-surface-container-low p-8 rounded-xl h-48 relative flex items-end justify-between gap-1 overflow-hidden">
+<!-- Simulated Chart -->
+<div class="absolute inset-0 opacity-10 flex items-center justify-center">
+<span class="material-symbols-outlined text-[120px]" data-icon="show_chart">show_chart</span>
+</div>
+<div class="w-3 bg-secondary/20 h-[40%] rounded-t-full"></div>
+<div class="w-3 bg-secondary/20 h-[55%] rounded-t-full"></div>
+<div class="w-3 bg-secondary/40 h-[70%] rounded-t-full"></div>
+<div class="w-3 bg-secondary/20 h-[30%] rounded-t-full"></div>
+<div class="w-3 bg-secondary/20 h-[45%] rounded-t-full"></div>
+<div class="w-3 bg-primary h-[85%] rounded-t-full"></div>
+<div class="w-3 bg-secondary/20 h-[50%] rounded-t-full"></div>
+<div class="w-3 bg-secondary/20 h-[40%] rounded-t-full"></div>
+<div class="w-3 bg-secondary/40 h-[65%] rounded-t-full"></div>
+<div class="w-3 bg-secondary/20 h-[35%] rounded-t-full"></div>
+<div class="w-3 bg-secondary/20 h-[20%] rounded-t-full"></div>
+<div class="w-3 bg-primary h-[90%] rounded-t-full shadow-lg shadow-primary/20"></div>
+<div class="w-3 bg-secondary/20 h-[50%] rounded-t-full"></div>
+<div class="w-3 bg-secondary/20 h-[45%] rounded-t-full"></div>
+<div class="w-3 bg-secondary/20 h-[30%] rounded-t-full"></div>
+<div class="w-3 bg-secondary/40 h-[60%] rounded-t-full"></div>
+<div class="w-3 bg-secondary/20 h-[40%] rounded-t-full"></div>
+</div>
+</section>
+<!-- Section 3 & 4: Dual Column Layout -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+<!-- Section 3: Most Frequent Symptoms -->
+<section>
+<h3 class="font-headline text-lg text-primary mb-6 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                            Frequency
+                        </h3>
+<ul class="space-y-4">
+<li class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl">
+<span class="font-body font-semibold text-on-surface">Hot Flashes</span>
+<span class="font-headline text-lg text-primary">18 <span class="text-[10px] text-outline uppercase font-bold ml-1">Days</span></span>
+</li>
+<li class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl">
+<span class="font-body font-semibold text-on-surface">Sleep Disturbance</span>
+<span class="font-headline text-lg text-primary">12 <span class="text-[10px] text-outline uppercase font-bold ml-1">Days</span></span>
+</li>
+<li class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl">
+<span class="font-body font-semibold text-on-surface">Mood Changes</span>
+<span class="font-headline text-lg text-primary">10 <span class="text-[10px] text-outline uppercase font-bold ml-1">Days</span></span>
+</li>
+</ul>
+</section>
+<!-- Section 4: Trigger Analysis -->
+<section>
+<h3 class="font-headline text-lg text-primary mb-6 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+                            Insights &amp; Triggers
+                        </h3>
+<div class="space-y-6">
+<div class="flex gap-4">
+<div class="mt-1 flex-shrink-0 w-8 h-8 rounded-full bg-error-container/40 flex items-center justify-center">
+<span class="material-symbols-outlined text-error text-sm" data-icon="warning">warning</span>
+</div>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+<strong class="text-on-surface">Caffeine Correlation:</strong> High correlation (85% confidence) between caffeine intake and immediate symptom onset.
+                                </p>
+</div>
+<div class="flex gap-4">
+<div class="mt-1 flex-shrink-0 w-8 h-8 rounded-full bg-secondary-container/40 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="check_circle">check_circle</span>
+</div>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+<strong class="text-on-surface">Physical Activity:</strong> Positive response noted following 30+ min of moderate physical activity.
+                                </p>
+</div>
+</div>
+</section>
+</div>
+<!-- Section 5: Patient Notes -->
+<section class="pt-8 border-t border-surface-container-high">
+<h3 class="font-headline text-lg text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-base" data-icon="edit_note">edit_note</span>
+                        Clinical Observations &amp; Notes
+                    </h3>
+<div class="p-6 bg-surface-container-low/50 rounded-xl border border-dashed border-outline-variant/50">
+<p class="font-headline italic text-on-surface-variant leading-relaxed">
+                            "Patient reports a noticeable increase in night sweat frequency and intensity during high-stress work weeks. Symptoms seem to stabilize during weekend rest periods."
+                        </p>
+</div>
+</section>
+<!-- PDF Footer -->
+<div class="pt-12 flex justify-between items-center opacity-40">
+<p class="text-[9px] uppercase tracking-[0.2em] font-bold text-outline">Generated by MenoSync Health AI • Ref: MS-2026-SJ-03</p>
+<img alt="MenoSync Branding" class="h-4" data-alt="Small minimalist brand logo for MenoSync" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAm4FWJ2XE7xEANVe7KO7g--X1a2AwfW1HPfwfFcshnWiS4LLunKhkiemUo4cDRZgUt1WUqXum4l72c5vj3_ZoliRJq3hi1rUOrmBRkdmg6x43M7aAkd3t6A_tMM1hPEKjhO6gr4AP4AbuSiSKmh5HLRZ9zJ99n0fhYzVaAgWBevePvZdaAQsdych2ltsU2VLfDHqNUQFXmU9YNJOFw7KRSDZt5SCguwHsxVDob3BsO6pfzTSV2QqRh7GUeT6S0QqXxIyolU4L6Vsg"/>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full rounded-t-3xl z-50 bg-[#fef8f6]/70 dark:bg-stone-950/70 backdrop-blur-md shadow-[0_-4px_24px_0_rgba(29,27,26,0.06)] tonal-shift flex justify-around items-center px-6 pt-3 pb-8 w-full">
+<!-- Inactive: Share -->
+<button class="flex flex-col items-center justify-center text-[#9B8B7E] dark:text-stone-400 px-6 py-2 hover:opacity-80 transition-opacity active:scale-98 duration-150">
+<span class="material-symbols-outlined mb-1" data-icon="share">share</span>
+<span class="font-['Manrope'] font-medium text-[11px] tracking-wide">Share</span>
+</button>
+<!-- Active: Export PDF (Since we are in the Preview screen) -->
+<button class="flex flex-col items-center justify-center bg-[#D8C9E0] dark:bg-[#67594e] text-[#1d1b1a] dark:text-[#fef8f6] rounded-2xl px-6 py-2 hover:opacity-80 transition-opacity active:scale-98 duration-150">
+<span class="material-symbols-outlined mb-1" data-icon="picture_as_pdf" data-weight="fill" style="font-variation-settings: 'FILL' 1;">picture_as_pdf</span>
+<span class="font-['Manrope'] font-medium text-[11px] tracking-wide">Export PDF</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#9B8B7E] dark:text-stone-400 px-6 py-2 hover:opacity-80 transition-opacity active:scale-98 duration-150">
+<span class="material-symbols-outlined mb-1" data-icon="print">print</span>
+<span class="font-['Manrope'] font-medium text-[11px] tracking-wide">Print</span>
+</button>
+</nav>
+</body></html>

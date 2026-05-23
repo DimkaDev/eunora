@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync Proactive Wellness</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;0,900;1,400&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#67594e",
+                        "on-surface": "#1d1b1a",
+                        "surface-container": "#f2edea",
+                        "background": "#F7F5F0",
+                        "accent-rose": "#E8A89B",
+                        "sage-light": "#E8F0E8",
+                        "lavender-light": "#E8C9E0"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"]
+                    },
+                    borderRadius: {
+                        "card": "2rem",
+                        "button": "1.25rem"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body {
+                @apply bg-[#F7F5F0] text-on-surface font-body min-h-screen pb-32;
+            }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .editorial-header {
+            font-family: 'Noto Serif', serif;
+        }
+        .soft-shadow {
+            box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body>
+<header class="w-full top-0 sticky z-50 bg-[#F7F5F0]/80 backdrop-blur-md flex justify-between items-center px-6 py-5">
+<div class="flex flex-col">
+<h1 class="editorial-header font-bold text-2xl tracking-tight text-primary">Good morning, Sarah</h1>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="text-[11px] font-bold text-stone-500 uppercase tracking-widest">Wednesday, March 19</span>
+<span class="w-1 h-1 rounded-full bg-accent-rose"></span>
+<span class="text-[11px] text-stone-400 italic">1 week in cycle</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-primary bg-white p-2 rounded-full shadow-sm">notifications</button>
+<div class="w-10 h-10 rounded-full overflow-hidden ring-2 ring-white shadow-sm">
+<img alt="Sarah's Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcyvRmigFQWEnghTEoPCUvu6Lls83qWwGf81JXXAHmxs_PI1albuWzfyX8hJHYDK2oDWVWOWPMCqACZzrOSiUrEriDUDMizBdlzmoikkKEMsviNymTb1SmeDL2M5mjpE7ZBB0lVSTa1Di99-xd5i_V5XTTvhH9uNbS-BEM4dPF7EevWWNXW_jzlWxSVjPjBZ3OPwiDpUtKeUmcOYd5ry2dtceFPJ-WL6Bp-ZEtlShywIcbEgix84xxFqoBGr1QXN6ehV00Hjb-W4c"/>
+</div>
+</div>
+</header>
+<main class="px-5 space-y-5">
+<section class="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-sage-light to-[#d9e8d9] p-7 soft-shadow border border-white/40">
+<div class="relative z-10">
+<div class="flex items-center gap-2 mb-4">
+<span class="bg-white/60 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-black text-[#4a5e4a] uppercase tracking-wider">Today's Focus</span>
+<span class="text-lg">🌿</span>
+</div>
+<h2 class="editorial-header font-bold text-2xl text-[#2d402d] leading-tight mb-3">Mindful Evening Wind-down</h2>
+<p class="text-[15px] text-[#4a5e4a] leading-relaxed mb-8">
+                Based on your logs, stress is impacting your sleep. Try <span class="font-bold underline decoration-accent-rose/50">10 minutes of box breathing</span> tonight to lower cortisol.
+            </p>
+<div class="bg-white/40 backdrop-blur-md rounded-3xl p-5 border border-white/60">
+<p class="text-xs font-bold text-[#2d402d] mb-4 text-center">Ready to check in with yourself?</p>
+<div class="flex flex-col gap-3">
+<button class="flex items-center justify-center gap-3 w-full bg-primary text-white font-bold py-4 rounded-button shadow-lg shadow-primary/20 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-xl">edit_note</span>
+                        Log Today's Symptoms
+                    </button>
+<button class="w-full bg-white/60 text-primary font-bold py-3 rounded-button text-sm active:scale-95 transition-all">
+                        I'm feeling great today
+                    </button>
+</div>
+</div>
+</div>
+<div class="absolute -right-12 -top-12 w-48 h-48 bg-white/20 rounded-full blur-3xl"></div>
+<div class="absolute -left-12 bottom-0 w-64 h-32 opacity-20 pointer-events-none">
+<svg preserveAspectRatio="none" style="height: 100%; width: 100%;" viewBox="0 0 500 150">
+<path d="M0.00,49.98 C149.99,150.00 349.89,-49.98 500.00,49.98 L500.00,150.00 L0.00,150.00 Z" style="stroke: none; fill: #4a5e4a;"></path>
+</svg>
+</div>
+</section>
+<section class="bg-white rounded-card p-6 soft-shadow border border-stone-100">
+<div class="flex justify-between items-center mb-5">
+<h3 class="font-bold text-[13px] text-primary uppercase tracking-widest">Logged Today</h3>
+<span class="material-symbols-outlined text-stone-300">history</span>
+</div>
+<div class="flex flex-wrap gap-2.5">
+<div class="flex items-center gap-2 pl-4 pr-2 py-2 bg-[#F0E0D8]/60 rounded-full border border-[#F0E0D8]">
+<span class="text-xs font-bold text-primary">Hot Flashes</span>
+<span class="px-2 py-0.5 text-[9px] bg-primary text-white rounded-full uppercase font-black">Severe</span>
+</div>
+<div class="flex items-center gap-2 pl-4 pr-2 py-2 bg-[#F0E0D8]/60 rounded-full border border-[#F0E0D8]">
+<span class="text-xs font-bold text-primary">Sleep Issues</span>
+<span class="px-2 py-0.5 text-[9px] bg-stone-400 text-white rounded-full uppercase font-black">Mild</span>
+</div>
+<button class="flex items-center justify-center w-10 h-10 rounded-full border-2 border-dashed border-stone-200 text-stone-400 hover:border-accent-rose hover:text-accent-rose transition-colors">
+<span class="material-symbols-outlined text-xl">add</span>
+</button>
+</div>
+</section>
+<section class="bg-white rounded-card p-6 soft-shadow border border-stone-100">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-bold text-[13px] text-primary uppercase tracking-widest">Weekly Trends</h3>
+<a class="text-[11px] font-bold text-accent-rose underline decoration-accent-rose/30" href="#">View Details</a>
+</div>
+<div class="space-y-4 mb-6">
+<div class="grid grid-cols-[35px_1fr] items-center gap-4">
+<span class="text-[10px] font-black text-stone-300">MON</span>
+<div class="h-2.5 bg-stone-50 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-lavender-light to-accent-rose w-[40%] rounded-full"></div>
+</div>
+</div>
+<div class="grid grid-cols-[35px_1fr] items-center gap-4">
+<span class="text-[10px] font-black text-stone-300">TUE</span>
+<div class="h-2.5 bg-stone-50 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-lavender-light to-accent-rose w-[85%] rounded-full"></div>
+</div>
+</div>
+<div class="grid grid-cols-[35px_1fr] items-center gap-4">
+<span class="text-[10px] font-black text-primary">WED</span>
+<div class="h-2.5 bg-stone-100 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-lavender-light to-accent-rose w-[60%] rounded-full"></div>
+</div>
+</div>
+<div class="flex justify-between px-10 pt-2 opacity-30">
+<div class="flex flex-col items-center gap-1"><span class="text-[8px] font-black">THU</span><div class="w-1 h-1 rounded-full bg-stone-400"></div></div>
+<div class="flex flex-col items-center gap-1"><span class="text-[8px] font-black">FRI</span><div class="w-1 h-1 rounded-full bg-stone-400"></div></div>
+<div class="flex flex-col items-center gap-1"><span class="text-[8px] font-black">SAT</span><div class="w-1 h-1 rounded-full bg-stone-400"></div></div>
+<div class="flex flex-col items-center gap-1"><span class="text-[8px] font-black">SUN</span><div class="w-1 h-1 rounded-full bg-stone-400"></div></div>
+</div>
+</div>
+<div class="flex items-center gap-3 p-4 bg-background rounded-2xl">
+<div class="w-10 h-10 rounded-full bg-accent-rose/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-accent-rose" style="font-variation-settings: 'FILL' 1;">trending_up</span>
+</div>
+<p class="text-xs text-stone-600">Peak symptom frequency: <span class="font-bold text-primary">Hot Flashes</span> during evenings.</p>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-4 bg-white/80 backdrop-blur-xl border-t border-stone-100">
+<a class="flex flex-col items-center justify-center bg-primary text-white rounded-[1.5rem] px-5 py-2.5 active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined text-[22px]" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-bold text-[9px] uppercase tracking-[0.1em] mt-1">Guide</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-400 px-5 py-2 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined text-[22px]">calendar_today</span>
+<span class="font-bold text-[9px] uppercase tracking-[0.1em] mt-1">Logs</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-400 px-5 py-2 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined text-[22px]">auto_graph</span>
+<span class="font-bold text-[9px] uppercase tracking-[0.1em] mt-1">Trends</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-400 px-5 py-2 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined text-[22px]">face</span>
+<span class="font-bold text-[9px] uppercase tracking-[0.1em] mt-1">Profile</span>
+</a>
+</nav>
+
+</body></html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Sign In Error</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed-dim": "#f9b7a9",
+                    "primary-container": "#817266",
+                    "on-tertiary-container": "#fffbff",
+                    "on-primary-fixed": "#231a11",
+                    "inverse-primary": "#d6c3b5",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-highest": "#e7e1df",
+                    "surface-bright": "#fef8f6",
+                    "on-error-container": "#93000a",
+                    "background": "#fef8f6",
+                    "surface": "#fef8f6",
+                    "secondary-container": "#edddf5",
+                    "on-surface-variant": "#4d453f",
+                    "outline-variant": "#d0c4bc",
+                    "on-surface": "#1d1b1a",
+                    "inverse-on-surface": "#f5f0ed",
+                    "on-secondary-fixed": "#211828",
+                    "error-container": "#ffdad6",
+                    "inverse-surface": "#32302f",
+                    "secondary-fixed-dim": "#d0c1d8",
+                    "on-primary-fixed-variant": "#51443a",
+                    "secondary-fixed": "#edddf5",
+                    "on-secondary": "#ffffff",
+                    "on-primary-container": "#fffbff",
+                    "secondary": "#655a6e",
+                    "on-secondary-container": "#6c6074",
+                    "on-background": "#1d1b1a",
+                    "surface-dim": "#ded9d7",
+                    "outline": "#7f756e",
+                    "on-error": "#ffffff",
+                    "surface-variant": "#e7e1df",
+                    "error": "#ba1a1a",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-fixed": "#f2dfd0",
+                    "primary": "#67594e",
+                    "on-tertiary-fixed-variant": "#683a31",
+                    "tertiary": "#814f45",
+                    "surface-container": "#f2edea",
+                    "primary-fixed-dim": "#d6c3b5",
+                    "on-tertiary-fixed": "#341009",
+                    "tertiary-fixed": "#ffdad3",
+                    "surface-tint": "#6a5c50",
+                    "surface-container-low": "#f8f2f0",
+                    "tertiary-container": "#9d675c",
+                    "surface-container-high": "#ede7e5",
+                    "on-secondary-fixed-variant": "#4d4355",
+                    "on-primary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {},
+            "fontFamily": {
+                    "headline": [
+                            "Noto Serif"
+                    ],
+                    "display": [
+                            "Noto Serif"
+                    ],
+                    "body": [
+                            "Manrope"
+                    ],
+                    "label": [
+                            "Manrope"
+                    ]
+            },
+            "fontSize": {}
+    },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body antialiased min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
+<div class="absolute inset-0 z-0 pointer-events-none" style="background-image: radial-gradient(circle at 80% 20%, rgba(216, 201, 224, 0.4) 0%, transparent 40%), radial-gradient(circle at 20% 80%, rgba(155, 139, 126, 0.2) 0%, transparent 40%);">
+</div>
+<main class="w-full max-w-md px-6 py-12 relative z-10 flex flex-col">
+<header class="mb-12 text-center space-y-4">
+<h1 class="font-headline text-4xl text-primary tracking-tight">MenoSync</h1>
+<p class="font-body text-on-surface-variant text-lg">Welcome back to your serene space.</p>
+</header>
+<section class="bg-surface-container-lowest rounded-[1.5rem] p-8 shadow-[0_4px_24px_rgba(29,27,26,0.06)] flex flex-col space-y-6 relative">
+<form class="flex flex-col space-y-6" onsubmit="event.preventDefault();">
+<div class="space-y-2">
+<label class="block font-label text-sm font-medium text-on-surface-variant" for="email">Email Address</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-error">mail</span>
+<input class="w-full bg-error-container/20 text-on-surface rounded-full pl-12 pr-4 py-3 font-body text-base outline-none border border-error/50 focus:border-error focus:ring-1 focus:ring-error transition-all placeholder:text-on-surface-variant/50" id="email" name="email" placeholder="your@email.com" type="email" value="sarah.j@example"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="block font-label text-sm font-medium text-on-surface-variant" for="password">Password</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-error">lock</span>
+<input class="w-full bg-error-container/20 text-on-surface rounded-full pl-12 pr-12 py-3 font-body text-base outline-none border border-error/50 focus:border-error focus:ring-1 focus:ring-error transition-all placeholder:text-on-surface-variant/50" id="password" name="password" placeholder="Enter your password" type="password" value="********"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined">visibility_off</span>
+</button>
+</div>
+<p class="text-error text-sm mt-2 flex items-center gap-1 font-medium">
+<span class="material-symbols-outlined text-[16px]">error</span>
+                        Invalid email or password. Please try again.
+                    </p>
+</div>
+<div class="flex justify-end pt-2">
+<a class="font-label text-sm font-medium text-primary hover:text-primary-container transition-colors" href="#">Forgot password?</a>
+</div>
+<div class="pt-4">
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-[1.5rem] py-4 font-label text-base font-semibold shadow-[0_4px_24px_rgba(29,27,26,0.06)] hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2" type="submit">
+                        Sign In
+                        <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</div>
+</form>
+<div class="pt-6 border-t border-surface-container mt-6">
+<p class="text-center font-body text-sm text-on-surface-variant">
+                    Don't have an account yet? 
+                    <a class="font-medium text-primary hover:text-primary-container transition-colors ml-1" href="#">Create one here</a>
+</p>
+</div>
+</section>
+</main>
+</body></html>

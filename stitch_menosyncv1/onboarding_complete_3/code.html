@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Mindful Integration</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&amp;family=Playfair+Display:ital,wght@0,400;0,500;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "mindful-sky": "#E0F2F1",
+                    "mindful-sand": "#FDFBF7",
+                    "mindful-text": "#4A4542",
+                    "mindful-subtle": "#7A7471",
+                    "primary": "#8E7F76",
+                    "primary-container": "#A3968E",
+                    "on-primary": "#ffffff"
+            },
+            "fontFamily": {
+                    "headline": ["Playfair Display", "serif"],
+                    "body": ["Manrope", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style type="text/tailwindcss">
+        :root {
+            --watercolor-gradient: linear-gradient(180deg, #D4E9F2 0%, #F8E8D5 40%, #E8F3E9 100%);
+        }
+        .watercolor-bg {
+            background: var(--watercolor-gradient);
+            background-attachment: fixed;
+        }
+        .hill-1 {
+            border-radius: 60% 40% 0 0 / 100% 100% 0 0;
+            background: linear-gradient(180deg, rgba(165, 185, 168, 0.4) 0%, rgba(165, 185, 168, 0) 100%);
+        }
+        .hill-2 {
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+            background: linear-gradient(180deg, rgba(142, 158, 145, 0.3) 0%, rgba(142, 158, 145, 0) 100%);
+        }
+        .organic-bubble {
+            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(142, 127, 118, 0.08);
+            border-radius: 40% 60% 50% 50% / 50% 50% 50% 50%;
+        }
+        .organic-bubble-alt {
+            border-radius: 55% 45% 60% 40% / 45% 55% 45% 55%;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+        }
+        .sunrise-glow {
+            background: radial-gradient(circle at 50% 50%, rgba(255, 243, 224, 0.8) 0%, transparent 70%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="watercolor-bg font-body text-mindful-text antialiased min-h-screen flex flex-col items-center">
+<div class="fixed inset-0 pointer-events-none z-0">
+<div class="absolute top-[15%] left-1/2 -translate-x-1/2 w-48 h-48 sunrise-glow blur-2xl"></div>
+<div class="absolute bottom-0 left-[-20%] w-[140%] h-[40%] hill-1 transform translate-y-10"></div>
+<div class="absolute bottom-0 left-[-10%] w-[120%] h-[30%] hill-2 transform translate-y-5"></div>
+</div>
+<main class="relative z-10 w-full max-w-lg flex-1 flex flex-col px-6">
+<section class="pt-20 pb-12 flex flex-col items-center text-center">
+<h1 class="font-headline text-[32px] font-medium text-mindful-text tracking-tight mb-4 italic opacity-90">
+            You're all set, Sarah.
+        </h1>
+<p class="font-body text-[16px] leading-relaxed text-mindful-subtle max-w-[290px] font-light">
+            MenoSync is personalised for your journey. Two quick reminders and you're ready.
+        </p>
+</section>
+<section class="space-y-8 pb-40">
+<div class="organic-bubble p-6 flex items-center justify-between transition-all active:scale-[0.98]">
+<div class="flex items-center space-x-4">
+<div class="w-14 h-14 rounded-full bg-white/40 flex items-center justify-center backdrop-blur-sm">
+<span class="text-2xl filter saturate-50">🌿</span>
+</div>
+<div class="flex flex-col">
+<h3 class="font-headline italic text-[18px] text-mindful-text">Take your HRT</h3>
+<p class="font-body text-[13px] text-mindful-subtle font-light">A gentle nudge for your dose</p>
+</div>
+</div>
+<button class="font-body font-medium text-[15px] text-primary/80 border-b border-primary/20 pb-1">
+                8:00 AM
+            </button>
+</div>
+<div class="organic-bubble organic-bubble-alt p-6 flex items-center justify-between transition-all active:scale-[0.98]">
+<div class="flex items-center space-x-4">
+<div class="w-14 h-14 rounded-full bg-white/40 flex items-center justify-center backdrop-blur-sm">
+<span class="text-2xl filter saturate-50">🌙</span>
+</div>
+<div class="flex flex-col">
+<h3 class="font-headline italic text-[18px] text-mindful-text">Log your day</h3>
+<p class="font-body text-[13px] text-mindful-subtle font-light">60 seconds to wind down</p>
+</div>
+</div>
+<button class="font-body font-medium text-[15px] text-primary/80 border-b border-primary/20 pb-1">
+                8:00 PM
+            </button>
+</div>
+<div class="text-center">
+<p class="font-body text-[13px] text-mindful-subtle italic opacity-60">
+                You can change these any time in Settings.
+            </p>
+</div>
+</section>
+</main>
+<div class="fixed bottom-0 left-0 w-full flex justify-center p-6 z-50">
+<div class="w-full max-w-md">
+<button class="w-full h-14 rounded-full bg-primary text-on-primary font-body text-[15px] font-medium tracking-wide flex items-center justify-center space-x-2 shadow-lg shadow-primary/20 transition-all active:scale-95">
+<span class="font-light">Start tracking</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+<div class="mt-4 flex items-center justify-center space-x-1.5 opacity-50">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+<span class="font-body text-[11px] uppercase tracking-widest text-mindful-text">Private &amp; Secure</span>
+</div>
+</div>
+</div>
+<div class="h-24"></div>
+
+</body></html>

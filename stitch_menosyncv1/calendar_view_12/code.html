@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Calendar View</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface": "#1d1b1a",
+                        "primary-fixed": "#f2dfd0",
+                        "secondary-container": "#edddf5",
+                        "surface-variant": "#e7e1df",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "primary": "#67594e",
+                        "on-secondary-fixed": "#211828",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#231a11",
+                        "inverse-on-surface": "#f5f0ed",
+                        "outline": "#7f756e",
+                        "on-tertiary-container": "#fffbff",
+                        "on-primary-fixed-variant": "#51443a",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "outline-variant": "#d0c4bc",
+                        "primary-container": "#817266",
+                        "error-container": "#ffdad6",
+                        "tertiary-container": "#9d675c",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "surface-container": "#f2edea",
+                        "surface-container-highest": "#e7e1df",
+                        "on-tertiary-fixed": "#341009",
+                        "on-surface-variant": "#4d453f",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "on-secondary-container": "#6c6074",
+                        "surface-container-low": "#f8f2f0",
+                        "surface-container-high": "#ede7e5",
+                        "on-error-container": "#93000a",
+                        "inverse-surface": "#32302f",
+                        "on-primary-container": "#fffbff",
+                        "tertiary": "#814f45",
+                        "surface-dim": "#ded9d7",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "surface": "#fef8f6",
+                        "tertiary-fixed": "#ffdad3",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#fef8f6",
+                        "background": "#fef8f6",
+                        "secondary": "#655a6e",
+                        "on-background": "#1d1b1a",
+                        "inverse-primary": "#d6c3b5",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-tint": "#6a5c50",
+                        "secondary-fixed": "#edddf5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+        }
+        body { font-family: 'Manrope', sans-serif; }
+        h1, h2, h3 { font-family: 'Noto Serif', serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen pb-48">
+<header class="fixed top-0 w-full z-50 bg-[#fef8f6]/90 backdrop-blur-xl flex items-center justify-between px-6 py-4 border-b border-outline-variant/10">
+<div class="flex items-center gap-4">
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-surface-container-low active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[#67594e]">arrow_back</span>
+</button>
+<h1 class="font-headline text-xl font-semibold tracking-tight text-[#67594e]">Calendar View</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-surface-container-low active:scale-95 transition-all group">
+<span class="material-symbols-outlined text-[#67594e] group-hover:text-primary">info</span>
+</button>
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-surface-container-low active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[#67594e]">filter_list</span>
+</button>
+</div>
+</header>
+<main class="pt-24 px-5 max-w-2xl mx-auto">
+<nav class="flex items-center justify-between mb-4">
+<button class="text-[#9B8B7E] font-medium text-xs flex items-center gap-1 hover:text-[#67594e] transition-colors">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+                FEBRUARY
+            </button>
+<div class="px-6 py-1.5 rounded-full border border-outline-variant/30 bg-surface-container-lowest shadow-sm">
+<h2 class="text-sm font-bold uppercase tracking-widest text-primary">March 2024</h2>
+</div>
+<button class="text-[#9B8B7E] font-medium text-xs flex items-center gap-1 hover:text-[#67594e] transition-colors">
+                APRIL
+                <span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</nav>
+<section class="bg-surface-container-low rounded-[2rem] p-4 mb-6 shadow-sm border border-outline-variant/10">
+<div class="grid grid-cols-7 gap-1 mb-3">
+<div class="text-center text-[10px] font-bold text-outline uppercase tracking-wider">Mon</div>
+<div class="text-center text-[10px] font-bold text-outline uppercase tracking-wider">Tue</div>
+<div class="text-center text-[10px] font-bold text-outline uppercase tracking-wider">Wed</div>
+<div class="text-center text-[10px] font-bold text-outline uppercase tracking-wider">Thu</div>
+<div class="text-center text-[10px] font-bold text-outline uppercase tracking-wider">Fri</div>
+<div class="text-center text-[10px] font-bold text-outline uppercase tracking-wider">Sat</div>
+<div class="text-center text-[10px] font-bold text-outline uppercase tracking-wider">Sun</div>
+</div>
+<div class="grid grid-cols-7 gap-2">
+<div class="aspect-square flex items-center justify-center rounded-xl text-outline-variant text-sm">26</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-outline-variant text-sm">27</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-outline-variant text-sm">28</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-outline-variant text-sm">29</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-surface-container-lowest shadow-sm">1</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-surface-container-lowest shadow-sm">2</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-surface-container-lowest shadow-sm">3</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-secondary-container/40">4</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-secondary-container/40">5</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-secondary-container/80">6</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-secondary-container/80">7</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-tertiary-fixed-dim/50">8</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-tertiary-container/30">9</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-surface-container-lowest shadow-sm">10</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-surface-container-lowest shadow-sm">11</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-secondary-container/40">12</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-white border-2 border-primary-container shadow-md relative scale-110 z-10 font-bold">13</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-surface-container-lowest shadow-sm">14</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-surface-container-lowest shadow-sm">15</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-secondary-container/80">16</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-tertiary-container/60">17</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-surface-container-lowest shadow-sm">18</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-surface-container-lowest shadow-sm">19</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-secondary-container/40">20</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-secondary-container/40">21</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-secondary-container/40">22</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-surface-container-lowest shadow-sm">23</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-surface-container-lowest shadow-sm">24</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-surface-container-lowest shadow-sm">25</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-surface-container-lowest shadow-sm">26</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-surface-container-lowest shadow-sm">27</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-surface-container-lowest shadow-sm">28</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-surface-container-lowest shadow-sm">29</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-surface-container-lowest shadow-sm">30</div>
+<div class="aspect-square flex items-center justify-center rounded-xl text-on-surface text-sm bg-surface-container-lowest shadow-sm">31</div>
+</div>
+</section>
+<section class="mb-10">
+<div class="flex items-center gap-1 bg-surface-container-low p-1 rounded-2xl mb-4 border border-outline-variant/10">
+<button class="flex-1 py-2.5 rounded-xl text-xs font-bold bg-surface-container-lowest shadow-sm text-primary transition-all">DAY DETAILS</button>
+<button class="flex-1 py-2.5 rounded-xl text-xs font-bold text-outline hover:text-primary transition-all">TRENDS</button>
+<button class="flex-1 py-2.5 rounded-xl text-xs font-bold text-outline hover:text-primary transition-all">INSIGHTS</button>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between px-1">
+<h3 class="font-headline text-lg font-semibold text-primary">Wednesday, March 13</h3>
+<div class="px-3 py-1 rounded-full bg-secondary-container/40 text-xs font-bold text-on-secondary-container">MILD DAY</div>
+</div>
+<div class="grid grid-cols-1 gap-4">
+<div class="bg-surface-container-lowest p-5 rounded-3xl shadow-sm border border-outline-variant/10">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary text-xl">vital_signs</span>
+<h4 class="font-bold text-sm text-primary-container tracking-wide uppercase">Symptoms</h4>
+</div>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1.5 rounded-full bg-secondary-container/30 text-xs font-medium text-on-secondary-container">Hot Flashes (2)</span>
+<span class="px-3 py-1.5 rounded-full bg-secondary-container/30 text-xs font-medium text-on-secondary-container">Fatigue</span>
+<span class="px-3 py-1.5 rounded-full bg-secondary-container/30 text-xs font-medium text-on-secondary-container">Brain Fog</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-5 rounded-3xl shadow-sm border border-outline-variant/10">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-xl">medication</span>
+<h4 class="font-bold text-sm text-primary-container tracking-wide uppercase">HRT / Meds</h4>
+</div>
+<span class="material-symbols-outlined text-green-600 text-sm">check_circle</span>
+</div>
+<p class="text-sm text-on-surface-variant font-medium">Estradiol Patch (0.05mg) applied at 08:30 AM</p>
+</div>
+<div class="bg-surface-container-lowest p-5 rounded-3xl shadow-sm border border-outline-variant/10">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary text-xl">warning_amber</span>
+<h4 class="font-bold text-sm text-primary-container tracking-wide uppercase">Triggers</h4>
+</div>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1.5 rounded-full bg-tertiary-fixed-dim/20 text-xs font-medium text-on-tertiary-fixed-variant">High Stress</span>
+<span class="px-3 py-1.5 rounded-full bg-tertiary-fixed-dim/20 text-xs font-medium text-on-tertiary-fixed-variant">Caffeine</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<div class="fixed bottom-[88px] left-1/2 -translate-x-1/2 w-[90%] max-w-lg z-40">
+<div class="bg-surface-container-lowest/90 backdrop-blur-md rounded-2xl p-3 shadow-lg border border-outline-variant/20">
+<div class="flex items-center justify-around">
+<div class="flex items-center gap-1.5">
+<div class="w-3 h-3 rounded-full bg-surface-container-low shadow-inner border border-outline-variant/10"></div>
+<span class="text-[10px] font-bold text-outline uppercase">None</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-3 h-3 rounded-full bg-secondary-container/40 shadow-inner"></div>
+<span class="text-[10px] font-bold text-outline uppercase">Mild</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-3 h-3 rounded-full bg-secondary-container/80 shadow-inner"></div>
+<span class="text-[10px] font-bold text-outline uppercase">Mod</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-3 h-3 rounded-full bg-tertiary-container/60 shadow-inner"></div>
+<span class="text-[10px] font-bold text-outline uppercase">Sev</span>
+</div>
+</div>
+</div>
+</div>
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-4 bg-[#fef8f6]/95 backdrop-blur-xl z-50 border-t border-outline-variant/10 shadow-[0_-8px_32px_rgba(29,27,26,0.04)]">
+<button class="flex flex-col items-center justify-center text-outline px-4 py-1 hover:text-primary transition-all">
+<span class="material-symbols-outlined mb-1">today</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-widest">Today</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-2xl px-6 py-2 shadow-sm scale-105 transition-all">
+<span class="material-symbols-outlined mb-1">calendar_month</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-widest">Calendar</span>
+</button>
+<button class="flex flex-col items-center justify-center text-outline px-4 py-1 hover:text-primary transition-all">
+<span class="material-symbols-outlined mb-1">analytics</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-widest">Insights</span>
+</button>
+<button class="flex flex-col items-center justify-center text-outline px-4 py-1 hover:text-primary transition-all">
+<span class="material-symbols-outlined mb-1">edit_note</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-widest">Journal</span>
+</button>
+</nav>
+
+</body></html>

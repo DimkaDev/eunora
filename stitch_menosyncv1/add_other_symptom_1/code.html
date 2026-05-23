@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Add Other Symptom</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline": "#7f756e",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "surface-dim": "#ded9d7",
+                        "outline-variant": "#d0c4bc",
+                        "tertiary-fixed": "#ffdad3",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "surface-container-highest": "#e7e1df",
+                        "on-error-container": "#93000a",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#341009",
+                        "surface-container-low": "#f8f2f0",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed": "#231a11",
+                        "surface-bright": "#fef8f6",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "primary": "#67594e",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed-variant": "#51443a",
+                        "inverse-on-surface": "#f5f0ed",
+                        "on-surface": "#1d1b1a",
+                        "on-secondary-container": "#6c6074",
+                        "background": "#fef8f6",
+                        "surface-tint": "#6a5c50",
+                        "primary-fixed": "#f2dfd0",
+                        "on-primary": "#ffffff",
+                        "secondary-container": "#edddf5",
+                        "on-secondary-fixed": "#211828",
+                        "surface-container-high": "#ede7e5",
+                        "primary-container": "#817266",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "tertiary-container": "#9d675c",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#32302f",
+                        "tertiary": "#814f45",
+                        "on-tertiary-container": "#fffbff",
+                        "secondary-fixed": "#edddf5",
+                        "on-secondary": "#ffffff",
+                        "surface-variant": "#e7e1df",
+                        "on-surface-variant": "#4d453f",
+                        "surface-container": "#f2edea",
+                        "secondary": "#655a6e",
+                        "on-primary-container": "#fffbff",
+                        "inverse-primary": "#d6c3b5",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "on-background": "#1d1b1a",
+                        "surface": "#fef8f6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Manrope', sans-serif; }
+        h1, h2, h3 { font-family: 'Noto Serif', serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#fef8f6] text-on-surface min-h-screen">
+<!-- Modal Backdrop Overlay -->
+<div class="fixed inset-0 bg-on-surface/20 backdrop-blur-sm z-40"></div>
+<!-- Main Modal Container -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 overflow-y-auto">
+<div class="bg-surface w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[795px] relative">
+<!-- TopAppBar Implementation from Shared Components JSON -->
+<header class="bg-[#fef8f6] dark:bg-stone-950 flex justify-between items-center w-full px-6 py-4 sticky top-0 z-10">
+<div class="w-10"></div> <!-- Spacer for centering -->
+<div class="flex-1 text-center">
+<h1 class="font-['Noto_Serif'] text-xl font-medium tracking-tight text-[#67594e] dark:text-[#9B8B7E]">Add Your Symptom</h1>
+<p class="font-['Manrope'] text-xs text-[#1d1b1a]/60 dark:text-stone-400 mt-0.5">Tell us what you're experiencing</p>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#f2edea] dark:hover:bg-stone-800 transition-colors active:scale-95 duration-200 ease-in-out">
+<span class="material-symbols-outlined text-[#67594e]">close</span>
+</button>
+</header>
+<!-- Scrollable Content Area -->
+<main class="flex-1 overflow-y-auto px-6 py-8 md:px-10">
+<div class="space-y-10">
+<!-- Symptom Name Input -->
+<div class="space-y-3">
+<label class="block font-headline text-on-surface-variant font-medium" for="symptom_name">Symptom name *</label>
+<input class="w-full bg-surface-container-highest border-0 focus:ring-2 focus:ring-secondary-fixed-dim rounded-full px-6 py-4 text-on-surface placeholder:text-outline-variant font-body" id="symptom_name" placeholder="Enter symptom name..." type="text"/>
+<p class="text-on-surface-variant/60 text-xs px-2 italic">Examples: "Shoulder tension", "Leg restlessnes", "Mood swings"</p>
+</div>
+<!-- Description Area -->
+<div class="space-y-3">
+<div class="flex justify-between items-center">
+<label class="block font-headline text-on-surface-variant font-medium" for="description">Description</label>
+<span class="text-[10px] uppercase tracking-widest text-outline-variant font-bold">0 / 250</span>
+</div>
+<textarea class="w-full bg-surface-container-highest border-0 focus:ring-2 focus:ring-secondary-fixed-dim rounded-2xl px-6 py-4 text-on-surface placeholder:text-outline-variant font-body resize-none italic" id="description" placeholder="Briefly describe the intensity or nature of this symptom..." rows="4"></textarea>
+</div>
+<!-- Category Selector -->
+<div class="space-y-4">
+<label class="block font-headline text-on-surface-variant font-medium">Category</label>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+<!-- Category Item -->
+<button class="flex items-center gap-3 p-4 bg-surface-container-lowest rounded-xl hover:bg-secondary-container transition-colors border border-outline-variant/10 group">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center group-hover:bg-white">
+<span class="material-symbols-outlined text-primary">cyclone</span>
+</div>
+<span class="font-body text-sm font-semibold text-on-surface">Vasomotor</span>
+</button>
+<button class="flex items-center gap-3 p-4 bg-secondary-container rounded-xl ring-2 ring-primary transition-colors border border-outline-variant/10 group">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">bedtime</span>
+</div>
+<span class="font-body text-sm font-semibold text-on-surface">Sleep</span>
+</button>
+<button class="flex items-center gap-3 p-4 bg-surface-container-lowest rounded-xl hover:bg-secondary-container transition-colors border border-outline-variant/10 group">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center group-hover:bg-white">
+<span class="material-symbols-outlined text-primary">sentiment_neutral</span>
+</div>
+<span class="font-body text-sm font-semibold text-on-surface">Mood</span>
+</button>
+<button class="flex items-center gap-3 p-4 bg-surface-container-lowest rounded-xl hover:bg-secondary-container transition-colors border border-outline-variant/10 group">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center group-hover:bg-white">
+<span class="material-symbols-outlined text-primary">accessibility_new</span>
+</div>
+<span class="font-body text-sm font-semibold text-on-surface">Physical</span>
+</button>
+<button class="flex items-center gap-3 p-4 bg-surface-container-lowest rounded-xl hover:bg-secondary-container transition-colors border border-outline-variant/10 group">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center group-hover:bg-white">
+<span class="material-symbols-outlined text-primary">medical_services</span>
+</div>
+<span class="font-body text-sm font-semibold text-on-surface">Medical</span>
+</button>
+</div>
+</div>
+<!-- Quick Add Presets -->
+<div class="space-y-4">
+<label class="block font-headline text-on-surface-variant font-medium">Common Additions</label>
+<div class="flex flex-wrap gap-2">
+<button class="px-5 py-2.5 bg-surface-container-high rounded-full text-sm font-body font-medium hover:bg-primary-fixed transition-all text-on-surface-variant">Tingling fingers</button>
+<button class="px-5 py-2.5 bg-surface-container-high rounded-full text-sm font-body font-medium hover:bg-primary-fixed transition-all text-on-surface-variant">Dizziness</button>
+<button class="px-5 py-2.5 bg-surface-container-high rounded-full text-sm font-body font-medium hover:bg-primary-fixed transition-all text-on-surface-variant">Hot chest</button>
+</div>
+</div>
+<!-- Info Banner -->
+<div class="bg-secondary-container/50 border-l-4 border-secondary p-4 rounded-r-xl flex gap-4 items-start">
+<span class="material-symbols-outlined text-secondary">info</span>
+<p class="text-sm text-on-secondary-container leading-relaxed">Your custom symptom will be saved to your personal library and tracked in your Trends report.</p>
+</div>
+</div>
+</main>
+<!-- Sticky Footer Buttons -->
+<footer class="p-6 md:px-10 bg-surface/80 backdrop-blur-md border-t border-surface-container flex gap-4">
+<button class="flex-1 py-4 px-6 rounded-full border border-outline-variant text-primary font-body font-bold hover:bg-surface-container transition-colors active:scale-95">
+                    Cancel
+                </button>
+<button class="flex-1 py-4 px-6 rounded-full bg-gradient-to-r from-primary to-primary-container text-white font-body font-bold shadow-lg shadow-primary/20 hover:opacity-90 transition-all active:scale-95">
+                    Add Symptom
+                </button>
+</footer>
+</div>
+</div>
+<!-- BottomNavBar Implementation for background context (Optional shell) -->
+<nav class="hidden md:flex fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-4 bg-[#fef8f6]/70 backdrop-blur-xl z-30">
+<div class="flex flex-col items-center justify-center text-[#1d1b1a]/40 group">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-['Manrope'] text-[11px] font-semibold uppercase tracking-wider mt-1">Today</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#1d1b1a]/40 group">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-['Manrope'] text-[11px] font-semibold uppercase tracking-wider mt-1">Trends</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#67594e] relative after:content-[''] after:absolute after:-bottom-1 after:w-1 after:h-1 after:bg-[#D8C9E0] after:rounded-full">
+<span class="material-symbols-outlined">auto_stories</span>
+<span class="font-['Manrope'] text-[11px] font-semibold uppercase tracking-wider mt-1">Journal</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#1d1b1a]/40 group">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Manrope'] text-[11px] font-semibold uppercase tracking-wider mt-1">Profile</span>
+</div>
+</nav>
+</body></html>

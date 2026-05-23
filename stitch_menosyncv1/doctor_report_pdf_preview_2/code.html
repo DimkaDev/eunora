@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync | Action-Oriented Briefing</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface": "#1d1b1a",
+                        "primary": "#67594e",
+                        "secondary": "#655a6e",
+                        "tertiary": "#814f45",
+                        "surface": "#F7F5F0",
+                        "brand-taupe": "#9B8B7E",
+                        "brand-lavender": "#D8C9E0",
+                        "brand-rose": "#E8A89B",
+                        "doctor-focus": "#F2EDE4"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif", "serif"],
+                        "body": ["Manrope", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style type="text/tailwindcss">
+    .paper-texture {
+        background-color: #fff;
+        background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuDbGmHBLGdRr6u1aa_q34HL9KheSQ_MA1sq7foXZly0mYqWh4rVWEDrrI0EiFSI7yWhbIwgmzZkUo4kGzfyktvDsm3rSUwYUNaCiQGBeCzKHl4hJuZaiT_jqt9K_uMSR1VKCW-v1RGJskV3doYNtjvHvX3uDh_-sN2-b008xKAwO8z0RZvLoEAdCgMmW_UeCQqESyewoaAYYuT4A3IBdM2nvCdUafmSckja6H_TeA8GVgvXL01O7o2IQn8txmmfLnmH_qJFwnHAHWc)
+    }
+    .slide-card {
+        @apply bg-white rounded-3xl p-6 mb-8 shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-stone-100 flex flex-col gap-4;
+    }
+    .focus-header {
+        @apply -mx-6 -mt-6 p-5 bg-doctor-focus rounded-t-3xl border-b border-stone-200/50 mb-4;
+    }
+    .step-line {
+        position: absolute;
+        left: 24px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(to bottom, transparent, #E7E1DF 10%, #E7E1DF 90%, transparent);
+        z-index: 0;
+    }
+</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface antialiased">
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-stone-200 px-5 h-16 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<button class="material-symbols-outlined text-primary p-2">arrow_back</button>
+<h1 class="font-headline font-semibold text-primary">Pre-Consultation Briefing</h1>
+</div>
+<span class="text-[10px] font-bold px-3 py-1 rounded-full bg-brand-lavender text-primary-fixed-dim uppercase tracking-wider">Review Mode</span>
+</header>
+<main class="pt-24 pb-32 px-4 max-w-lg mx-auto relative">
+<div class="step-line hidden sm:block"></div>
+<div class="slide-card relative z-10">
+<div class="flex justify-between items-start">
+<div class="space-y-1">
+<p class="text-[10px] font-bold text-brand-taupe uppercase tracking-[0.2em]">Patient Profile</p>
+<h2 class="font-headline text-3xl font-bold">Sarah Johnson</h2>
+<p class="text-sm text-stone-500">March 1 – March 30, 2026</p>
+</div>
+<div class="bg-brand-rose/20 p-3 rounded-2xl">
+<span class="material-symbols-outlined text-brand-rose text-3xl" style="font-variation-settings: 'FILL' 1;">person_book</span>
+</div>
+</div>
+<p class="text-stone-600 text-sm italic leading-relaxed border-l-2 border-brand-lavender pl-4 mt-2">
+            "I'm feeling particularly overwhelmed this month. The night sweats are making it impossible to stay focused at work."
+        </p>
+</div>
+<section class="slide-card relative z-10">
+<div class="focus-header">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary text-xl">psychology</span>
+<span class="text-[11px] font-extrabold text-primary uppercase tracking-widest">Doctor's Focus</span>
+</div>
+<p class="font-headline font-bold text-on-surface">Patient is experiencing severe Hot Flashes 60% of tracked days.</p>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div class="bg-stone-50 p-4 rounded-2xl border border-stone-100">
+<p class="text-[10px] font-bold text-stone-400 uppercase mb-1">Adherence</p>
+<p class="font-headline text-2xl font-bold">24/30 <span class="text-xs font-normal text-stone-500">days</span></p>
+</div>
+<div class="bg-stone-50 p-4 rounded-2xl border border-stone-100">
+<p class="text-[10px] font-bold text-stone-400 uppercase mb-1">Avg Severity</p>
+<p class="font-headline text-2xl font-bold text-brand-rose">5.2/10</p>
+</div>
+</div>
+</section>
+<section class="slide-card relative z-10">
+<div class="focus-header bg-[#e6e2da]">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary text-xl">trending_up</span>
+<span class="text-[11px] font-extrabold text-primary uppercase tracking-widest">Key Takeaway</span>
+</div>
+<p class="font-headline text-lg font-bold text-on-surface">Severity peaks align with mid-week stress cycles.</p>
+</div>
+<div class="h-32 flex items-end justify-between gap-1 px-2 pb-2">
+<div class="w-2 bg-brand-lavender/40 h-1/2 rounded-t-full"></div>
+<div class="w-2 bg-brand-lavender/40 h-2/3 rounded-t-full"></div>
+<div class="w-2 bg-brand-rose h-3/4 rounded-t-full"></div>
+<div class="w-2 bg-brand-lavender/40 h-1/2 rounded-t-full"></div>
+<div class="w-2 bg-brand-rose h-5/6 rounded-t-full"></div>
+<div class="w-2 bg-brand-lavender/40 h-1/3 rounded-t-full"></div>
+<div class="w-2 bg-brand-rose h-[90%] rounded-t-full"></div>
+<div class="w-2 bg-brand-lavender/40 h-1/2 rounded-t-full"></div>
+<div class="w-2 bg-brand-lavender/40 h-2/3 rounded-t-full"></div>
+<div class="w-2 bg-brand-rose h-3/4 rounded-t-full"></div>
+<div class="w-2 bg-brand-lavender/40 h-1/2 rounded-t-full"></div>
+<div class="w-2 bg-brand-rose h-5/6 rounded-t-full"></div>
+</div>
+<div class="flex justify-between text-[10px] text-stone-400 font-bold uppercase mt-2 px-1">
+<span>Week 1</span>
+<span>Week 2</span>
+<span>Week 3</span>
+<span>Week 4</span>
+</div>
+</section>
+<section class="slide-card relative z-10">
+<div class="focus-header">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary text-xl">list_alt</span>
+<span class="text-[11px] font-extrabold text-primary uppercase tracking-widest">Symptom Load</span>
+</div>
+<p class="font-headline font-bold text-on-surface">Hot Flashes (18) and Sleep (12) are primary disruptors.</p>
+</div>
+<div class="space-y-3">
+<div class="flex items-center justify-between bg-stone-50 p-4 rounded-xl border border-stone-100">
+<div class="flex items-center gap-3">
+<span class="w-3 h-3 rounded-full bg-brand-rose"></span>
+<span class="font-semibold text-sm">Hot Flashes</span>
+</div>
+<span class="font-headline font-bold text-primary text-lg">18</span>
+</div>
+<div class="flex items-center justify-between bg-stone-50 p-4 rounded-xl border border-stone-100">
+<div class="flex items-center gap-3">
+<span class="w-3 h-3 rounded-full bg-brand-lavender"></span>
+<span class="font-semibold text-sm">Sleep Disturbance</span>
+</div>
+<span class="font-headline font-bold text-primary text-lg">12</span>
+</div>
+<div class="flex items-center justify-between bg-stone-50 p-4 rounded-xl border border-stone-100">
+<div class="flex items-center gap-3">
+<span class="w-3 h-3 rounded-full bg-brand-taupe"></span>
+<span class="font-semibold text-sm">Mood Changes</span>
+</div>
+<span class="font-headline font-bold text-primary text-lg">10</span>
+</div>
+</div>
+</section>
+<section class="slide-card relative z-10">
+<div class="focus-header bg-[#e6e2da]">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary text-xl">bolt</span>
+<span class="text-[11px] font-extrabold text-primary uppercase tracking-widest">Intervention Strategy</span>
+</div>
+<p class="font-headline text-lg font-bold text-on-surface">Focus on caffeine reduction to mitigate 85% of triggers.</p>
+</div>
+<div class="space-y-4">
+<div class="flex gap-4 p-4 rounded-2xl bg-brand-rose/5 border border-brand-rose/10">
+<span class="material-symbols-outlined text-brand-rose mt-0.5">warning</span>
+<p class="text-sm leading-relaxed text-stone-700">
+<strong class="block mb-1 text-on-surface">Caffeine Correlation</strong>
+                    85% confidence level. Symptom onset typically occurs within 60 minutes of intake.
+                </p>
+</div>
+<div class="flex gap-4 p-4 rounded-2xl bg-brand-lavender/20 border border-brand-lavender/30">
+<span class="material-symbols-outlined text-secondary mt-0.5">exercise</span>
+<p class="text-sm leading-relaxed text-stone-700">
+<strong class="block mb-1 text-on-surface">Protective Factors</strong>
+                    30+ min of physical activity correlates with improved sleep quality on subsequent nights.
+                </p>
+</div>
+</div>
+</section>
+<section class="slide-card relative z-10">
+<div class="focus-header">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary text-xl">clinical_notes</span>
+<span class="text-[11px] font-extrabold text-primary uppercase tracking-widest">Clinical Context</span>
+</div>
+<p class="font-headline font-bold text-on-surface">Symptoms stabilize during weekend rest periods.</p>
+</div>
+<p class="text-sm text-stone-600 leading-relaxed italic border-l-4 border-stone-200 pl-4 py-1">
+            "Patient reports increased night sweats during high-stress work weeks. This suggest an autonomic or cortisol-related link worth exploring during today's visit."
+        </p>
+</section>
+<div class="mt-8 text-center space-y-2 opacity-60">
+<p class="text-[9px] uppercase tracking-[0.3em] font-bold text-stone-400">Generated by MenoSync Health AI • Ref: MS-2026-SJ-03</p>
+</div>
+</main>
+<nav class="fixed bottom-0 w-full z-50 bg-white/90 backdrop-blur-xl border-t border-stone-200 px-6 pt-3 pb-8 flex justify-around items-center">
+<button class="flex flex-col items-center gap-1 group">
+<div class="p-2 rounded-xl group-active:bg-stone-100 transition-colors">
+<span class="material-symbols-outlined text-stone-500">share</span>
+</div>
+<span class="text-[10px] font-bold text-stone-500 uppercase tracking-tight">Share</span>
+</button>
+<button class="flex flex-col items-center gap-1 group">
+<div class="bg-brand-lavender px-8 py-2 rounded-2xl shadow-lg shadow-brand-lavender/30 group-active:scale-95 transition-all">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">picture_as_pdf</span>
+</div>
+<span class="text-[10px] font-extrabold text-primary uppercase tracking-tight">Export Briefing</span>
+</button>
+<button class="flex flex-col items-center gap-1 group">
+<div class="p-2 rounded-xl group-active:bg-stone-100 transition-colors">
+<span class="material-symbols-outlined text-stone-500">lock</span>
+</div>
+<span class="text-[10px] font-bold text-stone-500 uppercase tracking-tight">Secure</span>
+</button>
+</nav>
+
+</body></html>

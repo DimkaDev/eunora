@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Edit Medication - Serene Balance</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-surface": "#1d1b1a",
+                    "outline-variant": "#d0c4bc",
+                    "surface-container-high": "#ede7e5",
+                    "on-background": "#1d1b1a",
+                    "secondary-container": "#edddf5",
+                    "primary-fixed-dim": "#d6c3b5",
+                    "on-secondary-fixed": "#211828",
+                    "tertiary-container": "#9d675c",
+                    "surface-container-low": "#f8f2f0",
+                    "primary-fixed": "#f2dfd0",
+                    "on-surface-variant": "#4d453f",
+                    "surface-dim": "#ded9d7",
+                    "tertiary-fixed-dim": "#f9b7a9",
+                    "primary": "#67594e",
+                    "on-tertiary": "#ffffff",
+                    "surface-container": "#f2edea",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#683a31",
+                    "surface-bright": "#fef8f6",
+                    "on-secondary-container": "#6c6074",
+                    "inverse-primary": "#d6c3b5",
+                    "error-container": "#ffdad6",
+                    "on-secondary-fixed-variant": "#4d4355",
+                    "tertiary": "#814f45",
+                    "surface-tint": "#6a5c50",
+                    "on-primary-fixed": "#231a11",
+                    "on-tertiary-fixed": "#341009",
+                    "tertiary-fixed": "#ffdad3",
+                    "secondary-fixed-dim": "#d0c1d8",
+                    "surface-container-highest": "#e7e1df",
+                    "on-primary-container": "#fffbff",
+                    "outline": "#7f756e",
+                    "surface": "#fef8f6",
+                    "primary-container": "#817266",
+                    "background": "#fef8f6",
+                    "surface-variant": "#e7e1df",
+                    "inverse-surface": "#32302f",
+                    "on-primary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed": "#edddf5",
+                    "secondary": "#655a6e",
+                    "inverse-on-surface": "#f5f0ed",
+                    "on-tertiary-container": "#fffbff",
+                    "on-primary-fixed-variant": "#51443a",
+                    "error": "#ba1a1a",
+                    "surface-container-lowest": "#ffffff",
+                    "on-error": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif"],
+                    "body": ["Manrope"],
+                    "label": ["Manrope"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; }
+        .serif { font-family: 'Noto Serif', serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen relative overflow-hidden">
+<div class="fixed inset-0 z-0 p-6 flex flex-col gap-8 opacity-60 pointer-events-none">
+<header class="flex justify-between items-center">
+<h1 class="serif text-3xl font-bold text-primary">Journal</h1>
+<span class="material-symbols-outlined text-3xl">account_circle</span>
+</header>
+<div class="grid grid-cols-2 gap-4">
+<div class="h-32 bg-surface-container rounded-xl p-4 flex flex-col justify-end">
+<span class="text-xs uppercase tracking-widest opacity-60">Today's Dose</span>
+<span class="text-xl font-bold">Estradiol</span>
+</div>
+<div class="h-32 bg-surface-container-high rounded-xl p-4 flex flex-col justify-end">
+<span class="text-xs uppercase tracking-widest opacity-60">Next Refill</span>
+<span class="text-xl font-bold">12 Days</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm">
+<div class="flex items-center gap-4 mb-4">
+<div class="w-12 h-12 bg-secondary-container rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">medication</span>
+</div>
+<div>
+<h3 class="font-bold">Active Protocol</h3>
+<p class="text-sm opacity-60">Cycle Day 14</p>
+</div>
+</div>
+<div class="space-y-3">
+<div class="h-4 bg-surface-container rounded-full w-full"></div>
+<div class="h-4 bg-surface-container rounded-full w-3/4"></div>
+</div>
+</div>
+</div>
+<div class="fixed inset-0 z-10 bg-[#1A1A2E]/40 backdrop-blur-[2px]"></div>
+<div class="fixed bottom-0 left-0 right-0 z-20 bg-white rounded-t-[24px] max-h-[813px] overflow-y-auto shadow-[0_-8px_40px_rgba(0,0,0,0.12)]">
+<div class="sticky top-0 bg-white z-30 pt-3 pb-4 px-6">
+<div class="flex justify-center mb-6">
+<div class="w-8 h-1 bg-[#E0DEDA] rounded-full"></div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h2 class="serif text-[20px] font-bold text-on-surface leading-tight">Edit Medication</h2>
+<p class="font-body text-[14px] text-on-surface-variant mt-1">Estradiol · Patch</p>
+</div>
+<button class="w-11 h-11 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">close</span>
+</button>
+</div>
+</div>
+<div class="px-6 pb-24">
+<section class="mt-4 mb-8">
+<label class="block text-[12px] font-bold text-on-surface-variant uppercase tracking-[0.5em] mb-4">CURRENT PRESCRIPTION</label>
+<div class="flex items-center bg-surface-container-low rounded-xl py-5">
+<div class="flex-1 px-6">
+<span class="block text-[14px] text-on-surface-variant mb-1">Dose</span>
+<span class="text-[18px] font-bold text-on-surface">50 mcg</span>
+</div>
+<div class="w-[1px] h-10 bg-outline-variant/30"></div>
+<div class="flex-1 px-6">
+<span class="block text-[14px] text-on-surface-variant mb-1">Recent Doses</span>
+<span class="text-[14px] font-bold text-on-surface block leading-tight">Today 8 AM</span>
+<span class="text-[14px] font-bold text-on-surface block leading-tight">Yesterday 8 PM</span>
+</div>
+</div>
+</section>
+<section class="space-y-8">
+<label class="block text-[12px] font-bold text-on-surface-variant uppercase tracking-[0.5em]">UPDATE TO</label>
+<div class="space-y-2">
+<span class="block text-[14px] font-semibold text-on-surface-variant px-1">Adjust Dose</span>
+<div class="flex items-center gap-4">
+<div class="flex-1 bg-[#F5F3F0] rounded-[12px] p-4 flex items-center h-[56px]">
+<input class="bg-transparent border-none focus:ring-0 text-[18px] font-bold w-full text-on-surface placeholder-on-surface-variant/30" placeholder="0" type="number" value="75"/>
+</div>
+<div class="flex bg-[#F5F3F0] rounded-[12px] p-1 h-[56px] items-center">
+<button class="px-4 h-full rounded-[10px] bg-primary text-white text-[14px] font-semibold transition-all">mcg</button>
+<button class="px-4 h-full rounded-[10px] text-on-surface-variant text-[14px] font-medium hover:bg-surface-container transition-all">mg</button>
+<button class="px-4 h-full rounded-[10px] text-on-surface-variant text-[14px] font-medium hover:bg-surface-container transition-all">pump</button>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<button class="w-full h-[56px] bg-primary text-white rounded-[14px] flex items-center justify-center gap-2 text-[16px] font-bold shadow-md active:scale-[0.98] transition-transform">
+<span class="material-symbols-outlined text-[20px]">add_task</span>
+                        Log Dose Now
+                    </button>
+<div class="bg-[#F5F3F0] rounded-[12px] p-4">
+<span class="block text-[12px] font-bold text-on-surface-variant uppercase tracking-wider mb-3">Last 48 Hours Log</span>
+<ul class="space-y-3">
+<li class="flex items-center justify-between border-b border-outline-variant/20 pb-2">
+<span class="text-[15px] text-on-surface">Today, 8:12 AM</span>
+<span class="text-[13px] text-on-surface-variant">75 mcg</span>
+</li>
+<li class="flex items-center justify-between border-b border-outline-variant/20 pb-2">
+<span class="text-[15px] text-on-surface">Yesterday, 8:05 PM</span>
+<span class="text-[13px] text-on-surface-variant">50 mcg</span>
+</li>
+<li class="flex items-center justify-between">
+<span class="text-[15px] text-on-surface">Yesterday, 7:58 AM</span>
+<span class="text-[13px] text-on-surface-variant">50 mcg</span>
+</li>
+</ul>
+</div>
+</div>
+<div class="flex items-center justify-between py-2">
+<div class="flex-1 pr-4">
+<h4 class="text-[16px] font-bold text-on-surface leading-tight">This is a prescription change</h4>
+<p class="text-[14px] text-on-surface-variant mt-1">Creates a before/after comparison</p>
+</div>
+<div class="relative inline-block w-[52px] h-[32px] cursor-pointer">
+<div class="absolute inset-0 bg-primary rounded-full transition-colors duration-200"></div>
+<div class="absolute right-1 top-1 w-6 h-6 bg-white rounded-full shadow-sm transform transition-transform duration-200"></div>
+</div>
+</div>
+<div class="bg-[#FFF8EC] rounded-xl p-5 border border-[#FBEACF] flex gap-4">
+<span class="material-symbols-outlined text-[#B47C00] mt-0.5" style="font-variation-settings: 'FILL' 1">warning</span>
+<p class="text-[14px] text-[#7A5400] leading-relaxed">
+                        Dose change logged from <span class="font-bold">50 mcg → 75 mcg</span>. A before/after comparison will appear in <span class="font-bold">14 days</span>.
+                    </p>
+</div>
+</section>
+</div>
+<div class="sticky bottom-0 bg-white/90 backdrop-blur-md px-6 pt-4 pb-8 border-t border-surface-container flex flex-col gap-3">
+<button class="w-full h-[56px] bg-primary text-white rounded-[14px] text-[16px] font-bold shadow-md active:scale-[0.98] transition-transform">
+                Save changes
+            </button>
+<button class="w-full h-[56px] bg-transparent text-primary rounded-[14px] text-[16px] font-bold hover:bg-surface-container-low transition-colors">
+                Cancel
+            </button>
+</div>
+</div>
+
+</body></html>

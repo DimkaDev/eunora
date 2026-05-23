@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync Trends &amp; Analytics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "surface-container-highest": "#e7e1df",
+                  "outline-variant": "#d0c4bc",
+                  "inverse-primary": "#d6c3b5",
+                  "error": "#ba1a1a",
+                  "surface-container-low": "#f8f2f0",
+                  "on-surface": "#1d1b1a",
+                  "surface-container-high": "#ede7e5",
+                  "primary-fixed-dim": "#d6c3b5",
+                  "on-primary-fixed-variant": "#51443a",
+                  "on-secondary-fixed": "#211828",
+                  "outline": "#7f756e",
+                  "on-secondary-container": "#6c6074",
+                  "inverse-surface": "#32302f",
+                  "on-surface-variant": "#4d453f",
+                  "surface-tint": "#6a5c50",
+                  "on-tertiary": "#ffffff",
+                  "on-secondary": "#ffffff",
+                  "background": "#fef8f6",
+                  "on-background": "#1d1b1a",
+                  "surface-bright": "#fef8f6",
+                  "inverse-on-surface": "#f5f0ed",
+                  "secondary-fixed-dim": "#d0c1d8",
+                  "on-primary": "#ffffff",
+                  "on-tertiary-container": "#fffbff",
+                  "on-error": "#ffffff",
+                  "on-secondary-fixed-variant": "#4d4355",
+                  "tertiary-fixed": "#ffdad3",
+                  "on-tertiary-fixed": "#341009",
+                  "surface-container": "#f2edea",
+                  "tertiary-container": "#9d675c",
+                  "surface-variant": "#e7e1df",
+                  "surface": "#fef8f6",
+                  "tertiary-fixed-dim": "#f9b7a9",
+                  "secondary-fixed": "#edddf5",
+                  "on-primary-fixed": "#231a11",
+                  "on-primary-container": "#fffbff",
+                  "primary-fixed": "#f2dfd0",
+                  "tertiary": "#814f45",
+                  "secondary": "#655a6e",
+                  "secondary-container": "#edddf5",
+                  "surface-dim": "#ded9d7",
+                  "primary-container": "#817266",
+                  "primary": "#67594e",
+                  "error-container": "#ffdad6",
+                  "surface-container-lowest": "#ffffff",
+                  "on-error-container": "#93000a",
+                  "on-tertiary-fixed-variant": "#683a31"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "full": "9999px"
+          },
+          "fontFamily": {
+                  "headline": ["Noto Serif"],
+                  "body": ["Manrope"],
+                  "label": ["Manrope"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body { font-family: 'Manrope', sans-serif; background-color: #fef8f6; }
+    .serif { font-family: 'Noto Serif', serif; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .intensity-0 { background-color: #f8f2f0; }
+    .intensity-1 { background-color: #edddf5; }
+    .intensity-2 { background-color: #d0c1d8; }
+    .intensity-3 { background-color: #9B8B7E; }
+    .intensity-4 { background-color: #67594e; }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface antialiased pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#fef8f6]/70 dark:bg-[#1d1b1a]/70 backdrop-blur-md flex items-center justify-between px-6 h-16 w-full">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#67594e]">menu</span>
+<div class="flex flex-col">
+<h1 class="font-['Noto_Serif'] text-xl font-semibold tracking-tight text-[#67594e]">Your Trends</h1>
+<p class="font-['Manrope'] text-[10px] text-on-surface-variant uppercase tracking-widest leading-none">Analyze patterns over time</p>
+</div>
+</div>
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-highest">
+<img alt="User profile" data-alt="Close-up portrait of a mature woman with soft lighting and a serene expression, professional photography style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVzFP4WlFLwxxXUF4kyllT-NMZQr8yer7H0JG0KI09uSkxVAULdH6FkQV7QaNEV0ULh5rA65xKodZhqZZT3Ql8hFZdD2ExHNCbXbpWYVMeNMI0I2mqcafvtbDGe-7IblMaGtOg78pGVxU0k-HGp0vGpQaDy7WgqvcNIfTCosZik_5Czhje-W983vaS6sJVVq7AtAgPF0Xk9Q4_JPWXppvfKS-bG-qmrs4IB-UTb2e7QoVetlbS7CRjzlNoxo5X6U8tYoZLNedGfww"/>
+</div>
+</header>
+<main class="mt-20 px-6 space-y-6">
+<!-- Time Period Selector (Sticky) -->
+<div class="sticky top-16 z-40 bg-surface/90 backdrop-blur-sm py-4 -mx-6 px-6 overflow-x-auto no-scrollbar">
+<div class="flex gap-2 items-center min-w-max">
+<button class="px-5 py-2 rounded-full text-xs font-bold font-label border border-outline-variant text-primary hover:bg-surface-container-high transition-colors">7 days</button>
+<button class="px-5 py-2 rounded-full text-xs font-bold font-label bg-primary text-white shadow-sm">30 days</button>
+<button class="px-5 py-2 rounded-full text-xs font-bold font-label border border-outline-variant text-primary hover:bg-surface-container-high transition-colors">90 days</button>
+<button class="px-5 py-2 rounded-full text-xs font-bold font-label border border-outline-variant text-primary hover:bg-surface-container-high transition-colors">6 months</button>
+<button class="px-5 py-2 rounded-full text-xs font-bold font-label border border-outline-variant text-primary hover:bg-surface-container-high transition-colors">All time</button>
+</div>
+<p class="text-[11px] text-on-surface-variant mt-3 font-medium">Last 30 days: March 1 — March 30, 2024</p>
+</div>
+<!-- Daily Severity Trend Card -->
+<section class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/10">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h3 class="text-sm font-bold text-on-surface mb-1">Daily Severity Trend</h3>
+<p class="text-[11px] text-on-surface-variant">Hot Flashes</p>
+</div>
+<button class="flex items-center gap-1 px-3 py-1.5 border border-outline-variant rounded-lg text-[10px] font-bold text-primary">
+          Change symptom
+          <span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+</div>
+<!-- Mock Area Chart -->
+<div class="relative h-40 w-full mb-4 flex items-end gap-1">
+<div class="absolute inset-0 flex flex-col justify-between text-[10px] text-outline-variant pointer-events-none">
+<div class="border-b border-outline-variant/10 w-full h-0"></div>
+<div class="border-b border-outline-variant/10 w-full h-0"></div>
+<div class="border-b border-outline-variant/10 w-full h-0"></div>
+<div class="border-b border-outline-variant/10 w-full h-0"></div>
+</div>
+<div class="relative w-full h-full">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 400 100">
+<path d="M0 80 Q 50 40 100 60 T 200 30 T 300 70 T 400 40 V 100 H 0 Z" fill="#D8C9E0" fill-opacity="0.4"></path>
+<path d="M0 80 Q 50 40 100 60 T 200 30 T 300 70 T 400 40" fill="none" stroke="#9B8B7E" stroke-width="2"></path>
+<circle cx="50" cy="55" fill="#E8A89B" r="4"></circle>
+<circle cx="150" cy="45" fill="#E8A89B" r="4"></circle>
+<circle cx="250" cy="65" fill="#E8A89B" r="4"></circle>
+<circle cx="350" cy="45" fill="#E8A89B" r="4"></circle>
+</svg>
+</div>
+</div>
+<div class="flex justify-between text-[10px] text-on-surface-variant font-medium px-1">
+<span>Mar 1</span><span>Mar 5</span><span>Mar 10</span><span>Mar 15</span><span>Mar 19</span>
+</div>
+<div class="mt-6 pt-6 border-t border-outline-variant/10 flex justify-around">
+<div class="text-center">
+<p class="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider mb-1">Avg</p>
+<p class="text-lg font-bold text-primary">5.2</p>
+</div>
+<div class="text-center">
+<p class="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider mb-1">Min</p>
+<p class="text-lg font-bold text-primary">2</p>
+</div>
+<div class="text-center">
+<p class="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider mb-1">Max</p>
+<p class="text-lg font-bold text-primary">9</p>
+</div>
+</div>
+</section>
+<!-- Weekly Comparison & Symptom Comparison Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Weekly Comparison Card -->
+<section class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/10">
+<h3 class="text-sm font-bold text-on-surface mb-6">Weekly Comparison</h3>
+<div class="flex items-end justify-between h-32 px-2">
+<div class="flex flex-col items-center gap-2 w-full">
+<div class="w-8 bg-gradient-to-t from-primary to-tertiary-fixed rounded-t-lg h-24"></div>
+<span class="text-[10px] font-bold text-on-surface-variant">Wk 1</span>
+</div>
+<div class="flex flex-col items-center gap-2 w-full">
+<div class="w-8 bg-gradient-to-t from-primary to-tertiary-fixed rounded-t-lg h-20"></div>
+<span class="text-[10px] font-bold text-on-surface-variant">Wk 2</span>
+</div>
+<div class="flex flex-col items-center gap-2 w-full">
+<div class="w-8 bg-gradient-to-t from-primary to-tertiary-fixed rounded-t-lg h-16"></div>
+<span class="text-[10px] font-bold text-on-surface-variant">Wk 3</span>
+</div>
+<div class="flex flex-col items-center gap-2 w-full">
+<div class="w-8 bg-gradient-to-t from-primary to-tertiary-fixed rounded-t-lg h-12"></div>
+<span class="text-[10px] font-bold text-on-surface-variant">Wk 4</span>
+</div>
+</div>
+<div class="mt-6 flex items-center gap-2 bg-green-50 p-3 rounded-lg">
+<span class="material-symbols-outlined text-green-600 text-sm">trending_down</span>
+<p class="text-[11px] font-bold text-green-700">15% improvement week-over-week</p>
+</div>
+</section>
+<!-- Symptom Comparison Card -->
+<section class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/10">
+<h3 class="text-sm font-bold text-on-surface mb-4">Compare Two Symptoms</h3>
+<div class="flex gap-2 mb-6">
+<div class="flex-1 px-3 py-2 border border-outline-variant rounded-lg text-[10px] font-bold flex justify-between items-center">
+            Hot Flashes
+            <span class="material-symbols-outlined text-xs">expand_more</span>
+</div>
+<div class="flex-1 px-3 py-2 border border-outline-variant rounded-lg text-[10px] font-bold flex justify-between items-center">
+            Sleep Quality
+            <span class="material-symbols-outlined text-xs">expand_more</span>
+</div>
+</div>
+<div class="relative h-32 mb-4">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 100 100">
+<path d="M0 20 L 20 40 L 40 10 L 60 50 L 80 30 L 100 60" fill="none" stroke="#9B8B7E" stroke-width="2"></path>
+<path d="M0 80 L 20 60 L 40 90 L 60 40 L 80 70 L 100 30" fill="none" stroke="#E8A89B" stroke-width="2"></path>
+</svg>
+</div>
+<p class="text-[11px] text-on-surface-variant italic leading-relaxed bg-surface-container-low p-3 rounded-lg border-l-4 border-primary/20">
+          "Hot flashes and poor sleep correlate 67% of the time in your current cycle."
+        </p>
+</section>
+</div>
+<!-- Monthly Heatmap Section -->
+<section class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/10">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-sm font-bold text-on-surface uppercase tracking-wider">Monthly Heatmap</h3>
+<p class="text-[11px] font-bold text-primary">March 2024</p>
+</div>
+<div class="grid grid-cols-7 gap-2 mb-6">
+<!-- Day labels -->
+<div class="text-[9px] font-bold text-center text-on-surface-variant uppercase">Mon</div>
+<div class="text-[9px] font-bold text-center text-on-surface-variant uppercase">Tue</div>
+<div class="text-[9px] font-bold text-center text-on-surface-variant uppercase">Wed</div>
+<div class="text-[9px] font-bold text-center text-on-surface-variant uppercase">Thu</div>
+<div class="text-[9px] font-bold text-center text-on-surface-variant uppercase">Fri</div>
+<div class="text-[9px] font-bold text-center text-on-surface-variant uppercase">Sat</div>
+<div class="text-[9px] font-bold text-center text-on-surface-variant uppercase">Sun</div>
+<!-- Grid cells (Simulated for March) -->
+<div class="h-8 rounded intensity-0"></div>
+<div class="h-8 rounded intensity-0"></div>
+<div class="h-8 rounded intensity-0"></div>
+<div class="h-8 rounded intensity-0"></div>
+<div class="h-8 rounded intensity-1 flex items-center justify-center text-[9px] font-bold">1</div>
+<div class="h-8 rounded intensity-2 flex items-center justify-center text-[9px] font-bold">2</div>
+<div class="h-8 rounded intensity-1 flex items-center justify-center text-[9px] font-bold">3</div>
+<div class="h-8 rounded intensity-3 flex items-center justify-center text-[9px] font-bold text-white">4</div>
+<div class="h-8 rounded intensity-4 flex items-center justify-center text-[9px] font-bold text-white">5</div>
+<div class="h-8 rounded intensity-2 flex items-center justify-center text-[9px] font-bold">6</div>
+<div class="h-8 rounded intensity-1 flex items-center justify-center text-[9px] font-bold">7</div>
+<div class="h-8 rounded intensity-0 flex items-center justify-center text-[9px] font-bold">8</div>
+<div class="h-8 rounded intensity-3 flex items-center justify-center text-[9px] font-bold text-white">9</div>
+<div class="h-8 rounded intensity-2 flex items-center justify-center text-[9px] font-bold">10</div>
+<div class="h-8 rounded intensity-1 flex items-center justify-center text-[9px] font-bold">11</div>
+<div class="h-8 rounded intensity-1 flex items-center justify-center text-[9px] font-bold">12</div>
+<div class="h-8 rounded intensity-4 flex items-center justify-center text-[9px] font-bold text-white">13</div>
+<div class="h-8 rounded intensity-3 flex items-center justify-center text-[9px] font-bold text-white">14</div>
+<div class="h-8 rounded intensity-2 flex items-center justify-center text-[9px] font-bold">15</div>
+<div class="h-8 rounded intensity-1 flex items-center justify-center text-[9px] font-bold">16</div>
+<div class="h-8 rounded intensity-0 flex items-center justify-center text-[9px] font-bold">17</div>
+<!-- ... more days ... -->
+</div>
+<div class="flex items-center justify-end gap-2">
+<span class="text-[9px] font-bold text-on-surface-variant uppercase">Intensity:</span>
+<div class="flex gap-1">
+<div class="w-3 h-3 rounded intensity-0 border border-outline-variant/10"></div>
+<div class="w-3 h-3 rounded intensity-1"></div>
+<div class="w-3 h-3 rounded intensity-2"></div>
+<div class="w-3 h-3 rounded intensity-3"></div>
+<div class="w-3 h-3 rounded intensity-4"></div>
+</div>
+</div>
+</section>
+<!-- Export & Actions -->
+<section class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/10 space-y-3">
+<h3 class="text-sm font-bold text-on-surface mb-4">Export &amp; Actions</h3>
+<button class="w-full flex items-center justify-center gap-3 px-6 py-4 border border-outline text-primary rounded-[10px] text-xs font-bold hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined">download</span>
+        Download Data as CSV
+      </button>
+<button class="w-full flex items-center justify-center gap-3 px-6 py-4 border border-outline text-primary rounded-[10px] text-xs font-bold hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined">medical_services</span>
+        Share Report with Doctor
+      </button>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-2 bg-[#f2edea]/70 dark:bg-[#1d1b1a]/70 backdrop-blur-md z-50 rounded-t-[1.5rem] shadow-[0_-4px_24px_0_rgba(29,27,26,0.06)]">
+<div class="flex flex-col items-center justify-center text-[#9B8B7E] py-2 px-5 hover:bg-[#fef8f6]/50 transition-opacity">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-['Manrope'] text-[10px] font-bold uppercase tracking-wider mt-1">Today</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-[#D8C9E0] text-[#1d1b1a] rounded-[1.5rem] py-2 px-6 scale-105">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<span class="font-['Manrope'] text-[10px] font-bold uppercase tracking-wider mt-1">Trends</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#9B8B7E] py-2 px-5 hover:bg-[#fef8f6]/50 transition-opacity">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="font-['Manrope'] text-[10px] font-bold uppercase tracking-wider mt-1">Insights</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#9B8B7E] py-2 px-5 hover:bg-[#fef8f6]/50 transition-opacity">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Manrope'] text-[10px] font-bold uppercase tracking-wider mt-1">Profile</span>
+</div>
+</nav>
+</body></html>

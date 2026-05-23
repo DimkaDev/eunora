@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Medication Setup Error</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-dim": "#ded9d7",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "secondary-fixed": "#edddf5",
+                        "on-tertiary": "#ffffff",
+                        "surface-tint": "#6a5c50",
+                        "on-secondary": "#ffffff",
+                        "surface-container-highest": "#e7e1df",
+                        "on-background": "#1d1b1a",
+                        "inverse-primary": "#d6c3b5",
+                        "error": "#ba1a1a",
+                        "background": "#fef8f6",
+                        "on-tertiary-fixed": "#341009",
+                        "on-primary-fixed-variant": "#51443a",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#f2dfd0",
+                        "on-primary-container": "#fffbff",
+                        "surface-variant": "#e7e1df",
+                        "on-primary": "#ffffff",
+                        "primary": "#67594e",
+                        "outline": "#7f756e",
+                        "on-surface": "#1d1b1a",
+                        "on-error-container": "#93000a",
+                        "on-error": "#ffffff",
+                        "on-tertiary-container": "#fffbff",
+                        "tertiary-container": "#9d675c",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "tertiary": "#814f45",
+                        "on-surface-variant": "#4d453f",
+                        "surface-bright": "#fef8f6",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#ede7e5",
+                        "on-secondary-container": "#6c6074",
+                        "secondary-container": "#edddf5",
+                        "on-secondary-fixed": "#211828",
+                        "inverse-surface": "#32302f",
+                        "outline-variant": "#d0c4bc",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "surface-container-low": "#f8f2f0",
+                        "secondary": "#655a6e",
+                        "on-primary-fixed": "#231a11",
+                        "inverse-on-surface": "#f5f0ed",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "tertiary-fixed": "#ffdad3",
+                        "surface": "#fef8f6",
+                        "surface-container": "#f2edea",
+                        "primary-container": "#817266"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "display": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: theme('colors.background'); color: theme('colors.on-background'); font-family: theme('fontFamily.body'); }
+        .glass-panel { background: rgba(254, 248, 246, 0.7); backdrop-filter: blur(20px); }
+        .gradient-bg { background: linear-gradient(135deg, theme('colors.primary'), theme('colors.primary-container')); }
+        .shadow-ambient { box-shadow: 0 4px 24px rgba(29, 27, 26, 0.06); }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col pt-20 pb-28 md:pb-12 bg-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 glass-panel no-border-tonal-shift-only flex justify-between items-center px-6 py-4">
+<div class="flex items-center gap-4">
+<button class="text-[#67594e] hover:opacity-80 transition-opacity flex items-center justify-center p-2 rounded-full hover:bg-surface-container">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</button>
+</div>
+<h1 class="font-headline font-bold text-2xl text-[#67594e] tracking-tight">MenoSync</h1>
+<div class="w-10"></div> <!-- Spacer for center alignment -->
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow container mx-auto px-5 md:px-8 max-w-3xl flex flex-col gap-8">
+<!-- Hero Image (Required Image) -->
+<div class="w-full rounded-[2rem] overflow-hidden shadow-ambient h-48 md:h-64 mt-4 relative">
+<img alt="Setup" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/ADBb0uhXMQAM0I5cp27WfHNJWhtYt4M5TJYCAcv1lzKoQgqYjKoiMgPBCrVz_cyGaPJ96St0K48pXbbqIzLmmB0llOMrURsubpka-32Od1iozMkYNm9EyVUwfKmqO098Rv1ipMDR-omFscI8Ri7XFnZVuxuqfMMoNjnK2t4zl7B65ceRkof-V3YHs5V2Y3g7tIN-zdVfgh_PEUb21v-5Gztaw3E6gYaWrgtUVkcMdffEb_L1EloTMhlhH9IHol0"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface/80 to-transparent"></div>
+</div>
+<!-- Header Section -->
+<section class="flex flex-col gap-2 pr-8">
+<h2 class="font-headline text-3xl md:text-4xl text-primary font-semibold leading-tight">Medication Setup</h2>
+<p class="font-body text-on-surface-variant text-lg">Review and finalize your current HRT routine.</p>
+</section>
+<!-- Medication List -->
+<section class="flex flex-col gap-5">
+<!-- Valid Card -->
+<div class="bg-surface-container-lowest rounded-[1.5rem] p-6 shadow-ambient flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">medication</span>
+</div>
+<div>
+<h3 class="font-body font-semibold text-xl text-on-background">Evorel Conti</h3>
+<p class="font-body text-sm text-on-surface-variant">Patches</p>
+</div>
+</div>
+<button class="text-primary hover:bg-surface-container rounded-full p-2 transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</div>
+<div class="bg-surface p-4 rounded-xl flex gap-6">
+<div class="flex flex-col">
+<span class="font-body text-xs text-on-surface-variant uppercase tracking-wider">Dosage</span>
+<span class="font-body font-medium text-on-background">1 Patch</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body text-xs text-on-surface-variant uppercase tracking-wider">Frequency</span>
+<span class="font-body font-medium text-on-background">Twice Weekly</span>
+</div>
+</div>
+</div>
+<!-- Error Card (Utrogestan) -->
+<div class="bg-surface-container-lowest rounded-[1.5rem] p-6 shadow-ambient flex flex-col gap-4 border border-error-container/50 relative overflow-hidden">
+<!-- Subtle Error Indicator -->
+<div class="absolute top-0 right-0 w-16 h-16 bg-error-container/20 rounded-bl-[2rem] -mr-4 -mt-4"></div>
+<div class="flex justify-between items-start relative z-10">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-error-container/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">error</span>
+</div>
+<div>
+<h3 class="font-body font-semibold text-xl text-on-background">Utrogestan</h3>
+<p class="font-body text-sm text-on-surface-variant">Capsules</p>
+</div>
+</div>
+<button class="text-primary hover:bg-surface-container rounded-full p-2 transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</div>
+<div class="bg-error-container/10 p-4 rounded-xl flex gap-6">
+<div class="flex flex-col">
+<span class="font-body text-xs text-on-surface-variant uppercase tracking-wider">Dosage</span>
+<span class="font-body font-medium text-on-background">100mg</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body text-xs text-error uppercase tracking-wider">Frequency</span>
+<span class="font-body font-medium text-error italic">Required</span>
+</div>
+</div>
+</div>
+<!-- Error Message -->
+<div class="flex items-center gap-3 bg-error-container/20 p-4 rounded-xl mt-2">
+<span class="material-symbols-outlined text-error text-xl">info</span>
+<p class="font-body text-sm text-error">Please ensure all dosage and frequency details are complete before continuing.</p>
+</div>
+</section>
+<!-- Actions -->
+<section class="mt-8 flex flex-col gap-4">
+<button class="w-full bg-surface-dim text-outline py-4 rounded-[1.5rem] font-body text-lg font-semibold flex items-center justify-center gap-2 cursor-not-allowed opacity-70" disabled="">
+                Continue Setup
+                <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+<button class="w-full text-primary font-body font-semibold py-3 hover:bg-surface-container rounded-xl transition-colors">
+                Skip for now
+            </button>
+</section>
+<div class="h-12"></div>
+</main>
+</body></html>

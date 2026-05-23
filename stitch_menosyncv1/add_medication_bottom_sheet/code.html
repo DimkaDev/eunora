@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add HRT Medication</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary": "#67594e",
+                      "surface-container-lowest": "#ffffff",
+                      "primary-fixed": "#f2dfd0",
+                      "secondary": "#655a6e",
+                      "primary-fixed-dim": "#d6c3b5",
+                      "secondary-fixed": "#edddf5",
+                      "on-primary-fixed-variant": "#51443a",
+                      "on-tertiary-fixed-variant": "#683a31",
+                      "inverse-primary": "#d6c3b5",
+                      "on-tertiary-fixed": "#341009",
+                      "inverse-surface": "#32302f",
+                      "surface-bright": "#fef8f6",
+                      "on-primary": "#ffffff",
+                      "on-surface": "#1d1b1a",
+                      "tertiary-fixed": "#ffdad3",
+                      "on-error-container": "#93000a",
+                      "primary-container": "#817266",
+                      "on-error": "#ffffff",
+                      "surface-dim": "#ded9d7",
+                      "surface-container-low": "#f8f2f0",
+                      "surface-container": "#f2edea",
+                      "surface-container-highest": "#e7e1df",
+                      "error": "#ba1a1a",
+                      "background": "#fef8f6",
+                      "outline-variant": "#d0c4bc",
+                      "on-surface-variant": "#4d453f",
+                      "error-container": "#ffdad6",
+                      "outline": "#7f756e",
+                      "surface": "#fef8f6",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary-container": "#6c6074",
+                      "secondary-container": "#edddf5",
+                      "surface-variant": "#e7e1df",
+                      "on-tertiary-container": "#fffbff",
+                      "on-primary-container": "#fffbff",
+                      "tertiary-container": "#9d675c",
+                      "inverse-on-surface": "#f5f0ed",
+                      "on-primary-fixed": "#231a11",
+                      "secondary-fixed-dim": "#d0c1d8",
+                      "on-background": "#1d1b1a",
+                      "surface-tint": "#6a5c50",
+                      "surface-container-high": "#ede7e5",
+                      "tertiary-fixed-dim": "#f9b7a9",
+                      "tertiary": "#814f45",
+                      "on-secondary-fixed-variant": "#4d4355",
+                      "on-secondary-fixed": "#211828",
+                      "on-secondary": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Noto Serif"],
+                      "body": ["Manrope"],
+                      "label": ["Manrope"]
+              }
+            },
+          }
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .scrim-overlay {
+            background-color: rgba(26, 26, 46, 0.4);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+      </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background font-body text-on-surface min-h-screen">
+<!-- Dashboard Preview (Background Content) -->
+<main aria-hidden="true" class="p-6 md:p-12 opacity-40 select-none pointer-events-none">
+<header class="mb-10">
+<h1 class="font-headline text-4xl mb-2">Morning, Sarah</h1>
+<p class="text-on-surface-variant italic">The serenity of the morning is a gift to your body.</p>
+</header>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/10">
+<div class="flex items-center gap-4 mb-4">
+<span class="material-symbols-outlined text-tertiary-container">medication</span>
+<h2 class="font-bold">Active Protocol</h2>
+</div>
+<div class="h-24 bg-surface-container rounded-lg"></div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/10">
+<div class="flex items-center gap-4 mb-4">
+<span class="material-symbols-outlined text-primary">analytics</span>
+<h2 class="font-bold">Trends</h2>
+</div>
+<div class="h-24 bg-surface-container rounded-lg"></div>
+</div>
+</div>
+</main>
+<!-- Modal Backdrop / Scrim -->
+<div class="fixed inset-0 scrim-overlay z-[60] flex flex-col justify-end">
+<!-- Bottom Sheet -->
+<section class="bg-[#FFFFFF] w-full max-w-2xl mx-auto rounded-t-[24px] shadow-2xl relative flex flex-col max-h-[839px] overflow-hidden">
+<!-- Drag Handle -->
+<div class="flex justify-center py-3">
+<div class="w-8 h-1 bg-[#E0DEDA] rounded-full"></div>
+</div>
+<!-- Header Component -->
+<div class="px-6 pb-4 flex justify-between items-center bg-surface/80 backdrop-blur-xl">
+<div>
+<h2 class="font-manrope font-bold text-[20px] tracking-tight text-[#1d1b1a]">Add Medication</h2>
+<p class="text-on-surface-variant text-sm">This medication will appear in your daily check-in</p>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined text-[#625B71]">close</span>
+</button>
+</div>
+<!-- Content Area (Scrollable) -->
+<div class="px-6 py-4 overflow-y-auto no-scrollbar space-y-8 pb-32">
+<!-- Field 1: Medication Name (Autocomplete Active) -->
+<div class="relative">
+<label class="block text-xs font-semibold uppercase tracking-wider text-outline mb-2 px-1">Medication Name</label>
+<div class="relative">
+<input class="w-full bg-surface-container-highest rounded-full border-none px-6 py-4 focus:ring-2 focus:ring-primary text-on-surface font-medium" placeholder="Search HRT..." type="text" value="Estra"/>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline">search</span>
+</div>
+<!-- Autocomplete Menu -->
+<div class="mt-2 bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant/15 overflow-hidden">
+<div class="p-4 flex items-center gap-3 hover:bg-surface-container-high cursor-pointer border-b border-outline-variant/5">
+<span class="material-symbols-outlined text-primary text-sm">medication</span>
+<span class="font-semibold text-on-surface">Estradiol</span>
+</div>
+<div class="p-4 flex items-center gap-3 hover:bg-surface-container-high cursor-pointer border-b border-outline-variant/5">
+<span class="material-symbols-outlined text-primary text-sm">medication</span>
+<span class="font-medium text-on-surface">Utrogestan</span>
+</div>
+<div class="p-4 flex items-center gap-3 hover:bg-surface-container-high cursor-pointer">
+<span class="material-symbols-outlined text-primary text-sm">medication</span>
+<span class="font-medium text-on-surface">Evorel Conti</span>
+</div>
+</div>
+</div>
+<!-- Field 2: Form Selection Pills -->
+<div>
+<label class="block text-xs font-semibold uppercase tracking-wider text-outline mb-3 px-1">Form</label>
+<div class="flex flex-wrap gap-2">
+<button class="px-5 py-2.5 rounded-full bg-secondary-container text-on-secondary-container font-semibold transition-all">Patch</button>
+<button class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface transition-all hover:bg-surface-container-highest">Gel</button>
+<button class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface transition-all hover:bg-surface-container-highest">Pill</button>
+<button class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface transition-all hover:bg-surface-container-highest">Cream</button>
+</div>
+</div>
+<!-- Field 3: Dose and Unit -->
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block text-xs font-semibold uppercase tracking-wider text-outline mb-2 px-1">Dose</label>
+<input class="w-full bg-surface-container-highest rounded-full border-none px-6 py-4 focus:ring-2 focus:ring-primary text-on-surface font-bold text-center" type="number" value="50"/>
+</div>
+<div>
+<label class="block text-xs font-semibold uppercase tracking-wider text-outline mb-2 px-1">Unit</label>
+<div class="flex bg-surface-container-high rounded-full p-1 h-[56px]">
+<button class="flex-1 rounded-full bg-surface-container-lowest shadow-sm text-primary font-bold text-sm">mcg</button>
+<button class="flex-1 rounded-full text-on-surface-variant font-medium text-sm">mg</button>
+</div>
+</div>
+</div>
+<!-- Field 4: Frequency -->
+<div>
+<label class="block text-xs font-semibold uppercase tracking-wider text-outline mb-3 px-1">Frequency</label>
+<div class="flex flex-wrap gap-2">
+<button class="px-5 py-2.5 rounded-full bg-secondary-container text-on-secondary-container font-semibold">Daily</button>
+<button class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface font-medium">Twice Weekly</button>
+<button class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface font-medium">As Needed</button>
+</div>
+</div>
+<!-- Field 5: Start Date -->
+<div>
+<label class="block text-xs font-semibold uppercase tracking-wider text-outline mb-2 px-1">Start Date</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low rounded-full border-none px-6 py-4 text-on-surface font-medium cursor-default" readonly="" type="text" value="Today, 12 Apr 2026"/>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-primary">calendar_today</span>
+</div>
+</div>
+<!-- Field 6: Reminder Toggle -->
+<div class="bg-surface-container-low rounded-[24px] p-5 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-secondary-fixed rounded-2xl flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">notifications</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Daily Reminder</p>
+<p class="text-sm font-semibold text-primary">08:00 AM</p>
+</div>
+</div>
+<!-- iOS-style Toggle Switch -->
+<div class="w-14 h-8 bg-primary rounded-full relative p-1 flex items-center justify-end">
+<div class="w-6 h-6 bg-white rounded-full shadow-md"></div>
+</div>
+</div>
+</div>
+<!-- Action Buttons Container -->
+<div class="absolute bottom-0 left-0 w-full p-6 pt-4 bg-white/95 backdrop-blur-md flex flex-col gap-3">
+<button class="w-full py-4 bg-gradient-to-r from-primary to-primary-container text-white rounded-full font-bold shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform">
+                    Add to my tracker
+                </button>
+<button class="w-full py-4 bg-surface-container-high text-on-surface rounded-full font-bold active:scale-[0.98] transition-transform">
+                    Cancel
+                </button>
+</div>
+</section>
+</div>
+<!-- Bottom Navigation (Shared Component Reference) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center pb-safe pt-3 bg-surface z-50">
+<div class="flex flex-col items-center justify-center text-[#625B71] dark:text-[#CAC4D0]">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="font-manrope text-[11px] font-medium">Dashboard</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-[#EADDFF] dark:bg-[#4F378A] text-[#21005D] dark:text-[#EADDFF] rounded-2xl px-5 py-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">medication</span>
+<span class="font-manrope text-[11px] font-medium">Medications</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#625B71] dark:text-[#CAC4D0]">
+<span class="material-symbols-outlined">stethoscope</span>
+<span class="font-manrope text-[11px] font-medium">Symptoms</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#625B71] dark:text-[#CAC4D0]">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-manrope text-[11px] font-medium">Insights</span>
+</div>
+</nav>
+</body></html>

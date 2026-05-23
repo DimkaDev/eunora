@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Your Perimenopause Profile - MenoSync</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#8C7B6E",
+                        "primary-light": "#A8998D",
+                        "accent-warm": "#FDF9F3",
+                        "surface": "#FAF8F6",
+                        "border-soft": "#E8E2DD",
+                        "text-main": "#4A443F",
+                        "text-muted": "#8A827C",
+                        "background": "#F7F5F0"
+                    },
+                    "borderRadius": {
+                        "organic": "24px",
+                        "soft": "20px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif", "serif"],
+                        "body": ["Manrope", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer components {
+            .organic-pill {
+                @apply rounded-[22px_25px_20px_28px] border-2 border-border-soft bg-white transition-all duration-300;
+            }
+            .organic-pill-active {
+                @apply bg-primary border-primary text-white shadow-lg shadow-primary/20 scale-[1.02];
+            }
+            .section-card {
+                @apply bg-white p-7 rounded-soft shadow-[0_4px_20px_rgba(140,123,110,0.06)] relative border border-border-soft/50;
+            }
+            .input-soft {
+                @apply bg-accent-warm border-border-soft rounded-soft focus:ring-primary/20 focus:border-primary transition-all;
+            }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .symptom-checkbox:checked + .organic-pill {
+            @apply organic-pill-active;
+        }
+        .symptom-checkbox:checked + .organic-pill .material-symbols-outlined {
+            @apply text-white;
+        }
+        .section-header-icon {
+            @apply absolute top-7 right-7 text-text-muted/30 text-[20px] select-none;
+        }.organic-pill:nth-child(even) { border-radius: 25px 22px 28px 20px; }
+        .organic-pill:nth-child(3n) { border-radius: 20px 28px 25px 22px; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-text-main min-h-screen flex flex-col max-w-lg mx-auto overflow-x-hidden font-body">
+<header class="w-full sticky top-0 z-50 bg-background/90 backdrop-blur-md flex items-center px-6 h-20 shrink-0">
+<div class="flex items-center w-full gap-4">
+<button class="material-symbols-outlined text-text-main hover:bg-white/50 p-2 rounded-full transition-all active:scale-95">arrow_back</button>
+<div class="flex flex-col flex-grow">
+<div class="flex justify-between items-baseline">
+<h1 class="font-headline text-[20px] font-bold text-text-main">Your Profile</h1>
+<span class="text-[10px] uppercase tracking-widest font-extrabold text-text-muted opacity-60">Step 2a of 7</span>
+</div>
+<p class="text-[12px] text-text-muted">Personalizing your perimenopause journey</p>
+</div>
+</div>
+</header>
+<main class="flex-grow overflow-y-auto px-5 py-4 space-y-4 pb-40">
+<section class="section-card">
+<span class="material-symbols-outlined section-header-icon">history</span>
+<h2 class="text-[18px] font-headline font-bold mb-1">Irregular Periods</h2>
+<p class="text-sm text-text-muted mb-6 leading-relaxed">How long have your periods been irregular?</p>
+<div class="space-y-3">
+<label class="flex items-center p-4 rounded-soft border-2 border-primary/10 bg-primary/5 cursor-pointer hover:bg-primary/10 transition-all">
+<input checked="" class="w-5 h-5 text-primary focus:ring-primary/30 border-border-soft" name="irregularity" type="radio"/>
+<div class="ml-4">
+<span class="block text-sm font-bold">Less than 6 months</span>
+<span class="block text-[11px] text-text-muted">Just starting to notice changes</span>
+</div>
+</label>
+<label class="flex items-center p-4 rounded-soft border border-border-soft hover:bg-surface transition-all cursor-pointer">
+<input class="w-5 h-5 text-primary focus:ring-primary/30 border-border-soft" name="irregularity" type="radio"/>
+<span class="ml-4 text-sm font-medium">6 months to 1 year</span>
+</label>
+<label class="flex items-center p-4 rounded-soft border border-border-soft hover:bg-surface transition-all cursor-pointer">
+<input class="w-5 h-5 text-primary focus:ring-primary/30 border-border-soft" name="irregularity" type="radio"/>
+<span class="ml-4 text-sm font-medium">Over 1 year</span>
+</label>
+</div>
+</section>
+<section class="section-card">
+<span class="material-symbols-outlined section-header-icon">medication</span>
+<h2 class="text-[18px] font-headline font-bold mb-1">Hormone Treatment</h2>
+<p class="text-sm text-text-muted mb-6 leading-relaxed">Are you currently on any hormone treatment?</p>
+<div class="space-y-3">
+<label class="flex items-center p-4 rounded-soft border border-border-soft hover:bg-surface transition-all cursor-pointer">
+<input class="w-5 h-5 text-primary focus:ring-primary/30 border-border-soft" name="hormone" type="radio"/>
+<span class="ml-4 text-sm font-medium">Yes - I'm on HRT or other hormones</span>
+</label>
+<label class="flex items-center p-4 rounded-soft border-2 border-primary/10 bg-primary/5 cursor-pointer">
+<input checked="" class="w-5 h-5 text-primary focus:ring-primary/30 border-border-soft" name="hormone" type="radio"/>
+<span class="ml-4 text-sm font-bold">No - I'm managing naturally</span>
+</label>
+<label class="flex items-center p-4 rounded-soft border border-border-soft hover:bg-surface transition-all cursor-pointer">
+<input class="w-5 h-5 text-primary focus:ring-primary/30 border-border-soft" name="hormone" type="radio"/>
+<span class="ml-4 text-sm font-medium">I'm not sure</span>
+</label>
+</div>
+</section>
+<section class="section-card">
+<span class="material-symbols-outlined section-header-icon">bubble_chart</span>
+<h2 class="text-[18px] font-headline font-bold mb-1">Symptoms</h2>
+<p class="text-sm text-text-muted mb-6">Which symptoms are most affecting you? <span class="block text-[10px] uppercase font-extrabold mt-1 text-primary/60 tracking-wider">Tap to select multiple</span></p>
+<div class="grid grid-cols-2 gap-4">
+<label class="relative cursor-pointer group">
+<input class="hidden symptom-checkbox" type="checkbox"/>
+<div class="organic-pill flex flex-col items-center justify-center p-5 gap-2 h-full text-center">
+<span class="material-symbols-outlined text-primary text-2xl">sunny</span>
+<span class="text-xs font-bold leading-tight">Hot flashes</span>
+</div>
+</label>
+<label class="relative cursor-pointer group">
+<input checked="" class="hidden symptom-checkbox" type="checkbox"/>
+<div class="organic-pill flex flex-col items-center justify-center p-5 gap-2 h-full text-center">
+<span class="material-symbols-outlined text-primary text-2xl">bedtime</span>
+<span class="text-xs font-bold leading-tight">Night sweats</span>
+</div>
+</label>
+<label class="relative cursor-pointer group">
+<input checked="" class="hidden symptom-checkbox" type="checkbox"/>
+<div class="organic-pill flex flex-col items-center justify-center p-5 gap-2 h-full text-center">
+<span class="material-symbols-outlined text-primary text-2xl">psychology_alt</span>
+<span class="text-xs font-bold leading-tight">Mood changes</span>
+</div>
+</label>
+<label class="relative cursor-pointer group">
+<input class="hidden symptom-checkbox" type="checkbox"/>
+<div class="organic-pill flex flex-col items-center justify-center p-5 gap-2 h-full text-center">
+<span class="material-symbols-outlined text-primary text-2xl">neurology</span>
+<span class="text-xs font-bold leading-tight">Brain fog</span>
+</div>
+</label>
+<label class="relative cursor-pointer group">
+<input class="hidden symptom-checkbox" type="checkbox"/>
+<div class="organic-pill flex flex-col items-center justify-center p-5 gap-2 h-full text-center">
+<span class="material-symbols-outlined text-primary text-2xl">nest_eco_leaf</span>
+<span class="text-xs font-bold leading-tight">Libido changes</span>
+</div>
+</label>
+<label class="relative cursor-pointer group">
+<input class="hidden symptom-checkbox" type="checkbox"/>
+<div class="organic-pill flex flex-col items-center justify-center p-5 gap-2 h-full text-center">
+<span class="material-symbols-outlined text-primary text-2xl">more_horiz</span>
+<span class="text-xs font-bold leading-tight">Other</span>
+</div>
+</label>
+</div>
+</section>
+<section class="section-card">
+<span class="material-symbols-outlined section-header-icon">calendar_today</span>
+<h2 class="text-[18px] font-headline font-bold mb-1">Timeline</h2>
+<p class="text-sm text-text-muted mb-6">When did your irregular periods start?</p>
+<button class="w-full flex justify-between items-center px-5 py-4 rounded-soft border-2 border-border-soft bg-white text-text-main font-bold hover:border-primary/40 transition-all">
+<span class="text-sm">March 2022</span>
+<span class="material-symbols-outlined text-primary">event</span>
+</button>
+</section>
+<section class="section-card mb-8">
+<span class="material-symbols-outlined section-header-icon">clinical_notes</span>
+<h2 class="text-[18px] font-headline font-bold mb-1">Medical History</h2>
+<p class="text-sm text-text-muted mb-4">Any relevant medical history? (optional)</p>
+<textarea class="w-full bg-accent-warm border-border-soft rounded-soft p-4 text-sm focus:ring-2 focus:ring-primary/10 border placeholder:text-text-muted/50 min-h-[100px]" placeholder="Share any details like endometriosis, PCOS, or recent surgeries..."></textarea>
+</section>
+</main>
+<footer class="fixed bottom-0 w-full z-50 bg-background/80 backdrop-blur-xl px-8 py-6 max-w-lg mx-auto flex flex-col items-center gap-3">
+<button class="w-full bg-primary text-white rounded-soft px-8 py-4.5 flex justify-center items-center gap-2 font-bold shadow-lg shadow-primary/20 hover:bg-primary-light transition-all active:scale-[0.98] py-4">
+        Continue
+        <span class="material-symbols-outlined text-base">arrow_forward</span>
+</button>
+<button class="text-text-muted font-bold px-6 py-2 hover:text-text-main transition-colors text-[10px] uppercase tracking-widest">
+        Skip for now
+    </button>
+</footer>
+
+</body></html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync | Health Profile Interview</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "cream-bg": "#F7F5F0",
+                        "taupe-primary": "#9B8B7E",
+                        "charcoal": "#333333",
+                        "surface": "#ffffff",
+                        "lavender-soft": "#E8E0F0",
+                        "outline-subtle": "#e5e1da"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif", "serif"],
+                        "body": ["Manrope", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body { 
+                @apply bg-cream-bg text-charcoal font-body antialiased overflow-hidden;
+                height: 100dvh;
+            }
+            h1, h2, h3 { @apply font-headline; }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }input[type="radio"], input[type="checkbox"] {
+            @apply text-taupe-primary focus:ring-taupe-primary/30 border-outline-subtle;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col">
+<header class="px-6 py-4 flex items-center justify-between shrink-0">
+<button class="w-10 h-10 flex items-center justify-start text-charcoal">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</button>
+<div class="text-center">
+<p class="text-[10px] uppercase tracking-[0.2em] font-bold text-gray-500 mb-0.5">Step 2 of 4</p>
+<h1 class="text-base font-semibold text-charcoal">Health Profile</h1>
+</div>
+<div class="w-10 h-10"></div> 
+</header>
+<div class="px-6 mb-8 shrink-0">
+<div class="h-1 w-full bg-outline-subtle rounded-full overflow-hidden">
+<div class="h-full bg-taupe-primary rounded-full transition-all duration-500" style="width: 50%;"></div>
+</div>
+</div>
+<main class="flex-grow px-6 flex flex-col justify-between overflow-y-auto pb-8">
+<div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+<div class="space-y-3">
+<h2 class="text-2xl font-bold leading-tight text-charcoal">
+                    Are you currently on Hormone Replacement Therapy (HRT)?
+                </h2>
+<p class="text-gray-500 text-sm leading-relaxed italic">
+                    This helps us personalize your hormone tracking and insights.
+                </p>
+</div>
+<div class="space-y-3">
+<label class="flex items-center p-5 bg-surface rounded-2xl border border-transparent shadow-sm active:scale-[0.98] transition-all cursor-pointer">
+<input checked="" class="w-5 h-5" name="hrt" type="radio"/>
+<span class="ml-4 font-semibold text-[15px]">Yes - I'm on HRT</span>
+</label>
+<div class="bg-lavender-soft/40 p-5 rounded-2xl space-y-4 border border-lavender-soft">
+<p class="text-[11px] font-bold uppercase tracking-wider text-gray-600">Which type do you use?</p>
+<div class="grid grid-cols-1 gap-3">
+<label class="flex items-center gap-3 text-sm font-medium">
+<input class="rounded-full w-4 h-4" type="checkbox"/> Patch (transdermal)
+                        </label>
+<label class="flex items-center gap-3 text-sm font-medium">
+<input class="rounded-full w-4 h-4" type="checkbox"/> Tablet
+                        </label>
+<label class="flex items-center gap-3 text-sm font-medium">
+<input class="rounded-full w-4 h-4" type="checkbox"/> Gel (topical)
+                        </label>
+<label class="flex items-center gap-3 text-sm font-medium">
+<input class="rounded-full w-4 h-4" type="checkbox"/> Spray/Nasal
+                        </label>
+<label class="flex items-center gap-3 text-sm font-medium italic text-gray-500">
+<input class="rounded-full w-4 h-4" type="checkbox"/> I'm not sure
+                        </label>
+</div>
+</div>
+<label class="flex items-center p-5 bg-surface rounded-2xl border border-transparent shadow-sm active:scale-[0.98] transition-all cursor-pointer">
+<input class="w-5 h-5" name="hrt" type="radio"/>
+<span class="ml-4 font-semibold text-[15px]">No - I'm not taking hormones</span>
+</label>
+<label class="flex items-center p-5 bg-surface rounded-2xl border border-transparent shadow-sm active:scale-[0.98] transition-all cursor-pointer">
+<input class="w-5 h-5" name="hrt" type="radio"/>
+<span class="ml-4 font-semibold text-[15px]">I'm starting HRT soon</span>
+</label>
+</div>
+</div>
+<div class="mt-8 space-y-6 shrink-0">
+<div class="flex items-center justify-center gap-2 text-taupe-primary/80">
+<span class="material-symbols-outlined text-lg">face</span>
+<p class="text-xs font-medium italic">Take your time. This information is key to your care.</p>
+</div>
+<div class="space-y-3">
+<button class="w-full bg-taupe-primary text-white py-5 rounded-2xl font-bold shadow-lg shadow-taupe-primary/20 active:scale-[0.97] transition-transform">
+                    Continue
+                </button>
+<button class="w-full text-gray-400 py-2 text-xs font-bold uppercase tracking-widest hover:text-charcoal transition-colors">
+                    Skip this question
+                </button>
+</div>
+</div>
+</main>
+<div class="h-6 shrink-0"></div>
+
+</body></html>

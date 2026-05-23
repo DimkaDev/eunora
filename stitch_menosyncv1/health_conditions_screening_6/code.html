@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Personal Health Journal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Quicksand:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style type="text/tailwindcss">:root {
+    --cream-bg: #F7F5F0;
+    --soft-taupe: #8C7E6D;
+    --muted-sage: #9CAF88;
+    --warm-charcoal: #4A443F;
+    --dusty-rose: #D4A373;
+    --journal-paper: #FFF;
+    --helper-gray: #7D746D;
+    --trust-blue: #E8EDF2
+    }
+body {
+    font-family: "Quicksand", sans-serif;
+    background-color: var(--cream-bg);
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuBzuaksI5-QlWKXkPivtj-UyolmfWH-0Rkfsqs8o5aO_Fk2mNzmsuWwC2oJeL6DAsy14a5fGaSccnmRKOD8BZ6_aI5wcR1_CllHPx8LNyO7EFOlAEKBNGF5wQvZhhXEYOHTrEZ4GaBmbKkKWqrfN7BOUogTimHRIKh4fj23uIVTn1Gk7-NBPUgC656NwsycujTIXDtwn-V48z60XnCKTjAZBtaLRQ3AdKPVrjCn_NCfIjEPKDUYnHTv2knCZUe_ILoBfxJIzN2nw4E);
+    color: var(--warm-charcoal)
+    }
+.serif-heading {
+    font-family: "Crimson Pro", serif
+    }
+.custom-checkbox {
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border: 1.5px solid var(--soft-taupe);
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background-color: transparent;
+    position: relative
+    }
+.custom-checkbox:checked {
+    background-color: #FDFBF7;
+    border-color: var(--muted-sage)
+    }.custom-checkbox:checked::after {
+    content: "";
+    font-family: "Material Symbols Outlined";
+    font-size: 18px;
+    color: var(--muted-sage);
+    font-weight: 700;transform: rotate(-2deg) scale(1.1)
+    }
+.journal-card {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(140, 126, 109, 0.1)
+    }
+.input-focus:focus {
+    outline: none;
+    border-color: var(--soft-taupe);
+    box-shadow: 0 0 0 3px rgba(140, 126, 109, 0.1)
+    }
+.continue-btn {
+    background: var(--soft-taupe);
+    box-shadow: 0 4px 12px rgba(140, 126, 109, 0.2)
+    }
+.continue-btn:active {
+    transform: translatey(1px);
+    box-shadow: 0 2px 6px rgba(140, 126, 109, 0.2)
+    }</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased">
+<header class="sticky top-0 z-50 bg-[#F7F5F0]/80 backdrop-blur-md">
+<div class="flex items-center justify-between px-6 py-5 max-w-2xl mx-auto">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[var(--soft-taupe)] cursor-pointer">arrow_back</span>
+<h1 class="serif-heading text-2xl font-semibold italic text-[var(--warm-charcoal)]">Your Journey</h1>
+</div>
+<div class="hidden md:flex items-center gap-2">
+<div class="h-1 w-8 bg-[var(--muted-sage)] rounded-full"></div>
+<div class="h-1 w-8 bg-stone-200 rounded-full"></div>
+<div class="h-1 w-8 bg-stone-200 rounded-full"></div>
+</div>
+</div>
+</header>
+<main class="max-w-2xl mx-auto px-4 pt-4 pb-40">
+<div class="journal-card bg-white rounded-[20px] p-6 mb-8">
+<header class="mb-8">
+<h2 class="font-bold text-[13px] text-[var(--warm-charcoal)] uppercase tracking-[0.1em] mb-1">Health Conditions &amp; Medical History</h2>
+<p class="text-[11px] text-[var(--helper-gray)] leading-relaxed italic">
+                This helps us provide safer, more personalized recommendations. Optional but helpful.
+            </p>
+</header>
+<div class="space-y-8">
+<div>
+<h3 class="text-[14px] font-semibold text-[var(--warm-charcoal)] mb-5 serif-heading italic">Do you have any of the following?</h3>
+<div class="space-y-4">
+<label class="flex items-start gap-4 cursor-pointer group">
+<input class="custom-checkbox mt-0.5" type="checkbox"/>
+<div class="flex flex-col">
+<span class="text-[13px] font-medium text-[var(--warm-charcoal)] group-hover:text-[var(--soft-taupe)] transition-colors">Heart disease or high blood pressure</span>
+<span class="text-[9px] text-[var(--helper-gray)] uppercase tracking-wider font-semibold">Affects HRT suitability</span>
+</div>
+</label>
+<label class="flex items-start gap-4 cursor-pointer group">
+<input class="custom-checkbox mt-0.5" type="checkbox"/>
+<div class="flex flex-col">
+<span class="text-[13px] font-medium text-[var(--warm-charcoal)]">Diabetes or blood sugar management issues</span>
+<span class="text-[9px] text-[var(--helper-gray)] uppercase tracking-wider font-semibold">May influence recommendations</span>
+</div>
+</label>
+<label class="flex items-start gap-4 cursor-pointer group">
+<input class="custom-checkbox mt-0.5" type="checkbox"/>
+<div class="flex flex-col">
+<span class="text-[13px] font-medium text-[var(--warm-charcoal)]">Migraines with aura</span>
+<span class="text-[9px] text-[var(--helper-gray)] uppercase tracking-wider font-semibold">Important for estrogen decisions</span>
+</div>
+</label>
+<label class="flex items-start gap-4 cursor-pointer group">
+<input class="custom-checkbox mt-0.5" type="checkbox"/>
+<div class="flex flex-col">
+<span class="text-[13px] font-medium text-[var(--warm-charcoal)]">Blood clots (DVT/PE) or clotting disorder</span>
+<span class="text-[9px] text-[var(--helper-gray)] uppercase tracking-wider font-semibold">May restrict certain HRT types</span>
+</div>
+</label>
+<label class="flex items-start gap-4 cursor-pointer group">
+<input class="custom-checkbox mt-0.5" type="checkbox"/>
+<div class="flex flex-col">
+<span class="text-[13px] font-medium text-[var(--warm-charcoal)]">Liver disease</span>
+<span class="text-[9px] text-[var(--helper-gray)] uppercase tracking-wider font-semibold">Affects medication metabolism</span>
+</div>
+</label>
+<label class="flex items-start gap-4 cursor-pointer group">
+<input class="custom-checkbox mt-0.5" type="checkbox"/>
+<div class="flex flex-col">
+<span class="text-[13px] font-medium text-[var(--warm-charcoal)]">Breast cancer (current or history)</span>
+<span class="text-[9px] text-[var(--helper-gray)] uppercase tracking-wider font-semibold">Important for treatment planning</span>
+</div>
+</label>
+<label class="flex items-start gap-4 cursor-pointer group">
+<input class="custom-checkbox mt-0.5" type="checkbox"/>
+<span class="text-[13px] font-medium text-[var(--warm-charcoal)]">Endometriosis</span>
+</label>
+<label class="flex items-start gap-4 cursor-pointer group">
+<input class="custom-checkbox mt-0.5" type="checkbox"/>
+<span class="text-[13px] font-medium text-[var(--warm-charcoal)]">Uterine fibroids</span>
+</label>
+<label class="flex items-start gap-4 cursor-pointer group">
+<input class="custom-checkbox mt-0.5" type="checkbox"/>
+<div class="flex flex-col">
+<span class="text-[13px] font-medium text-[var(--warm-charcoal)]">Thyroid disorder</span>
+<span class="text-[9px] text-[var(--helper-gray)] uppercase tracking-wider font-semibold">May interact with HRT</span>
+</div>
+</label>
+<label class="flex items-start gap-4 cursor-pointer group">
+<input class="custom-checkbox mt-0.5" type="checkbox"/>
+<span class="text-[13px] font-medium text-[var(--warm-charcoal)]">Autoimmune condition (lupus, RA, etc.)</span>
+</label>
+<label class="flex items-start gap-4 cursor-pointer group">
+<input class="custom-checkbox mt-0.5" type="checkbox"/>
+<span class="text-[13px] font-medium text-[var(--warm-charcoal)]">Depression or anxiety disorder</span>
+</label>
+<div class="space-y-3">
+<label class="flex items-start gap-4 cursor-pointer group">
+<input checked="" class="custom-checkbox mt-0.5" type="checkbox"/>
+<span class="text-[13px] font-medium text-[var(--warm-charcoal)]">Other condition</span>
+</label>
+<div class="pl-10">
+<p class="text-[11px] text-[var(--helper-gray)] mb-2 italic">Please describe:</p>
+<textarea class="w-full text-[13px] p-4 bg-[var(--cream-bg)]/50 border border-stone-200 rounded-xl input-focus resize-none serif-heading italic" placeholder="Briefly detail your health experience..." rows="2"></textarea>
+</div>
+</div>
+<label class="flex items-start gap-4 cursor-pointer group pt-4 border-t border-stone-100">
+<input class="custom-checkbox mt-0.5" type="checkbox"/>
+<span class="text-[13px] font-medium text-[var(--helper-gray)]">None of the above / Prefer not to disclose</span>
+</label>
+</div>
+</div>
+<div class="pt-2">
+<h3 class="text-[11px] font-bold text-[var(--helper-gray)] uppercase tracking-widest mb-5">Family History</h3>
+<div class="space-y-4">
+<label class="flex items-center gap-4 cursor-pointer group">
+<input class="custom-checkbox" type="checkbox"/>
+<span class="text-[13px] font-medium text-[var(--warm-charcoal)]">Family history of breast cancer</span>
+</label>
+<label class="flex items-center gap-4 cursor-pointer group">
+<input class="custom-checkbox" type="checkbox"/>
+<span class="text-[13px] font-medium text-[var(--warm-charcoal)]">Family history of early menopause</span>
+</label>
+<label class="flex items-center gap-4 cursor-pointer group">
+<input class="custom-checkbox" type="checkbox"/>
+<span class="text-[13px] font-medium text-[var(--warm-charcoal)]">Family history of blood clots</span>
+</label>
+</div>
+</div>
+<div class="bg-[var(--trust-blue)]/60 rounded-2xl p-5 flex gap-4 border border-white/50">
+<span class="material-symbols-outlined text-[var(--soft-taupe)] text-xl shrink-0">info</span>
+<p class="text-[11px] text-[#5A6372] leading-relaxed">
+                    These conditions don't disqualify you from using MenoSync. They help us provide appropriate guidance and encourage you to discuss with your healthcare provider.
+                </p>
+</div>
+</div>
+</div>
+<div class="space-y-6">
+<div class="bg-[var(--muted-sage)]/10 p-6 rounded-3xl border border-[var(--muted-sage)]/20 relative overflow-hidden">
+<div class="relative z-10">
+<h4 class="serif-heading text-xl font-semibold mb-2 text-[var(--warm-charcoal)] italic">Privacy is Care</h4>
+<p class="text-xs text-[var(--warm-charcoal)]/80 leading-relaxed max-w-[80%]">
+                    Your health history is a personal narrative. We protect it with the highest standards of security, ensuring it remains yours alone.
+                </p>
+</div>
+<div class="absolute -right-12 -bottom-12 w-32 h-32 bg-[var(--muted-sage)]/20 rounded-full blur-3xl"></div>
+</div>
+<div class="w-full aspect-[16/9] rounded-[24px] overflow-hidden journal-card bg-white p-2">
+<img alt="Soft botanical elements" class="w-full h-full object-cover rounded-[20px] opacity-90" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCC_zF3dVp656qylYGVFSBVls1COmGvTFk44g_ckmmYX3ViXOkDjGGp78K_igbc5kjjxdlmQ4V0BswqUUHxurF4C71IskRR34-6DDUyly6Uv4iWorFU2NBaH3D5k-SoNcMW1YiAdzdaUhvIS3jT8v8dXXKeLPv3VCML_ZbgqMvg5f8IPz3KBbuPkFGbwn-6j7JLMY-5Q5cxCZEujpxsc1c01jfTc8WjqWjN2vnx5E9wGq9E4D2XQTXKQRtUKHAlwleZcX1G0ONaYbw"/>
+</div>
+</div>
+</main>
+<footer class="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#F7F5F0] via-[#F7F5F0] to-[#F7F5F0]/0 pt-12 z-50">
+<div class="max-w-2xl mx-auto flex flex-col items-center gap-4">
+<button class="continue-btn w-full py-4.5 text-white font-bold text-[15px] rounded-2xl transition-all duration-300 h-14">
+            Continue
+        </button>
+<button class="text-[11px] text-[var(--helper-gray)] underline underline-offset-4 font-medium transition-colors hover:text-[var(--warm-charcoal)]">
+            I'd rather not share this
+        </button>
+</div>
+</footer>
+
+</body></html>

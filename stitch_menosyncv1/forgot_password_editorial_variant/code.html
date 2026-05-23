@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Forgot Password</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#6c6074",
+                        "surface-container-low": "#f8f2f0",
+                        "on-surface": "#1d1b1a",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "surface-container-highest": "#e7e1df",
+                        "primary": "#67594e",
+                        "tertiary-container": "#9d675c",
+                        "outline-variant": "#d0c4bc",
+                        "on-tertiary-fixed": "#341009",
+                        "surface-tint": "#6a5c50",
+                        "background": "#fef8f6",
+                        "surface-variant": "#e7e1df",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed": "#211828",
+                        "inverse-surface": "#32302f",
+                        "on-tertiary-container": "#fffbff",
+                        "inverse-on-surface": "#f5f0ed",
+                        "outline": "#7f756e",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "inverse-primary": "#d6c3b5",
+                        "surface-container-high": "#ede7e5",
+                        "surface-bright": "#fef8f6",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "surface-dim": "#ded9d7",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "tertiary": "#814f45",
+                        "surface-container": "#f2edea",
+                        "on-primary-fixed": "#231a11",
+                        "secondary-container": "#edddf5",
+                        "primary-container": "#817266",
+                        "surface": "#fef8f6",
+                        "on-surface-variant": "#4d453f",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "secondary": "#655a6e",
+                        "on-error": "#ffffff",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "on-primary-fixed-variant": "#51443a",
+                        "primary-fixed": "#f2dfd0",
+                        "error-container": "#ffdad6",
+                        "on-primary-container": "#fffbff",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "on-background": "#1d1b1a",
+                        "tertiary-fixed": "#ffdad3",
+                        "secondary-fixed": "#edddf5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": [
+                            "Noto Serif"
+                        ],
+                        "display": [
+                            "Noto Serif"
+                        ],
+                        "body": [
+                            "Manrope"
+                        ],
+                        "label": [
+                            "Manrope"
+                        ]
+                    },
+                    "fontSize": {}
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
+<!-- Background Texture/Image -->
+<div class="absolute inset-0 z-0 opacity-20 pointer-events-none" data-alt="A very soft, abstract floral watermark texture in warm taupe and lavender hues, barely visible against a light background. The style is serene, editorial, and sophisticated, acting as a subtle backdrop that doesn't compete with the foreground content. The lighting is gentle and diffused, evoking a sense of calm wellness." style="background-image: url('https://lh3.googleusercontent.com/aida/ADBb0uhXMQAM0I5cp27WfHNJWhtYt4M5TJYCAcv1lzKoQgqYjKoiMgPBCrVz_cyGaPJ96St0K48pXbbqIzLmmB0llOMrURsubpka-32Od1iozMkYNm9EyVUwfKmqO098Rv1ipMDR-omFscI8Ri7XFnZVuxuqfMMoNjnK2t4zl7B65ceRkof-V3YHs5V2Y3g7tIN-zdVfgh_PEUb21v-5Gztaw3E6gYaWrgtUVkcMdffEb_L1EloTMhlhH9IHol0'); background-size: cover; background-position: center;"></div>
+<!-- Main Content Canvas -->
+<main class="w-full max-w-md px-5 md:px-0 z-10 relative">
+<!-- Card Container -->
+<div class="bg-surface-container-lowest rounded-[32px] p-8 md:p-10 shadow-[0_24px_48px_-12px_rgba(29,27,26,0.06)] relative overflow-hidden">
+<!-- Header Section -->
+<div class="text-center mb-8">
+<h1 class="font-display text-4xl text-primary font-bold mb-3 tracking-tight">MenoSync</h1>
+<h2 class="font-display text-2xl text-on-surface mb-2">Reset Password</h2>
+<p class="font-body text-on-surface-variant text-sm max-w-[280px] mx-auto">
+                    Enter the email associated with your account, and we’ll send you a link to reset your password.
+                </p>
+</div>
+<!-- Form -->
+<form action="#" class="space-y-6" method="POST">
+<!-- Email Field -->
+<div>
+<label class="block font-headline text-lg text-primary mb-2 italic" for="email">Email Address</label>
+<div class="relative">
+<input class="block w-full bg-surface-container-highest border-transparent rounded-full px-5 py-4 text-on-surface font-body focus:border-outline-variant focus:ring-0 focus:bg-surface-container-lowest transition-colors placeholder:text-on-surface-variant/50" id="email" name="email" placeholder="your@email.com" required="" type="email"/>
+</div>
+</div>
+<!-- Submit Button -->
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-xl py-4 font-body text-base font-semibold shadow-[0_8px_16px_-4px_rgba(103,89,78,0.2)] hover:opacity-90 transition-opacity active:scale-[0.98]" type="submit">
+                    Send Reset Link
+                </button>
+</form>
+<!-- Back to Login Link -->
+<div class="mt-8 text-center">
+<a class="inline-flex items-center text-primary font-body text-sm font-medium hover:text-on-surface transition-colors" href="#">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px] mr-1">chevron_left</span>
+                    Back to Login
+                </a>
+</div>
+</div>
+</main>
+</body></html>

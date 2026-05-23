@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Health History</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;500;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background": "#fef8f6",
+                        "on-tertiary-fixed": "#341009",
+                        "secondary-container": "#edddf5",
+                        "primary-container": "#817266",
+                        "outline": "#7f756e",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#ede7e5",
+                        "on-surface-variant": "#4d453f",
+                        "on-error": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "surface-container-low": "#f8f2f0",
+                        "inverse-primary": "#d6c3b5",
+                        "secondary": "#655a6e",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "on-secondary-container": "#6c6074",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "on-secondary-fixed": "#211828",
+                        "surface-bright": "#fef8f6",
+                        "surface-dim": "#ded9d7",
+                        "on-tertiary-container": "#fffbff",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "surface": "#fef8f6",
+                        "on-background": "#1d1b1a",
+                        "on-primary-fixed-variant": "#51443a",
+                        "on-surface": "#1d1b1a",
+                        "inverse-on-surface": "#f5f0ed",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#ffdad3",
+                        "outline-variant": "#d0c4bc",
+                        "on-primary-container": "#fffbff",
+                        "surface-tint": "#6a5c50",
+                        "primary": "#67594e",
+                        "tertiary": "#814f45",
+                        "inverse-surface": "#32302f",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#231a11",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "tertiary-container": "#9d675c",
+                        "surface-container-highest": "#e7e1df",
+                        "surface-container": "#f2edea",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "primary-fixed": "#f2dfd0",
+                        "surface-variant": "#e7e1df",
+                        "secondary-fixed": "#edddf5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body { font-family: 'Manrope', sans-serif; background-color: #fef8f6; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .condition-card {
+            @apply relative flex flex-col items-center justify-center p-4 rounded-2xl border-2 border-stone-100 bg-white transition-all cursor-pointer select-none active:scale-[0.97];
+        }
+        .condition-card input[type="checkbox"] {
+            @apply absolute top-3 right-3 appearance-none w-5 h-5 border-2 border-stone-200 rounded-full transition-all;
+        }
+        .condition-card input[type="checkbox"]:checked {
+            @apply bg-primary border-primary;
+        }
+        .condition-card input[type="checkbox"]:checked::after {
+            content: '\e5ca';
+            font-family: 'Material Symbols Outlined';
+            @apply text-white text-sm absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+        }
+        .condition-card:has(input:checked) {
+            @apply border-primary bg-stone-50 shadow-sm;
+        }
+        .condition-card:has(input:checked) .card-icon {
+            @apply scale-110;
+        }
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        details[open] .collapse-icon { transform: rotate(180deg); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="text-on-surface leading-relaxed antialiased">
+<header class="bg-stone-50/70 backdrop-blur-xl sticky top-0 z-50 shadow-sm border-b border-stone-100">
+<div class="flex items-center justify-between px-6 py-4 w-full max-w-2xl mx-auto">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-stone-700 cursor-pointer hover:opacity-80 transition-opacity">arrow_back</span>
+<h1 class="font-serif text-2xl font-medium tracking-tight text-stone-800">Your Journey</h1>
+</div>
+<div class="flex gap-2 font-sans text-[10px] font-bold uppercase tracking-widest text-primary">
+            Setup Mode
+        </div>
+</div>
+</header>
+<main class="max-w-2xl mx-auto px-4 pt-6 pb-32">
+<section class="bg-surface-container-lowest rounded-3xl p-6 shadow-sm border border-stone-100">
+<header class="mb-8">
+<h2 class="font-body font-extrabold text-sm text-on-surface uppercase tracking-wider">Health Conditions &amp; Medical History</h2>
+<p class="font-body text-xs text-on-surface-variant mt-2 leading-relaxed">Select any conditions that apply. This helps personalize your MenoSync experience.</p>
+</header>
+<div class="space-y-6">
+<details class="group bg-surface-container-low rounded-2xl overflow-hidden border border-stone-100" open="">
+<summary class="flex items-center justify-between p-5 cursor-pointer hover:bg-stone-100 transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-primary">vital_signs</span>
+</div>
+<span class="text-xs font-bold text-on-surface uppercase tracking-[0.1em]">Chronic Illnesses</span>
+</div>
+<span class="material-symbols-outlined text-stone-400 collapse-icon transition-transform duration-300">expand_more</span>
+</summary>
+<div class="p-5 pt-0 grid grid-cols-2 gap-3">
+<label class="condition-card">
+<input type="checkbox"/>
+<div class="w-12 h-12 rounded-full mb-3 flex items-center justify-center bg-error-container/60 transition-all duration-300">
+<span class="material-symbols-outlined text-error text-[28px] card-icon transition-all duration-300">favorite</span>
+</div>
+<span class="text-[11px] font-bold text-on-surface text-center">Heart / BP</span>
+<span class="text-[9px] text-on-surface-variant uppercase mt-1">HRT Risk</span>
+</label>
+<label class="condition-card">
+<input type="checkbox"/>
+<div class="w-12 h-12 rounded-full mb-3 flex items-center justify-center bg-secondary-container/80 transition-all duration-300">
+<span class="material-symbols-outlined text-secondary text-[28px] card-icon transition-all duration-300">opacity</span>
+</div>
+<span class="text-[11px] font-bold text-on-surface text-center">Diabetes</span>
+<span class="text-[9px] text-on-surface-variant uppercase mt-1">Blood Sugar</span>
+</label>
+<label class="condition-card">
+<input type="checkbox"/>
+<div class="w-12 h-12 rounded-full mb-3 flex items-center justify-center bg-tertiary-fixed/80 transition-all duration-300">
+<span class="material-symbols-outlined text-tertiary text-[28px] card-icon transition-all duration-300">water_drop</span>
+</div>
+<span class="text-[11px] font-bold text-on-surface text-center">Blood Clots</span>
+<span class="text-[9px] text-on-surface-variant uppercase mt-1">DVT History</span>
+</label>
+<label class="condition-card">
+<input type="checkbox"/>
+<div class="w-12 h-12 rounded-full mb-3 flex items-center justify-center bg-primary-fixed/80 transition-all duration-300">
+<span class="material-symbols-outlined text-primary text-[28px] card-icon transition-all duration-300">ecg</span>
+</div>
+<span class="text-[11px] font-bold text-on-surface text-center">Thyroid</span>
+<span class="text-[9px] text-on-surface-variant uppercase mt-1">Interactions</span>
+</label>
+<label class="condition-card">
+<input type="checkbox"/>
+<div class="w-12 h-12 rounded-full mb-3 flex items-center justify-center bg-surface-variant transition-all duration-300">
+<span class="material-symbols-outlined text-on-surface-variant text-[28px] card-icon transition-all duration-300">health_and_safety</span>
+</div>
+<span class="text-[11px] font-bold text-on-surface text-center">Autoimmune</span>
+<span class="text-[9px] text-on-surface-variant uppercase mt-1">Lupus, RA</span>
+</label>
+<label class="condition-card">
+<input type="checkbox"/>
+<div class="w-12 h-12 rounded-full mb-3 flex items-center justify-center bg-secondary-fixed-dim/50 transition-all duration-300">
+<span class="material-symbols-outlined text-secondary text-[28px] card-icon transition-all duration-300">medical_services</span>
+</div>
+<span class="text-[11px] font-bold text-on-surface text-center">Liver Disease</span>
+<span class="text-[9px] text-on-surface-variant uppercase mt-1">Metabolism</span>
+</label>
+</div>
+</details>
+<details class="group bg-surface-container-low rounded-2xl overflow-hidden border border-stone-100">
+<summary class="flex items-center justify-between p-5 cursor-pointer hover:bg-stone-100 transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-primary">female</span>
+</div>
+<span class="text-xs font-bold text-on-surface uppercase tracking-[0.1em]">Reproductive Health</span>
+</div>
+<span class="material-symbols-outlined text-stone-400 collapse-icon transition-transform duration-300">expand_more</span>
+</summary>
+<div class="p-5 pt-0 grid grid-cols-2 gap-3">
+<label class="condition-card">
+<input type="checkbox"/>
+<span class="material-symbols-outlined text-stone-400 text-3xl mb-2 card-icon transition-all duration-300">immunology</span>
+<span class="text-[11px] font-bold text-on-surface text-center">Breast Cancer</span>
+<span class="text-[9px] text-on-surface-variant uppercase mt-1">Med Planning</span>
+</label>
+<label class="condition-card">
+<input type="checkbox"/>
+<span class="material-symbols-outlined text-stone-400 text-3xl mb-2 card-icon transition-all duration-300">egg_alt</span>
+<span class="text-[11px] font-bold text-on-surface text-center">Endometriosis</span>
+<span class="text-[9px] text-on-surface-variant uppercase mt-1">Symptom Tracking</span>
+</label>
+<label class="condition-card">
+<input type="checkbox"/>
+<span class="material-symbols-outlined text-stone-400 text-3xl mb-2 card-icon transition-all duration-300">gynecology</span>
+<span class="text-[11px] font-bold text-on-surface text-center">Uterine Fibroids</span>
+<span class="text-[9px] text-on-surface-variant uppercase mt-1">Pelvic Care</span>
+</label>
+<label class="condition-card">
+<input type="checkbox"/>
+<span class="material-symbols-outlined text-stone-400 text-3xl mb-2 card-icon transition-all duration-300">neurology</span>
+<span class="text-[11px] font-bold text-on-surface text-center">Migraine+Aura</span>
+<span class="text-[9px] text-on-surface-variant uppercase mt-1">Estrogen Risk</span>
+</label>
+</div>
+</details>
+<details class="group bg-surface-container-low rounded-2xl overflow-hidden border border-stone-100">
+<summary class="flex items-center justify-between p-5 cursor-pointer hover:bg-stone-100 transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-primary">psychology</span>
+</div>
+<span class="text-xs font-bold text-on-surface uppercase tracking-[0.1em]">Mental Wellbeing</span>
+</div>
+<span class="material-symbols-outlined text-stone-400 collapse-icon transition-transform duration-300">expand_more</span>
+</summary>
+<div class="p-5 pt-0 grid grid-cols-2 gap-3">
+<label class="condition-card">
+<input type="checkbox"/>
+<span class="material-symbols-outlined text-stone-400 text-3xl mb-2 card-icon transition-all duration-300">mood_bad</span>
+<span class="text-[11px] font-bold text-on-surface text-center">Depression</span>
+</label>
+<label class="condition-card">
+<input type="checkbox"/>
+<span class="material-symbols-outlined text-stone-400 text-3xl mb-2 card-icon transition-all duration-300">mindfulness</span>
+<span class="text-[11px] font-bold text-on-surface text-center">Anxiety</span>
+</label>
+</div>
+</details>
+<details class="group bg-surface-container-low rounded-2xl overflow-hidden border border-stone-100">
+<summary class="flex items-center justify-between p-5 cursor-pointer hover:bg-stone-100 transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-primary">family_history</span>
+</div>
+<span class="text-xs font-bold text-on-surface uppercase tracking-[0.1em]">Family History</span>
+</div>
+<span class="material-symbols-outlined text-stone-400 collapse-icon transition-transform duration-300">expand_more</span>
+</summary>
+<div class="p-5 pt-0 grid grid-cols-1 gap-2">
+<label class="flex items-center gap-4 p-4 bg-white rounded-xl border border-stone-100 cursor-pointer">
+<input class="w-5 h-5 rounded-full border-stone-300 text-primary focus:ring-primary" type="checkbox"/>
+<span class="text-[11px] font-medium text-on-surface">Family history of breast cancer</span>
+</label>
+<label class="flex items-center gap-4 p-4 bg-white rounded-xl border border-stone-100 cursor-pointer">
+<input class="w-5 h-5 rounded-full border-stone-300 text-primary focus:ring-primary" type="checkbox"/>
+<span class="text-[11px] font-medium text-on-surface">Family history of early menopause</span>
+</label>
+<label class="flex items-center gap-4 p-4 bg-white rounded-xl border border-stone-100 cursor-pointer">
+<input class="w-5 h-5 rounded-full border-stone-300 text-primary focus:ring-primary" type="checkbox"/>
+<span class="text-[11px] font-medium text-on-surface">Family history of blood clots</span>
+</label>
+</div>
+</details>
+<div class="pt-2 space-y-4">
+<div class="bg-surface-container-low p-5 rounded-2xl border border-stone-100 space-y-4">
+<label class="flex items-center gap-4 cursor-pointer group">
+<input class="w-5 h-5 rounded border-stone-300 text-primary focus:ring-primary transition-all" type="checkbox"/>
+<span class="text-xs font-bold text-on-surface uppercase tracking-wider">Other condition</span>
+</label>
+<div class="pl-9">
+<textarea class="w-full bg-white border border-stone-100 rounded-xl p-3 text-xs focus:ring-2 focus:ring-primary-container outline-none transition-all placeholder:italic" placeholder="Briefly detail your health experience..." rows="2"></textarea>
+</div>
+<div class="h-[1px] bg-stone-200/50 my-2"></div>
+<label class="flex items-center gap-4 cursor-pointer group">
+<input class="w-5 h-5 rounded border-stone-300 text-primary focus:ring-primary transition-all" type="checkbox"/>
+<span class="text-[11px] font-medium text-on-surface-variant italic">None of the above / Prefer not to disclose</span>
+</label>
+</div>
+<div class="bg-[#f0f4f8] rounded-2xl p-5 flex gap-4 items-start border border-white/40">
+<span class="material-symbols-outlined text-primary text-xl mt-0.5">info</span>
+<p class="text-[11px] text-stone-600 leading-relaxed italic">
+                        These conditions don't disqualify you from using MenoSync. They help us provide safe guidance and encourage conversation with your care provider.
+                    </p>
+</div>
+</div>
+</div>
+</section>
+<div class="mt-8 flex flex-col gap-6">
+<div class="bg-primary/5 border border-primary/10 p-6 rounded-3xl flex items-center gap-4">
+<div class="bg-primary text-white p-2 rounded-xl">
+<span class="material-symbols-outlined text-xl">encrypted</span>
+</div>
+<div>
+<h4 class="font-serif text-base font-semibold text-primary">Safe &amp; Secure</h4>
+<p class="text-[10px] text-primary/70 uppercase tracking-widest font-bold">Encrypted personal health data</p>
+</div>
+</div>
+<div class="w-full h-32 rounded-3xl overflow-hidden shadow-sm">
+<img alt="Minimalist botanical image" class="w-full h-full object-cover grayscale opacity-70" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCC_zF3dVp656qylYGVFSBVls1COmGvTFk44g_ckmmYX3ViXOkDjGGp78K_igbc5kjjxdlmQ4V0BswqUUHxurF4C71IskRR34-6DDUyly6Uv4iWorFU2NBaH3D5k-SoNcMW1YiAdzdaUhvIS3jT8v8dXXKeLPv3VCML_ZbgqMvg5f8IPz3KBbuPkFGbwn-6j7JLMY-5Q5cxCZEujpxsc1c01jfTc8WjqWjN2vnx5E9wGq9E4D2XQTXKQRtUKHAlwleZcX1G0ONaYbw"/>
+</div>
+</div>
+</main>
+<footer class="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md px-6 py-6 border-t border-stone-100 flex flex-col items-center gap-3 z-[60]">
+<button class="w-full max-w-2xl bg-primary text-white py-4 rounded-2xl font-body font-bold text-sm shadow-xl shadow-primary/10 active:scale-[0.98] transition-all">
+        Continue
+    </button>
+<button class="text-[11px] text-on-surface-variant font-semibold hover:text-primary transition-colors">
+        I'd rather not share this right now
+    </button>
+</footer>
+</body></html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync AI Insights</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#9B8B7E", // Warm Taupe
+                        "secondary": "#D8C9E0", // Soft Lavender
+                        "background": "#F7F5F0", // Soft Cream
+                        "on-background": "#2D2D2D",
+                        "surface": "#FFFFFF",
+                        "on-surface": "#2D2D2D",
+                        "surface-variant": "#EBE7E0",
+                        "on-surface-variant": "#5E5954",
+                        "error": "#B0413E",
+                        "accent-success": "#5B8C7E"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.25rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: #F7F5F0; color: #2D2D2D; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="text-on-surface antialiased">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#F7F5F0]/80 backdrop-blur-xl border-b border-[#9B8B7E]/10 flex justify-between items-center px-6 h-16 w-full">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary hover:scale-105 transition-transform duration-200 active:scale-95 cursor-pointer" data-icon="menu">menu</span>
+<h1 class="font-['Inter'] font-bold text-[20px] tracking-tight text-primary">Your Insights</h1>
+</div>
+<div class="w-9 h-9 rounded-full bg-secondary overflow-hidden border-2 border-white shadow-sm">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="close-up portrait of a smiling woman in her 50s with natural skin and silver-streaked hair" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhdogcyDJOCPX9GdF-cLW9YvlEHm2UDFaRIeD4FJwjWp1MMQqbcR7a-sD18fK1frtnfMUqzgIxKakU4Hp9zH0MSJW7aMbh6dF4EemTkiKYajj_vuGIxBosQadXpyNnDL5Rs1Toy-XoFSKLRM6UyUt9n6UxRyEzauCqx1mFKP4ZSUE4-ATvrlKtrsSn2DAGyb6S145AGUuIYWQ__Sdz9SDG7iZnwoqWG-nlj2mpL0w6PM-MVz-z_bF02O6f_3Xh7mnLZU1RYWSVghs"/>
+</div>
+</header>
+<main class="pt-20 pb-32 px-5 max-w-[375px] mx-auto min-h-screen">
+<!-- Header Subtext -->
+<div class="mb-6 ml-1">
+<p class="text-[14px] font-medium text-on-surface-variant/80">Based on 34 days of your data</p>
+</div>
+<!-- AI Capability Banner -->
+<section class="mb-6 relative overflow-hidden bg-primary p-6 rounded-xl text-white shadow-md">
+<div class="relative z-10 flex justify-between items-start">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<h2 class="text-[17px] font-bold">5 New Patterns Identified</h2>
+</div>
+<p class="text-[13px] text-white/90 leading-relaxed font-medium">Minimum 7 events required per insight<br/>Updated weekly</p>
+</div>
+<div class="ml-2">
+<span class="material-symbols-outlined text-secondary/60 text-2xl animate-pulse" data-icon="sparkle">spark</span>
+</div>
+</div>
+<!-- Decorative Overlay -->
+<div class="absolute inset-0 opacity-10 pointer-events-none mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/asfalt-dark.png')]"></div>
+<div class="absolute -right-10 -bottom-10 w-32 h-32 bg-secondary/20 rounded-full blur-3xl"></div>
+</section>
+<!-- Medical Disclaimer -->
+<div class="mb-8 bg-secondary/30 p-4 rounded-xl flex items-start gap-3 border border-secondary/50">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="info">info</span>
+<p class="text-[13px] text-primary leading-tight font-medium">
+                These patterns are for informational purposes only. Not medical advice. Consult your healthcare provider.
+            </p>
+</div>
+<!-- Insights Container -->
+<div class="space-y-4">
+<!-- CARD 1: Negative Correlation -->
+<div class="bg-surface rounded-xl p-5 border border-primary/10 shadow-sm transition-all hover:shadow-md">
+<div class="flex justify-between items-center mb-4">
+<div class="flex items-center gap-2">
+<span class="text-2xl">🍷</span>
+<h3 class="text-[18px] font-bold text-on-surface">Red wine</h3>
+</div>
+<span class="text-[11px] font-bold uppercase tracking-widest text-error bg-error/10 px-2.5 py-1 rounded-full">Strong link</span>
+</div>
+<div class="flex items-center gap-2 mb-4">
+<span class="text-on-surface-variant text-[15px]">Effect:</span>
+<span class="font-bold text-error text-[15px]">→ +4.2 hot flashes next morning</span>
+</div>
+<div class="space-y-1.5">
+<div class="flex justify-between text-[12px] font-bold text-primary">
+<span>Confidence</span>
+<span>79%</span>
+</div>
+<div class="w-full bg-secondary/20 rounded-full h-2">
+<div class="bg-primary h-2 rounded-full" style="width: 79%"></div>
+</div>
+</div>
+</div>
+<!-- CARD 2: Positive Correlation -->
+<div class="bg-surface rounded-xl p-5 border border-primary/10 shadow-sm transition-all hover:shadow-md">
+<div class="flex justify-between items-center mb-4">
+<div class="flex items-center gap-2">
+<span class="text-2xl">🏃</span>
+<h3 class="text-[18px] font-bold text-on-surface">30+ min exercise</h3>
+</div>
+<span class="text-[11px] font-bold uppercase tracking-widest text-accent-success bg-accent-success/10 px-2.5 py-1 rounded-full">Protective</span>
+</div>
+<div class="flex items-center gap-2 mb-2">
+<span class="text-on-surface-variant text-[15px]">Effect:</span>
+<span class="text-[15px] flex items-center gap-1 font-bold text-accent-success">
+                        → Significant improvement
+                    </span>
+</div>
+<p class="text-[13px] text-on-surface-variant italic font-medium">Active days show better temperature regulation.</p>
+</div>
+<!-- CARD 3: Mood Correlation -->
+<div class="bg-surface rounded-xl p-5 border border-primary/10 shadow-sm transition-all hover:shadow-md">
+<div class="flex justify-between items-center mb-4">
+<div class="flex items-center gap-2">
+<span class="text-2xl">😰</span>
+<h3 class="text-[18px] font-bold text-on-surface">High stress days</h3>
+</div>
+<span class="text-[11px] font-bold uppercase tracking-widest text-primary bg-primary/10 px-2.5 py-1 rounded-full">Direct Link</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-on-surface-variant text-[15px]">Effect:</span>
+<span class="font-bold text-primary text-[15px]">→ Anxiety score +2.1 same day</span>
+</div>
+</div>
+<!-- CARD 4: Weather Correlation -->
+<div class="bg-surface rounded-xl p-5 border border-primary/10 shadow-sm transition-all hover:shadow-md">
+<div class="flex justify-between items-center mb-4">
+<div class="flex items-center gap-2">
+<span class="text-2xl">🌡</span>
+<h3 class="text-[18px] font-bold text-on-surface">Hot/humid days</h3>
+</div>
+<span class="text-[11px] font-bold uppercase tracking-widest text-primary bg-primary/10 px-2.5 py-1 rounded-full">Environment</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-on-surface-variant text-[15px]">Effect:</span>
+<span class="font-bold text-primary text-[15px]">→ 2× more hot flashes reported</span>
+</div>
+</div>
+<!-- CARD 5: Locked/Building -->
+<div class="bg-background border-2 border-dashed border-primary/20 rounded-xl p-5 opacity-70">
+<div class="flex justify-between items-center mb-4">
+<div class="flex items-center gap-2">
+<span class="text-2xl grayscale">☕️</span>
+<h3 class="text-[18px] font-bold text-on-surface-variant">Morning coffee</h3>
+</div>
+</div>
+<div class="space-y-3">
+<p class="text-[14px] font-bold text-on-surface-variant/80 uppercase tracking-wide">Analyzing… 5 of 7 events</p>
+<div class="w-full bg-primary/10 rounded-full h-2">
+<div class="bg-primary/40 h-2 rounded-full" style="width: 71.4%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Link -->
+<div class="mt-12 text-center">
+<a class="text-primary font-bold text-[15px] hover:text-primary/80 flex items-center justify-center gap-1 transition-all" href="#">
+                How are these calculated? 
+                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-white border-t border-primary/10 z-50">
+<a class="flex flex-col items-center justify-center text-primary/40 px-4 py-1" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="font-['Inter'] text-[10px] font-bold uppercase tracking-widest">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary bg-secondary/40 rounded-xl px-4 py-1" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="analytics" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<span class="font-['Inter'] text-[10px] font-bold uppercase tracking-widest">Insights</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary/40 px-4 py-1" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="edit_note">edit_note</span>
+<span class="font-['Inter'] text-[10px] font-bold uppercase tracking-widest">Logs</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary/40 px-4 py-1" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-['Inter'] text-[10px] font-bold uppercase tracking-widest">Profile</span>
+</a>
+</nav>
+</body></html>

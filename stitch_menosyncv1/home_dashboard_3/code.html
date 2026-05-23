@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#6B4E8C",
+                        "primary-muted": "#8A74A8",
+                        "surface": "#FAFAF8",
+                        "on-surface": "#1d1b1a",
+                        "coral": "#E8734A",
+                        "coral-bg": "#FFF0E8",
+                        "green-success": "#4CAF82",
+                        "green-bg": "#E8F5ED",
+                        "card-bg": "#ffffff",
+                        "border-subtle": "#F2EDE9",
+                        "text-secondary": "#6b5e54"
+                    },
+                    borderRadius: {
+                        "3xl": "24px",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif", "serif"],
+                        "body": ["Manrope", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body { 
+                @apply font-body bg-surface text-on-surface; 
+                min-height: 100vh;
+            }
+            h1, h2, h3 { @apply font-headline; }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .toggle-large {
+            @apply relative inline-flex items-center cursor-pointer;
+        }
+        .toggle-large input:checked ~ .toggle-bg { @apply bg-primary; }
+        .toggle-large input:checked ~ .toggle-dot { @apply translate-x-6; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="pb-32">
+<header class="sticky top-0 z-40 bg-surface/80 backdrop-blur-md">
+<div class="flex justify-between items-center w-full px-5 py-6 max-w-md mx-auto">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-lg">
+                    C
+                </div>
+<div>
+<h1 class="text-xl font-bold">Good evening, Claire</h1>
+<p class="text-xs text-text-secondary">Monday, 13 Apr</p>
+</div>
+</div>
+<button class="text-text-secondary p-2">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</header>
+<main class="max-w-md mx-auto px-5 space-y-4">
+<section class="bg-card-bg rounded-3xl p-6 shadow-sm border border-border-subtle overflow-hidden">
+<div class="flex justify-between items-start mb-2">
+<h2 class="text-2xl font-bold tracking-tight">HRT Logging</h2>
+<button class="text-primary text-xs font-bold uppercase tracking-wider bg-primary/5 px-3 py-1.5 rounded-full">+ Add Med</button>
+</div>
+<div class="bg-coral-bg border border-coral/10 rounded-2xl p-4 mb-6 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-coral" style="font-variation-settings: 'FILL' 1;">warning</span>
+<div>
+<p class="text-coral text-sm font-bold leading-none">Partial Compliance</p>
+<p class="text-coral/80 text-[11px] font-medium mt-1">1 of 2 medications logged</p>
+</div>
+</div>
+<button class="bg-coral text-white text-[11px] font-bold px-3 py-1.5 rounded-lg shadow-sm">LOG ALL</button>
+</div>
+<div class="space-y-6">
+<div class="flex items-center justify-between">
+<div class="flex-1">
+<h3 class="font-sans text-base font-bold text-on-surface">Estradiol, 75 mcg</h3>
+<p class="text-xs text-text-secondary mt-0.5">Patch · Twice weekly</p>
+<div class="inline-flex mt-2 items-center bg-green-bg text-green-success px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide">
+                            Logged 08:15
+                        </div>
+</div>
+<label class="toggle-large">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="toggle-bg w-14 h-8 bg-slate-200 rounded-full transition-colors duration-200"></div>
+<div class="toggle-dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform duration-200 shadow-sm"></div>
+</label>
+</div>
+<div class="h-[1px] bg-border-subtle"></div>
+<div class="flex items-center justify-between">
+<div class="flex-1">
+<h3 class="font-sans text-base font-bold text-on-surface">Utrogestan, 100 mg</h3>
+<p class="text-xs text-text-secondary mt-0.5">Tablet · Bedtime</p>
+<div class="inline-flex mt-2 items-center bg-coral-bg text-coral px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide">
+                            Pending
+                        </div>
+</div>
+<label class="toggle-large">
+<input class="sr-only peer" type="checkbox"/>
+<div class="toggle-bg w-14 h-8 bg-slate-200 rounded-full transition-colors duration-200"></div>
+<div class="toggle-dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform duration-200 shadow-sm"></div>
+</label>
+</div>
+</div>
+<div class="mt-8 pt-4 border-t border-border-subtle flex justify-between items-center text-[11px] text-text-secondary font-medium">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">history</span>
+                    Dose changed 18 days ago
+                </span>
+<button class="text-primary font-bold flex items-center">
+                    SEE IMPACT <span class="material-symbols-outlined text-[14px] ml-0.5">arrow_forward</span>
+</button>
+</div>
+</section>
+<section class="bg-card-bg rounded-3xl p-6 shadow-sm border border-border-subtle">
+<div class="flex justify-between items-center mb-6">
+<h2 class="text-xl font-bold">Daily Check-in</h2>
+<button class="text-primary text-xs font-bold uppercase tracking-wider">Log All</button>
+</div>
+<div class="space-y-6">
+<div>
+<div class="flex justify-between items-center mb-3">
+<span class="text-xs font-bold text-text-secondary uppercase tracking-widest">Symptoms</span>
+<button class="text-primary text-xs font-bold">+ Add</button>
+</div>
+<div class="flex flex-wrap gap-2">
+<div class="bg-surface border border-border-subtle px-3 py-2 rounded-xl flex items-center gap-2 text-sm shadow-sm">
+<span class="font-medium">Hot flashes</span>
+<span class="bg-primary/10 text-primary px-1.5 py-0.5 rounded text-[10px] font-bold">4/5</span>
+<span class="material-symbols-outlined text-sm opacity-40">close</span>
+</div>
+<button class="border-2 border-dashed border-border-subtle px-3 py-2 rounded-xl text-text-secondary/50 flex items-center gap-1 text-sm">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-3">
+<span class="text-xs font-bold text-text-secondary uppercase tracking-widest">Potential Triggers</span>
+<button class="text-primary text-xs font-bold">+ Add</button>
+</div>
+<div class="flex flex-wrap gap-2">
+<div class="bg-coral-bg text-coral px-3 py-2 rounded-xl flex items-center gap-2 text-sm font-semibold border border-coral/5 shadow-sm">
+                            Stress <span class="material-symbols-outlined text-sm opacity-50">close</span>
+</div>
+<div class="bg-coral-bg text-coral px-3 py-2 rounded-xl flex items-center gap-2 text-sm font-semibold border border-coral/5 shadow-sm">
+                            Red wine <span class="material-symbols-outlined text-sm opacity-50">close</span>
+</div>
+<div class="bg-coral-bg text-coral px-3 py-2 rounded-xl flex items-center gap-2 text-sm font-semibold border border-coral/5 shadow-sm">
+                            Poor sleep <span class="material-symbols-outlined text-sm opacity-50">close</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-primary/5 rounded-3xl p-6 relative border border-primary/10">
+<div class="flex justify-between items-start mb-4">
+<div>
+<div class="flex items-center gap-1.5 mb-2">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="text-[10px] font-bold uppercase tracking-widest text-primary">Insight Pattern</span>
+</div>
+<h3 class="text-base leading-tight font-headline text-on-surface">Red wine correlates with +4.2 hot flashes next day</h3>
+</div>
+<span class="material-symbols-outlined text-primary/40" style="font-variation-settings: 'FILL' 1;">lock</span>
+</div>
+<div class="w-full h-1.5 bg-white rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 79%"></div>
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent flex items-end justify-center pb-4 opacity-0 hover:opacity-100 transition-opacity">
+<button class="bg-primary text-white text-[10px] font-bold py-2 px-4 rounded-full shadow-lg">UNLOCK PREMIUM</button>
+</div>
+</section>
+</main>
+<button class="fixed bottom-24 right-6 w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-lg z-50">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-3 bg-white/90 backdrop-blur-xl border-t border-border-subtle rounded-t-3xl shadow-[0_-4px_12px_rgba(0,0,0,0.03)]">
+<a class="flex flex-col items-center justify-center text-primary" href="#">
+<span class="material-symbols-outlined text-[26px]" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-[10px] font-bold mt-1">Today</span>
+</a>
+<a class="flex flex-col items-center justify-center text-text-secondary" href="#">
+<span class="material-symbols-outlined text-[26px]">analytics</span>
+<span class="text-[10px] font-medium mt-1">Insights</span>
+</a>
+<div class="w-12"></div> 
+<a class="flex flex-col items-center justify-center text-text-secondary" href="#">
+<span class="material-symbols-outlined text-[26px]">menu_book</span>
+<span class="text-[10px] font-medium mt-1">Library</span>
+</a>
+<a class="flex flex-col items-center justify-center text-text-secondary" href="#">
+<span class="material-symbols-outlined text-[26px]">groups</span>
+<span class="text-[10px] font-medium mt-1">Circle</span>
+</a>
+</nav>
+
+</body></html>

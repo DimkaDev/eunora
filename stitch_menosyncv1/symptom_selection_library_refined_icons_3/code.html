@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "on-tertiary-fixed": "#341009",
+                "on-secondary-container": "#6c6074",
+                "surface-tint": "#6a5c50",
+                "tertiary": "#814f45",
+                "surface-container-lowest": "#ffffff",
+                "surface-bright": "#fef8f6",
+                "on-surface-variant": "#4d453f",
+                "on-error-container": "#93000a",
+                "on-tertiary-fixed-variant": "#683a31",
+                "inverse-primary": "#d6c3b5",
+                "surface-container-high": "#ede7e5",
+                "surface-container": "#f2edea",
+                "on-secondary": "#ffffff",
+                "on-primary-container": "#fffbff",
+                "background": "#fef8f6",
+                "secondary": "#655a6e",
+                "primary-fixed-dim": "#d6c3b5",
+                "on-primary-fixed-variant": "#51443a",
+                "on-secondary-fixed-variant": "#4d4355",
+                "surface-dim": "#ded9d7",
+                "surface": "#fef8f6",
+                "on-tertiary": "#ffffff",
+                "tertiary-container": "#9d675c",
+                "on-tertiary-container": "#fffbff",
+                "secondary-fixed": "#edddf5",
+                "surface-container-highest": "#e7e1df",
+                "tertiary-fixed": "#ffdad3",
+                "surface-container-low": "#f8f2f0",
+                "surface-variant": "#e7e1df",
+                "primary-fixed": "#f2dfd0",
+                "outline": "#7f756e",
+                "error-container": "#ffdad6",
+                "secondary-fixed-dim": "#d0c1d8",
+                "secondary-container": "#edddf5",
+                "error": "#ba1a1a",
+                "on-secondary-fixed": "#211828",
+                "on-error": "#ffffff",
+                "primary-container": "#817266",
+                "on-surface": "#1d1b1a",
+                "inverse-on-surface": "#f5f0ed",
+                "on-primary": "#ffffff",
+                "on-background": "#1d1b1a",
+                "on-primary-fixed": "#231a11",
+                "tertiary-fixed-dim": "#f9b7a9",
+                "outline-variant": "#d0c4bc",
+                "inverse-surface": "#32302f",
+                "primary": "#67594e"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {},
+        "fontFamily": {
+                "headline": [
+                        "Noto Serif"
+                ],
+                "display": [
+                        "Noto Serif"
+                ],
+                "body": [
+                        "Manrope"
+                ],
+                "label": [
+                        "Manrope"
+                ]
+        },
+        "fontSize": {}
+},
+    },
+  }
+</script>
+<style type="text/tailwindcss">
+        body { font-family: 'Manrope', sans-serif; }
+        .font-noto-serif { font-family: 'Noto Serif', serif; }
+        .font-manrope { font-family: 'Manrope', sans-serif; }
+        .symptom-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .filled-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen pb-32">
+<header class="bg-background/90 backdrop-blur-md fixed top-0 w-full z-50 flex items-center justify-between px-6 py-4 border-b border-outline-variant/30">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer p-1 rounded-full" data-icon="arrow_back">arrow_back</span>
+<h1 class="font-noto-serif text-xl font-bold tracking-tight text-primary">Symptom Library</h1>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary cursor-pointer p-1" data-icon="search">search</span>
+</div>
+</header>
+<main class="pt-20 px-4 max-w-2xl mx-auto">
+<section class="mt-4 mb-6">
+<div class="relative group">
+<div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-on-surface-variant text-xl" data-icon="search">search</span>
+</div>
+<input class="w-full bg-surface-container-high border-none rounded-xl py-4 pl-12 pr-4 focus:ring-1 focus:ring-primary/20 text-on-surface placeholder:text-on-surface-variant/60 text-sm transition-all" placeholder="Search all symptoms..." type="text"/>
+</div>
+</section>
+<section class="mb-8">
+<div class="bg-surface-container-lowest p-5 rounded-3xl border border-outline-variant/40 flex items-center justify-between group cursor-pointer hover:shadow-sm transition-all active:scale-[0.98]">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-2xl bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="add">add</span>
+</div>
+<div>
+<h3 class="font-manrope font-bold text-primary text-base tracking-tight">+ Add your own symptom</h3>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary text-xl" data-icon="chevron_right">chevron_right</span>
+</div>
+</section>
+<div class="space-y-12">
+<section>
+<div class="flex items-center gap-3 mb-6 px-2">
+<h2 class="font-noto-serif text-xl font-bold text-primary">Vasomotor Symptoms</h2>
+<div class="h-[1px] flex-grow bg-outline-variant/50"></div>
+</div>
+<div class="symptom-grid">
+<div class="bg-primary-fixed rounded-[28px] p-3 flex items-center gap-5 relative border border-primary/20 ring-1 ring-primary/20 cursor-pointer">
+<img alt="Hot flashes" class="w-20 h-20 rounded-2xl object-cover mix-blend-multiply opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxl7ib28bPMaeH44TuqLovaeovaZi6_sNiWMWK5-KAyqwlFR-ipsjCfAeZnX3WIYdqvdOkm5MOC5GpOPQJ2YaY_VxqQAn5KO4xHfoGAgAiorK_frWxm8GvZTZZAdbvX7VO_yOQaaAQIDBaPAY5ZFnMqAj22ciQjFwn4CW0_RUBhx9LTM3bDfMBIfdETwJrK0dUBheYWEFAMlZhFEP8uOoEgsOYx9RM8bWBrzYjwctsB5D7_4Wx9XvzBhkwMEAH7v7aLsRRZOGvPWQ"/>
+<span class="text-base font-bold text-primary flex-grow">Hot flashes</span>
+<div class="pr-4">
+<span class="material-symbols-outlined text-primary text-2xl filled-icon" data-icon="check_circle">check_circle</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-[28px] p-3 flex items-center gap-5 relative border border-outline-variant/30 hover:border-primary/50 transition-colors cursor-pointer">
+<img alt="Night sweats" class="w-20 h-20 rounded-2xl object-cover opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfF6pb8vVwoXJPNHOt2L3YvUaXQIge9SZpKh3TzzQ518lYcRcRV9pkQxo30yWRqad1Woo_RSrKz1HnxQVMab1jgCzOoNq3WWE7L3OYOgZGeY8Yel4A5IFUwNKCtK_5T9dwOG3iUabEFDjUd2rCCz5KUJidL4EbAtWf_z1Lpk4gY-6-cYCkhkSusNfR_0AHNdOXpFOaEbJA9eOB-4JRcl2t7km6z5yjRlnhfHvQOV0omz1mes8mlVl8IG4gVBcwGCauJwo-MDkA04E"/>
+<span class="text-base font-semibold text-on-surface flex-grow">Night sweats</span>
+<div class="pr-4">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant/60"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-[28px] p-3 flex items-center gap-5 relative border border-outline-variant/30 hover:border-primary/50 transition-colors cursor-pointer">
+<img alt="Cold flashes" class="w-20 h-20 rounded-2xl object-cover opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8CKamqhqClWBzveWTviRc06VluTM3uzOO2fgVEEBgXTFsjXFPU2YbiM8yXKIQHSMndgn0vL9-Xim3S2srDYHSPnszQdBx8Bq5JN1yAyEMEa5G_exgdKVY9JDBDfMwY81hcq8TcWCN7FMF9HkgFMdBRi7WMh4w3Blwy3lIM8RFErGhwphew5EknbzmU3m1Z1wHfa9eMzSRJUeOon3Jyo6bD6SomeAzCiWyZw7qyUPjDaX87Pm88Hixuw3PFhceM6TJxpqbIOks8hQ"/>
+<span class="text-base font-semibold text-on-surface flex-grow">Cold flashes</span>
+<div class="pr-4">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant/60"></div>
+</div>
+</div>
+</div>
+</section>
+<section>
+<div class="flex items-center gap-3 mb-6 px-2">
+<h2 class="font-noto-serif text-xl font-bold text-primary">Emotional &amp; Cognitive</h2>
+<div class="h-[1px] flex-grow bg-outline-variant/50"></div>
+</div>
+<div class="symptom-grid">
+<div class="bg-surface-container-lowest rounded-[28px] p-3 flex items-center gap-5 relative border border-outline-variant/30 hover:border-primary/50 transition-colors cursor-pointer">
+<img alt="Anxiety" class="w-20 h-20 rounded-2xl object-cover opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEW92GVbMhxQlSkcWDTnr9AVoTE5lKGFmpxB4IRZUljjjLzFthaVvz0361wjrff6vbxKprWQ55qJJJJPccSnGuStavjFsUEOLsj8eYkZpr3HUUszsKBDiBJuamWCHx76mTifxVNynGqXnn3DEo3gKkDU5lB_f9RKcwdSkpv4JL65lkbLV5vrk0LBdpwgd2pdZBfD2FYtPIImDhkzPMihzWvhAviXxUWFpP3lQKzC7CbNyr8CoQjDnhzvika6X-2HtJHB9-WM03nf0"/>
+<span class="text-base font-semibold text-on-surface flex-grow">Anxiety</span>
+<div class="pr-4">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant/60"></div>
+</div>
+</div>
+<div class="bg-primary-fixed rounded-[28px] p-3 flex items-center gap-5 relative border border-primary/20 ring-1 ring-primary/20 cursor-pointer">
+<img alt="Irritability" class="w-20 h-20 rounded-2xl object-cover mix-blend-multiply opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARfSDoU8Oq7aWDcO9IcFKth8exDpna6Ir3ienejkZ6bep57Nym2WfcLOCnNNB3h7glrOYrwdpiix7l8U4DIkPlnD_R7UOoI8ZeDSX29fAn-E6tg3haOhkvlMnFxv98J0G31WfzYLn_J_UVQKyXmmLP5cwZ-Fj-8mKttNCgdjxbgQHFjSgG-YBhay1VkYral7yA_h8c5cobQTAiZjcx5vrmkIS0xfh6ljkzyWJEu1D248Ykrb_da7gfEl19taK7eJr-gVAgudglmlg"/>
+<span class="text-base font-bold text-primary flex-grow">Irritability</span>
+<div class="pr-4">
+<span class="material-symbols-outlined text-primary text-2xl filled-icon" data-icon="check_circle">check_circle</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-[28px] p-3 flex items-center gap-5 relative border border-outline-variant/30 hover:border-primary/50 transition-colors cursor-pointer">
+<img alt="Mood swings" class="w-20 h-20 rounded-2xl object-cover opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDuAdnFao-ggcmezyHqtA68uznBgiSsM1Kc1g7zjByMgHno0iUIQV-Q8FPGe9feuGCoXrCU64PT_IAfZfBkIUk5-kp-u5UsIgriPS859N73-o7wrHxyxMY3lVWYI-sk-wyvvGOA6VU-q3pDii9i9dEd0tm2-0cx6h0N6U0bNKijqxC1JdHmlZYpdpDc_O09BPMkk71Q7M51El_2cyEfbBfyvAwvmuBVVUuEFd2zZR_gajINBLf27BdzzMkF13mlCiFCC6YHDAWgi4s"/>
+<span class="text-base font-semibold text-on-surface flex-grow">Mood swings</span>
+<div class="pr-4">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant/60"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-[28px] p-3 flex items-center gap-5 relative border border-outline-variant/30 hover:border-primary/50 transition-colors cursor-pointer">
+<img alt="Brain fog" class="w-20 h-20 rounded-2xl object-cover opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCI1fwNEpxOlLGY7XyVkZXtUd3lboh2jRNgJG2-4kCveXnG4Vw9Ul-Xg-XFk6geXJo9baZQfWDVB_PDkptVivyDJkR-fUAsN43EQLxktuTuvDbkDJiEJ7GBKTGhkf66acQof1EaUtki59B8Ur2OB0oVIgAL-ynx1aj4DN_8_R7OfRg2Qo1RRiv5wzWc5TTAmDWsN0xz-CRSu_iL91YoSJpz63iAMi0EMQ2ZZ85pTnB153Uf_uz-h4kBpwjkLbtoktfGE2SNbbHuXw8"/>
+<span class="text-base font-semibold text-on-surface flex-grow">Brain fog</span>
+<div class="pr-4">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant/60"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-[28px] p-3 flex items-center gap-5 relative border border-outline-variant/30 hover:border-primary/50 transition-colors cursor-pointer">
+<img alt="Memory lapses" class="w-20 h-20 rounded-2xl object-cover opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwdVM52N2vG9EKv4s5SgiOtVZ-3pfxvu4QpWUyasrWyQ_nkuJU0roXp3FbNqIrO7wbJG4L9RQDhsoJ1dfjE2eSKmFjnZbbu_IPEIZ4dSVtfQ-KXWwpB4ZOdLy7QERsDFMdiJ970lYMo_d8KBTcKN5n44S8qt3zpCZhm6Fs-E9jeOOY7OrbHXpSZwYoQpWx1XPe_sFsDq2rJ3I19igZxQ7b_oBCwq1kR_1MXbSOkgxnquhcjr7Nfy50waE6IKaMrkiy84IcVcbJAKY"/>
+<span class="text-base font-semibold text-on-surface flex-grow">Memory lapses</span>
+<div class="pr-4">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant/60"></div>
+</div>
+</div>
+</div>
+</section>
+<section>
+<div class="flex items-center gap-3 mb-6 px-2">
+<h2 class="font-noto-serif text-xl font-bold text-primary">Physical Wellbeing</h2>
+<div class="h-[1px] flex-grow bg-outline-variant/50"></div>
+</div>
+<div class="symptom-grid">
+<div class="bg-surface-container-lowest rounded-[28px] p-3 flex items-center gap-5 relative border border-outline-variant/30 hover:border-primary/50 transition-colors cursor-pointer">
+<img alt="Joint pain" class="w-20 h-20 rounded-2xl object-cover opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHFCSKXCze7n4Cz-ami1DM6ZlVEMhRUF-u3E2gGLInab7XYf2HBRT9FBQPqoPELKa-k0cD6OdGwKKXR2-Low1aCBdjH-oXSlnviFeUJ5IqCZqPzVglhoS05I4f5-bR6opbTmHpJeeaSii9q724jDdi9R7DHg0kBk9SiAz03AMfWufFa2j3rAvjH7IM8_NmMnSrYc-8dP5n1f7IhoZR-zH6iKW1QxkOEf3zLj80jwkxY0H6pDQH5Ov5kYgPiO4MrFx0jbX4w0pwHcg"/>
+<span class="text-base font-semibold text-on-surface flex-grow">Joint pain</span>
+<div class="pr-4">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant/60"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-[28px] p-3 flex items-center gap-5 relative border border-outline-variant/30 hover:border-primary/50 transition-colors cursor-pointer">
+<img alt="Headaches" class="w-20 h-20 rounded-2xl object-cover opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvz-0kuNTazLrtIiUFFQdPOYRQXrB3OOYnTJZb227HfGvPyHMtuWt_7zMk0nMuFYojRRRiSJ5J5rVZF5jwfQyx0OveWLqG3d1D_esDDwuoHHBYHrB7IkIVbb2o2eahfkCPgaLKA8N8ZH_xv3FBXvkcE4pdzH0-7KHn6wIAc0tJwxyNjtimmPB8n42VVEx1dUmN1FJvhcPA4rNq5_joTPXUNM-jabZr3dCBJFQYJcIaOJeC-jf6jiqQvMWhEfb9xTQdHK6-c0lJfws"/>
+<span class="text-base font-semibold text-on-surface flex-grow">Headaches</span>
+<div class="pr-4">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant/60"></div>
+</div>
+</div>
+<div class="bg-primary-fixed rounded-[28px] p-3 flex items-center gap-5 relative border border-primary/20 ring-1 ring-primary/20 cursor-pointer">
+<img alt="Fatigue" class="w-20 h-20 rounded-2xl object-cover mix-blend-multiply opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkQ9Lh42OheYqIwAiWfz50iprE1RRAi_Owg5p5tD8R8yGpFxtEdoYUIZMTEApVhCdzcZpVm156Alia-a4SlZS-DO2dMjkpl3IuLuH3jQ0TBBeojH44VQlEru3g_g2qsaU7wx11-x3t6Km507J239V-teZbJgKcdLFftEpngVo5yukuVoZhamymZgVf_-bsWrZYoV4byulmzeQ1S0OnqRMVvvNBkuwZzA7DfdgoBT7CnsJLu7GyIaq77iB8um5XjbybG6Ue_51ELMk"/>
+<span class="text-base font-bold text-primary flex-grow">Fatigue</span>
+<div class="pr-4">
+<span class="material-symbols-outlined text-primary text-2xl filled-icon" data-icon="check_circle">check_circle</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-[28px] p-3 flex items-center gap-5 relative border border-outline-variant/30 hover:border-primary/50 transition-colors cursor-pointer">
+<img alt="Heart palpitation" class="w-20 h-20 rounded-2xl object-cover opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKjwSEpKy4_DYSr2KoiJqJ7whBDC53nn6ZhD_mY7qDxBFE6TV1FtJFQbb7UtYOw6RwWTU_RRsZd5_BTy4ioxDpN0_E5uPhOMPbOArOeqoeEycwW18fVGhwkh9BnDI3-e7tAOY_BUETucWTi-p02n3kg5Cv1rdG9nZJEGQa6SJ04AAZpUw_noe3ywC5oj4SUZ_cYM031oGZcZJRjD7yvpeQ8xpCV_-XhIXbni5csKlOdOZsATa5QUVKWUK0VpxFXMtLwPPehSMTtac"/>
+<span class="text-base font-semibold text-on-surface flex-grow">Heart palpitation</span>
+<div class="pr-4">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant/60"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-[28px] p-3 flex items-center gap-5 relative border border-outline-variant/30 hover:border-primary/50 transition-colors cursor-pointer">
+<img alt="Dry skin" class="w-20 h-20 rounded-2xl object-cover opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtYCO2nA576HguQ-8Zlvj6e0TfPrn652MTv6KCaEd7Fqbve3OHJUr51o08RVk2xkEKxjY9RwfattSe1pzQQWJIbaPHLrMd06omEiPsONugCSkd89zN9Fe0rAv3M1BoqXMhM1xoAc6wYuEY3uCFIeX_s3XZTsinxLBoQPqGqmdyvRWl4EqqSHdDu3SFlVFpIWcT9k6JoR9WGgRnd2dlSgC23LLfKNZXOQ9J43uqsLxO17OaJeEz0fb1j1cu6lvhjbyg2P4OhXyNIWk"/>
+<span class="text-base font-semibold text-on-surface flex-grow">Dry skin</span>
+<div class="pr-4">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant/60"></div>
+</div>
+</div>
+</div>
+</section>
+<section>
+<div class="flex items-center gap-3 mb-6 px-2">
+<h2 class="font-noto-serif text-xl font-bold text-primary">Sleep &amp; Energy</h2>
+<div class="h-[1px] flex-grow bg-outline-variant/50"></div>
+</div>
+<div class="symptom-grid">
+<div class="bg-surface-container-lowest rounded-[28px] p-3 flex items-center gap-5 relative border border-outline-variant/30 hover:border-primary/50 transition-colors cursor-pointer">
+<img alt="Difficulty sleep" class="w-20 h-20 rounded-2xl object-cover opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJ84kC1L3mQfthRs-D9ey1RRaYh1bWCyE9-3AOfX2TX5t_KYYogNh7GPz9SDH4mCnrrhedeSCZ1BVs8xK9AY5IDq7NybTKwwosB0ngY_k5O2s0ctu7utFqdDaDOXXPafPBjRy_cGirbYYcoIhzzsyuvLWtZN2An7sBojSZWbVzqcpp9EYUH_npibkBO1AwJPicsp5wYtCvM50uGql3RHcOoLtYvTLaGn0iJuZAfpVHoB8m_0HJtZpcTQc4hffoxsjc4gRaSKR3YLM"/>
+<span class="text-base font-semibold text-on-surface flex-grow">Difficulty sleep</span>
+<div class="pr-4">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant/60"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-[28px] p-3 flex items-center gap-5 relative border border-outline-variant/30 hover:border-primary/50 transition-colors cursor-pointer">
+<img alt="Waking night" class="w-20 h-20 rounded-2xl object-cover opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAP4FDcdbCw1TvGuu9no9C27QpEEInBAWPp4gb7UN36fXisp80IOo-Q1yIXqrcV89r0z94DsTmULGjw-a5f8W1y2DTbOog49sPs2o5ZEr5H9g-1a0-djNcwj9jJUR7xam08o70CN-lw0I5fmcQDCGq4tOWJ4BpcW7kXqFTiy7MBGuQZW7arJ5v1aopwLfN_dgrrFD_wB66J7kgmMQKJN-p9qU5X1DvRcuzemaToPy70SKOXQg2Q-8cXiq6bQ_Dd1B6kP4CssuM5DY"/>
+<span class="text-base font-semibold text-on-surface flex-grow">Waking night</span>
+<div class="pr-4">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant/60"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-[28px] p-3 flex items-center gap-5 relative border border-outline-variant/30 hover:border-primary/50 transition-colors cursor-pointer">
+<img alt="Low energy" class="w-20 h-20 rounded-2xl object-cover opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAof3ZsDIZ3lROhHsEuqG-jmNMV2CxqpvZZ1S83orINvXADO2UKKZPzzlZwbhpxe_ZPc9w-2ncqFsoXSfneGSH1rnXyv8ewCYrYsOjAdcAj5e-RmmGZeoOsSfbyVrg5WXvTHjG_kW2f0fDeSffFg0Z0RK16xyyVZJOgLVRY6yQkjcaXIOdysRDpS_0JPq0ZLuEePkj7w0wo1W7E4SH7xl5ho7RFYDuJvxVgp_bkcRP4LQ4IEwldLHSwxp7sRKl8PfHOgf5q5Kz-OQI"/>
+<span class="text-base font-semibold text-on-surface flex-grow">Low energy</span>
+<div class="pr-4">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant/60"></div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<nav class="fixed bottom-0 w-full z-50 rounded-t-[32px] bg-background/90 backdrop-blur-xl border-t border-outline-variant/30 flex justify-around items-center px-4 pb-8 pt-4">
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-2 hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined mb-1 text-2xl" data-icon="auto_stories">auto_stories</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-widest">Journal</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary px-5 py-2 relative" href="#">
+<div class="absolute -top-4 w-12 h-1 bg-primary rounded-full"></div>
+<span class="material-symbols-outlined mb-1 text-2xl filled-icon" data-icon="local_library">local_library</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-widest">Library</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-2 hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined mb-1 text-2xl" data-icon="insights">insights</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-widest">Insights</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-2 hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined mb-1 text-2xl" data-icon="person">person</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-widest">Profile</span>
+</a>
+</nav>
+</body></html>

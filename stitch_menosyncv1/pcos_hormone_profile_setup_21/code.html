@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Hormone Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-dim": "#ded9d7",
+                        "surface-container-high": "#ede7e5",
+                        "inverse-surface": "#32302f",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#817266",
+                        "on-primary-container": "#fffbff",
+                        "secondary-container": "#edddf5",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "on-primary-fixed": "#231a11",
+                        "outline-variant": "#d0c4bc",
+                        "on-primary-fixed-variant": "#51443a",
+                        "on-tertiary-fixed": "#341009",
+                        "on-tertiary-container": "#fffbff",
+                        "primary-fixed": "#f2dfd0",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#1d1b1a",
+                        "outline": "#7f756e",
+                        "error": "#ba1a1a",
+                        "secondary-fixed": "#edddf5",
+                        "on-secondary-container": "#6c6074",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "error-container": "#ffdad6",
+                        "surface-bright": "#fef8f6",
+                        "surface-container-low": "#f8f2f0",
+                        "on-surface-variant": "#4d453f",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#d6c3b5",
+                        "surface-container-highest": "#e7e1df",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#1d1b1a",
+                        "surface-variant": "#e7e1df",
+                        "tertiary-container": "#9d675c",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "background": "#fef8f6",
+                        "surface-tint": "#6a5c50",
+                        "inverse-on-surface": "#f5f0ed",
+                        "surface-container": "#f2edea",
+                        "tertiary": "#814f45",
+                        "on-error": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed": "#ffdad3",
+                        "surface": "#fef8f6",
+                        "secondary": "#655a6e",
+                        "on-secondary-fixed": "#211828",
+                        "primary": "#67594e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body { font-family: 'Manrope', sans-serif; background-color: #F7F5F0; }
+        .font-serif { font-family: 'Noto Serif', serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        ::-webkit-scrollbar { width: 0; background: transparent; }
+        .learning-hub-card:has(input:checked) {
+            @apply border-primary bg-primary-fixed/30 shadow-md;
+        }
+        .cycle-toggle:has(input:checked) {
+            @apply bg-primary text-white border-primary shadow-inner;
+        }
+        .insight-tile:has(input:checked) {
+            @apply bg-tertiary-fixed border-tertiary/20 shadow-sm;
+        }#edit-trigger:checked ~ .med-item .edit-check { @apply block; }
+        #edit-trigger:checked ~ .med-item .edit-icon { @apply hidden; }
+        #edit-trigger:checked ~ .delete-btn-container { @apply flex; }
+        #edit-trigger:checked ~ .add-section { @apply hidden; }
+        #edit-trigger:checked ~ .edit-label-on { @apply block; }
+        #edit-trigger:checked ~ .edit-label-off { @apply hidden; }#add-form-trigger:checked ~ .add-med-btn { @apply hidden; }
+        #add-form-trigger:checked ~ .add-med-form { @apply block; }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface antialiased">
+<header class="fixed top-0 w-full z-50 bg-[#F7F5F0]/80 backdrop-blur-xl px-6 pt-8 pb-4 border-b border-outline-variant/20">
+<div class="flex items-center justify-between mb-2">
+<button class="active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<span class="text-[10px] uppercase tracking-widest font-bold text-outline">Step 2e of 7</span>
+</div>
+<h1 class="font-serif text-[20px] font-semibold text-[#1d1b1a] leading-tight mb-1">Your PCOS &amp; Hormone Condition Profile</h1>
+<p class="text-[12px] text-on-surface-variant font-medium opacity-80 leading-relaxed">Different conditions need different tracking. Let's customize your experience.</p>
+</header>
+<main class="pt-44 pb-48 px-5 space-y-6">
+<section class="bg-surface-container-lowest rounded-xl p-5 shadow-sm border border-outline-variant/30">
+<h2 class="font-headline text-lg mb-4 text-on-surface">Which condition are you managing?</h2>
+<div class="space-y-3">
+<label class="learning-hub-card block p-4 rounded-xl border border-outline-variant/40 bg-surface-bright cursor-pointer transition-all">
+<div class="flex items-start justify-between">
+<div>
+<p class="font-bold text-base text-primary">PCOS</p>
+<p class="text-[13px] text-on-surface-variant mt-1 leading-snug">Polycystic Ovary Syndrome involves hormonal imbalances that can affect your metabolism and regular cycle.</p>
+</div>
+<input class="rounded border-outline-variant text-primary focus:ring-primary h-5 w-5 mt-0.5" type="checkbox"/>
+</div>
+</label>
+<label class="learning-hub-card block p-4 rounded-xl border border-outline-variant/40 bg-surface-bright cursor-pointer transition-all">
+<div class="flex items-start justify-between">
+<div>
+<p class="font-bold text-base text-primary">PMDD</p>
+<p class="text-[13px] text-on-surface-variant mt-1 leading-snug">Premenstrual Dysphoric Disorder is a severe form of PMS, often requiring specialized mood and symptom support.</p>
+</div>
+<input class="rounded border-outline-variant text-primary focus:ring-primary h-5 w-5 mt-0.5" type="checkbox"/>
+</div>
+</label>
+<div class="space-y-3">
+<label class="learning-hub-card block p-4 rounded-xl border border-outline-variant/40 bg-surface-bright cursor-pointer transition-all">
+<div class="flex items-start justify-between">
+<div>
+<p class="font-bold text-base text-primary">Other</p>
+<p class="text-[13px] text-on-surface-variant mt-1 leading-snug">Select this if you are managing a condition not listed above.</p>
+</div>
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary h-5 w-5 mt-0.5 peer/other" type="checkbox"/>
+</div>
+</label>
+<div class="pt-2">
+<label class="block text-[11px] font-bold text-on-surface-variant mb-2 uppercase tracking-wider px-1">Specify your condition</label>
+<textarea class="w-full rounded-xl border-outline-variant bg-white text-sm focus:border-primary focus:ring-primary/20 p-4 min-h-[100px] placeholder:text-outline-variant/60" placeholder="Please describe your condition here..."></textarea>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-surface-container-lowest rounded-xl p-5 shadow-sm border border-outline-variant/30">
+<h2 class="font-headline text-lg mb-4 text-on-surface">How would you describe your cycles?</h2>
+<div class="grid grid-cols-2 gap-3">
+<label class="cycle-toggle flex flex-col items-center justify-center p-4 border border-outline-variant/40 rounded-xl cursor-pointer transition-all gap-2 bg-surface-bright">
+<input class="hidden" type="checkbox"/>
+<span class="material-symbols-outlined text-2xl">waves</span>
+<span class="text-xs font-bold uppercase tracking-tight">Irregular</span>
+</label>
+<label class="cycle-toggle flex flex-col items-center justify-center p-4 border border-outline-variant/40 rounded-xl cursor-pointer transition-all gap-2 bg-surface-bright">
+<input checked="" class="hidden" type="checkbox"/>
+<span class="material-symbols-outlined text-2xl">opacity</span>
+<span class="text-xs font-bold uppercase tracking-tight">Heavy</span>
+</label>
+</div>
+</section>
+<section class="bg-surface-container-lowest rounded-xl p-5 shadow-sm border border-outline-variant/30">
+<div class="flex items-start justify-between mb-2">
+<div>
+<h2 class="font-headline text-lg text-on-surface leading-tight">What are you taking for this condition?</h2>
+<p class="text-[12px] text-on-surface-variant mt-0.5">Manage your prescriptions or supplements.</p>
+</div>
+<label class="cursor-pointer" for="edit-trigger">
+<input class="hidden" id="edit-trigger" type="checkbox"/>
+<span class="edit-label-off text-[11px] font-bold text-primary uppercase tracking-widest px-2 py-1 bg-primary/5 rounded-lg border border-primary/20">Edit List</span>
+<span class="edit-label-on hidden text-[11px] font-bold text-primary uppercase tracking-widest px-2 py-1 bg-primary/10 rounded-lg border border-primary">Done</span>
+</label>
+</div>
+<div class="space-y-3 mt-4">
+<div class="med-item flex items-center gap-3 p-3 bg-surface-bright border border-outline-variant/20 rounded-xl transition-all">
+<input class="edit-check hidden w-5 h-5 rounded-full border-outline-variant text-primary focus:ring-primary" type="checkbox"/>
+<div class="flex-1 flex items-center gap-3 overflow-hidden">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary text-xl">pill</span>
+</div>
+<div class="min-w-0">
+<p class="text-[14px] font-bold text-on-surface truncate">Metformin</p>
+<p class="text-[11px] text-on-surface-variant truncate">500mg • Twice daily</p>
+</div>
+</div>
+<button class="edit-icon w-8 h-8 flex items-center justify-center text-outline-variant hover:text-primary active:scale-90 transition-all">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+</div>
+<div class="med-item flex items-center gap-3 p-3 bg-surface-bright border border-outline-variant/20 rounded-xl transition-all">
+<input class="edit-check hidden w-5 h-5 rounded-full border-outline-variant text-primary focus:ring-primary" type="checkbox"/>
+<div class="flex-1 flex items-center gap-3 overflow-hidden">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary text-xl">pill</span>
+</div>
+<div class="min-w-0">
+<p class="text-[14px] font-bold text-on-surface truncate">Inositol</p>
+<p class="text-[11px] text-on-surface-variant truncate">2000mg • Once daily</p>
+</div>
+</div>
+<button class="edit-icon w-8 h-8 flex items-center justify-center text-outline-variant hover:text-primary active:scale-90 transition-all">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+</div>
+<div class="delete-btn-container hidden pt-2">
+<button class="w-full py-3 bg-error text-white rounded-xl text-xs font-bold uppercase tracking-wide flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+                        Delete Selected
+                    </button>
+</div>
+<div class="add-section pt-2">
+<input class="hidden" id="add-form-trigger" type="checkbox"/>
+<label class="add-med-btn w-full py-4 border-2 border-dashed border-outline-variant/40 rounded-xl flex items-center justify-center gap-2 text-primary font-bold text-sm cursor-pointer active:bg-primary/5 transition-all" for="add-form-trigger">
+<span class="material-symbols-outlined text-[20px]">add_circle</span>
+                        Add Medication
+                    </label>
+<div class="add-med-form hidden bg-surface-container-low border border-dashed border-outline-variant rounded-2xl p-5 space-y-4 animate-in fade-in slide-in-from-top-2">
+<div class="space-y-1">
+<label class="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider ml-1">Medication Name</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
+<input class="w-full bg-white border border-outline-variant/30 rounded-xl text-sm pl-10 pr-4 py-3 focus:ring-1 focus:ring-primary focus:border-primary placeholder:text-outline-variant/50" placeholder="Search or type medication..." type="text"/>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div class="space-y-1">
+<label class="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider ml-1">Dose</label>
+<input class="w-full bg-white border border-outline-variant/30 rounded-xl text-sm px-4 py-3 focus:ring-1 focus:ring-primary focus:border-primary placeholder:text-outline-variant/50" placeholder="e.g. 10mg" type="text"/>
+</div>
+<div class="space-y-1">
+<label class="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider ml-1">Frequency</label>
+<input class="w-full bg-white border border-outline-variant/30 rounded-xl text-sm px-4 py-3 focus:ring-1 focus:ring-primary focus:border-primary placeholder:text-outline-variant/50" placeholder="e.g. Every morning" type="text"/>
+</div>
+</div>
+<div class="flex gap-2 pt-2">
+<button class="flex-1 py-3 bg-primary text-white rounded-xl text-xs font-bold uppercase tracking-wide active:scale-95 transition-all shadow-sm">
+                                Save Medication
+                            </button>
+<label class="px-4 py-3 bg-surface-variant/30 text-outline rounded-xl text-xs font-bold uppercase tracking-wide cursor-pointer flex items-center justify-center" for="add-form-trigger">
+                                Cancel
+                            </label>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-surface-container-lowest rounded-xl p-5 shadow-sm border border-outline-variant/30">
+<h2 class="font-headline text-lg mb-4 text-on-surface">Which symptoms are most important to track?</h2>
+<div class="grid grid-cols-2 gap-3">
+<label class="insight-tile flex items-center gap-3 p-3 border border-outline-variant/30 rounded-xl cursor-pointer transition-all bg-surface-bright">
+<input checked="" class="hidden" type="checkbox"/>
+<div class="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0">
+<span class="material-symbols-outlined text-lg text-primary">water_drop</span>
+</div>
+<span class="text-[11px] font-semibold leading-tight text-on-surface">Heavy bleeding</span>
+</label>
+<label class="insight-tile flex items-center gap-3 p-3 border border-outline-variant/30 rounded-xl cursor-pointer transition-all bg-surface-bright">
+<input class="hidden" type="checkbox"/>
+<div class="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0">
+<span class="material-symbols-outlined text-lg text-primary">face</span>
+</div>
+<span class="text-[11px] font-semibold leading-tight text-on-surface">Hormonal acne</span>
+</label>
+</div>
+</section>
+<section class="bg-surface-container-lowest rounded-xl p-5 shadow-sm border border-outline-variant/30">
+<h2 class="font-headline text-lg mb-4 text-on-surface">Do you see a specialist?</h2>
+<div class="flex gap-4">
+<label class="flex-1 flex items-center justify-center p-3 rounded-xl bg-surface-container border border-outline-variant/40 cursor-pointer has-[:checked]:bg-secondary-container has-[:checked]:border-secondary transition-all">
+<input checked="" class="hidden" name="specialist" type="radio"/>
+<span class="text-sm font-bold">Yes</span>
+</label>
+<label class="flex-1 flex items-center justify-center p-3 rounded-xl bg-surface-container border border-outline-variant/40 cursor-pointer has-[:checked]:bg-secondary-container has-[:checked]:border-secondary transition-all">
+<input class="hidden" name="specialist" type="radio"/>
+<span class="text-sm font-bold">No</span>
+</label>
+</div>
+</section>
+</main>
+<footer class="fixed bottom-0 w-full bg-[#F7F5F0]/90 backdrop-blur-md px-6 pt-4 pb-8 flex flex-col items-center gap-4 border-t border-outline-variant/20">
+<button class="w-full py-4 bg-[#9B8B7E] text-white rounded-xl font-bold text-sm tracking-wide uppercase active:scale-95 transition-transform shadow-lg shadow-[#9B8B7E]/20">
+            Continue
+        </button>
+<div class="flex items-center gap-6">
+<button class="text-[11px] font-bold text-primary uppercase tracking-widest hover:opacity-70 transition-opacity">Back</button>
+<div class="w-px h-3 bg-outline-variant"></div>
+<button class="text-[11px] font-bold text-outline uppercase tracking-widest hover:opacity-70 transition-opacity">Skip this detailed setup</button>
+</div>
+</footer>
+
+</body></html>

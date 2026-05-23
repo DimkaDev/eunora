@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Postmenopause Health Profile - MenoSync</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed-dim": "#d0c1d8",
+                    "surface-container-high": "#ede7e5",
+                    "inverse-on-surface": "#f5f0ed",
+                    "on-primary-fixed": "#231a11",
+                    "on-secondary": "#ffffff",
+                    "on-primary-container": "#fffbff",
+                    "error": "#ba1a1a",
+                    "on-primary-fixed-variant": "#51443a",
+                    "on-tertiary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "inverse-primary": "#d6c3b5",
+                    "secondary-container": "#edddf5",
+                    "surface-dim": "#ded9d7",
+                    "surface-bright": "#fef8f6",
+                    "on-secondary-fixed": "#211828",
+                    "primary-fixed-dim": "#d6c3b5",
+                    "on-background": "#1d1b1a",
+                    "tertiary": "#814f45",
+                    "surface-container-low": "#f8f2f0",
+                    "surface-variant": "#e7e1df",
+                    "surface": "#fef8f6",
+                    "on-secondary-fixed-variant": "#4d4355",
+                    "primary-fixed": "#f2dfd0",
+                    "on-error": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "tertiary-container": "#9d675c",
+                    "tertiary-fixed-dim": "#f9b7a9",
+                    "secondary-fixed": "#edddf5",
+                    "on-tertiary-container": "#fffbff",
+                    "tertiary-fixed": "#ffdad3",
+                    "outline-variant": "#d0c4bc",
+                    "inverse-surface": "#32302f",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-tint": "#6a5c50",
+                    "secondary": "#655a6e",
+                    "outline": "#7f756e",
+                    "on-tertiary-fixed-variant": "#683a31",
+                    "on-tertiary-fixed": "#341009",
+                    "surface-container-highest": "#e7e1df",
+                    "background": "#fef8f6",
+                    "on-primary": "#ffffff",
+                    "on-surface": "#1d1b1a",
+                    "on-secondary-container": "#6c6074",
+                    "on-surface-variant": "#4d453f",
+                    "surface-container": "#f2edea",
+                    "primary-container": "#817266",
+                    "primary": "#67594e"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif"],
+                    "body": ["Manrope"],
+                    "label": ["Manrope"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { background-color: #fef8f6; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+        }
+        /* Custom radio/checkbox styles */
+        input[type="radio"]:checked + label, 
+        input[type="checkbox"]:checked + label {
+            background-color: #edddf5;
+            color: #1d1b1a;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body text-on-surface antialiased">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#fef8f6]/70 dark:bg-[#1d1b1a]/70 backdrop-blur-md flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-4">
+<button class="text-[#9B8B7E] hover:opacity-80 transition-opacity active:scale-95 duration-200 ease-in-out">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-['Noto_Serif'] text-xl font-semibold tracking-tight text-[#1d1b1a]">Health Profile</h1>
+</div>
+<button class="text-[#9B8B7E] hover:opacity-80 transition-opacity active:scale-95 duration-200 ease-in-out">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</header>
+<main class="pt-24 pb-40 px-6 max-w-2xl mx-auto">
+<!-- Hero Editorial Section -->
+<section class="mb-10 text-left">
+<p class="font-label text-primary-container text-xs uppercase tracking-widest mb-2">Step 2c of 7</p>
+<h2 class="font-headline text-3xl font-bold text-on-surface mb-3 leading-tight">Your Postmenopause Profile</h2>
+<p class="text-on-surface-variant font-body leading-relaxed max-w-md opacity-80">
+                Postmenopause doesn't mean the conversation is over. Many symptoms persist for years.
+            </p>
+</section>
+<div class="space-y-8">
+<!-- Question 1: Duration -->
+<div class="bg-surface-container-lowest rounded-xl p-6 transition-all duration-300">
+<h3 class="font-headline text-lg font-semibold text-on-surface mb-4">How long ago did you go through menopause?</h3>
+<div class="grid grid-cols-1 gap-3">
+<input class="hidden peer/dur1" id="dur1" name="duration" type="radio"/>
+<label class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl cursor-pointer hover:bg-surface-container-high transition-colors text-on-surface-variant peer-checked/dur1:bg-secondary-container peer-checked/dur1:text-on-surface" for="dur1">
+<span class="font-medium">1-2 years ago</span>
+<span class="material-symbols-outlined text-primary" data-icon="check_circle" style="font-variation-settings: 'FILL' 0;">check_circle</span>
+</label>
+<input class="hidden peer/dur2" id="dur2" name="duration" type="radio"/>
+<label class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl cursor-pointer hover:bg-surface-container-high transition-colors text-on-surface-variant peer-checked/dur2:bg-secondary-container peer-checked/dur2:text-on-surface" for="dur2">
+<span class="font-medium">3-5 years ago</span>
+<span class="material-symbols-outlined text-primary" data-icon="check_circle">check_circle</span>
+</label>
+<input class="hidden peer/dur3" id="dur3" name="duration" type="radio"/>
+<label class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl cursor-pointer hover:bg-surface-container-high transition-colors text-on-surface-variant peer-checked/dur3:bg-secondary-container peer-checked/dur3:text-on-surface" for="dur3">
+<span class="font-medium">5-10 years ago</span>
+<span class="material-symbols-outlined text-primary" data-icon="check_circle">check_circle</span>
+</label>
+<input class="hidden peer/dur4" id="dur4" name="duration" type="radio"/>
+<label class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl cursor-pointer hover:bg-surface-container-high transition-colors text-on-surface-variant peer-checked/dur4:bg-secondary-container peer-checked/dur4:text-on-surface" for="dur4">
+<span class="font-medium">More than 10 years ago</span>
+<span class="material-symbols-outlined text-primary" data-icon="check_circle">check_circle</span>
+</label>
+</div>
+</div>
+<!-- Question 2: HRT -->
+<div class="bg-surface-container-lowest rounded-xl p-6">
+<h3 class="font-headline text-lg font-semibold text-on-surface mb-1">Are you on long-term HRT?</h3>
+<p class="text-sm text-on-surface-variant mb-5 opacity-70 italic">Tracking long-term HRT helps us understand your wellness journey</p>
+<div class="space-y-3">
+<input checked="" class="hidden peer/yes" id="hrt_yes" name="hrt" type="radio"/>
+<label class="block p-4 bg-surface-container-low rounded-xl cursor-pointer hover:bg-surface-container-high transition-colors peer-checked/yes:bg-secondary-container" for="hrt_yes">
+<span class="font-medium">Yes - still on HRT</span>
+</label>
+<!-- Conditional Dropdown -->
+<div class="hidden peer-checked/yes:block pl-4 mt-2 border-l-2 border-secondary-fixed-dim py-2">
+<label class="block text-xs uppercase tracking-tighter font-bold text-primary mb-2">Since</label>
+<select class="w-full bg-surface-container rounded-lg border-none focus:ring-2 focus:ring-primary-container py-3 px-4 font-body text-on-surface">
+<option>2024</option>
+<option>2023</option>
+<option>2022</option>
+<option>2021</option>
+<option>Before 2020</option>
+</select>
+</div>
+<input class="hidden peer/no" id="hrt_no" name="hrt" type="radio"/>
+<label class="block p-4 bg-surface-container-low rounded-xl cursor-pointer hover:bg-surface-container-high transition-colors peer-checked/no:bg-secondary-container" for="hrt_no">
+<span class="font-medium">No - stopped HRT</span>
+</label>
+<input class="hidden peer/recent" id="hrt_recent" name="hrt" type="radio"/>
+<label class="block p-4 bg-surface-container-low rounded-xl cursor-pointer hover:bg-surface-container-high transition-colors peer-checked/recent:bg-secondary-container" for="hrt_recent">
+<span class="font-medium">I stopped HRT recently (last 1-2 years)</span>
+</label>
+</div>
+</div>
+<!-- Question 3: Ongoing Symptoms -->
+<div class="bg-surface-container-lowest rounded-xl p-6">
+<h3 class="font-headline text-lg font-semibold text-on-surface mb-1">Are you still experiencing symptoms?</h3>
+<p class="text-sm text-on-surface-variant mb-5 opacity-70">It's very common</p>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+<div class="flex items-center">
+<input class="hidden peer" id="sym1" type="checkbox"/>
+<label class="w-full flex items-center p-3 bg-surface-container-low rounded-xl cursor-pointer hover:bg-surface-container-high peer-checked:bg-secondary-container" for="sym1">
+<span class="material-symbols-outlined mr-3 text-primary-container" data-icon="hot_tub">hot_tub</span>
+<span class="text-sm font-medium">Hot flashes</span>
+</label>
+</div>
+<div class="flex items-center">
+<input class="hidden peer" id="sym2" type="checkbox"/>
+<label class="w-full flex items-center p-3 bg-surface-container-low rounded-xl cursor-pointer hover:bg-surface-container-high peer-checked:bg-secondary-container" for="sym2">
+<span class="material-symbols-outlined mr-3 text-primary-container" data-icon="bedtime">bedtime</span>
+<span class="text-sm font-medium">Sleep issues</span>
+</label>
+</div>
+<div class="flex items-center">
+<input class="hidden peer" id="sym3" type="checkbox"/>
+<label class="w-full flex items-center p-3 bg-surface-container-low rounded-xl cursor-pointer hover:bg-surface-container-high peer-checked:bg-secondary-container" for="sym3">
+<span class="material-symbols-outlined mr-3 text-primary-container" data-icon="accessibility_new">accessibility_new</span>
+<span class="text-sm font-medium">Joint or muscle pain</span>
+</label>
+</div>
+<div class="flex items-center">
+<input class="hidden peer" id="sym4" type="checkbox"/>
+<label class="w-full flex items-center p-3 bg-surface-container-low rounded-xl cursor-pointer hover:bg-surface-container-high peer-checked:bg-secondary-container" for="sym4">
+<span class="material-symbols-outlined mr-3 text-primary-container" data-icon="mood">mood</span>
+<span class="text-sm font-medium">Mood changes</span>
+</label>
+</div>
+<div class="flex items-center">
+<input class="hidden peer" id="sym5" type="checkbox"/>
+<label class="w-full flex items-center p-3 bg-surface-container-low rounded-xl cursor-pointer hover:bg-surface-container-high peer-checked:bg-secondary-container" for="sym5">
+<span class="material-symbols-outlined mr-3 text-primary-container" data-icon="monitor_weight">monitor_weight</span>
+<span class="text-sm font-medium">Weight management</span>
+</label>
+</div>
+<div class="flex items-center">
+<input class="hidden peer" id="sym6" type="checkbox"/>
+<label class="w-full flex items-center p-3 bg-surface-container-low rounded-xl cursor-pointer hover:bg-surface-container-high peer-checked:bg-secondary-container" for="sym6">
+<span class="material-symbols-outlined mr-3 text-primary-container" data-icon="opacity">opacity</span>
+<span class="text-sm font-medium">Vaginal dryness</span>
+</label>
+</div>
+<div class="col-span-full">
+<input class="hidden peer" id="sym7" type="checkbox"/>
+<label class="w-full flex items-center p-3 bg-surface-container-low rounded-xl cursor-pointer hover:bg-surface-container-high peer-checked:bg-secondary-container" for="sym7">
+<span class="material-symbols-outlined mr-3 text-primary-container" data-icon="check_circle">check_circle</span>
+<span class="text-sm font-medium">No symptoms</span>
+</label>
+</div>
+</div>
+</div>
+<!-- Question 4: Goals (Soft Green Accent) -->
+<div class="bg-[#E8F0E8] rounded-xl p-6 border-l-4 border-[#A5D6A7]">
+<h3 class="font-headline text-lg font-semibold text-on-surface mb-4">What brings you to MenoSync?</h3>
+<div class="space-y-2">
+<div class="flex items-center gap-3 py-2 border-b border-white/30 last:border-0">
+<input class="rounded-full border-2 border-[#A5D6A7] text-primary focus:ring-primary-container" id="goal1" type="checkbox"/>
+<label class="text-sm font-medium text-on-surface" for="goal1">Track ongoing symptoms</label>
+</div>
+<div class="flex items-center gap-3 py-2 border-b border-white/30 last:border-0">
+<input class="rounded-full border-2 border-[#A5D6A7] text-primary focus:ring-primary-container" id="goal2" type="checkbox"/>
+<label class="text-sm font-medium text-on-surface" for="goal2">Monitor my HRT effectiveness</label>
+</div>
+<div class="flex items-center gap-3 py-2 border-b border-white/30 last:border-0">
+<input class="rounded-full border-2 border-[#A5D6A7] text-primary focus:ring-primary-container" id="goal3" type="checkbox"/>
+<label class="text-sm font-medium text-on-surface" for="goal3">Prepare for my annual review</label>
+</div>
+<div class="flex items-center gap-3 py-2 border-b border-white/30 last:border-0">
+<input class="rounded-full border-2 border-[#A5D6A7] text-primary focus:ring-primary-container" id="goal4" type="checkbox"/>
+<label class="text-sm font-medium text-on-surface" for="goal4">Better understand my patterns</label>
+</div>
+<div class="flex items-center gap-3 py-2 border-b border-white/30 last:border-0">
+<input class="rounded-full border-2 border-[#A5D6A7] text-primary focus:ring-primary-container" id="goal5" type="checkbox"/>
+<label class="text-sm font-medium text-on-surface" for="goal5">Share data with my doctor</label>
+</div>
+</div>
+</div>
+<!-- Question 5: Appointment -->
+<div class="bg-surface-container-lowest rounded-xl p-6">
+<div class="flex items-start justify-between mb-4">
+<div>
+<h3 class="font-headline text-lg font-semibold text-on-surface">Next doctor's appointment</h3>
+<p class="text-sm text-on-surface-variant opacity-70">We can prepare a report for your visit</p>
+</div>
+<div class="bg-primary/10 p-2 rounded-full">
+<span class="material-symbols-outlined text-primary" data-icon="calendar_month">calendar_month</span>
+</div>
+</div>
+<div class="relative group">
+<input class="w-full bg-surface-container rounded-full border-none focus:ring-2 focus:ring-primary-container py-4 px-6 font-body text-on-surface placeholder-on-surface-variant/50 appearance-none" placeholder="Select date" type="date"/>
+</div>
+</div>
+<!-- Asymmetric Image Insert -->
+<div class="relative w-full aspect-video rounded-3xl overflow-hidden mt-4 group">
+<img alt="Wellness morning" class="w-full h-full object-cover grayscale-[20%] group-hover:scale-105 transition-transform duration-700" data-alt="Calm portrait of a mature woman in a soft linen robe looking out a sunlit window with soft morning light and plants" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBM87AsPY279kjdR_6MfvBfFxG7t3Ise64Mz1zAu3_l6k5W9tODDXNDspztnrQGR4dHX1bT9fPNpLrCUvW3d408LKzWPJKkzz7hUO8z-KsQVri4A2hUEv4qlv-o7_5cNkxbYlSDLjLRMjKCbEtMs39ZBPo8VIUNO99LJ1KyYNqVa93unYUJNhs72ORpZe1Xync8tfX7EEnCACtkVpwkZQjb31jDtoRJnrljDrS-it5InUwXVSHlk5PeYFY1ibu7TMdu7OPESC9N2c"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent"></div>
+<div class="absolute bottom-6 left-6 text-white max-w-[70%]">
+<p class="font-headline text-lg italic">"Health is a slow, beautiful unfolding of awareness."</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Shell & Actions -->
+<div class="fixed bottom-0 left-0 w-full z-50">
+<!-- Main Actions Container -->
+<div class="bg-[#fef8f6]/70 backdrop-blur-md px-6 pt-4 pb-8 flex flex-col items-center gap-4">
+<button class="w-full max-w-md py-4 rounded-full bg-gradient-to-r from-primary to-primary-container text-white font-bold tracking-wide shadow-lg active:scale-95 duration-300 transition-all">
+                Continue
+            </button>
+<button class="text-primary font-medium hover:underline active:scale-90 transition-transform">
+                Skip
+            </button>
+</div>
+<!-- Hidden BottomNavBar (only shown on relevant screens as per instruction, but configured here for shell completeness) -->
+<!-- In this specific focused profile flow, we suppress the full BottomNavBar to prioritize the "Continue" focus. -->
+</div>
+</body></html>

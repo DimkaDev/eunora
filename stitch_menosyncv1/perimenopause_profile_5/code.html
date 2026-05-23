@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Your Perimenopause Profile - MenoSync</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "cream-bg": "#F7F5F0",
+                        "taupe": "#9B8B7E",
+                        "charcoal": "#3A3A3A",
+                        "soft-lavender": "#E8E0F0",
+                        "sage-light": "#E9EDEA",
+                        "dusty-rose": "#F2E9E9",
+                        "leaf-active": "#7C8D7C"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif", "serif"],
+                        "body": ["Manrope", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body { 
+                @apply bg-cream-bg text-charcoal font-body;
+            }
+            h1, h2, h3 { 
+                @apply font-headline;
+            }
+        }
+        .botanical-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3%3Cpath d='M30 20c0 0 5 10 0 20s-15 10-15 10 10 5 15-5 5-15 5-15zM70 60c0 0-5 10 0 20s15 10 15 10-10 5-15-5-5-15-5-15z' fill='%239B8B7E' fill-opacity='0.05'/%3E%3C/svg%3E");
+        }
+        .leaf-accent {
+            position: absolute;
+            opacity: 0.1;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .pill-input {
+            display: none;
+        }
+        .pill-label {
+            @apply flex items-center justify-center text-center p-4 rounded-full border-2 border-transparent bg-white shadow-sm transition-all duration-300 cursor-pointer text-sm font-medium;
+        }
+        .pill-input:checked + .pill-label {
+            @apply border-taupe bg-soft-lavender text-charcoal scale-[1.02] shadow-md;
+        }.symptom-scale-group {
+            @apply bg-white rounded-3xl p-4 border border-taupe/10 flex flex-col gap-3 transition-all duration-300;
+        }
+        .symptom-scale-group:has(input:checked) {
+            @apply border-taupe/40 bg-sage-light/30 shadow-sm;
+        }
+        .impact-btn {
+            @apply flex-1 flex flex-col items-center gap-1 p-2 rounded-2xl transition-all duration-200 cursor-pointer border border-transparent;
+        }
+        .impact-input:checked + .impact-btn {
+            @apply bg-white shadow-sm border-taupe/20;
+        }
+        .impact-input:checked + .impact-btn .leaf-icon {
+            @apply text-leaf-active;
+            font-variation-settings: 'FILL' 1;
+        }
+        .leaf-icon {
+            @apply text-taupe/30 text-xl transition-all;
+            font-variation-settings: 'FILL' 0;
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d0c4bc; border-radius: 10px; }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen flex flex-col max-w-lg mx-auto overflow-hidden relative">
+<header class="w-full sticky top-0 z-50 bg-cream-bg/95 backdrop-blur-md px-5 py-4 shrink-0">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-charcoal hover:opacity-70 transition-opacity">arrow_back</button>
+<div class="flex flex-col flex-grow">
+<div class="flex justify-between items-baseline">
+<h1 class="text-[20px] font-bold text-charcoal">Your Perimenopause Profile</h1>
+<span class="text-[11px] font-bold text-taupe tracking-wider uppercase">Step 2a of 7</span>
+</div>
+<p class="text-xs text-gray-500">Help us understand your cycle patterns</p>
+</div>
+</div>
+</header>
+<main class="flex-grow overflow-y-auto px-4 py-4 space-y-4 pb-36 botanical-pattern">
+<section class="bg-white p-5 rounded-[20px] shadow-sm relative overflow-hidden">
+<span class="material-symbols-outlined leaf-accent right-[-10px] top-[-10px] text-[80px]">eco</span>
+<div class="relative z-10">
+<h2 class="text-lg font-semibold mb-1">Irregular Periods</h2>
+<p class="text-[13px] text-gray-600 mb-6 italic font-serif">How long have your periods been irregular?</p>
+<div class="flex flex-col gap-3">
+<label>
+<input checked="" class="pill-input" name="irregularity" type="radio"/>
+<div class="pill-label flex-col py-3">
+<span class="font-bold">Less than 6 months</span>
+<span class="text-[10px] opacity-70">Just starting to notice changes</span>
+</div>
+</label>
+<label>
+<input class="pill-input" name="irregularity" type="radio"/>
+<div class="pill-label">6 months to 1 year</div>
+</label>
+<label>
+<input class="pill-input" name="irregularity" type="radio"/>
+<div class="pill-label">Over 1 year</div>
+</label>
+</div>
+</div>
+</section>
+<section class="bg-white p-5 rounded-[20px] shadow-sm relative overflow-hidden">
+<span class="material-symbols-outlined leaf-accent left-[-15px] bottom-[-15px] text-[70px] rotate-45">yard</span>
+<div class="relative z-10">
+<h2 class="text-lg font-semibold mb-1">Hormone Treatment</h2>
+<p class="text-[13px] text-gray-600 mb-6 italic font-serif">Are you currently on any hormone treatment?</p>
+<div class="space-y-3">
+<label>
+<input class="pill-input" name="hormone" type="radio"/>
+<div class="pill-label">Yes - I'm on HRT or other hormones</div>
+</label>
+<label>
+<input checked="" class="pill-input" name="hormone" type="radio"/>
+<div class="pill-label">No - I'm managing naturally</div>
+</label>
+</div>
+</div>
+</section>
+<section class="bg-white p-5 rounded-[20px] shadow-sm relative overflow-hidden">
+<span class="material-symbols-outlined leaf-accent right-[-15px] top-[-15px] text-[90px] rotate-[-15deg] opacity-[0.08]">filter_vintage</span>
+<div class="relative z-10">
+<h2 class="text-lg font-semibold mb-1">Symptom Impact Scale</h2>
+<p class="text-[13px] text-gray-600 mb-6 italic font-serif leading-tight">How much is each symptom currently impacting your daily well-being?</p>
+<div class="space-y-4">
+<div class="symptom-scale-group">
+<div class="flex justify-between items-center px-2">
+<span class="text-sm font-semibold text-charcoal">Hot Flashes</span>
+<span class="text-[10px] uppercase tracking-wider text-taupe font-bold opacity-60">Impact Level</span>
+</div>
+<div class="flex gap-2">
+<label class="flex-1">
+<input class="hidden impact-input" name="impact-hot-flashes" type="radio"/>
+<div class="impact-btn">
+<span class="material-symbols-outlined leaf-icon">eco</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Low</span>
+</div>
+</label>
+<label class="flex-1">
+<input class="hidden impact-input" name="impact-hot-flashes" type="radio"/>
+<div class="impact-btn">
+<div class="flex">
+<span class="material-symbols-outlined leaf-icon text-sm">eco</span>
+<span class="material-symbols-outlined leaf-icon text-sm -ml-1">eco</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Med</span>
+</div>
+</label>
+<label class="flex-1">
+<input class="hidden impact-input" name="impact-hot-flashes" type="radio"/>
+<div class="impact-btn">
+<div class="flex">
+<span class="material-symbols-outlined leaf-icon text-sm">eco</span>
+<span class="material-symbols-outlined leaf-icon text-sm -ml-1">eco</span>
+<span class="material-symbols-outlined leaf-icon text-sm -ml-1">eco</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-tighter">High</span>
+</div>
+</label>
+</div>
+</div>
+<div class="symptom-scale-group">
+<div class="flex justify-between items-center px-2">
+<span class="text-sm font-semibold text-charcoal">Mood Changes</span>
+</div>
+<div class="flex gap-2">
+<label class="flex-1">
+<input class="hidden impact-input" name="impact-mood" type="radio"/>
+<div class="impact-btn">
+<span class="material-symbols-outlined leaf-icon">eco</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Low</span>
+</div>
+</label>
+<label class="flex-1">
+<input checked="" class="hidden impact-input" name="impact-mood" type="radio"/>
+<div class="impact-btn">
+<div class="flex">
+<span class="material-symbols-outlined leaf-icon text-sm">eco</span>
+<span class="material-symbols-outlined leaf-icon text-sm -ml-1">eco</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Med</span>
+</div>
+</label>
+<label class="flex-1">
+<input class="hidden impact-input" name="impact-mood" type="radio"/>
+<div class="impact-btn">
+<div class="flex">
+<span class="material-symbols-outlined leaf-icon text-sm">eco</span>
+<span class="material-symbols-outlined leaf-icon text-sm -ml-1">eco</span>
+<span class="material-symbols-outlined leaf-icon text-sm -ml-1">eco</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-tighter">High</span>
+</div>
+</label>
+</div>
+</div>
+<div class="symptom-scale-group">
+<div class="flex justify-between items-center px-2">
+<span class="text-sm font-semibold text-charcoal">Sleep Quality</span>
+</div>
+<div class="flex gap-2">
+<label class="flex-1">
+<input class="hidden impact-input" name="impact-sleep" type="radio"/>
+<div class="impact-btn">
+<span class="material-symbols-outlined leaf-icon">eco</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Low</span>
+</div>
+</label>
+<label class="flex-1">
+<input class="hidden impact-input" name="impact-sleep" type="radio"/>
+<div class="impact-btn">
+<div class="flex">
+<span class="material-symbols-outlined leaf-icon text-sm">eco</span>
+<span class="material-symbols-outlined leaf-icon text-sm -ml-1">eco</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Med</span>
+</div>
+</label>
+<label class="flex-1">
+<input checked="" class="hidden impact-input" name="impact-sleep" type="radio"/>
+<div class="impact-btn">
+<div class="flex">
+<span class="material-symbols-outlined leaf-icon text-sm">eco</span>
+<span class="material-symbols-outlined leaf-icon text-sm -ml-1">eco</span>
+<span class="material-symbols-outlined leaf-icon text-sm -ml-1">eco</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-tighter">High</span>
+</div>
+</label>
+</div>
+</div>
+<button class="w-full py-3 border-2 border-dashed border-taupe/20 rounded-2xl text-taupe/60 text-xs font-bold uppercase tracking-widest hover:bg-taupe/5 transition-colors">
+                        + Add Another Symptom
+                    </button>
+</div>
+</div>
+</section>
+<section class="bg-white p-5 rounded-[20px] shadow-sm relative overflow-hidden">
+<span class="material-symbols-outlined leaf-accent left-[-10px] top-[-10px] text-[60px] opacity-10">calendar_today</span>
+<div class="relative z-10">
+<h2 class="text-lg font-semibold mb-1">Timeline</h2>
+<p class="text-[13px] text-gray-600 mb-6 italic font-serif">When did your irregular periods start?</p>
+<button class="w-full flex justify-between items-center px-6 py-4 rounded-full border-2 border-taupe/20 text-taupe font-bold hover:bg-taupe/5 transition-all">
+<span>March 2022</span>
+<span class="material-symbols-outlined">event_note</span>
+</button>
+</div>
+</section>
+<section class="bg-white p-5 rounded-[20px] shadow-sm relative mb-8 overflow-hidden">
+<span class="material-symbols-outlined leaf-accent right-[-15px] bottom-[-15px] text-[70px] opacity-10">description</span>
+<div class="relative z-10">
+<h2 class="text-lg font-semibold mb-1">Medical History</h2>
+<p class="text-[13px] text-gray-600 mb-4 italic font-serif">Any relevant history? (optional)</p>
+<textarea class="w-full bg-cream-bg/30 border-2 border-taupe/10 rounded-[20px] p-4 text-sm focus:border-taupe/30 focus:ring-0 placeholder:text-gray-400 font-body min-h-[100px]" placeholder="Endometriosis, PCOS, or recent surgeries..."></textarea>
+</div>
+</section>
+</main>
+<footer class="fixed bottom-0 left-0 right-0 z-50 px-6 py-6 bg-cream-bg/80 backdrop-blur-xl border-t border-taupe/10 flex flex-col items-center gap-3 max-w-lg mx-auto">
+<button class="w-full bg-taupe text-white rounded-full py-4 flex justify-center items-center gap-2 font-bold text-sm tracking-wide shadow-lg hover:shadow-xl hover:scale-[1.01] transition-all active:scale-[0.98]">
+            Save Assessment
+            <span class="material-symbols-outlined text-base">spa</span>
+</button>
+<button class="text-gray-500 font-bold px-6 py-1 hover:text-charcoal transition-colors text-[11px] uppercase tracking-[2px]">
+            Skip for now
+        </button>
+</footer>
+
+</body></html>

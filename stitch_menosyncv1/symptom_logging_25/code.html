@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Quick Log</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-fixed-variant": "#683a31",
+              "on-primary-fixed-variant": "#51443a",
+              "on-error-container": "#93000a",
+              "surface-container-low": "#f8f2f0",
+              "background": "#F7F5F0",
+              "surface-tint": "#9B8B7E",
+              "outline-variant": "#d0c4bc",
+              "on-surface": "#3A3A3A",
+              "tertiary-fixed": "#ffdad3",
+              "secondary-container": "#D8C9E0",
+              "on-secondary-container": "#6c6074",
+              "on-error": "#ffffff",
+              "surface-container-highest": "#e7e1df",
+              "inverse-on-surface": "#f5f0ed",
+              "surface-container-high": "#ede7e5",
+              "primary-container": "#E8A89B",
+              "secondary": "#655a6e",
+              "primary-fixed": "#f2dfd0",
+              "on-secondary-fixed-variant": "#4d4355",
+              "secondary-fixed-dim": "#d0c1d8",
+              "primary": "#9B8B7E",
+              "on-primary-container": "#ffffff",
+              "on-tertiary": "#ffffff",
+              "surface-dim": "#ded9d7",
+              "error-container": "#ffdad6",
+              "on-tertiary-container": "#ffffff",
+              "tertiary": "#814f45",
+              "inverse-surface": "#32302f",
+              "on-secondary-fixed": "#211828",
+              "on-background": "#3A3A3A",
+              "on-primary-fixed": "#231a11",
+              "secondary-fixed": "#edddf5",
+              "on-surface-variant": "#4d453f",
+              "surface-variant": "#e7e1df",
+              "inverse-primary": "#d6c3b5",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary-fixed": "#341009",
+              "surface-container": "#f2edea",
+              "tertiary-container": "#9d675c",
+              "outline": "#7f756e",
+              "on-secondary": "#ffffff",
+              "tertiary-fixed-dim": "#f9b7a9",
+              "surface-bright": "#F7F5F0",
+              "primary-fixed-dim": "#d6c3b5",
+              "error": "#ba1a1a",
+              "on-primary": "#ffffff",
+              "surface": "#F7F5F0"
+            },
+            fontFamily: {
+              "headline": ["Noto Serif"],
+              "body": ["Manrope"],
+              "label": ["Manrope"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "10px", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style type="text/tailwindcss">
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #d0c4bc;
+        border-radius: 10px;
+      }
+      .quick-chip {
+        @apply flex-1 text-[10px] font-bold py-1.5 px-2 rounded-md border border-outline-variant text-outline text-center transition-all;
+      }
+      .quick-chip-active {
+        @apply bg-primary text-white border-primary;
+      }.severity-entry {
+        display: none;
+      }
+      input:checked ~ .severity-entry {
+        display: flex;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background font-body text-on-surface min-h-screen flex flex-col items-center">
+<nav class="w-full sticky top-0 z-50 bg-background/80 backdrop-blur-md flex items-center justify-between px-6 py-4">
+<button class="text-primary flex items-center justify-center">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="flex flex-col items-center">
+<h1 class="font-headline text-[20px] font-bold text-on-surface">Log Your Symptoms</h1>
+<span class="text-[12px] text-outline">Today, 10:45 AM</span>
+</div>
+<button class="text-primary flex items-center justify-center">
+<span class="material-symbols-outlined">info</span>
+</button>
+</nav>
+<main class="w-full max-w-md px-5 pt-2 pb-32 space-y-3">
+<section class="bg-surface-container-lowest rounded-xl p-4 shadow-sm">
+<div class="mb-4">
+<h2 class="text-on-surface font-bold text-[14px]">Quick Log</h2>
+<p class="text-outline text-[12px]">Tap a symptom and set intensity</p>
+</div>
+<div class="space-y-3">
+<div class="p-3 bg-surface-container-low rounded-lg transition-all border border-transparent has-[:checked]:border-primary-container/30">
+<label class="flex items-center justify-between cursor-pointer w-full mb-2">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary/70">thermometer</span>
+<span class="text-[13px] font-semibold">Hot Flashes / Night Sweats</span>
+</div>
+<input checked="" class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary" type="checkbox"/>
+</label>
+<div class="severity-entry flex gap-2 mt-2 items-center">
+<span class="text-[10px] text-outline font-bold uppercase w-12">Level:</span>
+<div class="flex gap-1.5 flex-1">
+<button class="quick-chip">Mild</button>
+<button class="quick-chip">Mod.</button>
+<button class="quick-chip quick-chip-active">Severe</button>
+</div>
+</div>
+</div>
+<div class="p-3 bg-surface-container-low rounded-lg transition-all">
+<label class="flex items-center justify-between cursor-pointer w-full">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary/70">sentiment_satisfied</span>
+<span class="text-[13px] font-semibold">Mood Changes</span>
+</div>
+<input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary" type="checkbox"/>
+</label>
+<div class="severity-entry flex gap-2 mt-2 items-center">
+<span class="text-[10px] text-outline font-bold uppercase w-12">Level:</span>
+<div class="flex gap-1.5 flex-1">
+<button class="quick-chip">Mild</button>
+<button class="quick-chip">Mod.</button>
+<button class="quick-chip">Severe</button>
+</div>
+</div>
+</div>
+<div class="p-3 bg-surface-container-low rounded-lg transition-all">
+<label class="flex items-center justify-between cursor-pointer w-full">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary/70">bedtime</span>
+<span class="text-[13px] font-semibold">Sleep Disturbances</span>
+</div>
+<input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary" type="checkbox"/>
+</label>
+<div class="severity-entry flex gap-2 mt-2 items-center">
+<span class="text-[10px] text-outline font-bold uppercase w-12">Level:</span>
+<div class="flex gap-1.5 flex-1">
+<button class="quick-chip">Mild</button>
+<button class="quick-chip">Mod.</button>
+<button class="quick-chip">Severe</button>
+</div>
+</div>
+</div>
+<div class="p-3 bg-surface-container-low rounded-lg transition-all">
+<label class="flex items-center justify-between cursor-pointer w-full">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary/70">water_drop</span>
+<span class="text-[13px] font-semibold">Vaginal Dryness</span>
+</div>
+<input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary" type="checkbox"/>
+</label>
+<div class="severity-entry flex gap-2 mt-2 items-center">
+<span class="text-[10px] text-outline font-bold uppercase w-12">Level:</span>
+<div class="flex gap-1.5 flex-1">
+<button class="quick-chip">Mild</button>
+<button class="quick-chip">Mod.</button>
+<button class="quick-chip">Severe</button>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-2 mt-2">
+<button class="p-3 bg-surface-container-low rounded-lg flex items-center gap-2 text-[12px] font-semibold text-outline/80">
+<span class="material-symbols-outlined text-sm">psychology</span> Brain Fog
+                    </button>
+<button class="p-3 bg-surface-container-low rounded-lg flex items-center gap-2 text-[12px] font-semibold text-outline/80">
+<span class="material-symbols-outlined text-sm">fitness_center</span> Joint Pain
+                    </button>
+</div>
+<button class="w-full mt-2 py-2.5 border border-dashed border-outline-variant rounded-lg text-xs font-medium text-outline flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">add</span> Other...
+                </button>
+</div>
+</section>
+<section class="bg-surface-container-lowest rounded-xl p-4 shadow-sm grid grid-cols-2 gap-3">
+<div class="flex flex-col gap-1.5">
+<label class="text-on-surface font-bold text-[13px]">Occurred</label>
+<div class="flex items-center justify-between px-3 py-2.5 rounded-lg border border-outline-variant text-on-surface text-[13px]">
+                    10:45 AM
+                    <span class="material-symbols-outlined text-sm text-primary">schedule</span>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-on-surface font-bold text-[13px]">Duration</label>
+<div class="flex items-center justify-between px-3 py-2.5 rounded-lg bg-surface-container-low text-on-surface text-[13px]">
+                    45 min
+                    <span class="material-symbols-outlined text-sm text-primary">expand_more</span>
+</div>
+</div>
+</section>
+<section class="bg-surface-container-lowest rounded-xl p-4 shadow-sm">
+<h2 class="text-on-surface font-bold text-[13px] mb-3">Triggers <span class="text-outline font-normal text-[10px] uppercase">(Optional)</span></h2>
+<div class="flex flex-wrap gap-2">
+<button class="px-3 py-1.5 rounded-full text-[11px] font-semibold bg-secondary-container/50 text-on-secondary-container">Stress</button>
+<button class="px-3 py-1.5 rounded-full text-[11px] font-semibold bg-surface-container-high text-outline">Caffeine</button>
+<button class="px-3 py-1.5 rounded-full text-[11px] font-semibold bg-surface-container-high text-outline">Alcohol</button>
+<button class="px-3 py-1.5 rounded-full text-[11px] font-semibold bg-surface-container-high text-outline">Weather</button>
+</div>
+</section>
+<section class="bg-surface-container-lowest rounded-xl p-4 shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">medication</span>
+<span class="text-on-surface font-bold text-[13px]">Meds Taken?</span>
+</div>
+<div class="w-10 h-5 bg-primary rounded-full relative flex items-center px-0.5">
+<div class="w-4 h-4 bg-white rounded-full absolute right-0.5 shadow-sm"></div>
+</div>
+</section>
+</main>
+<div class="fixed bottom-0 w-full bg-white/90 backdrop-blur-md border-t border-outline-variant/10 px-6 pt-4 pb-8 max-w-xl mx-auto z-50">
+<div class="flex flex-col items-center gap-3">
+<span class="text-[10px] font-bold text-outline tracking-wider uppercase flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">lock</span> Private &amp; Encrypted
+            </span>
+<button class="w-full bg-primary text-white font-bold py-4 rounded-[10px] text-[14px] shadow-lg shadow-primary/20 active:scale-[0.98] transition-all">
+                Save &amp; Continue
+            </button>
+</div>
+</div>
+
+</body></html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Create Account</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@300;400;500;600&amp;family=Playfair+Display:ital,wght@0,400;0,600;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "sage": "#A8B5A2",
+                        "lavender": "#B8A7C6",
+                        "taupe": "#9B8B7E",
+                        "charcoal": "#3A3A3A",
+                        "cream": "#F7F5F0",
+                        "on-surface": "#4A4A4A",
+                        "on-surface-variant": "#7A7A7A"
+                    },
+                    fontFamily: {
+                        "handwritten": ["Playfair Display", "serif"],
+                        "serif": ["Libre Baskerville", "serif"],
+                        "body": ["Manrope", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body {
+                @apply bg-cream font-body text-on-surface min-h-screen flex flex-col;
+            }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        input:focus, select:focus {
+            background-color: #F0EDF5 !important;outline: none !important;
+            border-color: #A8B5A2 !important;box-shadow: 0 0 0 4px rgba(168, 181, 162, 0.15) !important;
+        }
+        .pill-input {
+            @apply rounded-full border-stone-300 border-[1.5px] bg-white/50 px-6 py-3 transition-all duration-300;
+        }
+        .soft-label {
+            @apply text-[11px] uppercase tracking-widest text-on-surface-variant font-light mb-1 ml-4;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body>
+<header class="fixed top-0 w-full z-50 bg-cream/80 backdrop-blur-sm flex items-center px-6 py-6">
+<button class="text-charcoal hover:opacity-60 transition-opacity active:scale-95">
+<span class="material-symbols-outlined text-[24px]" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="ml-4 font-handwritten text-charcoal text-[26px] italic leading-tight">Create Your MenoSync Account</h1>
+</header>
+<main class="flex-1 flex flex-col items-center justify-start pt-32 pb-16 px-6">
+<div class="w-full max-w-[380px] flex flex-col space-y-6">
+<div class="flex flex-col">
+<label class="soft-label">Email Address</label>
+<input class="pill-input text-[14px] placeholder-stone-400" placeholder="you@email.com" type="email"/>
+</div>
+<div class="flex flex-col">
+<label class="soft-label">Password</label>
+<input class="pill-input text-[14px] placeholder-stone-400" placeholder="Create a secure password" type="password"/>
+<p class="text-[10px] text-stone-400 mt-1.5 ml-4">At least 8 characters</p>
+</div>
+<div class="flex flex-col pt-2">
+<label class="soft-label">Age Range</label>
+<div class="flex flex-wrap gap-x-4 gap-y-3 mt-1 px-2">
+<label class="flex items-center space-x-2 cursor-pointer group">
+<div class="relative flex items-center justify-center">
+<input class="peer appearance-none w-5 h-5 border-[1.5px] border-stone-300 rounded-full checked:bg-sage checked:border-sage transition-all" name="age" type="radio"/>
+<div class="absolute w-1.5 h-1.5 bg-white rounded-full opacity-0 peer-checked:opacity-100"></div>
+</div>
+<span class="text-[14px] text-on-surface font-light">40-44</span>
+</label>
+<label class="flex items-center space-x-2 cursor-pointer group">
+<div class="relative flex items-center justify-center">
+<input class="peer appearance-none w-5 h-5 border-[1.5px] border-stone-300 rounded-full checked:bg-sage checked:border-sage transition-all" name="age" type="radio"/>
+<div class="absolute w-1.5 h-1.5 bg-white rounded-full opacity-0 peer-checked:opacity-100"></div>
+</div>
+<span class="text-[14px] text-on-surface font-light">45-49</span>
+</label>
+<label class="flex items-center space-x-2 cursor-pointer group">
+<div class="relative flex items-center justify-center">
+<input class="peer appearance-none w-5 h-5 border-[1.5px] border-stone-300 rounded-full checked:bg-sage checked:border-sage transition-all" name="age" type="radio"/>
+<div class="absolute w-1.5 h-1.5 bg-white rounded-full opacity-0 peer-checked:opacity-100"></div>
+</div>
+<span class="text-[14px] text-on-surface font-light">50-54</span>
+</label>
+<label class="flex items-center space-x-2 cursor-pointer group">
+<div class="relative flex items-center justify-center">
+<input class="peer appearance-none w-5 h-5 border-[1.5px] border-stone-300 rounded-full checked:bg-sage checked:border-sage transition-all" name="age" type="radio"/>
+<div class="absolute w-1.5 h-1.5 bg-white rounded-full opacity-0 peer-checked:opacity-100"></div>
+</div>
+<span class="text-[14px] text-on-surface font-light">55-59</span>
+</label>
+<label class="flex items-center space-x-2 cursor-pointer group">
+<div class="relative flex items-center justify-center">
+<input class="peer appearance-none w-5 h-5 border-[1.5px] border-stone-300 rounded-full checked:bg-sage checked:border-sage transition-all" name="age" type="radio"/>
+<div class="absolute w-1.5 h-1.5 bg-white rounded-full opacity-0 peer-checked:opacity-100"></div>
+</div>
+<span class="text-[14px] text-on-surface font-light">60+</span>
+</label>
+</div>
+</div>
+<div class="flex flex-col pt-2">
+<label class="soft-label">Where are you in your journey?</label>
+<div class="relative">
+<select class="w-full appearance-none pill-input text-[14px] text-on-surface cursor-pointer focus:ring-0">
+<option disabled="" selected="" value="">Select your stage</option>
+<option>Not sure</option>
+<option>Early perimenopause</option>
+<option>Active perimenopause</option>
+<option>Early menopause</option>
+<option>Post-menopause</option>
+</select>
+<div class="absolute inset-y-0 right-5 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-stone-400" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+</div>
+<div class="pt-6 space-y-6">
+<button class="w-full bg-taupe text-white py-[16px] rounded-full font-medium text-[15px] shadow-sm hover:bg-stone-600 active:scale-[0.98] transition-all duration-300">
+                    Create Account
+                </button>
+<div class="text-center">
+<a class="text-lavender font-medium text-[13px] hover:text-stone-500 transition-colors" href="#">
+                        Already have account? <span class="underline">Sign in</span>
+</a>
+</div>
+</div>
+<div class="pt-16 mt-8 flex flex-col items-center">
+<div class="w-12 h-[1px] bg-sage mb-6 opacity-40"></div>
+<p class="font-handwritten italic text-stone-400 text-center text-[15px] leading-relaxed max-w-[280px]">
+                    "This is the start of a more supported, harmonious transition."
+                </p>
+</div>
+</div>
+</main>
+<div class="fixed -bottom-10 -right-10 w-40 h-40 bg-sage/5 rounded-full blur-3xl pointer-events-none"></div>
+<div class="fixed -top-10 -left-10 w-40 h-40 bg-lavender/5 rounded-full blur-3xl pointer-events-none"></div>
+
+</body></html>

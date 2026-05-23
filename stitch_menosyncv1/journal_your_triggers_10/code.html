@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-container": "#817266",
+                    "error": "#ba1a1a",
+                    "on-error": "#ffffff",
+                    "inverse-surface": "#32302f",
+                    "error-container": "#ffdad6",
+                    "surface-container-low": "#f8f2f0",
+                    "surface-container-highest": "#e7e1df",
+                    "surface-container": "#f2edea",
+                    "on-primary-fixed": "#231a11",
+                    "secondary-fixed": "#edddf5",
+                    "on-error-container": "#93000a",
+                    "tertiary-container": "#9d675c",
+                    "on-primary": "#ffffff",
+                    "secondary-container": "#edddf5",
+                    "secondary-fixed-dim": "#d0c1d8",
+                    "on-tertiary-container": "#fffbff",
+                    "on-secondary-fixed": "#211828",
+                    "on-tertiary-fixed-variant": "#683a31",
+                    "on-surface": "#1d1b1a",
+                    "surface": "#fef8f6",
+                    "tertiary-fixed": "#ffdad3",
+                    "primary-fixed-dim": "#d6c3b5",
+                    "on-primary-container": "#fffbff",
+                    "surface-tint": "#6a5c50",
+                    "outline": "#7f756e",
+                    "on-surface-variant": "#4d453f",
+                    "outline-variant": "#d0c4bc",
+                    "surface-container-high": "#ede7e5",
+                    "surface-bright": "#fef8f6",
+                    "on-tertiary": "#ffffff",
+                    "on-background": "#1d1b1a",
+                    "inverse-primary": "#d6c3b5",
+                    "secondary": "#655a6e",
+                    "on-tertiary-fixed": "#341009",
+                    "on-secondary": "#ffffff",
+                    "inverse-on-surface": "#f5f0ed",
+                    "tertiary-fixed-dim": "#f9b7a9",
+                    "primary": "#67594e",
+                    "on-secondary-container": "#6c6074",
+                    "on-primary-fixed-variant": "#51443a",
+                    "background": "#fef8f6",
+                    "primary-fixed": "#f2dfd0",
+                    "surface-variant": "#e7e1df",
+                    "on-secondary-fixed-variant": "#4d4355",
+                    "surface-dim": "#ded9d7",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary": "#814f45"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif"],
+                    "body": ["Manrope"],
+                    "label": ["Manrope"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-glass {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface min-h-screen pb-32">
+<!-- Top App Bar (Suppressing Shell as it's a focused task) -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-6 py-4 bg-[#fef8f6]/70 backdrop-blur-xl">
+<div class="flex items-center gap-4">
+<button class="hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<span class="font-headline italic font-bold text-primary">MenoSync</span>
+</div>
+<div class="text-on-surface-variant font-label text-xs tracking-widest uppercase">Step 3 of 3</div>
+</header>
+<main class="pt-24 px-6 max-w-md mx-auto">
+<!-- Progress Bar Section -->
+<div class="mb-10">
+<div class="flex justify-between items-end mb-3">
+<h1 class="font-headline text-3xl font-medium text-on-surface">Journal Your Influences</h1>
+</div>
+<p class="font-body text-on-surface-variant mb-6">Reflect on today's triggers</p>
+<div class="relative w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="absolute top-0 left-0 h-full w-full bg-gradient-to-r from-primary to-primary-container rounded-full shadow-[0_0_12px_rgba(103,89,78,0.3)]"></div>
+</div>
+</div>
+<!-- Triggers Grid -->
+<div class="space-y-6">
+<!-- Card 1: Caffeine -->
+<section class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_24px_rgba(29,27,26,0.04)]">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h2 class="font-headline text-xl text-on-surface">Caffeine</h2>
+<p class="font-label text-xs text-on-surface-variant uppercase tracking-wider mt-1">How much today?</p>
+</div>
+<span class="material-symbols-outlined text-tertiary-container" style="font-variation-settings: 'FILL' 1;">coffee</span>
+</div>
+<div class="flex items-center justify-between bg-surface-container-low rounded-full p-2">
+<button class="w-10 h-10 flex items-center justify-center bg-surface-container-lowest rounded-full shadow-sm text-primary active:scale-90 transition-transform">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<span class="font-headline text-xl text-primary font-bold">2 cups</span>
+<button class="w-10 h-10 flex items-center justify-center bg-surface-container-lowest rounded-full shadow-sm text-primary active:scale-90 transition-transform">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</section>
+<!-- Card 2: Alcohol -->
+<section class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_24px_rgba(29,27,26,0.04)]">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h2 class="font-headline text-xl text-on-surface">Alcohol</h2>
+<p class="font-label text-xs text-on-surface-variant uppercase tracking-wider mt-1">Consumption log</p>
+</div>
+<span class="material-symbols-outlined text-tertiary-container" style="font-variation-settings: 'FILL' 1;">wine_bar</span>
+</div>
+<div class="flex items-center justify-between bg-surface-container-low rounded-full p-2">
+<button class="w-10 h-10 flex items-center justify-center bg-surface-container-lowest rounded-full shadow-sm text-primary active:scale-90 transition-transform">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<span class="font-headline text-xl text-primary font-bold">1 glass</span>
+<button class="w-10 h-10 flex items-center justify-center bg-surface-container-lowest rounded-full shadow-sm text-primary active:scale-90 transition-transform">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</section>
+<!-- Card 3: Stress -->
+<section class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_24px_rgba(29,27,26,0.04)]">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h2 class="font-headline text-xl text-on-surface">Stress</h2>
+<p class="font-label text-xs text-on-surface-variant uppercase tracking-wider mt-1">Intensity Level</p>
+</div>
+<span class="material-symbols-outlined text-tertiary-container" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+<div class="grid grid-cols-3 gap-3">
+<button class="py-3 px-1 rounded-full text-sm font-semibold bg-surface-container-high text-on-surface-variant transition-all">Calm</button>
+<button class="py-3 px-1 rounded-full text-sm font-semibold bg-secondary-container text-on-secondary-container shadow-sm border border-secondary-fixed transition-all">Moderate</button>
+<button class="py-3 px-1 rounded-full text-sm font-semibold bg-surface-container-high text-on-surface-variant transition-all">High</button>
+</div>
+</section>
+<!-- Card 4: Foods -->
+<section class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_24px_rgba(29,27,26,0.04)]">
+<div class="flex justify-between items-center mb-6">
+<div>
+<h2 class="font-headline text-xl text-on-surface">Foods</h2>
+<p class="font-label text-xs text-on-surface-variant uppercase tracking-wider mt-1">Specific triggers?</p>
+</div>
+<!-- Custom Toggle -->
+<div class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
+</div>
+</div>
+<div class="relative">
+<textarea class="w-full bg-surface-container-low border-none rounded-xl p-4 font-headline italic text-on-surface-variant placeholder:text-outline-variant focus:ring-1 focus:ring-primary-fixed text-sm resize-none" placeholder="Journal your thoughts today..." rows="3"></textarea>
+</div>
+</section>
+</div>
+<!-- Educational/Reflection Tip -->
+<div class="mt-8 mb-12 p-6 bg-secondary-fixed/30 rounded-xl flex items-start gap-4">
+<span class="material-symbols-outlined text-primary-container">lightbulb</span>
+<p class="text-sm font-body text-on-surface-variant leading-relaxed">
+<span class="font-bold text-primary">Pro Tip:</span> High sodium can increase water retention and worsen night sweats. Try reducing salt in your evening meals.
+            </p>
+</div>
+</main>
+<!-- Fixed Action Bar -->
+<footer class="fixed bottom-0 left-0 w-full px-6 pb-10 pt-6 bg-glass bg-[#fef8f6]/80 flex flex-col gap-4">
+<div class="flex gap-4">
+<button class="flex-1 py-4 px-6 rounded-full bg-surface-container-high text-on-surface font-semibold text-sm active:scale-95 transition-all">
+                Back
+            </button>
+<button class="flex-[2] py-4 px-6 rounded-full bg-gradient-to-br from-primary to-primary-container text-white font-semibold text-sm shadow-lg shadow-primary/20 active:scale-95 transition-all">
+                Save Log
+            </button>
+</div>
+</footer>
+<!-- Bottom Spacing for Float -->
+<div class="h-10"></div>
+</body></html>

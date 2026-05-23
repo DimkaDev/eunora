@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary-container": "#fffbff",
+                        "tertiary-container": "#9d675c",
+                        "secondary": "#655a6e",
+                        "on-primary-container": "#fffbff",
+                        "surface-variant": "#e7e1df",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "on-tertiary": "#ffffff",
+                        "surface": "#fef8f6",
+                        "outline-variant": "#d0c4bc",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "on-error": "#ffffff",
+                        "tertiary": "#814f45",
+                        "tertiary-fixed": "#ffdad3",
+                        "secondary-fixed": "#edddf5",
+                        "on-secondary-container": "#6c6074",
+                        "on-secondary-fixed": "#211828",
+                        "on-surface": "#1d1b1a",
+                        "on-primary-fixed-variant": "#51443a",
+                        "outline": "#7f756e",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed": "#341009",
+                        "surface-container-highest": "#e7e1df",
+                        "surface-container-high": "#ede7e5",
+                        "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed": "#231a11",
+                        "surface-dim": "#ded9d7",
+                        "error": "#ba1a1a",
+                        "inverse-primary": "#d6c3b5",
+                        "primary": "#67594e",
+                        "surface-tint": "#6a5c50",
+                        "primary-fixed": "#f2dfd0",
+                        "on-surface-variant": "#4d453f",
+                        "on-background": "#1d1b1a",
+                        "surface-container-low": "#f8f2f0",
+                        "background": "#fef8f6",
+                        "inverse-surface": "#32302f",
+                        "primary-container": "#817266",
+                        "error-container": "#ffdad6",
+                        "inverse-on-surface": "#f5f0ed",
+                        "surface-container": "#f2edea",
+                        "surface-bright": "#fef8f6"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#fef8f6]/70 backdrop-blur-xl shadow-[0_24px_24px_0_rgba(29,27,26,0.06)]">
+<div class="flex justify-between items-center px-6 py-4 w-full max-w-md mx-auto">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#67594e]">menu</span>
+<h1 class="font-headline text-2xl font-semibold tracking-tight italic text-[#67594e]">MenoSync</h1>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-container overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="Portrait of a smiling mature woman" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAL9fTgog09FtkHaAsbVdFEinqiSa1va0lEXN9IdhppkTiyJfMplDmCWU-VCpgtqku1T6LXSEoQvxlVYT7-QpyIBueuhf4Ws5BRuMdmDd_0IVluQYqgJoo9b29D8pc3w7lts5sOkJx9pxBpUEvOoZzQ92mpmWNZQAVQq0enB4_VcNC5th5MTfRyc1iZ6Qt8vd153G6RYTmsG-5UVUkdWWB24W7J3qNm5BIZ2fGL4B9K9XZ1uyk5b8PsRD1e9i63Jn1aay0OGeAYiEI"/>
+</div>
+</div>
+</header>
+<main class="pt-24 px-6 max-w-md mx-auto">
+<!-- Hero Section: Editorial Intro -->
+<section class="mb-10">
+<h2 class="font-headline text-4xl font-bold leading-tight mb-4 text-primary">Resources <span class="block italic font-normal text-primary-container">&amp; Connection</span></h2>
+<p class="text-on-surface-variant leading-relaxed text-lg">A curated sanctuary for knowledge, shared wisdom, and gentle guidance through your transition.</p>
+</section>
+<!-- Search & Filter (Glassmorphism inspired) -->
+<div class="relative mb-10">
+<div class="flex items-center bg-surface-container-highest/50 backdrop-blur-md rounded-full px-5 py-3 shadow-sm">
+<span class="material-symbols-outlined text-outline mr-3">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-on-surface-variant w-full font-body placeholder:text-outline/70" placeholder="Search topics, tips, or articles..." type="text"/>
+</div>
+</div>
+<!-- Latest Articles: Asymmetrical Horizontal Scroll -->
+<section class="mb-12">
+<div class="flex justify-between items-end mb-6 pr-2">
+<h3 class="font-headline text-2xl font-semibold text-primary">Latest Articles</h3>
+<span class="text-tertiary font-bold text-sm uppercase tracking-widest cursor-pointer">View All</span>
+</div>
+<div class="flex gap-6 overflow-x-auto hide-scrollbar pb-4 -mx-6 px-6">
+<!-- Article Card 1 -->
+<div class="flex-none w-[280px] bg-surface-container-lowest rounded-[2rem] overflow-hidden shadow-sm">
+<div class="h-48 relative overflow-hidden">
+<img alt="Wellness" class="w-full h-full object-cover" data-alt="Abstract calming botanical leaves in warm light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNp64eiSxZaugbhqSupVgP0dRIQzhq4FT635gP2vJQqHfAcG0RvAo9MPeX6tcWWKlY_JPAI9CSPAin4_LHOdK9CvXlCr1hTrgudZwfl2OrM9XfDxxEk8XGb9qgDKeV3yQG7YUrnIuU4aV1DxhUDsBIBlykTDJx9aUCjcM8L_RuclAvc5_Glf6tp3hv6woRkgTsxGMzN_5lVZuqOa5zJYp9MO-FAh-6YoGsLq4Nwp4OtUC-R27jgTO80gKyqt4LJCrZarjYoiV5oKI"/>
+<div class="absolute top-4 right-4 bg-tertiary-fixed text-on-tertiary-fixed text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Mindfulness</div>
+</div>
+<div class="p-6">
+<h4 class="font-headline text-xl font-bold mb-2 leading-snug">The Art of Soft Sleep: Managing Night Sweats</h4>
+<p class="text-on-surface-variant text-sm mb-4 line-clamp-2">Gentle evening rituals to regulate body temperature and calm the nervous system.</p>
+<div class="flex items-center text-primary font-bold text-xs gap-1">
+                            READ ARTICLE <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</div>
+</div>
+</div>
+<!-- Article Card 2 -->
+<div class="flex-none w-[280px] bg-surface-container-lowest rounded-[2rem] overflow-hidden shadow-sm">
+<div class="h-48 relative overflow-hidden">
+<img alt="Yoga" class="w-full h-full object-cover" data-alt="Woman practicing peaceful yoga at sunset" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAAzQbdnZ_m2SHmSbSSI8CdbTzVuSUMA2CBVNjGvaMJ0RubpDpfnbihuroEKayzcfRuaebz5PGyFQy13eBU9fXI9DKI01gIV8Csjjb2aR4kq_0TM293KJQOgbMU6aftsKmths8QlFlL5V6DiLLKlVTZEELJ0IOtNvWiAA6YVZfS6Pgg32oRKRIZ6RO80nvlvODJF50wE9KAT0XYo15j1QwIkULPp_VIZbxsN-CQ2KI4S2PqmmgdBC_8tiX7IAXx8GEDnYbYb9Tdrs"/>
+<div class="absolute top-4 right-4 bg-secondary-fixed text-on-secondary-fixed text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Nutrition</div>
+</div>
+<div class="p-6">
+<h4 class="font-headline text-xl font-bold mb-2 leading-snug">Hormone-Balancing Superfoods for You</h4>
+<p class="text-on-surface-variant text-sm mb-4 line-clamp-2">Discover the nutrient-dense ingredients that support estrogen health naturally.</p>
+<div class="flex items-center text-primary font-bold text-xs gap-1">
+                            READ ARTICLE <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Community Highlights: Bento Grid Style -->
+<section class="mb-12">
+<h3 class="font-headline text-2xl font-semibold text-primary mb-6">Community Highlights</h3>
+<div class="grid grid-cols-2 gap-4">
+<!-- Highlight 1: Tall Card -->
+<div class="col-span-1 row-span-2 bg-secondary-container p-6 rounded-[2rem] flex flex-col justify-between">
+<div>
+<span class="material-symbols-outlined text-on-secondary-container mb-4 text-3xl" style="font-variation-settings: 'FILL' 1;">format_quote</span>
+<p class="font-headline text-lg italic text-on-secondary-container leading-relaxed">"Adding sage tea to my evening routine changed my sleep quality instantly."</p>
+</div>
+<div class="mt-6 flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-white/40"></div>
+<span class="text-xs font-bold text-on-secondary-container">Elena, 52</span>
+</div>
+</div>
+<!-- Highlight 2: Small Card -->
+<div class="col-span-1 bg-tertiary-fixed p-5 rounded-[2rem] relative overflow-hidden">
+<div class="relative z-10">
+<h5 class="text-[10px] font-bold uppercase tracking-widest text-on-tertiary-fixed mb-1">Top Tip</h5>
+<p class="font-bold text-on-tertiary-fixed leading-tight">Morning Cold Plunge Ritual</p>
+</div>
+<span class="material-symbols-outlined absolute -bottom-2 -right-2 text-7xl text-on-tertiary-fixed/10">ac_unit</span>
+</div>
+<!-- Highlight 3: Small Card -->
+<div class="col-span-1 bg-surface-container-high p-5 rounded-[2rem]">
+<h5 class="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">Support</h5>
+<p class="font-bold text-on-surface leading-tight">Virtual Circle: July 14th</p>
+<div class="mt-4 inline-block bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full">JOIN</div>
+</div>
+</div>
+</section>
+<!-- Newsletter / Reflection Space -->
+<section class="mb-12 bg-primary-container p-8 rounded-[2.5rem] relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-secondary-container/20 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+<div class="relative z-10 text-center">
+<h3 class="font-headline text-2xl text-white mb-2 italic">The Weekly Pulse</h3>
+<p class="text-white/80 text-sm mb-6">Receive gentle reminders and health insights directly in your inbox.</p>
+<div class="flex gap-2">
+<input class="flex-1 bg-white/10 border-none rounded-full px-4 text-white text-sm focus:ring-1 focus:ring-white/30 placeholder:text-white/50" placeholder="Your email" type="email"/>
+<button class="bg-surface text-primary font-bold px-6 py-2 rounded-full text-xs uppercase tracking-widest">Sign Up</button>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 rounded-t-[1.5rem] bg-[#fef8f6]/70 backdrop-blur-xl shadow-[0_-4px_24px_0_rgba(29,27,26,0.04)]">
+<div class="flex justify-around items-center px-4 pb-6 pt-3">
+<a class="flex flex-col items-center justify-center text-[#9b8b7e] px-5 py-2 hover:text-[#67594e] transition-colors active:scale-90 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined mb-1">edit_note</span>
+<span class="font-manrope text-[11px] font-bold uppercase tracking-wider">Journal</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-[#edddf5] text-[#67594e] rounded-2xl px-5 py-2 active:scale-90 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined mb-1">insert_chart</span>
+<span class="font-manrope text-[11px] font-bold uppercase tracking-wider">Insights</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#9b8b7e] px-5 py-2 hover:text-[#67594e] transition-colors active:scale-90 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined mb-1">description</span>
+<span class="font-manrope text-[11px] font-bold uppercase tracking-wider">Reports</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#9b8b7e] px-5 py-2 hover:text-[#67594e] transition-colors active:scale-90 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined mb-1">person</span>
+<span class="font-manrope text-[11px] font-bold uppercase tracking-wider">Profile</span>
+</a>
+</div>
+</nav>
+<!-- Contextual Floating Action Button (Supressed as per logic for Resources focus, but added as placeholder if interaction required) -->
+<!-- Suppression: FAB hidden as this is a browsing screen -->
+</body></html>

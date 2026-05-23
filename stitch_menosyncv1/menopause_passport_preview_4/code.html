@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Menopause Passport Preview</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-dim": "#ded9d7",
+                        "on-secondary-fixed": "#211828",
+                        "tertiary-fixed": "#ffdad3",
+                        "on-tertiary-container": "#fffbff",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "primary": "#67594e",
+                        "surface-container-highest": "#e7e1df",
+                        "on-surface-variant": "#4d453f",
+                        "on-surface": "#1d1b1a",
+                        "secondary-container": "#edddf5",
+                        "on-background": "#1d1b1a",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error": "#ffffff",
+                        "primary-fixed": "#f2dfd0",
+                        "surface-container": "#f2edea",
+                        "surface": "#fef8f6",
+                        "on-primary-container": "#fffbff",
+                        "surface-bright": "#fef8f6",
+                        "surface-tint": "#6a5c50",
+                        "secondary-fixed": "#edddf5",
+                        "background": "#fef8f6",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "inverse-on-surface": "#f5f0ed",
+                        "error-container": "#ffdad6",
+                        "inverse-surface": "#32302f",
+                        "inverse-primary": "#d6c3b5",
+                        "outline-variant": "#d0c4bc",
+                        "tertiary": "#814f45",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "surface-container-low": "#f8f2f0",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "on-tertiary-fixed": "#341009",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "outline": "#7f756e",
+                        "on-secondary": "#ffffff",
+                        "tertiary-container": "#9d675c",
+                        "surface-container-high": "#ede7e5",
+                        "on-primary": "#ffffff",
+                        "surface-variant": "#e7e1df",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "primary-container": "#817266",
+                        "on-primary-fixed-variant": "#51443a",
+                        "error": "#ba1a1a",
+                        "on-secondary-container": "#6c6074",
+                        "on-primary-fixed": "#231a11",
+                        "secondary": "#655a6e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; }
+        .serif { font-family: 'Noto Serif', serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .pdf-preview {
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface flex flex-col items-center min-h-screen pb-40">
+<!-- TopAppBar (from JSON Mapping) -->
+<header class="fixed top-0 w-full z-50 bg-stone-50/70 dark:bg-stone-900/70 backdrop-blur-xl flex justify-between items-center px-5 h-16 w-full shadow-sm">
+<div class="flex items-center gap-3">
+<button class="text-stone-700 dark:text-stone-300 hover:bg-stone-200/50 p-2 rounded-full transition-colors scale-95 active:duration-150">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-serif font-bold text-stone-800 dark:text-stone-200 text-xl">Your Passport</h1>
+</div>
+<button class="flex items-center gap-2 text-stone-700 dark:text-stone-300 hover:bg-stone-200/50 px-3 py-1.5 rounded-full transition-colors scale-95 active:duration-150">
+<span class="material-symbols-outlined" data-icon="share">share</span>
+<span class="font-label text-sm font-semibold">Share</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="w-full max-w-[375px] mt-20 px-5 flex flex-col gap-8">
+<!-- Document Preview Container (Editorial Layout) -->
+<div class="pdf-preview bg-white w-full rounded-2xl overflow-hidden flex flex-col border border-stone-100">
+<!-- SECTION 1: PATIENT PROFILE -->
+<div class="bg-secondary-container px-6 py-4">
+<p class="font-label text-[10px] uppercase tracking-[0.2em] font-bold text-secondary">Menopause Passport · Generated 12 March 2025</p>
+</div>
+<div class="p-6 flex flex-col gap-6">
+<!-- Patient Grid -->
+<div class="grid grid-cols-2 gap-y-4 border-b border-stone-50 pb-6">
+<div>
+<p class="text-[10px] uppercase tracking-wider text-stone-400 font-bold">Name</p>
+<p class="font-headline font-bold text-stone-900">Claire H.</p>
+</div>
+<div>
+<p class="text-[10px] uppercase tracking-wider text-stone-400 font-bold">Age</p>
+<p class="font-headline font-bold text-stone-900">52</p>
+</div>
+<div>
+<p class="text-[10px] uppercase tracking-wider text-stone-400 font-bold">Stage</p>
+<p class="font-body font-semibold text-stone-700">Menopause</p>
+</div>
+<div>
+<p class="text-[10px] uppercase tracking-wider text-stone-400 font-bold">Tracking since</p>
+<p class="font-body font-semibold text-stone-700">6 Feb 2025</p>
+</div>
+</div>
+<!-- Current HRT Block -->
+<div class="bg-surface-container-low p-4 rounded-xl border-l-4 border-primary">
+<p class="text-[10px] uppercase tracking-wider text-primary font-bold mb-1">Current HRT Regimen</p>
+<p class="font-body text-sm font-medium leading-relaxed text-stone-800">
+                        Estradiol 75mcg Patch (twice weekly) + Utrogestan 100mg (daily)
+                    </p>
+</div>
+</div>
+<!-- SECTION 2: SYMPTOM SUMMARY -->
+<div class="bg-primary/5 px-6 py-3">
+<h3 class="font-label text-xs font-extrabold text-primary uppercase tracking-widest">Symptom Summary</h3>
+</div>
+<div class="px-6 py-4">
+<table class="w-full text-sm">
+<tbody class="divide-y divide-stone-50">
+<tr class="h-10">
+<td class="text-stone-600 font-medium">Hot flashes</td>
+<td class="text-right font-bold text-stone-900">avg 3.1/day</td>
+<td class="text-right">
+<span class="flex items-center justify-end text-emerald-600 text-xs font-bold">
+<span class="material-symbols-outlined text-sm mr-1" data-icon="arrow_downward">arrow_downward</span> Improving
+                                </span>
+</td>
+</tr>
+<tr class="h-10">
+<td class="text-stone-600 font-medium">Sleep</td>
+<td class="text-right font-bold text-stone-900">2.8/5</td>
+<td class="text-right">
+<span class="flex items-center justify-end text-stone-400 text-xs font-bold">
+<span class="material-symbols-outlined text-sm mr-1" data-icon="horizontal_rule">horizontal_rule</span> Stable
+                                </span>
+</td>
+</tr>
+<tr class="h-10">
+<td class="text-stone-600 font-medium">Mood</td>
+<td class="text-right font-bold text-stone-900">2.4/5</td>
+<td class="text-right">
+<span class="flex items-center justify-end text-emerald-600 text-xs font-bold">
+<span class="material-symbols-outlined text-sm mr-1" data-icon="arrow_downward">arrow_downward</span> Improving
+                                </span>
+</td>
+</tr>
+<tr class="h-10">
+<td class="text-stone-600 font-medium">Brain fog</td>
+<td class="text-right font-bold text-stone-900">2.0/5</td>
+<td class="text-right">
+<span class="flex items-center justify-end text-stone-400 text-xs font-bold">
+<span class="material-symbols-outlined text-sm mr-1" data-icon="horizontal_rule">horizontal_rule</span> Stable
+                                </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- SECTION 3: TREND CHART (Visual Representation) -->
+<div class="px-6 py-6 bg-stone-50/50">
+<div class="relative h-32 w-full flex items-end justify-between">
+<!-- Before Zone -->
+<div class="absolute left-0 top-0 h-full w-[60%] bg-stone-200/30 rounded-l-lg flex items-start p-2">
+<span class="text-[9px] font-bold text-stone-400 uppercase">Before (50mcg)</span>
+</div>
+<!-- After Zone -->
+<div class="absolute right-0 top-0 h-full w-[40%] bg-primary/10 rounded-r-lg flex items-start p-2">
+<span class="text-[9px] font-bold text-primary uppercase">After (75mcg)</span>
+</div>
+<!-- Vertical Dose Change Line -->
+<div class="absolute left-[60%] top-0 h-full border-l border-dashed border-primary z-10 flex flex-col items-center">
+<div class="bg-primary text-white text-[8px] px-1.5 py-0.5 rounded-full whitespace-nowrap mt-4">Dose changed</div>
+</div>
+<!-- SVG Chart Path -->
+<svg class="w-full h-full absolute bottom-0 left-0" preserveaspectratio="none" viewbox="0 0 100 40">
+<path d="M0,10 Q10,12 20,8 T40,15 T60,5 L60,18 T80,30 T100,35" fill="none" stroke="#67594e" stroke-width="2" vector-effect="non-scaling-stroke"></path>
+<path d="M0,10 Q10,12 20,8 T40,15 T60,5 L60,18 T80,30 T100,35 L100,40 L0,40 Z" fill="url(#chartGradient)"></path>
+<defs>
+<lineargradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#67594e" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#67594e" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+</svg>
+<div class="absolute bottom-0 w-full flex justify-between px-1 mb-[-12px]">
+<span class="text-[8px] text-stone-400">30 days ago</span>
+<span class="text-[8px] text-stone-400">Today</span>
+</div>
+</div>
+</div>
+<!-- SECTION 4: HRT IMPACT -->
+<div class="p-6">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-headline font-bold text-stone-900 text-lg">HRT Impact</h3>
+<span class="bg-tertiary-fixed text-on-tertiary-fixed-variant px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-tight">
+                        -63% reduction
+                    </span>
+</div>
+<div class="space-y-3">
+<div class="flex items-center justify-between text-sm">
+<div>
+<p class="font-bold text-stone-700">Estradiol 50mcg</p>
+<p class="text-xs text-stone-400">42 days observed</p>
+</div>
+<p class="font-body text-stone-500">8.2 / day avg</p>
+</div>
+<div class="flex justify-center py-1">
+<span class="material-symbols-outlined text-stone-300" data-icon="keyboard_double_arrow_down">keyboard_double_arrow_down</span>
+</div>
+<div class="flex items-center justify-between text-sm bg-emerald-50/50 p-3 rounded-lg border border-emerald-100/30">
+<div>
+<p class="font-bold text-emerald-900">Estradiol 75mcg</p>
+<p class="text-xs text-emerald-600/70">18 days observed</p>
+</div>
+<div class="text-right">
+<p class="font-bold text-emerald-700">3.1 / day avg</p>
+<p class="text-[10px] font-bold text-emerald-500">-63% vs previous</p>
+</div>
+</div>
+</div>
+</div>
+<!-- SECTION 5: TRIGGERS -->
+<div class="px-6 py-4 bg-stone-900 text-white">
+<p class="text-[10px] font-bold uppercase tracking-[0.2em] mb-4 opacity-70">Observed Triggers</p>
+<div class="grid grid-cols-[1fr_auto] gap-y-3 text-sm">
+<span class="font-medium">Red wine</span>
+<span class="text-tertiary-fixed-dim font-bold">+4.2 HF next day</span>
+<span class="font-medium">Stress</span>
+<span class="text-tertiary-fixed-dim font-bold">Anxiety +2.1</span>
+<span class="font-medium">Exercise</span>
+<span class="text-emerald-400 font-bold">HF -1.4</span>
+</div>
+</div>
+<!-- Footnote -->
+<div class="p-6 bg-stone-50">
+<p class="text-[9px] leading-relaxed italic text-stone-400 text-center">
+                    "Self-reported data. Not a substitute for clinical assessment. This document was generated by MenoSync based on user-entered logs."
+                </p>
+</div>
+</div>
+<!-- Asymmetric Promotional / Information Card -->
+<div class="relative bg-secondary-container p-6 rounded-[2.5rem] overflow-hidden group">
+<div class="relative z-10">
+<h4 class="font-headline text-2xl font-bold text-on-secondary-container leading-tight mb-2">Sharing helps<br/>your specialist.</h4>
+<p class="text-on-secondary-container/70 text-sm leading-relaxed mb-4 max-w-[200px]">
+                    Accurate data helps your doctor fine-tune your dosage faster.
+                </p>
+<div class="inline-flex items-center gap-2 text-primary font-bold text-sm">
+<span>Learn how to talk to your GP</span>
+<span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</div>
+<!-- Decorative image element -->
+<div class="absolute -right-10 -bottom-10 w-40 h-40 bg-tertiary-fixed rounded-full blur-3xl opacity-50 group-hover:opacity-80 transition-opacity"></div>
+<img class="absolute -right-4 top-0 w-32 h-full object-cover opacity-20 mix-blend-multiply" data-alt="Abstract soft focused image of dried lavender and natural textures in warm earth tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtWuQrB8YOAq2tg-uK0weuqBEoQJnYaxe1CvAZblkc6_68Nnjjdd1apdKtBm3NED_ZX0FCEjlshB8q48U3-TN3if8ETTVA9FFaslI2w4UCzW74To5n2uMZt5rRsgv5bHVGkjmoVaA2lRqZOIDb3PZSByyMnQf1UtisZ4l0vyl7uKliIDKAvy2_HS_oK1Df77jdEHlfI1HIbsp9Z3Z52-xXDe5Zz3ctdAJ8tNjcXjQf8a2xMOzXnwyJ4FXNjDpu2_4periDkQoFqCU"/>
+</div>
+</main>
+<!-- BottomNavBar Replacement: Shared Sticky Action Bar -->
+<div class="fixed bottom-0 left-0 w-full z-50 bg-stone-50/70 dark:bg-stone-900/70 backdrop-blur-xl rounded-t-[2rem] shadow-[0_-4px_24px_rgba(29,27,26,0.06)] px-6 pt-5 pb-8">
+<button class="w-full bg-gradient-to-r from-primary to-primary-container text-white py-4 rounded-full font-bold text-base shadow-lg shadow-primary/20 active:scale-95 transition-transform mb-6">
+            Share with doctor
+        </button>
+<div class="flex justify-around items-center w-full">
+<div class="flex flex-col items-center gap-2 group cursor-pointer transition-all active:scale-90">
+<div class="w-12 h-12 rounded-2xl bg-stone-100 flex items-center justify-center group-hover:bg-stone-200">
+<span class="material-symbols-outlined text-stone-600" data-icon="mail">mail</span>
+</div>
+<span class="text-[10px] font-bold text-stone-500 uppercase tracking-widest">Mail</span>
+</div>
+<div class="flex flex-col items-center gap-2 group cursor-pointer transition-all active:scale-90">
+<div class="w-12 h-12 rounded-2xl bg-stone-100 flex items-center justify-center group-hover:bg-stone-200">
+<span class="material-symbols-outlined text-stone-600" data-icon="chat">chat</span>
+</div>
+<span class="text-[10px] font-bold text-stone-500 uppercase tracking-widest">Chat</span>
+</div>
+<div class="flex flex-col items-center gap-2 group cursor-pointer transition-all active:scale-90">
+<div class="w-12 h-12 rounded-2xl bg-stone-100 flex items-center justify-center group-hover:bg-stone-200">
+<span class="material-symbols-outlined text-stone-600" data-icon="share_reviews">share_reviews</span>
+</div>
+<span class="text-[10px] font-bold text-stone-500 uppercase tracking-widest">AirDrop</span>
+</div>
+</div>
+</div>
+</body></html>

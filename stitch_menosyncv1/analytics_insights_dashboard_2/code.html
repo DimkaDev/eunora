@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync Insights - Zen Garden Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;500;600&amp;family=Manrope:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "zen-cream": "#F7F5F0",
+              "zen-lavender": "#D8C9E0",
+              "zen-sage": "#E8F0E8",
+              "zen-green": "#7A8C7A",
+              "zen-taupe": "#9B8B7E",
+              "zen-peach": "#E8A89B",
+              "zen-charcoal": "#4D453F",
+              "background": "#F7F5F0",
+            },
+            fontFamily: {
+              "headline": ["Noto Serif", "serif"],
+              "body": ["Manrope", "sans-serif"],
+            },
+          },
+        },
+      }
+    </script>
+<style type="text/tailwindcss">
+      @layer utilities {
+        .glass-panel {
+          @apply bg-white/60 backdrop-blur-md border border-white/40;
+        }
+        .organic-shape {
+          border-radius: 40% 60% 60% 40% / 60% 30% 70% 40%;
+        }
+        .zen-shadow {
+          box-shadow: 0 10px 30px -10px rgba(155, 139, 126, 0.15);
+        }
+        .leaf-pattern {
+          background-image: radial-gradient(#7A8C7A 0.5px, transparent 0.5px);
+          background-size: 20px 20px;
+          opacity: 0.1;
+        }
+      }
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      }
+      .wave-path {
+        stroke-dasharray: 1000;
+        stroke-dashoffset: 0;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-zen-cream font-body text-zen-charcoal min-h-screen pb-32">
+<header class="sticky top-0 w-full z-50 bg-zen-cream/80 backdrop-blur-lg px-6 h-20 flex justify-between items-center">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-zen-taupe">spa</span>
+<h1 class="font-headline text-xl font-medium text-zen-charcoal">Your Insights</h1>
+</div>
+<div class="w-10 h-10 rounded-full bg-zen-lavender/30 flex items-center justify-center text-zen-taupe">
+<span class="material-symbols-outlined">person_2</span>
+</div>
+</header>
+<main class="px-6 space-y-8">
+<section class="pt-4">
+<h2 class="font-headline text-3xl leading-snug text-zen-taupe">A moment of <span class="italic text-zen-green">reflection</span>.</h2>
+<p class="text-zen-charcoal/70 mt-2 font-light leading-relaxed">Let's look at how your body has been finding its equilibrium lately.</p>
+</section>
+<div class="flex gap-3 overflow-x-auto pb-2 -mx-6 px-6 scrollbar-hide">
+<button class="px-5 py-2 rounded-full glass-panel text-xs font-medium tracking-wide border-zen-taupe/20">7 Days</button>
+<button class="px-5 py-2 rounded-full bg-zen-taupe text-white text-xs font-medium tracking-wide shadow-lg">30 Days</button>
+<button class="px-5 py-2 rounded-full glass-panel text-xs font-medium tracking-wide border-zen-taupe/20">Season</button>
+</div>
+<div class="glass-panel p-8 rounded-[2rem] zen-shadow relative overflow-hidden">
+<div class="absolute inset-0 leaf-pattern pointer-events-none"></div>
+<div class="relative z-10">
+<h3 class="font-headline text-lg mb-8 text-zen-charcoal/80 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-zen-lavender"></span>
+                Presence &amp; Frequency
+            </h3>
+<div class="flex flex-wrap items-center justify-center gap-6 min-h-[220px]">
+<div class="flex flex-col items-center">
+<div class="w-24 h-24 organic-shape bg-zen-peach/20 flex items-center justify-center text-zen-charcoal font-medium text-center p-2 text-sm leading-tight transition-transform hover:scale-105 duration-500">Hot<br/>Flashes</div>
+<span class="text-[10px] uppercase tracking-tighter text-zen-taupe mt-2">Daily</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-20 h-20 organic-shape bg-zen-lavender/40 flex items-center justify-center text-zen-charcoal font-medium text-center p-2 text-xs leading-tight">Sleep<br/>Issues</div>
+<span class="text-[10px] uppercase tracking-tighter text-zen-taupe mt-2">Often</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-16 h-16 organic-shape bg-zen-sage/60 flex items-center justify-center text-zen-charcoal font-medium text-center p-2 text-[10px] leading-tight">Mood</div>
+<span class="text-[10px] uppercase tracking-tighter text-zen-taupe mt-2">Sometimes</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-14 h-14 organic-shape border border-zen-taupe/20 flex items-center justify-center text-zen-charcoal/60 text-center p-2 text-[10px] leading-tight">Joints</div>
+<span class="text-[10px] uppercase tracking-tighter text-zen-taupe mt-2">Rarely</span>
+</div>
+</div>
+<p class="text-[11px] text-zen-taupe text-center mt-10 italic">"The size of the stones reflects how often you've felt these shifts."</p>
+</div>
+</div>
+<div class="glass-panel p-8 rounded-[2rem] zen-shadow">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h3 class="font-headline text-lg text-zen-charcoal/80">Severity Flow</h3>
+<p class="text-xs text-zen-green mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">filter_vintage</span>
+                    Settling into a gentler rhythm (21% improvement)
+                </p>
+</div>
+</div>
+<div class="relative h-40 w-full flex items-center justify-center overflow-hidden">
+<svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 400 150">
+<defs>
+<linearGradient id="waveGradient" x1="0%" x2="100%" y1="0%" y2="0%">
+<stop offset="0%" stop-color="#E8A89B" stop-opacity="0.2"></stop>
+<stop offset="50%" stop-color="#D8C9E0" stop-opacity="0.4"></stop>
+<stop offset="100%" stop-color="#7A8C7A" stop-opacity="0.2"></stop>
+</linearGradient>
+</defs>
+<path d="M0,100 C100,50 200,150 300,80 L400,120 L400,150 L0,150 Z" fill="url(#waveGradient)"></path>
+<path class="wave-path" d="M0,100 C100,50 200,150 300,80 L400,120" fill="none" stroke="#9B8B7E" stroke-linecap="round" stroke-width="2"></path>
+<circle cx="100" cy="50" fill="#E8A89B" opacity="0.6" r="4"></circle>
+<circle cx="200" cy="150" fill="#D8C9E0" opacity="0.6" r="3"></circle>
+<circle cx="300" cy="80" fill="#7A8C7A" opacity="0.6" r="5"></circle>
+<circle cx="390" cy="115" fill="#7A8C7A" r="4"></circle>
+</svg>
+<div class="absolute bottom-0 left-0 right-0 flex justify-between text-[10px] text-zen-taupe/60 px-2 pb-2">
+<span>Last 14 Days</span>
+<span>Today</span>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t border-zen-taupe/10 space-y-4">
+<div class="flex items-center justify-between text-sm">
+<span class="text-zen-charcoal/60 font-light italic">Average Intensity</span>
+<span class="text-zen-charcoal font-medium">4.1 / 10</span>
+</div>
+</div>
+</div>
+<div class="glass-panel p-8 rounded-[2rem] zen-shadow">
+<h3 class="font-headline text-lg mb-6 text-zen-charcoal/80">Life's Harmony</h3>
+<div class="space-y-6">
+<div class="flex items-start gap-4">
+<div class="mt-1 w-8 h-8 rounded-full bg-zen-lavender/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-zen-charcoal/60 text-lg">water_drop</span>
+</div>
+<div>
+<h4 class="text-sm font-medium text-zen-charcoal">Deep Rest</h4>
+<p class="text-xs text-zen-taupe leading-relaxed mt-0.5">When your sleep exceeds 7 hours, we notice your heat surges soften by 15%.</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="mt-1 w-8 h-8 rounded-full bg-zen-peach/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-zen-charcoal/60 text-lg">energy_savings_leaf</span>
+</div>
+<div>
+<h4 class="text-sm font-medium text-zen-charcoal">Gentle Motion</h4>
+<p class="text-xs text-zen-taupe leading-relaxed mt-0.5">Morning movement helps stabilize your evening moods. A beautiful cycle.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-zen-sage p-10 rounded-[2.5rem] relative overflow-hidden">
+<div class="absolute -top-10 -right-10 w-40 h-40 organic-shape bg-white/20"></div>
+<div class="relative z-10">
+<span class="material-symbols-outlined text-zen-green mb-4 block scale-125">nature_people</span>
+<h3 class="font-headline text-2xl text-zen-charcoal mb-4">Nurture yourself...</h3>
+<div class="space-y-6 font-light leading-relaxed text-zen-charcoal/80">
+<p>Based on your rhythm, try a <span class="text-zen-green font-medium">cooling evening tea</span> today. It aligns with your body's trend toward nighttime restlessness.</p>
+<p>Consider a <span class="text-zen-green font-medium">10-minute quiet stretch</span> before dusk. It has shown to prolong your deep rest cycles by 20%.</p>
+</div>
+<div class="mt-10 flex flex-col gap-4">
+<button class="text-sm font-semibold text-zen-green flex items-center gap-2 group">
+                    Explore more rituals
+                    <span class="material-symbols-outlined text-sm transition-transform group-hover:translate-x-1">east</span>
+</button>
+</div>
+</div>
+</div>
+<div class="text-center py-10 px-4">
+<p class="text-xs text-zen-taupe mb-6 font-light italic">"Growth is a slow, beautiful process. Share your journey with your care provider."</p>
+<button class="inline-flex items-center gap-3 px-10 py-4 bg-white border border-zen-taupe/20 rounded-full text-zen-taupe font-medium text-sm transition-all hover:bg-zen-cream active:scale-95 shadow-sm">
+<span class="material-symbols-outlined text-lg">content_paste_go</span>
+            Prepare Summary
+        </button>
+</div>
+</main>
+<nav class="fixed bottom-0 left-0 w-full px-6 pb-8 pt-4 bg-zen-cream/90 backdrop-blur-xl z-50">
+<div class="max-w-md mx-auto bg-white rounded-full h-16 zen-shadow flex items-center justify-around px-4 border border-zen-taupe/5">
+<div class="flex flex-col items-center justify-center text-zen-taupe opacity-40">
+<span class="material-symbols-outlined text-xl">self_improvement</span>
+<span class="text-[9px] uppercase tracking-widest mt-0.5">Journal</span>
+</div>
+<div class="flex flex-col items-center justify-center text-zen-green relative">
+<span class="material-symbols-outlined text-2xl">lens_blur</span>
+<span class="text-[9px] uppercase tracking-widest mt-0.5 font-bold">Insights</span>
+<div class="absolute -bottom-1 w-1 h-1 rounded-full bg-zen-green"></div>
+</div>
+<div class="flex flex-col items-center justify-center text-zen-taupe opacity-40">
+<span class="material-symbols-outlined text-xl">auto_stories</span>
+<span class="text-[9px] uppercase tracking-widest mt-0.5">Library</span>
+</div>
+<div class="flex flex-col items-center justify-center text-zen-taupe opacity-40">
+<span class="material-symbols-outlined text-xl">person</span>
+<span class="text-[9px] uppercase tracking-widest mt-0.5">Profile</span>
+</div>
+</div>
+</nav>
+
+</body></html>

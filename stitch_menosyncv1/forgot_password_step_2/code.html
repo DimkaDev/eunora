@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Reset Your Password | MenoSync</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#d0c4bc",
+                        "on-primary-fixed-variant": "#51443a",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed": "#341009",
+                        "tertiary": "#814f45",
+                        "primary": "#67594e",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "surface-container-highest": "#e7e1df",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#f2edea",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-container": "#9d675c",
+                        "on-tertiary-container": "#fffbff",
+                        "surface-container-high": "#ede7e5",
+                        "on-background": "#1d1b1a",
+                        "tertiary-fixed": "#ffdad3",
+                        "secondary": "#655a6e",
+                        "primary-container": "#817266",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "secondary-fixed": "#edddf5",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed": "#231a11",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "inverse-on-surface": "#f5f0ed",
+                        "on-secondary-fixed": "#211828",
+                        "on-error": "#ffffff",
+                        "surface-dim": "#ded9d7",
+                        "surface-bright": "#fef8f6",
+                        "on-surface": "#1d1b1a",
+                        "on-surface-variant": "#4d453f",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "surface-variant": "#e7e1df",
+                        "on-primary-container": "#fffbff",
+                        "outline": "#7f756e",
+                        "inverse-primary": "#d6c3b5",
+                        "surface-tint": "#6a5c50",
+                        "on-secondary-container": "#6c6074",
+                        "on-error-container": "#93000a",
+                        "background": "#fef8f6",
+                        "inverse-surface": "#32302f",
+                        "surface-container-low": "#f8f2f0",
+                        "surface": "#fef8f6",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "primary-fixed": "#f2dfd0",
+                        "secondary-container": "#edddf5",
+                        "error": "#ba1a1a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Manrope', sans-serif; }
+        h1, h2, h3 { font-family: 'Noto Serif', serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col">
+<!-- Top Navigation Anchor -->
+<header class="sticky top-0 w-full z-50 bg-[#fef8f6]/70 backdrop-blur-md">
+<div class="flex items-center px-6 py-4 w-full">
+<div class="flex-1">
+<button class="text-[#67594e] hover:opacity-80 transition-opacity active:scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+</div>
+<div class="flex justify-center flex-1">
+<h1 class="font-serif text-[18px] font-medium tracking-tight text-[#67594e]">Reset Your Password</h1>
+</div>
+<div class="flex-1"></div>
+</div>
+</header>
+<main class="flex-1 flex items-center justify-center px-5 py-12 relative overflow-hidden">
+<!-- Abstract Background Glow for Depth -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] opacity-20 pointer-events-none">
+<div class="absolute top-0 right-0 w-96 h-96 bg-secondary-fixed rounded-full blur-[120px]"></div>
+<div class="absolute bottom-0 left-0 w-96 h-96 bg-tertiary-fixed rounded-full blur-[120px]"></div>
+</div>
+<!-- Central Action Card -->
+<div class="w-full max-w-md bg-surface-container-lowest rounded-[1.5rem] p-8 shadow-[0_4px_24px_rgba(29,27,26,0.04)] relative z-10">
+<div class="mb-8 text-center">
+<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-surface-container-low mb-4 text-primary">
+<span class="material-symbols-outlined text-3xl" data-icon="lock_reset">lock_reset</span>
+</div>
+<p class="text-on-surface-variant font-body text-sm leading-relaxed">
+                    Enter your new secure password below to regain access to your sanctuary.
+                </p>
+</div>
+<form class="space-y-6">
+<!-- New Password Field -->
+<div class="space-y-2">
+<label class="block text-[13px] font-bold text-on-surface ml-1">New Password</label>
+<div class="relative group">
+<input class="w-full bg-surface-container-highest border-none rounded-full px-5 py-4 text-on-surface placeholder-on-surface-variant/40 focus:ring-2 focus:ring-primary/20 transition-all outline-none" placeholder="••••••••" type="password"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/60 hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+</button>
+</div>
+</div>
+<!-- Requirements Checklist -->
+<div class="bg-surface-container-low/50 rounded-xl p-4 space-y-3">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-[12px] font-medium text-on-surface-variant">At least 8 characters</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-sm text-outline-variant" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+<span class="text-[12px] font-medium text-on-surface-variant">One uppercase letter</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-sm text-outline-variant" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+<span class="text-[12px] font-medium text-on-surface-variant">One number (0-9)</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-sm text-outline-variant" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+<span class="text-[12px] font-medium text-on-surface-variant">One special character (!@#$)</span>
+</div>
+</div>
+<!-- Confirm Password Field -->
+<div class="space-y-2">
+<label class="block text-[13px] font-bold text-on-surface ml-1">Confirm Password</label>
+<input class="w-full bg-surface-container-highest border-none rounded-full px-5 py-4 text-on-surface placeholder-on-surface-variant/40 focus:ring-2 focus:ring-primary/20 transition-all outline-none" placeholder="••••••••" type="password"/>
+<p class="text-[12px] text-primary italic font-medium ml-1">Passwords must match</p>
+</div>
+<!-- Primary Action -->
+<div class="pt-2">
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary font-body font-semibold py-4 rounded-full text-sm tracking-wide shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2" type="submit">
+                        Reset Password
+                        <span class="material-symbols-outlined text-lg" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</form>
+<!-- Secondary Action -->
+<div class="mt-8 text-center">
+<button class="text-[13px] font-bold text-primary hover:opacity-80 transition-opacity">
+                    Return to Login
+                </button>
+</div>
+</div>
+<!-- Decorative Illustration -->
+<div class="hidden lg:block absolute right-20 top-1/2 -translate-y-1/2 w-64 h-64 opacity-60">
+<div class="relative w-full h-full">
+<div class="absolute inset-0 bg-surface-container-low rounded-3xl rotate-12"></div>
+<div class="absolute inset-4 bg-white/40 backdrop-blur-sm rounded-3xl -rotate-6 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Soft focused image of delicate white petals against a warm cream background, representing serenity and new beginnings" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTp86yVr2WcKN2VSUdgDufBZBelf-s__cf9sejCi3pdoLCtetMMtapFlmwnbe4gx-lXeHfnHWvB_-lcskuN2mNfw3e3H-pUl0tJj7U8vNt69S6ZUqrcgZHbYftkULU1RMTLHHE6lGJve2S18_CGUoRKcUhhK3ZAJUhU3PD4COtYoOgnpDC4Z7xpYl784NowRdXTUYa5T3AqHL5-FD84T6yF43hbbp2efvlHtDxMtIfY7-rrvyx-uzVjQt5A_DvbNrtBFxnIlMA3GQ"/>
+</div>
+</div>
+</div>
+</main>
+<!-- Navigation Shell Filter Applied: Suppression of BottomNavBar as this is a focused transactional task -->
+</body></html>

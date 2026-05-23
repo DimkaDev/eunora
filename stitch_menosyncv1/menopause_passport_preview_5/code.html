@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Doctor's Executive Summary - MenoSync</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#67594e",
+                        "secondary": "#655a6e",
+                        "accent": "#E8A89B",
+                        "teal-custom": "#4a9d9c",
+                        "surface": "#fef8f6",
+                        "surface-container": "#f2edea",
+                        "on-surface": "#1d1b1a"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif", "serif"],
+                        "body": ["Manrope", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body { @apply bg-surface text-on-surface font-body; }
+            .serif { font-family: 'Noto Serif', serif; }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .pdf-preview {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col items-center min-h-screen pb-48">
+<header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl flex justify-between items-center px-5 h-16 shadow-sm border-b border-stone-100">
+<div class="flex items-center gap-3">
+<button class="text-stone-800 p-1">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline font-bold text-stone-900 text-[22px]">Your Passport</h1>
+</div>
+<button class="flex items-center gap-1.5 text-stone-700 bg-stone-100 px-3 py-1.5 rounded-full">
+<span class="material-symbols-outlined text-xl" data-icon="share">share</span>
+<span class="text-sm font-bold">Share</span>
+</button>
+</header>
+<main class="w-full max-w-[375px] mt-20 px-4 flex flex-col gap-4">
+<div class="pdf-preview bg-white w-full rounded-xl overflow-hidden flex flex-col border border-stone-200">
+<div class="bg-[#D8C9E0] px-6 py-3">
+<p class="text-[10px] uppercase tracking-[0.15em] font-extrabold text-secondary">
+                Doctor's Executive Summary · 12 Mar 2025
+            </p>
+</div>
+<div class="px-6 py-4 border-b border-stone-100 flex justify-between items-center bg-stone-50/50">
+<div>
+<h2 class="font-headline text-xl font-bold text-stone-900 leading-none">Claire H., 52</h2>
+<p class="text-[11px] font-bold text-stone-500 uppercase mt-1">Post-Menopause • Tracking since 6 Feb</p>
+</div>
+<div class="text-right">
+<span class="inline-block bg-primary text-white text-[10px] px-2 py-1 rounded font-bold">75mcg Dose</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3 px-4 pt-4">
+<div class="bg-[#fdf2f0] p-4 rounded-xl border border-red-100/50 flex flex-col justify-between">
+<p class="text-[9px] font-extrabold text-accent uppercase tracking-wider mb-2">HRT Impact</p>
+<div class="flex flex-col">
+<span class="text-3xl font-extrabold text-stone-900 tracking-tighter">-63%</span>
+<span class="text-[10px] font-bold text-stone-600 leading-tight">Hot Flash Reduction</span>
+</div>
+</div>
+<div class="bg-[#eff8f8] p-4 rounded-xl border border-teal-100/50 flex flex-col justify-between">
+<p class="text-[9px] font-extrabold text-teal-custom uppercase tracking-wider mb-2">Current Load</p>
+<div class="flex flex-col">
+<span class="text-3xl font-extrabold text-stone-900 tracking-tighter">3.1<span class="text-sm">/day</span></span>
+<span class="text-[10px] font-bold text-stone-600 leading-tight">Avg. Daily Intensity</span>
+</div>
+</div>
+</div>
+<div class="px-4 py-6">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-bold text-stone-900 text-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-lg text-primary">analytics</span>
+                    Symptom Trend: 30-Day View
+                </h3>
+</div>
+<div class="relative h-44 w-full bg-stone-50 rounded-xl p-4 overflow-hidden border border-stone-100">
+<div class="absolute inset-0 flex">
+<div class="w-[60%] h-full flex items-start justify-center pt-2 border-r border-dashed border-primary/40 bg-stone-200/10">
+<span class="text-[8px] font-extrabold text-stone-400 uppercase tracking-widest">50mcg Phase</span>
+</div>
+<div class="w-[40%] h-full flex items-start justify-center pt-2 bg-primary/5">
+<span class="text-[8px] font-extrabold text-primary uppercase tracking-widest">75mcg Phase</span>
+</div>
+</div>
+<svg class="absolute inset-0 w-full h-full p-4 overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
+<path d="M0,15 Q15,10 30,35 T60,5 T70,45 T100,55" fill="none" stroke="#67594e" stroke-width="2.5" vector-effect="non-scaling-stroke"></path>
+<circle cx="60" cy="5" fill="#67594e" r="3"></circle>
+</svg>
+<div class="absolute left-[60%] top-1/2 -translate-x-1/2 -translate-y-1/2 rotate-90 whitespace-nowrap">
+<span class="text-[8px] font-bold text-primary uppercase bg-white px-2 border border-primary/20 rounded-full">Dose Changed (28 Feb)</span>
+</div>
+<div class="absolute bottom-2 left-4 right-4 flex justify-between">
+<span class="text-[8px] font-bold text-stone-400 uppercase">Feb 6</span>
+<span class="text-[8px] font-bold text-stone-400 uppercase">Today</span>
+</div>
+</div>
+</div>
+<div class="px-6 pb-6">
+<h3 class="text-[10px] font-extrabold text-stone-400 uppercase tracking-widest mb-3">Metric Details</h3>
+<div class="space-y-2">
+<div class="flex items-center justify-between p-3 bg-stone-50 rounded-lg">
+<span class="text-sm font-bold text-stone-700">Hot Flashes</span>
+<div class="flex items-center gap-3">
+<span class="text-sm font-bold">3.1 / day</span>
+<span class="flex items-center text-emerald-600 text-[10px] font-black bg-emerald-50 px-2 py-0.5 rounded">
+<span class="material-symbols-outlined text-xs mr-0.5">arrow_downward</span> IMPROVING
+                        </span>
+</div>
+</div>
+<div class="flex items-center justify-between p-3 bg-stone-50 rounded-lg">
+<span class="text-sm font-bold text-stone-700">Sleep Quality</span>
+<div class="flex items-center gap-3">
+<span class="text-sm font-bold">2.8 / 5</span>
+<span class="text-stone-400 text-[10px] font-black bg-stone-100 px-2 py-0.5 rounded uppercase">Stable</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-3 bg-stone-50 rounded-lg">
+<span class="text-sm font-bold text-stone-700">Mood Stability</span>
+<div class="flex items-center gap-3">
+<span class="text-sm font-bold">2.4 / 5</span>
+<span class="flex items-center text-emerald-600 text-[10px] font-black bg-emerald-50 px-2 py-0.5 rounded">
+<span class="material-symbols-outlined text-xs mr-0.5">arrow_downward</span> IMPROVING
+                        </span>
+</div>
+</div>
+</div>
+</div>
+<div class="mx-4 mb-6 p-5 bg-stone-900 rounded-2xl text-white">
+<h3 class="text-[10px] font-black uppercase tracking-widest mb-4 opacity-50">High-Impact Factors</h3>
+<div class="grid grid-cols-1 gap-3">
+<div class="flex justify-between items-center border-b border-white/10 pb-2">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 bg-accent rounded-full"></span>
+<span class="text-sm font-medium">Red Wine</span>
+</div>
+<span class="text-sm font-bold text-accent">+4.2 HF next day</span>
+</div>
+<div class="flex justify-between items-center border-b border-white/10 pb-2">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 bg-accent rounded-full"></span>
+<span class="text-sm font-medium">Stress</span>
+</div>
+<span class="text-sm font-bold text-accent">Anxiety +2.1</span>
+</div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 bg-teal-custom rounded-full"></span>
+<span class="text-sm font-medium">Exercise</span>
+</div>
+<span class="text-sm font-bold text-teal-custom">HF -1.4 improvement</span>
+</div>
+</div>
+</div>
+<div class="p-6 bg-stone-50/80 border-t border-stone-100">
+<p class="text-[10px] leading-relaxed text-stone-400 text-center font-medium">
+                "Patient-reported data. Not a substitute for clinical assessment. This passport is designed for professional review to assist in clinical decision-making."
+            </p>
+</div>
+</div>
+<div class="bg-primary/5 p-5 rounded-2xl border-l-4 border-primary mt-2">
+<p class="text-[10px] uppercase font-black text-primary mb-2">Regimen Under Evaluation</p>
+<p class="text-sm font-bold text-stone-800 leading-relaxed">
+            Estradiol 75mcg Patch (twice weekly) <br/>+ Utrogestan 100mg (daily)
+        </p>
+</div>
+</main>
+<div class="fixed bottom-0 left-0 w-full z-50 bg-white/90 backdrop-blur-2xl rounded-t-[2.5rem] shadow-[0_-8px_30px_rgba(0,0,0,0.08)] px-6 pt-5 pb-10 flex flex-col gap-6">
+<button class="w-full bg-stone-900 text-white py-4.5 rounded-full font-bold text-base shadow-xl active:scale-95 transition-transform flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg">medical_services</span>
+        Share with doctor
+    </button>
+<div class="flex justify-between items-center px-4">
+<div class="flex flex-col items-center gap-1.5">
+<div class="w-11 h-11 rounded-full bg-stone-100 flex items-center justify-center">
+<span class="material-symbols-outlined text-stone-600" data-icon="mail">mail</span>
+</div>
+<span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Mail</span>
+</div>
+<div class="flex flex-col items-center gap-1.5">
+<div class="w-11 h-11 rounded-full bg-stone-100 flex items-center justify-center">
+<span class="material-symbols-outlined text-stone-600" data-icon="chat">chat</span>
+</div>
+<span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Chat</span>
+</div>
+<div class="flex flex-col items-center gap-1.5">
+<div class="w-11 h-11 rounded-full bg-stone-100 flex items-center justify-center">
+<span class="material-symbols-outlined text-stone-600" data-icon="share_reviews">share_reviews</span>
+</div>
+<span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">AirDrop</span>
+</div>
+</div>
+</div>
+
+</body></html>

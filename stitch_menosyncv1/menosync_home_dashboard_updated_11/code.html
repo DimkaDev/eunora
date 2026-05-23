@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;0,900;1,400&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#67594e",
+                        "surface": "#fef8f6",
+                        "peachy-rose": "#E8A89B",
+                        "soft-lavender": "#D8C9E0",
+                        "warm-taupe": "#817266",
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif", "serif"],
+                        "body": ["Manrope", "sans-serif"],
+                    },
+                    boxShadow: {
+                        'pillowy': 'inset 0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(255,255,255,0.8)',
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer components {
+            .pillowy-card {
+                @apply bg-surface-container-lowest rounded-[2.5rem] p-6 mb-4 shadow-pillowy border border-white/50;
+                background: linear-gradient(145deg, #ffffff, #f9f4f2);
+            }
+            .tactile-toggle-on {
+                @apply w-16 h-8 bg-primary rounded-full relative shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)];
+            }
+            .tactile-toggle-off {
+                @apply w-16 h-8 bg-stone-200 rounded-full relative shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)];
+            }
+            .toggle-knob {
+                @apply absolute top-1 w-6 h-6 bg-white rounded-full shadow-[0_2px_4px_rgba(0,0,0,0.2),inset_0_-1px_1px_rgba(0,0,0,0.1)];
+            }
+            .dosage-bar-bg {
+                @apply w-4 h-16 bg-stone-100 rounded-full overflow-hidden shadow-inner flex flex-col justify-end;
+            }
+            .dosage-bar-fill {
+                @apply w-full rounded-full bg-gradient-to-t from-[#E8A89B] to-[#F2C9C2];
+            }
+            .tag-card {
+                @apply flex flex-col items-start p-4 bg-white rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border-b-4 border-r-2 border-stone-200 active:translate-y-0.5 active:shadow-sm transition-all;
+            }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #fef8f6;
+            color: #1d1b1a;
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen pb-32">
+<header class="w-full top-0 sticky z-50 bg-stone-100/10 backdrop-blur-md flex justify-between items-center px-6 py-4">
+<div class="flex flex-col">
+<h1 class="font-headline font-bold text-2xl tracking-tight text-primary">Good morning, Sarah</h1>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="text-xs font-medium text-stone-500 font-body uppercase tracking-widest">Wednesday, March 19</span>
+<span class="w-1 h-1 rounded-full bg-stone-300"></span>
+<span class="text-[12px] text-stone-400 font-body lowercase italic">1 week in cycle</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-primary hover:opacity-80 transition-opacity active:scale-95 transition-transform">notifications</button>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-stone-200">
+<img alt="Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcyvRmigFQWEnghTEoPCUvu6Lls83qWwGf81JXXAHmxs_PI1albuWzfyX8hJHYDK2oDWVWOWPMCqACZzrOSiUrEriDUDMizBdlzmoikkKEMsviNymTb1SmeDL2M5mjpE7ZBB0lVSTa1Di99-xd5i_L5XTTvhH9uNbS-BEM4dPF7EevWWNXW_jzlWxSVjPjBZ3OPwiDpUtKeUmcOYd5ry2dtceFPJ-WL6Bp-ZEtlShywIcbEgix84xxFqoBGr1QXN6ehV00Hjb-W4c"/>
+</div>
+</div>
+</header>
+<main class="px-5 mt-4 space-y-4">
+<section class="relative overflow-hidden rounded-[2.5rem] p-8 bg-gradient-to-br from-[#F5E6F1] via-[#E8C9E0] to-[#D8C9E0] shadow-[0_12px_32px_rgba(216,201,224,0.3)] border border-white/40">
+<div class="relative z-10 flex flex-col items-center text-center space-y-6">
+<div>
+<h2 class="font-headline font-bold text-2xl text-primary mb-2">How are you feeling?</h2>
+<p class="text-sm text-stone-700 font-body opacity-80">Track your symptoms in just a few taps</p>
+</div>
+<button class="w-24 h-24 bg-white/60 backdrop-blur-md rounded-full flex items-center justify-center shadow-xl border border-white active:scale-90 transition-transform group">
+<span class="material-symbols-outlined text-[56px] text-peachy-rose" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+</button>
+<button class="w-full bg-primary text-white font-bold py-4 rounded-3xl tracking-wide shadow-lg shadow-primary/20 hover:opacity-95 transition-all">
+                    Start Daily Logging
+                </button>
+</div>
+<div class="absolute -bottom-10 -right-10 w-40 h-40 bg-white/20 rounded-full blur-3xl"></div>
+</section>
+<section class="pillowy-card">
+<div class="flex justify-between items-center mb-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-2xl bg-primary/5 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-xl">medication</span>
+</div>
+<h3 class="font-body font-bold text-base text-primary">Hormone Therapy</h3>
+</div>
+<button class="text-xs font-bold text-primary px-3 py-1 bg-stone-100 rounded-full">Manage</button>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-4 bg-white/50 rounded-3xl border border-white/60">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-soft-lavender/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-warm-taupe">layers</span>
+</div>
+<div>
+<p class="text-sm font-bold text-stone-800">Estradiol Patch</p>
+<p class="text-[10px] text-stone-400 font-medium uppercase tracking-tight">Today • Applied</p>
+</div>
+</div>
+<div class="tactile-toggle-on cursor-pointer">
+<div class="toggle-knob right-1"></div>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 bg-white/50 rounded-3xl border border-white/60">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-peachy-rose/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-peachy-rose">pill</span>
+</div>
+<div>
+<p class="text-sm font-bold text-stone-800">Progesterone</p>
+<p class="text-[10px] text-stone-400 font-medium uppercase tracking-tight">100mg • Bedtime</p>
+</div>
+</div>
+<div class="tactile-toggle-off cursor-pointer">
+<div class="toggle-knob left-1"></div>
+</div>
+</div>
+</div>
+</section>
+<section class="pillowy-card">
+<div class="flex justify-between items-center mb-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-2xl bg-peachy-rose/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-peachy-rose text-xl">vital_signs</span>
+</div>
+<h3 class="font-body font-bold text-base text-primary">Logged Symptoms</h3>
+</div>
+<button class="material-symbols-outlined text-stone-400 hover:text-primary transition-colors">edit_square</button>
+</div>
+<div class="flex gap-6 overflow-x-auto no-scrollbar pb-2">
+<div class="flex flex-col items-center gap-2 flex-shrink-0">
+<div class="dosage-bar-bg">
+<div class="dosage-bar-fill h-[85%] shadow-[inset_0_2px_4px_rgba(255,255,255,0.4)]"></div>
+</div>
+<span class="text-[11px] font-bold text-stone-700">Hot Flashes</span>
+<span class="text-[9px] text-peachy-rose font-black uppercase">High</span>
+</div>
+<div class="flex flex-col items-center gap-2 flex-shrink-0">
+<div class="dosage-bar-bg">
+<div class="dosage-bar-fill h-[40%]"></div>
+</div>
+<span class="text-[11px] font-bold text-stone-700">Sleep</span>
+<span class="text-[9px] text-stone-400 font-black uppercase">Mild</span>
+</div>
+<div class="flex flex-col items-center gap-2 flex-shrink-0">
+<div class="dosage-bar-bg">
+<div class="dosage-bar-fill h-[65%]"></div>
+</div>
+<span class="text-[11px] font-bold text-stone-700">Mood</span>
+<span class="text-[9px] text-warm-taupe font-black uppercase">Mod</span>
+</div>
+<button class="flex flex-col items-center gap-2 flex-shrink-0">
+<div class="w-12 h-16 rounded-full border-2 border-dashed border-stone-200 flex items-center justify-center hover:border-peachy-rose/40 hover:bg-peachy-rose/5">
+<span class="material-symbols-outlined text-stone-300">add</span>
+</div>
+<span class="text-[11px] font-bold text-stone-400">Add</span>
+</button>
+</div>
+</section>
+<section class="pillowy-card">
+<div class="flex justify-between items-center mb-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-2xl bg-warm-taupe/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-warm-taupe text-xl">bolt</span>
+</div>
+<h3 class="font-body font-bold text-base text-primary">Daily Triggers</h3>
+</div>
+<span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">3 Logged</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="tag-card bg-orange-50/30">
+<span class="material-symbols-outlined text-peachy-rose mb-2">psychology</span>
+<p class="text-xs font-bold text-stone-800">Stress</p>
+<p class="text-[10px] text-stone-500">Moderate</p>
+<button class="absolute top-2 right-2 text-stone-300 hover:text-red-400 transition-colors">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+<div class="tag-card">
+<span class="material-symbols-outlined text-warm-taupe mb-2">coffee</span>
+<p class="text-xs font-bold text-stone-800">Caffeine</p>
+<p class="text-[10px] text-stone-500">2 Cups</p>
+<button class="absolute top-2 right-2 text-stone-300">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+<div class="tag-card">
+<span class="material-symbols-outlined text-warm-taupe mb-2">wine_bar</span>
+<p class="text-xs font-bold text-stone-800">Alcohol</p>
+<p class="text-[10px] text-stone-500">1 Glass</p>
+<button class="absolute top-2 right-2 text-stone-300">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+<button class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-stone-200 rounded-2xl hover:bg-stone-50 transition-colors gap-1">
+<span class="material-symbols-outlined text-stone-300 text-lg">add_circle</span>
+<p class="text-[10px] font-bold text-stone-400">Add New</p>
+</button>
+</div>
+</section>
+<section class="pillowy-card bg-gradient-to-br from-[#E8F0E8] to-[#F1F7F1]">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-2xl bg-white/60 flex items-center justify-center shadow-sm">
+<span class="text-lg">✨</span>
+</div>
+<h3 class="font-body font-bold text-sm text-[#2d402d]">Smart Insight</h3>
+</div>
+<p class="text-sm text-[#4a5e4a] leading-relaxed mb-4">
+                You've logged <span class="font-bold">better sleep</span> on days with low caffeine. Keep it up!
+            </p>
+<a class="inline-flex items-center gap-2 text-xs font-bold text-primary hover:gap-3 transition-all" href="#">
+                Deep Dive Report <span class="material-symbols-outlined text-xs">arrow_forward</span>
+</a>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-3 bg-white/80 backdrop-blur-xl border-t border-stone-200/50 rounded-t-[2.5rem] shadow-[0_-8px_32px_rgba(0,0,0,0.05)]">
+<a class="flex flex-col items-center justify-center text-primary" href="#">
+<div class="w-12 h-8 bg-primary/10 rounded-full flex items-center justify-center mb-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+</div>
+<span class="font-body font-bold text-[10px] uppercase tracking-widest">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined mb-1">calendar_today</span>
+<span class="font-body font-bold text-[10px] uppercase tracking-widest">Tracker</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined mb-1">bar_chart</span>
+<span class="font-body font-bold text-[10px] uppercase tracking-widest">Trends</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined mb-1">medical_services</span>
+<span class="font-body font-bold text-[10px] uppercase tracking-widest">Health</span>
+</a>
+</nav>
+
+</body></html>

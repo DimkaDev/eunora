@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Medication Setup | MenoSync</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-high": "#ede7e5",
+                    "secondary-fixed-dim": "#d0c1d8",
+                    "on-secondary-container": "#6c6074",
+                    "on-primary-fixed-variant": "#51443a",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-container": "#fffbff",
+                    "surface-bright": "#fef8f6",
+                    "primary-fixed": "#f2dfd0",
+                    "inverse-on-surface": "#f5f0ed",
+                    "inverse-primary": "#d6c3b5",
+                    "inverse-surface": "#32302f",
+                    "outline-variant": "#d0c4bc",
+                    "secondary-container": "#edddf5",
+                    "primary": "#67594e",
+                    "on-primary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "secondary": "#655a6e",
+                    "primary-container": "#817266",
+                    "on-surface": "#1d1b1a",
+                    "surface-variant": "#e7e1df",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed": "#edddf5",
+                    "error": "#ba1a1a",
+                    "tertiary": "#814f45",
+                    "on-surface-variant": "#4d453f",
+                    "on-tertiary-container": "#fffbff",
+                    "primary-fixed-dim": "#d6c3b5",
+                    "on-background": "#1d1b1a",
+                    "surface-dim": "#ded9d7",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-tint": "#6a5c50",
+                    "on-tertiary-fixed-variant": "#683a31",
+                    "outline": "#7f756e",
+                    "surface-container": "#f2edea",
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed": "#211828",
+                    "surface-container-low": "#f8f2f0",
+                    "surface-container-highest": "#e7e1df",
+                    "on-tertiary-fixed": "#341009",
+                    "on-secondary-fixed-variant": "#4d4355",
+                    "on-secondary": "#ffffff",
+                    "background": "#fef8f6",
+                    "tertiary-fixed": "#ffdad3",
+                    "surface": "#fef8f6",
+                    "tertiary-container": "#9d675c",
+                    "on-primary-fixed": "#231a11",
+                    "tertiary-fixed-dim": "#f9b7a9"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "2xl": "1rem",
+                    "3xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif"],
+                    "body": ["Manrope"],
+                    "label": ["Manrope"]
+            }
+          },
+        },
+      }
+    </script>
+<style type="text/tailwindcss">
+    body { font-family: 'Manrope', sans-serif; }
+    h1, h2, .font-serif { font-family: 'Noto Serif', serif; }
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #d0c4bc; border-radius: 10px; }.step-view { display: none; }
+    .step-view.active { display: block; }
+</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#F7F5F0] text-on-surface min-h-screen flex flex-col">
+<header class="fixed top-0 w-full z-40 bg-[#F7F5F0]/80 backdrop-blur-md">
+<div class="flex items-center justify-between px-6 py-4 w-full max-w-md mx-auto">
+<button class="hover:bg-stone-200/50 transition-colors rounded-full p-2 flex items-center justify-center active:scale-95 duration-150 ease-in-out">
+<span class="material-symbols-outlined text-stone-700">arrow_back</span>
+</button>
+<h1 class="font-serif italic text-xl text-stone-800">Your Medications</h1>
+<div class="w-10"></div>
+</div>
+</header>
+<main class="flex-grow pt-24 pb-32 px-5 max-w-md mx-auto w-full">
+<div class="mb-8 space-y-2">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-medium uppercase tracking-wider text-stone-500 font-sans">Step 3 of 7</span>
+<div class="flex-grow ml-4 h-1 bg-stone-200 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[42%]"></div>
+</div>
+</div>
+<h2 class="text-[20px] font-serif font-bold text-stone-800 leading-tight">Review &amp; Setup</h2>
+<p class="text-[12px] text-stone-500 font-body leading-relaxed">
+            Track your current hormone therapy and other medications to identify patterns.
+        </p>
+</div>
+<section class="space-y-4 mb-10">
+<h3 class="text-[13px] font-bold text-stone-800 uppercase tracking-wide">Your Current List</h3>
+<div class="bg-white/50 border-2 border-dashed border-stone-200 rounded-2xl p-10 flex flex-col items-center justify-center text-center space-y-3">
+<div class="w-12 h-12 bg-stone-100 rounded-full flex items-center justify-center text-stone-300">
+<span class="material-symbols-outlined text-3xl">medication</span>
+</div>
+<p class="text-stone-400 text-[13px]">No medications added yet.</p>
+</div>
+</section>
+<div class="space-y-4">
+<button class="w-full flex items-center justify-center gap-2 py-5 bg-white border-2 border-primary/20 text-primary font-bold text-[14px] rounded-2xl hover:bg-primary/5 transition-all shadow-sm" onclick="document.getElementById('setup-modal').classList.remove('hidden')">
+<span class="material-symbols-outlined">add_circle</span>
+            Add New Medication
+        </button>
+<section class="p-5 bg-[#E8E0F0]/60 rounded-2xl border border-[#E8E0F0]">
+<h3 class="text-[11px] font-bold text-on-secondary-container mb-3 uppercase tracking-wider">Quick Start Common HRT</h3>
+<div class="flex flex-wrap gap-2">
+<button class="px-4 py-2 bg-white text-primary text-[12px] font-semibold rounded-full shadow-sm hover:shadow-md transition-all active:scale-95">Estradiol</button>
+<button class="px-4 py-2 bg-white text-primary text-[12px] font-semibold rounded-full shadow-sm hover:shadow-md transition-all active:scale-95">Utrogestan</button>
+<button class="px-4 py-2 bg-white text-primary text-[12px] font-semibold rounded-full shadow-sm hover:shadow-md transition-all active:scale-95">Femoston</button>
+</div>
+</section>
+</div>
+<div class="mt-12 opacity-80 mix-blend-multiply flex justify-center">
+<div class="w-24 h-24 rounded-full overflow-hidden grayscale opacity-30">
+<img alt="zen-like wellness scene" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtWL4AykE8V9JCMtemWAbCNllXKTcSNg47QWMheLDHZ4Ap-vOtx3kAoKkAEIW9e5eeJVq2M4H774lhoFEIUvzo8z29ooU7l-cU6_ERBR3YPD3up-RlLb-b1ZV3X0CWGr3cGgJNpA5rKOPdgolcmOL7ZQb_FirKRLorCvY-4U2ryEGjwy-dVQ_8MacoVKwN5OIFy7RH37kiEL36gpWiJQlt1t8-VR_F_AR4kIhuEratpyuGuDTdhtqb6ZxdpFyeKx9-OiY75fMyL6c"/>
+</div>
+</div>
+</main>
+<footer class="fixed bottom-0 left-0 w-full bg-[#F7F5F0]/80 backdrop-blur-md px-6 pt-4 pb-8 z-30">
+<div class="max-w-md mx-auto space-y-4">
+<button class="w-full py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/20 hover:shadow-xl transition-all">
+            Continue to Summary
+        </button>
+<button class="w-full text-center text-[13px] font-bold text-stone-400 hover:text-primary transition-colors">
+            Skip for now
+        </button>
+</div>
+</footer>
+<div class="fixed inset-0 z-[60] hidden" id="setup-modal">
+<div class="absolute inset-0 bg-stone-900/40 backdrop-blur-sm"></div>
+<div class="absolute inset-x-0 bottom-0 top-12 bg-[#F7F5F0] rounded-t-[32px] shadow-2xl flex flex-col overflow-hidden">
+<div class="px-6 py-5 flex items-center justify-between border-b border-stone-100">
+<button class="text-stone-400" onclick="document.getElementById('setup-modal').classList.add('hidden')">
+<span class="material-symbols-outlined">close</span>
+</button>
+<h3 class="font-bold text-[15px] text-stone-800">Add Medication</h3>
+<div class="w-6"></div>
+</div>
+<div class="flex-grow overflow-y-auto p-6">
+<div class="step-view active space-y-6" id="setup-step-1">
+<div class="space-y-2">
+<span class="text-[11px] font-bold text-primary/60 uppercase tracking-widest">Step 1 of 4</span>
+<h2 class="text-xl font-serif font-bold text-stone-800">What is the medication name?</h2>
+</div>
+<div class="relative">
+<input class="w-full bg-[#EEEEEE] border-0 focus:ring-2 focus:ring-primary/50 rounded-xl px-4 py-4 text-[16px] placeholder:text-stone-400" placeholder="e.g., Estradiol" type="text"/>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-stone-400">search</span>
+</div>
+<div class="pt-4">
+<button class="w-full py-4 bg-primary text-white font-bold rounded-2xl">Next</button>
+</div>
+</div>
+<div class="step-view space-y-6" id="setup-step-2">
+<div class="space-y-2">
+<span class="text-[11px] font-bold text-primary/60 uppercase tracking-widest">Step 2 of 4</span>
+<h2 class="text-xl font-serif font-bold text-stone-800">How do you take it?</h2>
+</div>
+<div class="grid grid-cols-1 gap-3">
+<label class="flex items-center p-4 rounded-xl border-2 border-stone-100 bg-white cursor-pointer active:border-primary transition-all">
+<span class="material-symbols-outlined text-primary mr-3 text-[24px]">rectangle</span>
+<span class="text-[15px] font-semibold text-stone-700 flex-grow">Patch</span>
+<div class="w-6 h-6 border-2 border-stone-200 rounded-full"></div>
+</label>
+<label class="flex items-center p-4 rounded-xl border-2 border-stone-100 bg-white cursor-pointer active:border-primary transition-all">
+<span class="material-symbols-outlined text-primary mr-3 text-[24px]">pill</span>
+<span class="text-[15px] font-semibold text-stone-700 flex-grow">Tablet</span>
+<div class="w-6 h-6 border-2 border-stone-200 rounded-full"></div>
+</label>
+<label class="flex items-center p-4 rounded-xl border-2 border-stone-100 bg-white cursor-pointer active:border-primary transition-all">
+<span class="material-symbols-outlined text-primary mr-3 text-[24px]">clean_hands</span>
+<span class="text-[15px] font-semibold text-stone-700 flex-grow">Gel or cream</span>
+<div class="w-6 h-6 border-2 border-stone-200 rounded-full"></div>
+</label>
+</div>
+<div class="flex gap-3 pt-4">
+<button class="flex-1 py-4 bg-stone-100 text-stone-500 font-bold rounded-2xl">Back</button>
+<button class="flex-[2] py-4 bg-primary text-white font-bold rounded-2xl">Next</button>
+</div>
+</div>
+<div class="step-view space-y-6" id="setup-step-3">
+<div class="space-y-2">
+<span class="text-[11px] font-bold text-primary/60 uppercase tracking-widest">Step 3 of 4</span>
+<h2 class="text-xl font-serif font-bold text-stone-800">What is your dose?</h2>
+</div>
+<div class="flex gap-3">
+<input class="w-24 bg-[#EEEEEE] border-0 focus:ring-2 focus:ring-primary/50 rounded-xl px-4 py-4 text-center text-[18px] font-bold" type="number" value="50"/>
+<select class="flex-grow bg-[#EEEEEE] border-0 focus:ring-2 focus:ring-primary/50 rounded-xl px-4 py-4 text-[16px] appearance-none">
+<option>mcg</option>
+<option>mg</option>
+<option>pumps</option>
+<option>applicator</option>
+</select>
+</div>
+<div class="flex gap-3 pt-4">
+<button class="flex-1 py-4 bg-stone-100 text-stone-500 font-bold rounded-2xl">Back</button>
+<button class="flex-[2] py-4 bg-primary text-white font-bold rounded-2xl">Next</button>
+</div>
+</div>
+<div class="step-view space-y-6" id="setup-step-4">
+<div class="space-y-2">
+<span class="text-[11px] font-bold text-primary/60 uppercase tracking-widest">Step 4 of 4</span>
+<h2 class="text-xl font-serif font-bold text-stone-800">How often?</h2>
+</div>
+<div class="flex flex-col gap-3">
+<label class="p-4 bg-white border-2 border-stone-100 rounded-xl font-semibold text-stone-700">Daily</label>
+<label class="p-4 bg-primary border-2 border-primary rounded-xl font-semibold text-white">Twice weekly</label>
+<label class="p-4 bg-white border-2 border-stone-100 rounded-xl font-semibold text-stone-700">Weekly</label>
+<label class="p-4 bg-white border-2 border-stone-100 rounded-xl font-semibold text-stone-700">As needed</label>
+</div>
+<div class="flex gap-3 pt-4">
+<button class="flex-1 py-4 bg-stone-100 text-stone-500 font-bold rounded-2xl">Back</button>
+<button class="flex-[2] py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/20" onclick="document.getElementById('setup-modal').classList.add('hidden')">Confirm &amp; Add</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</body></html>

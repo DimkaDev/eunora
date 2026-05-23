@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Medication Setup | MenoSync</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-high": "#ede7e5",
+                    "secondary-fixed-dim": "#d0c1d8",
+                    "on-secondary-container": "#6c6074",
+                    "on-primary-fixed-variant": "#51443a",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-container": "#fffbff",
+                    "surface-bright": "#fef8f6",
+                    "primary-fixed": "#f2dfd0",
+                    "inverse-on-surface": "#f5f0ed",
+                    "inverse-primary": "#d6c3b5",
+                    "inverse-surface": "#32302f",
+                    "outline-variant": "#d0c4bc",
+                    "secondary-container": "#edddf5",
+                    "primary": "#67594e",
+                    "on-primary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "secondary": "#655a6e",
+                    "primary-container": "#817266",
+                    "on-surface": "#1d1b1a",
+                    "surface-variant": "#e7e1df",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed": "#edddf5",
+                    "error": "#ba1a1a",
+                    "tertiary": "#814f45",
+                    "on-surface-variant": "#4d453f",
+                    "on-tertiary-container": "#fffbff",
+                    "primary-fixed-dim": "#d6c3b5",
+                    "on-background": "#1d1b1a",
+                    "surface-dim": "#ded9d7",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-tint": "#6a5c50",
+                    "on-tertiary-fixed-variant": "#683a31",
+                    "outline": "#7f756e",
+                    "surface-container": "#f2edea",
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed": "#211828",
+                    "surface-container-low": "#f8f2f0",
+                    "surface-container-highest": "#e7e1df",
+                    "on-tertiary-fixed": "#341009",
+                    "on-secondary-fixed-variant": "#4d4355",
+                    "on-secondary": "#ffffff",
+                    "background": "#fef8f6",
+                    "tertiary-fixed": "#ffdad3",
+                    "surface": "#fef8f6",
+                    "tertiary-container": "#9d675c",
+                    "on-primary-fixed": "#231a11",
+                    "tertiary-fixed-dim": "#f9b7a9"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "2xl": "1rem",
+                    "3xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif"],
+                    "body": ["Manrope"],
+                    "label": ["Manrope"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; }
+        h1, h2, .font-serif { font-family: 'Noto Serif', serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d0c4bc; border-radius: 10px; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#fef8f6] text-on-surface min-h-screen flex flex-col">
+<header class="fixed top-0 w-full z-50 bg-stone-50/70 backdrop-blur-md">
+<div class="flex items-center justify-between px-6 py-4 w-full max-w-screen-xl mx-auto">
+<button class="hover:bg-stone-200/50 transition-colors rounded-full p-2 flex items-center justify-center active:scale-95 duration-150 ease-in-out">
+<span class="material-symbols-outlined text-stone-700">arrow_back</span>
+</button>
+<h1 class="font-serif italic text-xl text-stone-800">Medication Setup</h1>
+<div class="w-10"></div>
+</div>
+</header>
+<main class="flex-grow pt-24 pb-32 px-5 max-w-md mx-auto w-full space-y-6">
+<section class="bg-white rounded-[24px] p-6 shadow-sm border border-primary/5 flex items-start gap-4">
+<div class="bg-secondary-container/30 p-3 rounded-2xl">
+<span class="material-symbols-outlined text-primary text-[32px]">clinical_notes</span>
+</div>
+<div class="space-y-1">
+<h3 class="font-serif font-bold text-stone-800 text-[16px]">Your MenoSync HRT Partner</h3>
+<p class="text-[12px] text-stone-500 leading-relaxed italic">
+                “Every journey is unique. By logging your HRT, MenoSync helps fine-tune your care plan for better relief and balance.”
+            </p>
+</div>
+</section>
+<div class="space-y-2">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-medium uppercase tracking-wider text-stone-500 font-sans">Step 3 of 7</span>
+<div class="flex-grow mx-4 h-1 bg-surface-container rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[42%]"></div>
+</div>
+</div>
+<h2 class="text-[20px] font-serif font-bold text-stone-800 leading-tight">Add Your Medications</h2>
+<p class="text-[12px] text-stone-500 font-body leading-relaxed">
+            Let's keep things organized. Start by entering the name of your medication below.
+        </p>
+</div>
+<form class="bg-white rounded-[20px] p-6 space-y-6 shadow-sm border border-surface-container relative">
+<div class="space-y-2 relative">
+<label class="block text-[13px] font-bold text-on-surface">Medication Name</label>
+<div class="relative">
+<input class="w-full bg-[#EEEEEE] border-0 focus:ring-2 focus:ring-primary/50 rounded-xl px-4 py-3 text-[14px] placeholder:text-stone-400 transition-all" id="medication-input" placeholder="Start typing (e.g., Estradiol)" type="text" value="Est"/>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-stone-400">search</span>
+</div>
+<div class="absolute z-40 top-[calc(100%+8px)] left-0 w-full bg-white rounded-2xl shadow-xl border border-surface-container overflow-hidden">
+<div class="p-4 space-y-4">
+<div>
+<span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest ml-1">Common HRT</span>
+<div class="mt-2 space-y-1">
+<button class="w-full text-left px-3 py-2.5 hover:bg-surface-container-low rounded-xl flex items-center gap-3 group transition-colors" type="button">
+<span class="material-symbols-outlined text-primary/40 group-hover:text-primary text-[18px]">pill</span>
+<span class="text-[14px] text-stone-700 font-medium">Estradiol</span>
+</button>
+<button class="w-full text-left px-3 py-2.5 hover:bg-surface-container-low rounded-xl flex items-center gap-3 group transition-colors" type="button">
+<span class="material-symbols-outlined text-primary/40 group-hover:text-primary text-[18px]">pill</span>
+<span class="text-[14px] text-stone-700 font-medium">Estradot</span>
+</button>
+</div>
+</div>
+<div>
+<span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest ml-1">Other Medications</span>
+<div class="mt-2 space-y-1">
+<button class="w-full text-left px-3 py-2.5 hover:bg-surface-container-low rounded-xl flex items-center gap-3 group transition-colors" type="button">
+<span class="material-symbols-outlined text-primary/40 group-hover:text-primary text-[18px]">medical_services</span>
+<span class="text-[14px] text-stone-700 font-medium">Estrogen Gel</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="space-y-3 pt-2">
+<label class="block text-[13px] font-bold text-on-surface">How do you take it?</label>
+<div class="grid grid-cols-1 gap-2">
+<label class="flex items-center p-3 rounded-xl border border-transparent bg-surface-container-low hover:bg-surface-container cursor-pointer transition-colors group">
+<input class="sr-only peer" name="method" type="radio"/>
+<span class="material-symbols-outlined text-primary mr-3 text-[20px]">rectangle</span>
+<span class="text-[14px] font-medium text-stone-700 flex-grow">Patch (transdermal)</span>
+<div class="w-5 h-5 border-2 border-stone-300 rounded-full peer-checked:border-primary peer-checked:bg-primary flex items-center justify-center transition-all">
+<div class="w-2 h-2 bg-white rounded-full opacity-0 peer-checked:opacity-100"></div>
+</div>
+</label>
+<label class="flex items-center p-3 rounded-xl border border-transparent bg-surface-container-low hover:bg-surface-container cursor-pointer transition-colors group">
+<input class="sr-only peer" name="method" type="radio"/>
+<span class="material-symbols-outlined text-primary mr-3 text-[20px]">pill</span>
+<span class="text-[14px] font-medium text-stone-700 flex-grow">Tablet</span>
+<div class="w-5 h-5 border-2 border-stone-300 rounded-full peer-checked:border-primary peer-checked:bg-primary flex items-center justify-center transition-all">
+<div class="w-2 h-2 bg-white rounded-full opacity-0 peer-checked:opacity-100"></div>
+</div>
+</label>
+<button class="text-[12px] font-bold text-primary flex items-center justify-center pt-2 hover:underline" type="button">
+                    Show more methods <span class="material-symbols-outlined text-[16px] ml-1">expand_more</span>
+</button>
+</div>
+</div>
+<div class="space-y-2">
+<label class="block text-[13px] font-bold text-on-surface">Dose</label>
+<div class="flex gap-2">
+<input class="w-24 bg-[#EEEEEE] border-0 focus:ring-2 focus:ring-primary/50 rounded-xl px-4 py-3 text-[14px]" placeholder="50" type="number"/>
+<div class="relative flex-grow">
+<select class="w-full bg-[#EEEEEE] border-0 focus:ring-2 focus:ring-primary/50 rounded-xl px-4 py-3 text-[14px] appearance-none">
+<option>mcg</option>
+<option>mg</option>
+<option>pump</option>
+<option>applicator</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none">unfold_more</span>
+</div>
+</div>
+</div>
+<div class="space-y-3">
+<label class="block text-[13px] font-bold text-on-surface">How often?</label>
+<div class="flex flex-wrap gap-2">
+<label class="cursor-pointer">
+<input class="sr-only peer" name="freq" type="radio"/>
+<div class="px-4 py-2 bg-surface-container-low text-stone-600 rounded-full text-[12px] font-medium peer-checked:bg-primary peer-checked:text-white transition-all">Daily</div>
+</label>
+<label class="cursor-pointer">
+<input class="sr-only peer" name="freq" type="radio"/>
+<div class="px-4 py-2 bg-surface-container-low text-stone-600 rounded-full text-[12px] font-medium peer-checked:bg-primary peer-checked:text-white transition-all">Twice weekly</div>
+</label>
+<label class="cursor-pointer">
+<input class="sr-only peer" name="freq" type="radio"/>
+<div class="px-4 py-2 bg-surface-container-low text-stone-600 rounded-full text-[12px] font-medium peer-checked:bg-primary peer-checked:text-white transition-all">Weekly</div>
+</label>
+</div>
+</div>
+<button class="w-full flex items-center justify-center gap-2 py-4 border-2 border-primary/10 text-primary font-bold text-[14px] rounded-xl hover:bg-primary/5 transition-all" type="button">
+<span class="material-symbols-outlined text-[20px]">add_circle</span>
+            Add Another Medication
+        </button>
+</form>
+<div class="mt-8 flex justify-center opacity-40">
+<div class="w-24 h-24 rounded-full overflow-hidden grayscale">
+<img alt="zen wellness" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtWL4AykE8V9JCMtemWAbCNllXKTcSNg47QWMheLDHZ4Ap-vOtx3kAoKkAEIW9e5eeJVq2M4H774lhoFEIUvzo8z29ooU7l-cU6_ERBR3YPD3up-RlLb-b1ZV3X0CWGr3cGgJNpA5rKOPdgolcmOL7ZQb_FirKRLorCvY-4U2ryEGjwy-dVQ_8MacoVKwN5OIFy7RH37kiEL36gpWiJQlt1t8-VR_F_AR4kIhuEratpyuGuDTdhtqb6ZxdpFyeKx9-OiY75fMyL6c"/>
+</div>
+</div>
+</main>
+<footer class="fixed bottom-0 left-0 w-full bg-stone-50/70 backdrop-blur-md px-6 pt-4 pb-8 z-50">
+<div class="max-w-md mx-auto space-y-4">
+<button class="w-full py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/20 hover:shadow-xl hover:-translate-y-0.5 transition-all active:scale-95">
+            Continue
+        </button>
+<button class="w-full text-center text-[13px] font-bold text-stone-500 hover:text-primary transition-colors">
+            Skip for now
+        </button>
+</div>
+</footer>
+
+</body></html>

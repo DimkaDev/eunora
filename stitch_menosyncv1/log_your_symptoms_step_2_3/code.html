@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Log Your Symptoms - Step 2</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@600;700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#9B8B7E",
+                        "brand-cream": "#F7F5F0",
+                        "brand-lavender": "#E8E0F0",
+                        "on-surface": "#1d1b1a",
+                        "surface-variant": "#e7e1df",
+                        "outline-variant": "#d0c4bc",
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body { font-family: 'Manrope', sans-serif; background-color: #F7F5F0; }
+        .serif-font { font-family: 'Noto Serif', serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .custom-shadow { box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04); }details summary::-webkit-details-marker { display: none; }
+        details[open] .expand-icon { transform: rotate(180deg); }.segmented-control input:checked + label {
+            background-color: #E8E0F0;
+            border-color: #9B8B7E;
+            font-weight: 700;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface min-h-screen flex flex-col items-center">
+<header class="w-full fixed top-0 z-50 bg-brand-cream/80 backdrop-blur-md">
+<div class="flex justify-between items-center w-full px-6 py-3 max-w-xl mx-auto">
+<button class="text-primary hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-bold text-sm text-primary uppercase tracking-wider">Step 2 of 3: Rate Severity</h1>
+<div class="w-10"></div>
+</div>
+<div class="px-6 py-2 max-w-xl mx-auto">
+<div class="w-full bg-white h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[66%] transition-all duration-500"></div>
+</div>
+</div>
+</header>
+<main class="flex-1 w-full max-w-xl px-6 pt-28 pb-32">
+<section class="mb-6">
+<h2 class="serif-font text-[20px] font-bold text-on-surface mb-1">Rate your symptoms</h2>
+<p class="text-gray-500 text-[12px]">For each symptom: Rate severity &amp; how long</p>
+</section>
+<div class="space-y-3">
+<details class="bg-white rounded-xl custom-shadow overflow-hidden transition-all duration-300" open="">
+<summary class="flex items-center justify-between p-4 cursor-pointer list-none">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<h3 class="font-bold text-[14px]">Hot Flashes</h3>
+</div>
+<span class="material-symbols-outlined text-primary transition-transform duration-300 expand-icon">expand_more</span>
+</summary>
+<div class="px-4 pb-5 space-y-4 border-t border-gray-50 pt-4">
+<div>
+<span class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Severity</span>
+<div class="grid grid-cols-3 bg-gray-50 p-1 rounded-lg segmented-control">
+<input checked="" class="hidden" id="hf-mild" name="sev-hf" type="radio"/>
+<label class="flex items-center justify-center gap-2 py-2.5 rounded-md border border-transparent transition-all text-[13px] cursor-pointer" for="hf-mild">
+<span>😊</span> Mild
+                        </label>
+<input class="hidden" id="hf-mod" name="sev-hf" type="radio"/>
+<label class="flex items-center justify-center gap-2 py-2.5 rounded-md border border-transparent transition-all text-[13px] cursor-pointer" for="hf-mod">
+<span>😐</span> Mod
+                        </label>
+<input class="hidden" id="hf-sev" name="sev-hf" type="radio"/>
+<label class="flex items-center justify-center gap-2 py-2.5 rounded-md border border-transparent transition-all text-[13px] cursor-pointer" for="hf-sev">
+<span>😟</span> Sev
+                        </label>
+</div>
+</div>
+<div>
+<span class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Duration (minutes)</span>
+<div class="flex items-center gap-2">
+<input class="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-primary" max="60" min="1" type="range" value="30"/>
+<span class="w-12 text-right font-bold text-primary text-sm">30m</span>
+</div>
+</div>
+</div>
+</details>
+<details class="bg-white rounded-xl custom-shadow overflow-hidden transition-all duration-300">
+<summary class="flex items-center justify-between p-4 cursor-pointer list-none">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: 'FILL' 1;">nights_stay</span>
+<h3 class="font-bold text-[14px]">Night Sweats</h3>
+</div>
+<span class="material-symbols-outlined text-primary transition-transform duration-300 expand-icon">expand_more</span>
+</summary>
+<div class="px-4 pb-5 space-y-4 border-t border-gray-50 pt-4">
+<div>
+<span class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Severity</span>
+<div class="grid grid-cols-3 bg-gray-50 p-1 rounded-lg segmented-control">
+<input class="hidden" id="ns-mild" name="sev-ns" type="radio"/>
+<label class="flex items-center justify-center gap-2 py-2.5 rounded-md border border-transparent transition-all text-[13px] cursor-pointer" for="ns-mild">
+<span>😊</span> Mild
+                        </label>
+<input checked="" class="hidden" id="ns-mod" name="sev-ns" type="radio"/>
+<label class="flex items-center justify-center gap-2 py-2.5 rounded-md border border-transparent transition-all text-[13px] cursor-pointer" for="ns-mod">
+<span>😐</span> Mod
+                        </label>
+<input class="hidden" id="ns-sev" name="sev-ns" type="radio"/>
+<label class="flex items-center justify-center gap-2 py-2.5 rounded-md border border-transparent transition-all text-[13px] cursor-pointer" for="ns-sev">
+<span>😟</span> Sev
+                        </label>
+</div>
+</div>
+<div>
+<span class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Duration (minutes)</span>
+<div class="flex items-center gap-2">
+<input class="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-primary" max="60" min="1" type="range" value="15"/>
+<span class="w-12 text-right font-bold text-primary text-sm">15m</span>
+</div>
+</div>
+</div>
+</details>
+<details class="bg-white rounded-xl custom-shadow overflow-hidden transition-all duration-300">
+<summary class="flex items-center justify-between p-4 cursor-pointer list-none">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: 'FILL' 1;">psychology</span>
+<h3 class="font-bold text-[14px]">Mood Changes</h3>
+</div>
+<span class="material-symbols-outlined text-primary transition-transform duration-300 expand-icon">expand_more</span>
+</summary>
+<div class="px-4 pb-5 space-y-4 border-t border-gray-50 pt-4">
+<div>
+<span class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Severity</span>
+<div class="grid grid-cols-3 bg-gray-50 p-1 rounded-lg segmented-control">
+<input class="hidden" id="mc-mild" name="sev-mc" type="radio"/>
+<label class="flex items-center justify-center gap-2 py-2.5 rounded-md border border-transparent transition-all text-[13px] cursor-pointer" for="mc-mild">
+<span>😊</span> Mild
+                        </label>
+<input class="hidden" id="mc-mod" name="sev-mc" type="radio"/>
+<label class="flex items-center justify-center gap-2 py-2.5 rounded-md border border-transparent transition-all text-[13px] cursor-pointer" for="mc-mod">
+<span>😐</span> Mod
+                        </label>
+<input checked="" class="hidden" id="mc-sev" name="sev-mc" type="radio"/>
+<label class="flex items-center justify-center gap-2 py-2.5 rounded-md border border-transparent transition-all text-[13px] cursor-pointer" for="mc-sev">
+<span>😟</span> Sev
+                        </label>
+</div>
+</div>
+</div>
+</details>
+<button class="w-full py-4 border-2 border-dashed border-primary/20 rounded-xl flex items-center justify-center gap-2 text-primary font-bold text-sm bg-white/50 hover:bg-white transition-colors">
+<span class="material-symbols-outlined text-lg">add_circle</span>
+            Add another symptom
+        </button>
+</div>
+</main>
+<footer class="fixed bottom-0 w-full bg-white/80 backdrop-blur-xl border-t border-gray-100">
+<div class="max-w-xl mx-auto px-6 py-6 flex gap-3">
+<button class="flex-1 h-12 rounded-xl border border-primary text-primary font-bold text-sm active:scale-95 transition-transform">
+            Back
+        </button>
+<button class="flex-[2] h-12 rounded-xl bg-primary text-white font-bold text-sm shadow-md shadow-primary/20 flex items-center justify-center gap-2 active:scale-95 transition-transform">
+            Next → Triggers
+        </button>
+</div>
+</footer>
+
+</body></html>

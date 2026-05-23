@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Health History</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;500;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background": "#fef8f6",
+                        "on-tertiary-fixed": "#341009",
+                        "secondary-container": "#edddf5",
+                        "primary-container": "#817266",
+                        "outline": "#7f756e",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#ede7e5",
+                        "on-surface-variant": "#4d453f",
+                        "on-error": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "surface-container-low": "#f8f2f0",
+                        "inverse-primary": "#d6c3b5",
+                        "secondary": "#655a6e",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "on-secondary-container": "#6c6074",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "on-secondary-fixed": "#211828",
+                        "surface-bright": "#fef8f6",
+                        "surface-dim": "#ded9d7",
+                        "on-tertiary-container": "#fffbff",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "surface": "#fef8f6",
+                        "on-background": "#1d1b1a",
+                        "on-primary-fixed-variant": "#51443a",
+                        "on-surface": "#1d1b1a",
+                        "inverse-on-surface": "#f5f0ed",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#ffdad3",
+                        "outline-variant": "#d0c4bc",
+                        "on-primary-container": "#fffbff",
+                        "surface-tint": "#6a5c50",
+                        "primary": "#67594e",
+                        "tertiary": "#814f45",
+                        "inverse-surface": "#32302f",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#231a11",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "tertiary-container": "#9d675c",
+                        "surface-container-highest": "#e7e1df",
+                        "surface-container": "#f2edea",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "primary-fixed": "#f2dfd0",
+                        "surface-variant": "#e7e1df",
+                        "secondary-fixed": "#edddf5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body { font-family: 'Manrope', sans-serif; background-color: #fef8f6; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }.pill-checkbox {
+            @apply hidden;
+        }
+        .pill-label {
+            @apply flex items-center gap-2 px-3 py-2.5 rounded-xl border border-stone-200 bg-white transition-all cursor-pointer select-none hover:border-primary/50;
+        }
+        .pill-checkbox:checked + .pill-label {
+            @apply border-primary bg-primary text-white shadow-md shadow-primary/20;
+        }
+        .pill-checkbox:checked + .pill-label .material-symbols-outlined {
+            @apply text-white;
+        }
+        .pill-checkbox:checked + .pill-label .subtitle {
+            @apply text-white/80;
+        }
+        details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        details[open] .collapse-icon {
+            transform: rotate(180deg);
+        }
+        .custom-checkbox {
+            appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 1.5px solid #7f756e;
+            border-radius: 4px;
+            display: inline-block;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .custom-checkbox:checked {
+            background-color: #67594e;
+            border-color: #67594e;
+        }
+        .custom-checkbox:checked::after {
+            content: '\e5ca';
+            font-family: 'Material Symbols Outlined';
+            font-size: 14px;
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface leading-relaxed antialiased">
+<header class="bg-stone-50/70 backdrop-blur-xl sticky top-0 z-50 shadow-sm shadow-stone-200/10">
+<div class="flex items-center justify-between px-6 py-4 w-full max-w-2xl mx-auto">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-stone-700 cursor-pointer hover:opacity-80 transition-opacity">arrow_back</span>
+<h1 class="font-serif text-2xl font-medium tracking-tight text-stone-800">Your Journey</h1>
+</div>
+<div class="flex gap-2 font-sans text-[10px] font-bold uppercase tracking-widest text-primary">
+                Setup Mode
+            </div>
+</div>
+</header>
+<main class="max-w-2xl mx-auto px-4 pt-6 pb-40">
+<section class="bg-surface-container-lowest rounded-2xl p-5 shadow-sm border border-stone-100">
+<header class="mb-6">
+<h2 class="font-body font-bold text-[14px] text-on-surface uppercase tracking-wider">Health Conditions &amp; Medical History</h2>
+<p class="font-body text-[12px] text-on-surface-variant mt-1">Tap categories to expand. Select all that apply.</p>
+</header>
+<div class="space-y-4">
+<details class="group bg-surface-container-low rounded-xl overflow-hidden border border-stone-100" open="">
+<summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-stone-100/50 transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-xl">vital_signs</span>
+<span class="text-[13px] font-bold text-on-surface uppercase tracking-wider">Chronic Illnesses</span>
+</div>
+<span class="material-symbols-outlined text-stone-400 collapse-icon transition-transform duration-200">expand_more</span>
+</summary>
+<div class="p-4 pt-0 grid grid-cols-2 gap-3">
+<div class="relative">
+<input class="pill-checkbox" id="cond-heart" type="checkbox"/>
+<label class="pill-label" for="cond-heart">
+<span class="material-symbols-outlined text-primary text-lg">favorite</span>
+<div class="flex flex-col">
+<span class="text-[11px] font-bold leading-tight">Heart/BP</span>
+<span class="text-[8px] text-on-surface-variant uppercase subtitle">HRT Risk</span>
+</div>
+</label>
+</div>
+<div class="relative">
+<input class="pill-checkbox" id="cond-diabetes" type="checkbox"/>
+<label class="pill-label" for="cond-diabetes">
+<span class="material-symbols-outlined text-primary text-lg">bloodtype</span>
+<div class="flex flex-col">
+<span class="text-[11px] font-bold leading-tight">Diabetes</span>
+<span class="text-[8px] text-on-surface-variant uppercase subtitle">Glucose</span>
+</div>
+</label>
+</div>
+<div class="relative">
+<input class="pill-checkbox" id="cond-clots" type="checkbox"/>
+<label class="pill-label" for="cond-clots">
+<span class="material-symbols-outlined text-primary text-lg">water_drop</span>
+<div class="flex flex-col">
+<span class="text-[11px] font-bold leading-tight">Blood Clots</span>
+<span class="text-[8px] text-on-surface-variant uppercase subtitle">DVT History</span>
+</div>
+</label>
+</div>
+<div class="relative">
+<input class="pill-checkbox" id="cond-liver" type="checkbox"/>
+<label class="pill-label" for="cond-liver">
+<span class="material-symbols-outlined text-primary text-lg">medical_services</span>
+<div class="flex flex-col">
+<span class="text-[11px] font-bold leading-tight">Liver</span>
+<span class="text-[8px] text-on-surface-variant uppercase subtitle">Metabolism</span>
+</div>
+</label>
+</div>
+<div class="relative">
+<input class="pill-checkbox" id="cond-thyroid" type="checkbox"/>
+<label class="pill-label" for="cond-thyroid">
+<span class="material-symbols-outlined text-primary text-lg">pill</span>
+<div class="flex flex-col">
+<span class="text-[11px] font-bold leading-tight">Thyroid</span>
+<span class="text-[8px] text-on-surface-variant uppercase subtitle">Interactions</span>
+</div>
+</label>
+</div>
+<div class="relative">
+<input class="pill-checkbox" id="cond-autoimmune" type="checkbox"/>
+<label class="pill-label" for="cond-autoimmune">
+<span class="material-symbols-outlined text-primary text-lg">shield_with_heart</span>
+<div class="flex flex-col">
+<span class="text-[11px] font-bold leading-tight">Autoimmune</span>
+<span class="text-[8px] text-on-surface-variant uppercase subtitle">Lupus, RA</span>
+</div>
+</label>
+</div>
+</div>
+</details>
+<details class="group bg-surface-container-low rounded-xl overflow-hidden border border-stone-100">
+<summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-stone-100/50 transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-xl">female</span>
+<span class="text-[13px] font-bold text-on-surface uppercase tracking-wider">Reproductive Health</span>
+</div>
+<span class="material-symbols-outlined text-stone-400 collapse-icon transition-transform duration-200">expand_more</span>
+</summary>
+<div class="p-4 pt-0 grid grid-cols-2 gap-3">
+<div class="relative">
+<input class="pill-checkbox" id="cond-breast-cancer" type="checkbox"/>
+<label class="pill-label" for="cond-breast-cancer">
+<span class="material-symbols-outlined text-primary text-lg">medical_information</span>
+<div class="flex flex-col">
+<span class="text-[11px] font-bold leading-tight">Breast Cancer</span>
+<span class="text-[8px] text-on-surface-variant uppercase subtitle">Planning</span>
+</div>
+</label>
+</div>
+<div class="relative">
+<input class="pill-checkbox" id="cond-endo" type="checkbox"/>
+<label class="pill-label" for="cond-endo">
+<span class="material-symbols-outlined text-primary text-lg">monitor_heart</span>
+<span class="text-[11px] font-bold leading-tight">Endometriosis</span>
+</label>
+</div>
+<div class="relative">
+<input class="pill-checkbox" id="cond-fibroids" type="checkbox"/>
+<label class="pill-label" for="cond-fibroids">
+<span class="material-symbols-outlined text-primary text-lg">opacity</span>
+<span class="text-[11px] font-bold leading-tight">Uterine Fibroids</span>
+</label>
+</div>
+<div class="relative">
+<input class="pill-checkbox" id="cond-migraine" type="checkbox"/>
+<label class="pill-label" for="cond-migraine">
+<span class="material-symbols-outlined text-primary text-lg">bolt</span>
+<div class="flex flex-col">
+<span class="text-[11px] font-bold leading-tight">Migraine+Aura</span>
+<span class="text-[8px] text-on-surface-variant uppercase subtitle">Estrogen Risk</span>
+</div>
+</label>
+</div>
+</div>
+</details>
+<details class="group bg-surface-container-low rounded-xl overflow-hidden border border-stone-100">
+<summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-stone-100/50 transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-xl">psychology</span>
+<span class="text-[13px] font-bold text-on-surface uppercase tracking-wider">Mental Wellbeing</span>
+</div>
+<span class="material-symbols-outlined text-stone-400 collapse-icon transition-transform duration-200">expand_more</span>
+</summary>
+<div class="p-4 pt-0 grid grid-cols-2 gap-3">
+<div class="relative">
+<input class="pill-checkbox" id="cond-depression" type="checkbox"/>
+<label class="pill-label" for="cond-depression">
+<span class="material-symbols-outlined text-primary text-lg">sentiment_dissatisfied</span>
+<span class="text-[11px] font-bold leading-tight">Depression</span>
+</label>
+</div>
+<div class="relative">
+<input class="pill-checkbox" id="cond-anxiety" type="checkbox"/>
+<label class="pill-label" for="cond-anxiety">
+<span class="material-symbols-outlined text-primary text-lg">waves</span>
+<span class="text-[11px] font-bold leading-tight">Anxiety</span>
+</label>
+</div>
+<div class="relative">
+<input class="pill-checkbox" id="cond-adhd" type="checkbox"/>
+<label class="pill-label" for="cond-adhd">
+<span class="material-symbols-outlined text-primary text-lg">psychology_alt</span>
+<span class="text-[11px] font-bold leading-tight">ADHD</span>
+</label>
+</div>
+<div class="relative">
+<input class="pill-checkbox" id="cond-sleep" type="checkbox"/>
+<label class="pill-label" for="cond-sleep">
+<span class="material-symbols-outlined text-primary text-lg">bedtime</span>
+<span class="text-[11px] font-bold leading-tight">Insomnia</span>
+</label>
+</div>
+</div>
+</details>
+<details class="group bg-surface-container-low rounded-xl overflow-hidden border border-stone-100">
+<summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-stone-100/50 transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-xl">family_history</span>
+<span class="text-[13px] font-bold text-on-surface uppercase tracking-wider">Family History</span>
+</div>
+<span class="material-symbols-outlined text-stone-400 collapse-icon transition-transform duration-200">expand_more</span>
+</summary>
+<div class="p-4 pt-0 space-y-2">
+<div class="relative">
+<input class="pill-checkbox" id="fam-breast" type="checkbox"/>
+<label class="pill-label" for="fam-breast">
+<span class="material-symbols-outlined text-primary text-lg">groups</span>
+<span class="text-[11px] font-bold leading-tight">Family history of breast cancer</span>
+</label>
+</div>
+<div class="relative">
+<input class="pill-checkbox" id="fam-meno" type="checkbox"/>
+<label class="pill-label" for="fam-meno">
+<span class="material-symbols-outlined text-primary text-lg">history</span>
+<span class="text-[11px] font-bold leading-tight">Family history of early menopause</span>
+</label>
+</div>
+<div class="relative">
+<input class="pill-checkbox" id="fam-clots" type="checkbox"/>
+<label class="pill-label" for="fam-clots">
+<span class="material-symbols-outlined text-primary text-lg">family_restroom</span>
+<span class="text-[11px] font-bold leading-tight">Family history of blood clots</span>
+</label>
+</div>
+</div>
+</details>
+<div class="pt-2 space-y-4">
+<div class="space-y-4">
+<label class="flex items-start gap-3 cursor-pointer group">
+<input class="custom-checkbox mt-0.5" id="other_trigger" type="checkbox"/>
+<div class="flex flex-col">
+<span class="text-sm font-bold text-on-surface group-hover:text-primary transition-colors">Other condition</span>
+<span class="text-[10px] text-on-surface-variant">Please detail below if selected</span>
+</div>
+</label>
+<div class="pl-8">
+<textarea class="w-full bg-stone-100 border border-stone-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-stone-400" placeholder="Briefly describe your health experience..." rows="2"></textarea>
+</div>
+<label class="flex items-center gap-3 cursor-pointer group bg-stone-50 p-3 rounded-xl border border-stone-200/60">
+<input class="custom-checkbox" type="checkbox"/>
+<span class="text-[12px] font-semibold text-on-surface-variant">None of the above / Prefer not to disclose</span>
+</label>
+</div>
+<div class="bg-blue-50/50 rounded-2xl p-4 flex gap-4 items-start border border-blue-100">
+<span class="material-symbols-outlined text-blue-600 text-xl mt-0.5">info</span>
+<p class="text-[11px] text-stone-600 leading-normal">
+                            These conditions help us personalize your journey safely. We always recommend discussing medical decisions with your doctor.
+                        </p>
+</div>
+</div>
+</div>
+</section>
+<div class="mt-6 flex flex-col gap-4">
+<div class="bg-primary-container text-on-primary-container p-5 rounded-2xl relative overflow-hidden group border border-stone-200/20">
+<div class="relative z-10">
+<h4 class="font-serif text-xl mb-1 text-white">Safe &amp; Secure</h4>
+<p class="text-[10px] text-white/90 leading-relaxed uppercase tracking-widest font-bold">Your medical data is encrypted and private.</p>
+</div>
+<div class="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-700"></div>
+</div>
+<div class="w-full h-32 rounded-2xl overflow-hidden shadow-sm border border-stone-100">
+<img alt="Minimalist botanical image" class="w-full h-full object-cover grayscale opacity-70" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCC_zF3dVp656qylYGVFSBVls1COmGvTFk44g_ckmmYX3ViXOkDjGGp78K_igbc5kjjxdlmQ4V0BswqUUHxurF4C71IskRR34-6DDUyly6Uv4iWorFU2NBaH3D5k-SoNcMW1YiAdzdaUhvIS3jT8v8dXXKeLPv3VCML_ZbgqMvg5f8IPz3KBbuPkFGbwn-6j7JLMY-5Q5cxCZEujpxsc1c01jfTc8WjqWjN2vnx5E9wGq9E4D2XQTXKQRtUKHAlwleZcX1G0ONaYbw"/>
+</div>
+</div>
+</main>
+<footer class="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md px-6 py-6 border-t border-stone-100 flex flex-col items-center gap-3 z-[60]">
+<div class="w-full max-w-2xl">
+<button class="w-full bg-gradient-to-r from-primary to-primary-container text-white py-4 rounded-2xl font-body font-bold text-sm shadow-xl shadow-primary/20 active:scale-[0.98] transition-transform">
+                Continue
+            </button>
+</div>
+<button class="text-[12px] text-on-surface-variant underline decoration-stone-300 underline-offset-4 font-semibold hover:text-primary transition-colors">
+            I'd rather not share this
+        </button>
+</footer>
+
+</body></html>

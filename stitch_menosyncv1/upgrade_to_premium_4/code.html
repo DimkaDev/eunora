@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-surface-variant": "#4d453f",
+                    "outline-variant": "#d0c4bc",
+                    "on-secondary-container": "#6c6074",
+                    "surface-dim": "#ded9d7",
+                    "background": "#fef8f6",
+                    "surface-variant": "#e7e1df",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "tertiary-container": "#9d675c",
+                    "on-error-container": "#93000a",
+                    "on-tertiary-fixed": "#341009",
+                    "surface": "#fef8f6",
+                    "primary-fixed": "#f2dfd0",
+                    "inverse-surface": "#32302f",
+                    "secondary-fixed": "#edddf5",
+                    "surface-bright": "#fef8f6",
+                    "on-primary": "#ffffff",
+                    "outline": "#7f756e",
+                    "secondary": "#655a6e",
+                    "on-tertiary-container": "#fffbff",
+                    "on-primary-fixed-variant": "#51443a",
+                    "surface-container": "#f2edea",
+                    "primary": "#67594e",
+                    "on-secondary-fixed-variant": "#4d4355",
+                    "surface-tint": "#6a5c50",
+                    "tertiary-fixed-dim": "#f9b7a9",
+                    "error": "#ba1a1a",
+                    "inverse-primary": "#d6c3b5",
+                    "inverse-on-surface": "#f5f0ed",
+                    "primary-container": "#817266",
+                    "on-primary-fixed": "#231a11",
+                    "on-background": "#1d1b1a",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-low": "#f8f2f0",
+                    "on-secondary-fixed": "#211828",
+                    "tertiary": "#814f45",
+                    "on-surface": "#1d1b1a",
+                    "secondary-container": "#edddf5",
+                    "secondary-fixed-dim": "#d0c1d8",
+                    "on-secondary": "#ffffff",
+                    "tertiary-fixed": "#ffdad3",
+                    "on-tertiary-fixed-variant": "#683a31",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed-dim": "#d6c3b5",
+                    "surface-container-high": "#ede7e5",
+                    "surface-container-highest": "#e7e1df",
+                    "on-primary-container": "#fffbff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "2xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif", "serif"],
+                    "body": ["Manrope", "sans-serif"],
+                    "label": ["Manrope", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        font-family: 'Manrope', sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .serif-display {
+        font-family: 'Noto Serif', serif;
+      }
+      .comparison-table th, .comparison-table td {
+        padding: 1rem 0.5rem;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#F7F5F0] text-on-surface min-h-screen flex flex-col items-center">
+<header class="sticky top-0 w-full z-50 bg-[#F7F5F0]/80 backdrop-blur-xl flex items-center justify-between px-6 py-4">
+<div class="flex items-center gap-4">
+<button class="hover:opacity-80 transition-opacity active:scale-95 duration-150 text-stone-700">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+<h1 class="font-serif text-stone-900 text-[20px] font-semibold leading-none">Upgrade to Premium</h1>
+</div>
+</header>
+<main class="w-full max-w-2xl px-4 py-8 flex flex-col items-center">
+<div class="text-center mb-8">
+<h2 class="serif-display text-stone-900 text-3xl md:text-4xl font-bold mb-3">Unlock Premium</h2>
+<p class="text-stone-500 text-sm md:text-base max-w-sm mx-auto leading-relaxed">Choose the analytical path with full data transparency and advanced health insights.</p>
+</div>
+<div class="w-full max-w-sm mb-8 flex flex-col items-center gap-6">
+<div class="bg-surface-container-high p-1 rounded-full flex items-center w-full shadow-inner border border-stone-200">
+<button class="flex-1 py-2.5 px-4 rounded-full text-sm font-semibold transition-all bg-transparent text-stone-500">Monthly</button>
+<button class="flex-1 py-2.5 px-4 rounded-full text-sm font-semibold transition-all bg-primary text-white flex items-center justify-center gap-2">
+                Annually
+                <span class="bg-[#e7f5e9] text-[#2e7d32] text-[10px] px-2 py-0.5 rounded-full font-bold">Save 33%</span>
+</button>
+</div>
+<div class="w-full flex flex-col items-center">
+<button class="w-full py-4 rounded-xl bg-primary text-white font-bold text-[16px] shadow-lg hover:shadow-xl transition-all active:scale-95">
+                Start 7-Day Free Trial
+            </button>
+<p class="text-stone-500 text-[11px] mt-3 font-medium">Then $79.99/year. Cancel anytime.</p>
+</div>
+</div>
+<div class="w-full bg-white/50 backdrop-blur-sm rounded-3xl p-2 border border-stone-200 mb-12 overflow-hidden">
+<table class="w-full border-collapse comparison-table">
+<thead>
+<tr class="border-b border-stone-100">
+<th class="text-left font-serif text-stone-900 text-base py-6 px-4">Feature</th>
+<th class="text-center text-stone-500 text-[11px] uppercase tracking-widest font-bold w-20">Free</th>
+<th class="text-center text-primary text-[11px] uppercase tracking-widest font-bold w-20 bg-primary/5 rounded-t-2xl">Premium</th>
+</tr>
+</thead>
+<tbody class="text-[13px] text-stone-700">
+<tr class="border-b border-stone-100">
+<td class="px-4 font-medium">Symptom Tracking</td>
+<td class="text-center text-stone-400">5 / day</td>
+<td class="text-center font-bold text-primary bg-primary/5">Unlimited</td>
+</tr>
+<tr class="border-b border-stone-100">
+<td class="px-4 font-medium">Core Visualizations</td>
+<td class="text-center"><span class="material-symbols-outlined text-stone-400 text-lg">check</span></td>
+<td class="text-center bg-primary/5"><span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings: 'FILL' 1;">check_circle</span></td>
+</tr>
+<tr class="border-b border-stone-100">
+<td class="px-4 font-medium">AI Trigger Correlations</td>
+<td class="text-center"><span class="material-symbols-outlined text-stone-300 text-lg">horizontal_rule</span></td>
+<td class="text-center bg-primary/5"><span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings: 'FILL' 1;">check_circle</span></td>
+</tr>
+<tr class="border-b border-stone-100">
+<td class="px-4 font-medium">Personalized Insights</td>
+<td class="text-center"><span class="material-symbols-outlined text-stone-300 text-lg">horizontal_rule</span></td>
+<td class="text-center bg-primary/5"><span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings: 'FILL' 1;">check_circle</span></td>
+</tr>
+<tr class="border-b border-stone-100">
+<td class="px-4 font-medium">PDF Doctor Reports</td>
+<td class="text-center"><span class="material-symbols-outlined text-stone-300 text-lg">horizontal_rule</span></td>
+<td class="text-center bg-primary/5"><span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings: 'FILL' 1;">check_circle</span></td>
+</tr>
+<tr class="border-b border-stone-100">
+<td class="px-4 font-medium">Apple Health Integration</td>
+<td class="text-center"><span class="material-symbols-outlined text-stone-300 text-lg">horizontal_rule</span></td>
+<td class="text-center bg-primary/5"><span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings: 'FILL' 1;">check_circle</span></td>
+</tr>
+<tr class="border-b border-stone-100">
+<td class="px-4 font-medium">Raw Data Export (CSV)</td>
+<td class="text-center"><span class="material-symbols-outlined text-stone-300 text-lg">horizontal_rule</span></td>
+<td class="text-center bg-primary/5"><span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings: 'FILL' 1;">check_circle</span></td>
+</tr>
+<tr>
+<td class="px-4 font-medium">Priority Support</td>
+<td class="text-center"><span class="material-symbols-outlined text-stone-300 text-lg">horizontal_rule</span></td>
+<td class="text-center bg-primary/5 rounded-b-2xl"><span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings: 'FILL' 1;">check_circle</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="w-full mb-12">
+<h4 class="serif-display text-stone-900 text-xl font-bold mb-6 text-center">Frequently Asked Questions</h4>
+<div class="space-y-4">
+<div class="bg-white/40 rounded-2xl p-6 border border-stone-200">
+<div class="flex items-center justify-between cursor-pointer">
+<h5 class="text-sm font-bold text-stone-800">Can I cancel anytime?</h5>
+<span class="material-symbols-outlined text-stone-400" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<div class="bg-white rounded-2xl p-6 border-l-4 border-primary shadow-sm">
+<div class="flex items-center justify-between cursor-pointer mb-3">
+<h5 class="text-sm font-bold text-primary">What if I don't like Premium?</h5>
+<span class="material-symbols-outlined text-primary" data-icon="expand_less">expand_less</span>
+</div>
+<p class="text-stone-500 text-[13px] leading-relaxed">
+                    We offer a full 7-day trial for you to explore all features. If you decide it's not for you, just cancel before the trial ends and you won't be charged a cent.
+                </p>
+</div>
+<div class="bg-white/40 rounded-2xl p-6 border border-stone-200">
+<div class="flex items-center justify-between cursor-pointer">
+<h5 class="text-sm font-bold text-stone-800">Is my payment secure?</h5>
+<span class="material-symbols-outlined text-stone-400" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-2 w-full max-w-lg mb-12">
+<div class="flex flex-col items-center text-center px-2">
+<span class="material-symbols-outlined text-stone-400 mb-2" data-icon="lock">lock</span>
+<span class="text-[10px] font-bold text-stone-500 uppercase leading-tight">Secure<br/>Payment</span>
+</div>
+<div class="flex flex-col items-center text-center px-2 border-x border-stone-200">
+<span class="material-symbols-outlined text-stone-400 mb-2" data-icon="shield_person">shield_person</span>
+<span class="text-[10px] font-bold text-stone-500 uppercase leading-tight">Data<br/>Privacy</span>
+</div>
+<div class="flex flex-col items-center text-center px-2">
+<span class="material-symbols-outlined text-stone-400 mb-2" data-icon="verified_user">verified_user</span>
+<span class="text-[10px] font-bold text-stone-500 uppercase leading-tight">Guarantee</span>
+</div>
+</div>
+<div class="flex flex-wrap justify-center gap-x-6 gap-y-3 mb-24">
+<a class="text-[11px] font-bold text-stone-400 hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="text-[11px] font-bold text-stone-400 hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="text-[11px] font-bold text-stone-400 hover:text-primary transition-colors" href="#">Restore Purchase</a>
+</div>
+</main>
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-white/80 backdrop-blur-xl z-50 border-t border-stone-100 shadow-lg">
+<div class="flex flex-col items-center justify-center text-stone-400 px-4 py-1">
+<span class="material-symbols-outlined" data-icon="today">today</span>
+<span class="font-sans text-[10px] font-medium tracking-wide">Today</span>
+</div>
+<div class="flex flex-col items-center justify-center text-stone-400 px-4 py-1">
+<span class="material-symbols-outlined" data-icon="auto_stories">auto_stories</span>
+<span class="font-sans text-[10px] font-medium tracking-wide">Journal</span>
+</div>
+<div class="flex flex-col items-center justify-center text-stone-400 px-4 py-1">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span class="font-sans text-[10px] font-medium tracking-wide">Insights</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-stone-100 text-stone-900 rounded-xl px-4 py-1">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-sans text-[10px] font-medium tracking-wide">Account</span>
+</div>
+</nav>
+
+</body></html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Quick Log &amp; Adjust</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-tint": "#6a5c50",
+                      "primary": "#67594e",
+                      "secondary-container": "#edddf5",
+                      "outline": "#7f756e",
+                      "surface-container-highest": "#e7e1df",
+                      "primary-fixed-dim": "#d6c3b5",
+                      "on-secondary-container": "#6c6074",
+                      "surface-container-lowest": "#ffffff",
+                      "primary-container": "#817266",
+                      "on-surface": "#1d1b1a",
+                      "surface-dim": "#ded9d7",
+                      "surface-container-low": "#f8f2f0",
+                      "background": "#fef8f6",
+                      "on-secondary": "#ffffff",
+                      "on-tertiary": "#ffffff",
+                      "on-background": "#1d1b1a",
+                      "surface-container": "#f2edea",
+                      "secondary": "#655a6e",
+                      "surface": "#fef8f6",
+                      "on-surface-variant": "#4d453f",
+                      "surface-variant": "#e7e1df",
+                      "on-primary": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Noto Serif"],
+                      "body": ["Manrope"],
+                      "label": ["Manrope"]
+              }
+            },
+          }
+        }
+    </script>
+<style type="text/tailwindcss">
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Manrope', sans-serif; }
+        h1, h2, h3 { font-family: 'Noto Serif', serif; }.intensity-input {
+            width: 44px;
+            height: 36px;
+            border-radius: 8px;
+            border: 1px solid #D8C9E0;
+            text-align: center;
+            font-weight: 600;
+            color: #6B5878;
+            font-size: 15px;
+            padding: 0;
+            background: #fff;
+        }
+        .intensity-input:focus {
+            border-color: #6B5878;
+            ring: 2px;
+            ring-color: #6B5878/20;
+            outline: none;
+        }.custom-checkbox {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            border: 2px solid #D8C9E0;
+            cursor: pointer;
+            appearance: none;
+            display: grid;
+            place-content: center;
+            transition: all 0.2s ease;
+        }
+        .custom-checkbox:checked {
+            background-color: #6B5878;
+            border-color: #6B5878;
+        }
+        .custom-checkbox:checked::before {
+            content: "\e5ca";
+            font-family: 'Material Symbols Outlined';
+            color: white;
+            font-size: 16px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#fef8f6] text-on-surface min-h-screen">
+<header class="flex justify-between items-center px-6 py-4 w-full bg-[#fef8f6] sticky top-0 z-40">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#9B8B7E] cursor-pointer">menu</span>
+<h1 class="font-serif italic text-2xl text-[#9B8B7E]">MenoSync</h1>
+</div>
+<div class="w-10 h-10 rounded-full overflow-hidden border border-[#D8C9E0]">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcDL3vxuSq45fUz1uK9IhmQ60wi5H-P-5WjSoTqhc36KTWCAavqNect4HVQNao44QaTiLubKdGbK3Bem0_A-Ge9Ih2hOgNZclMaeNaUTTDouA_bA_aROYdtiXZlPcFf6s1nYwg73ZYvHZaA1mg5611i2Z1U_x366J7JvxJxCnLLJ_igRhU5XNFPP71YTxnQDIzofp5EoUH2c2w1UFI467Dho_8XyzW9iirMnI5i2JeGZbhsvmMfEwDiI7kE8B6GmGJXANbFcUJ30w"/>
+</div>
+</header>
+<main class="px-6 pt-4 pb-32 space-y-8">
+<section class="space-y-4">
+<div class="p-8 rounded-[2rem] bg-[#67594e] text-white relative overflow-hidden">
+<div class="relative z-10">
+<h2 class="text-3xl font-headline mb-2">Good morning, Elena.</h2>
+<p class="font-body opacity-90">How are you feeling in your cycle today?</p>
+</div>
+<div class="absolute -right-12 -top-12 w-48 h-48 bg-[#D8C9E0] opacity-20 rounded-full blur-3xl"></div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-white p-6 rounded-xl shadow-sm border border-[#EAE6E0]/30">
+<p class="text-xs uppercase tracking-widest text-[#9B8B7E] font-label mb-1">Cycle Day</p>
+<p class="text-2xl font-headline">14</p>
+</div>
+<div class="bg-white p-6 rounded-xl shadow-sm border border-[#EAE6E0]/30">
+<p class="text-xs uppercase tracking-widest text-[#9B8B7E] font-label mb-1">Status</p>
+<p class="text-2xl font-headline">Ovulation</p>
+</div>
+</div>
+</section>
+</main>
+<div class="fixed inset-0 bg-[#3A3A3A]/40 z-[60] flex flex-col justify-end">
+<div class="bg-white rounded-t-[24px] w-full max-h-[795px] flex flex-col shadow-2xl relative">
+<div class="flex flex-col items-center pt-3 pb-4 px-6 border-b border-[#EAE6E0]/50 shrink-0">
+<div class="w-12 h-1.5 bg-[#D8C9E0] rounded-full mb-6"></div>
+<div class="flex justify-between items-start w-full">
+<div class="flex-1">
+<h2 class="text-[20px] font-headline text-[#3A3A3A]">Log Your Symptoms</h2>
+<p class="text-[13px] font-body text-[#7A7068] mt-0.5">Quickly batch log your daily symptoms</p>
+</div>
+<button class="w-11 h-11 flex items-center justify-center rounded-full hover:bg-stone-100 transition-colors">
+<span class="material-symbols-outlined text-[#B0A89E] text-[24px]">close</span>
+</button>
+</div>
+</div>
+<div class="overflow-y-auto px-6 py-6 space-y-8 pb-32">
+<div>
+<h3 class="text-[12px] font-label font-bold uppercase tracking-[0.15em] text-[#9B8B7E] mb-4">Logged today</h3>
+<div class="space-y-2">
+<div class="flex justify-between items-center py-2 px-1 border-b border-[#F2EDE7]">
+<span class="text-[#3A3A3A] font-medium text-[15px]">Hot flashes</span>
+<button class="text-[#B0A89E] hover:text-red-400">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<div class="flex justify-between items-center py-2 px-1 border-b border-[#F2EDE7]">
+<span class="text-[#3A3A3A] font-medium text-[15px]">Anxiety</span>
+<button class="text-[#B0A89E] hover:text-red-400">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<div class="flex justify-between items-center py-2 px-1 border-b border-[#F2EDE7]">
+<span class="text-[#3A3A3A] font-medium text-[15px]">Fatigue</span>
+<button class="text-[#B0A89E] hover:text-red-400">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+</div>
+</div>
+<div class="h-px w-full bg-[#EAE6E0]"></div>
+<div>
+<h3 class="text-[12px] font-label font-bold uppercase tracking-[0.15em] text-[#9B8B7E] mb-6">Add symptoms</h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-4">
+<input checked="" class="custom-checkbox" type="checkbox"/>
+<span class="text-[#3A3A3A] font-medium text-[15px]">Abdominal Pain</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[11px] font-bold text-[#B0A89E] uppercase tracking-wider">Level</span>
+<input class="intensity-input" max="5" min="1" type="number" value="2"/>
+</div>
+</div>
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-4">
+<input class="custom-checkbox" type="checkbox"/>
+<span class="text-[#3A3A3A] font-medium text-[15px]">Acne</span>
+</div>
+<div class="flex items-center gap-2 invisible group-has-[:checked]:visible">
+<span class="text-[11px] font-bold text-[#B0A89E] uppercase tracking-wider">Level</span>
+<input class="intensity-input" max="5" min="1" placeholder="-" type="number"/>
+</div>
+</div>
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-4">
+<input class="custom-checkbox" type="checkbox"/>
+<span class="text-[#3A3A3A] font-medium text-[15px]">Backache</span>
+</div>
+<div class="flex items-center gap-2 invisible group-has-[:checked]:visible">
+<span class="text-[11px] font-bold text-[#B0A89E] uppercase tracking-wider">Level</span>
+<input class="intensity-input" max="5" min="1" placeholder="-" type="number"/>
+</div>
+</div>
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-4">
+<input checked="" class="custom-checkbox" type="checkbox"/>
+<span class="text-[#3A3A3A] font-medium text-[15px]">Bloating</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[11px] font-bold text-[#B0A89E] uppercase tracking-wider">Level</span>
+<input class="intensity-input" max="5" min="1" type="number" value="3"/>
+</div>
+</div>
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-4">
+<input class="custom-checkbox" type="checkbox"/>
+<span class="text-[#3A3A3A] font-medium text-[15px]">Brain Fog</span>
+</div>
+<div class="flex items-center gap-2 invisible group-has-[:checked]:visible">
+<span class="text-[11px] font-bold text-[#B0A89E] uppercase tracking-wider">Level</span>
+<input class="intensity-input" max="5" min="1" placeholder="-" type="number"/>
+</div>
+</div>
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-4">
+<input class="custom-checkbox" type="checkbox"/>
+<span class="text-[#3A3A3A] font-medium text-[15px]">Breast Tenderness</span>
+</div>
+<div class="flex items-center gap-2 invisible group-has-[:checked]:visible">
+<span class="text-[11px] font-bold text-[#B0A89E] uppercase tracking-wider">Level</span>
+<input class="intensity-input" max="5" min="1" placeholder="-" type="number"/>
+</div>
+</div>
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-4">
+<input class="custom-checkbox" type="checkbox"/>
+<span class="text-[#3A3A3A] font-medium text-[15px]">Cramps</span>
+</div>
+<div class="flex items-center gap-2 invisible group-has-[:checked]:visible">
+<span class="text-[11px] font-bold text-[#B0A89E] uppercase tracking-wider">Level</span>
+<input class="intensity-input" max="5" min="1" placeholder="-" type="number"/>
+</div>
+</div>
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-4">
+<input class="custom-checkbox" type="checkbox"/>
+<span class="text-[#3A3A3A] font-medium text-[15px]">Dizziness</span>
+</div>
+<div class="flex items-center gap-2 invisible group-has-[:checked]:visible">
+<span class="text-[11px] font-bold text-[#B0A89E] uppercase tracking-wider">Level</span>
+<input class="intensity-input" max="5" min="1" placeholder="-" type="number"/>
+</div>
+</div>
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-4">
+<input class="custom-checkbox" type="checkbox"/>
+<span class="text-[#3A3A3A] font-medium text-[15px]">Headache</span>
+</div>
+<div class="flex items-center gap-2 invisible group-has-[:checked]:visible">
+<span class="text-[11px] font-bold text-[#B0A89E] uppercase tracking-wider">Level</span>
+<input class="intensity-input" max="5" min="1" placeholder="-" type="number"/>
+</div>
+</div>
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-4">
+<input class="custom-checkbox" type="checkbox"/>
+<span class="text-[#3A3A3A] font-medium text-[15px]">Insomnia</span>
+</div>
+<div class="flex items-center gap-2 invisible group-has-[:checked]:visible">
+<span class="text-[11px] font-bold text-[#B0A89E] uppercase tracking-wider">Level</span>
+<input class="intensity-input" max="5" min="1" placeholder="-" type="number"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="absolute bottom-0 left-0 w-full p-6 bg-white/95 backdrop-blur-sm border-t border-stone-50">
+<button class="w-full h-[52px] bg-[#6B5878] text-white rounded-[14px] font-bold text-base shadow-lg shadow-[#6B5878]/20 active:scale-[0.98] transition-transform">
+                    Save symptoms
+                </button>
+</div>
+</div>
+</div>
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-[#fef8f6]/70 backdrop-blur-xl shadow-[0_-4px_24px_rgba(29,27,26,0.06)] rounded-t-[2.5rem] border-t border-[#9B8B7E]/10">
+<a class="flex flex-col items-center justify-center bg-[#D8C9E0] text-[#1d1b1a] rounded-full px-5 py-2 active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined">auto_stories</span>
+<span class="font-sans text-[11px] uppercase tracking-wider mt-1">Journal</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] px-5 py-2" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-sans text-[11px] uppercase tracking-wider mt-1">Insights</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] px-5 py-2" href="#">
+<span class="material-symbols-outlined">diversity_1</span>
+<span class="font-sans text-[11px] uppercase tracking-wider mt-1">Community</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] px-5 py-2" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-sans text-[11px] uppercase tracking-wider mt-1">Profile</span>
+</a>
+</nav>
+
+</body></html>

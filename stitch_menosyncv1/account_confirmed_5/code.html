@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-bright": "#fef8f6",
+                        "secondary-fixed": "#edddf5",
+                        "surface-container": "#f2edea",
+                        "primary": "#67594e",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "secondary": "#655a6e",
+                        "on-tertiary-container": "#fffbff",
+                        "on-primary-fixed-variant": "#51443a",
+                        "outline": "#7f756e",
+                        "on-primary": "#ffffff",
+                        "surface-variant": "#e7e1df",
+                        "on-error": "#ffffff",
+                        "surface-dim": "#ded9d7",
+                        "background": "#fef8f6",
+                        "on-surface-variant": "#4d453f",
+                        "outline-variant": "#d0c4bc",
+                        "on-secondary-container": "#6c6074",
+                        "surface": "#fef8f6",
+                        "primary-fixed": "#f2dfd0",
+                        "inverse-surface": "#32302f",
+                        "tertiary-container": "#9d675c",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed": "#341009",
+                        "error-container": "#ffdad6",
+                        "secondary-container": "#edddf5",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "surface-container-highest": "#e7e1df",
+                        "on-primary-container": "#fffbff",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "surface-container-high": "#ede7e5",
+                        "tertiary-fixed": "#ffdad3",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "primary-container": "#817266",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "error": "#ba1a1a",
+                        "inverse-primary": "#d6c3b5",
+                        "inverse-on-surface": "#f5f0ed",
+                        "surface-tint": "#6a5c50",
+                        "tertiary": "#814f45",
+                        "on-surface": "#1d1b1a",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f8f2f0",
+                        "on-secondary-fixed": "#211828",
+                        "on-primary-fixed": "#231a11",
+                        "on-background": "#1d1b1a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: #fef8f6; /* cream background mapped to surface-bright */
+            overflow: hidden;
+        }
+        .serif {
+            font-family: 'Noto Serif', serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .filled-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-bright text-on-surface min-h-screen flex flex-col items-center">
+<!-- TopAppBar (Mapped from JSON logic for Step 5 of 7) -->
+<header class="fixed top-0 w-full z-50 bg-[#fef8f6]/70 dark:bg-stone-950/70 backdrop-blur-xl shadow-[0_24px_0_0_rgba(29,27,26,0.06)] flex justify-between items-center px-5 h-16">
+<div class="flex items-center gap-4">
+<button class="text-[#67594e] hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-['Noto_Serif'] text-lg tracking-tight text-[#67594e]">Step 5 of 7</h1>
+</div>
+<div class="font-['Noto_Serif'] font-bold text-[#67594e]">MenoSync</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="w-full max-w-[65%] flex flex-col items-center justify-center min-h-screen pt-20 pb-12">
+<!-- Progress Indicator -->
+<div class="w-full max-w-md mb-12">
+<div class="flex justify-between items-end mb-3">
+<span class="font-body text-xs font-semibold text-primary uppercase tracking-widest">Health Setup</span>
+<span class="font-body text-xs text-outline">70% Complete</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full transition-all duration-700 ease-out" style="width: 70%;"></div>
+</div>
+</div>
+<!-- Content Card: The Serene Curator Aesthetic -->
+<div class="w-full flex flex-col items-center text-center space-y-8">
+<!-- Illustration: Lavender, Taupe, Peachy vibe -->
+<div class="relative w-32 h-32 flex items-center justify-center">
+<div class="absolute inset-0 bg-secondary-container opacity-40 rounded-full blur-2xl"></div>
+<div class="relative z-10 w-20 h-20 bg-gradient-to-br from-secondary-container to-tertiary-fixed rounded-[2rem] flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-primary text-4xl font-bold filled-icon" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<!-- Decorative Elements -->
+<div class="absolute -top-2 -right-2 w-6 h-6 bg-tertiary-fixed rounded-full"></div>
+<div class="absolute bottom-4 -left-4 w-4 h-4 bg-secondary-fixed rounded-full"></div>
+</div>
+<!-- Title & Subtext -->
+<div class="space-y-3">
+<h2 class="serif text-4xl font-bold text-on-surface tracking-tight">Account Confirmed! ✓</h2>
+<p class="font-body text-sm text-on-surface-variant max-w-sm mx-auto">Your account is all set up and secure.</p>
+</div>
+<!-- Next Step Context -->
+<div class="bg-surface-container-low p-8 rounded-[2rem] max-w-xl w-full text-left space-y-6">
+<p class="font-body text-base text-on-surface leading-relaxed">
+                    Now let's set up your health profile. This takes about 3 minutes and helps us personalize your experience.
+                </p>
+<ul class="space-y-4">
+<li class="flex items-center gap-4 group">
+<div class="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-sm font-bold">check</span>
+</div>
+<span class="font-body text-sm text-on-surface-variant group-hover:text-on-surface transition-colors">Get personalized symptom insights</span>
+</li>
+<li class="flex items-center gap-4 group">
+<div class="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-sm font-bold">check</span>
+</div>
+<span class="font-body text-sm text-on-surface-variant group-hover:text-on-surface transition-colors">Generate reports for your doctor</span>
+</li>
+<li class="flex items-center gap-4 group">
+<div class="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-sm font-bold">check</span>
+</div>
+<span class="font-body text-sm text-on-surface-variant group-hover:text-on-surface transition-colors">Track your unique patterns</span>
+</li>
+</ul>
+</div>
+<!-- Action Cluster -->
+<div class="w-full max-w-md flex flex-col gap-4 pt-4">
+<button class="w-full py-4 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-[1.25rem] font-bold text-sm shadow-xl hover:opacity-90 active:scale-95 transition-all">
+                    Continue to Health Setup
+                </button>
+<button class="w-full py-4 bg-surface-container-lowest border border-outline-variant/30 text-primary rounded-[1.25rem] font-bold text-sm hover:bg-surface-container transition-colors">
+                    I'll Do This Later
+                </button>
+<a class="text-primary text-xs font-bold underline underline-offset-4 hover:text-primary-container transition-colors py-2" href="#">
+                    Skip for now
+                </a>
+</div>
+<!-- Security Footer -->
+<div class="flex items-center gap-2 text-outline-variant pt-4">
+<span class="material-symbols-outlined text-base">lock</span>
+<span class="font-body text-[11px] uppercase tracking-widest font-medium">Your data is encrypted and never shared</span>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Suppressed for Transactional Journey (Onboarding) -->
+</body></html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Forgot Password</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#6c6074",
+                        "surface-container-low": "#f8f2f0",
+                        "on-surface": "#1d1b1a",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "surface-container-highest": "#e7e1df",
+                        "primary": "#67594e",
+                        "tertiary-container": "#9d675c",
+                        "outline-variant": "#d0c4bc",
+                        "on-tertiary-fixed": "#341009",
+                        "surface-tint": "#6a5c50",
+                        "background": "#fef8f6",
+                        "surface-variant": "#e7e1df",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed": "#211828",
+                        "inverse-surface": "#32302f",
+                        "on-tertiary-container": "#fffbff",
+                        "inverse-on-surface": "#f5f0ed",
+                        "outline": "#7f756e",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "inverse-primary": "#d6c3b5",
+                        "surface-container-high": "#ede7e5",
+                        "surface-bright": "#fef8f6",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "surface-dim": "#ded9d7",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "tertiary": "#814f45",
+                        "surface-container": "#f2edea",
+                        "on-primary-fixed": "#231a11",
+                        "secondary-container": "#edddf5",
+                        "primary-container": "#817266",
+                        "surface": "#fef8f6",
+                        "on-surface-variant": "#4d453f",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "secondary": "#655a6e",
+                        "on-error": "#ffffff",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "on-primary-fixed-variant": "#51443a",
+                        "primary-fixed": "#f2dfd0",
+                        "error-container": "#ffdad6",
+                        "on-primary-container": "#fffbff",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "on-background": "#1d1b1a",
+                        "tertiary-fixed": "#ffdad3",
+                        "secondary-fixed": "#edddf5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "px": "1px",
+                        "4": "1rem",
+                        "5": "1.25rem",
+                        "6": "1.5rem",
+                        "8": "2rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif", "serif"],
+                        "display": ["Noto Serif", "serif"],
+                        "body": ["Manrope", "sans-serif"],
+                        "label": ["Manrope", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "label-md": ["0.875rem", { lineHeight: "1.25rem", letterSpacing: "0.01em", fontWeight: "500" }],
+                        "title-sm": ["0.875rem", { lineHeight: "1.25rem", letterSpacing: "0.007em", fontWeight: "500" }],
+                        "title-lg": ["1.375rem", { lineHeight: "1.75rem", letterSpacing: "0em", fontWeight: "400" }],
+                        "headline-md": ["1.75rem", { lineHeight: "2.25rem", letterSpacing: "0em", fontWeight: "400" }],
+                        "display-lg": ["3.5rem", { lineHeight: "4rem", letterSpacing: "-0.01em", fontWeight: "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
+<!-- Top Navigation Suppressed: Transactional screen (Forgot Password) -->
+<!-- Ambient Background Elements for Depth -->
+<div class="absolute inset-0 z-0 pointer-events-none" style="background: radial-gradient(circle at 50% -20%, var(--tw-colors-secondary-container) 0%, transparent 60%); opacity: 0.3;"></div>
+<div class="relative z-10 w-full max-w-md px-5 flex flex-col items-center">
+<!-- Illustrative Header Section -->
+<div class="w-full mb-8 relative rounded-[2rem] overflow-hidden aspect-[1.83] shadow-[0_24px_48px_-12px_rgba(29,27,26,0.06)] bg-surface-container-highest">
+<img alt="Abstract soothing illustration" class="w-full h-full object-cover" data-alt="A soft, abstract digital illustration featuring flowing, organic shapes in warm taupe and gentle lavender tones. The artwork has a calming, ethereal quality with smooth, blended gradients that evoke a sense of tranquility and reassurance. The composition is loose and airy, creating a comforting visual embrace. Soft, diffused light illuminates the gentle curves, fitting perfectly within a premium, supportive wellness aesthetic." src="https://lh3.googleusercontent.com/aida/ADBb0uhXMQAM0I5cp27WfHNJWhtYt4M5TJYCAcv1lzKoQgqYjKoiMgPBCrVz_cyGaPJ96St0K48pXbbqIzLmmB0llOMrURsubpka-32Od1iozMkYNm9EyVUwfKmqO098Rv1ipMDR-omFscI8Ri7XFnZVuxuqfMMoNjnK2t4zl7B65ceRkof-V3YHs5V2Y3g7tIN-zdVfgh_PEUb21v-5Gztaw3E6gYaWrgtUVkcMdffEb_L1EloTMhlhH9IHol0"/>
+<!-- Soft Gradient Overlay to blend with background -->
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest to-transparent opacity-80"></div>
+<!-- Icon/Logo element floating within the illustration area -->
+<div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center justify-center w-16 h-16 rounded-full bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_8px_16px_0_rgba(29,27,26,0.04)]">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">lock_reset</span>
+</div>
+</div>
+<!-- Typography & Content -->
+<div class="text-center mb-8 px-4">
+<h1 class="font-headline text-headline-md text-primary mb-3">Reset Password</h1>
+<p class="font-body text-title-sm text-on-surface-variant max-w-[280px] mx-auto leading-relaxed">
+                Take a deep breath. Enter the email associated with your account, and we’ll send you a link to get back in.
+            </p>
+</div>
+<!-- Form Card Container -->
+<div class="w-full bg-surface-container-lowest/70 backdrop-blur-[20px] rounded-[2rem] p-8 shadow-[0_8px_24px_0_rgba(29,27,26,0.04)] border border-outline-variant/15 relative overflow-hidden">
+<!-- Subtle internal glow -->
+<div class="absolute -top-10 -left-10 w-32 h-32 bg-secondary-container/20 rounded-full blur-3xl pointer-events-none"></div>
+<form class="flex flex-col space-y-6 relative z-10">
+<!-- Email Input -->
+<div class="flex flex-col space-y-2 relative">
+<label class="font-label text-label-md text-on-surface pl-4 absolute -top-2 left-2 bg-surface-container-lowest px-2 py-0 rounded-full z-10" for="email">Email Address</label>
+<input class="w-full bg-surface-container-highest text-on-surface placeholder:text-outline border-none rounded-full py-4 px-6 font-body focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all shadow-inner" id="email" placeholder="your@email.com" required="" type="email"/>
+</div>
+<!-- Action Buttons -->
+<div class="pt-4 flex flex-col space-y-4">
+<!-- Primary Button (Gradient Pill) -->
+<button class="w-full rounded-full py-4 px-6 bg-gradient-to-br from-primary to-primary-container text-on-primary font-body text-title-sm shadow-[0_8px_20px_-4px_rgba(103,89,78,0.3)] hover:opacity-90 active:scale-[0.98] transition-all duration-300" type="submit">
+                        Send Reset Link
+                    </button>
+<!-- Tertiary Action (Return) -->
+<button class="w-full py-3 text-primary font-body text-title-sm hover:text-primary-container transition-colors duration-200" type="button">
+                        Return to Login
+                    </button>
+</div>
+</form>
+</div>
+</div>
+<!-- Bottom Navigation Suppressed: Transactional screen (Forgot Password) -->
+</body></html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-surface-variant": "#4d453f",
+                    "outline-variant": "#d0c4bc",
+                    "on-secondary-container": "#6c6074",
+                    "surface-dim": "#ded9d7",
+                    "background": "#fef8f6",
+                    "surface-variant": "#e7e1df",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "tertiary-container": "#9d675c",
+                    "on-error-container": "#93000a",
+                    "on-tertiary-fixed": "#341009",
+                    "surface": "#fef8f6",
+                    "primary-fixed": "#f2dfd0",
+                    "inverse-surface": "#32302f",
+                    "secondary-fixed": "#edddf5",
+                    "surface-bright": "#fef8f6",
+                    "on-primary": "#ffffff",
+                    "outline": "#7f756e",
+                    "secondary": "#655a6e",
+                    "on-tertiary-container": "#fffbff",
+                    "on-primary-fixed-variant": "#51443a",
+                    "surface-container": "#f2edea",
+                    "primary": "#67594e",
+                    "on-secondary-fixed-variant": "#4d4355",
+                    "surface-tint": "#6a5c50",
+                    "tertiary-fixed-dim": "#f9b7a9",
+                    "error": "#ba1a1a",
+                    "inverse-primary": "#d6c3b5",
+                    "inverse-on-surface": "#f5f0ed",
+                    "primary-container": "#817266",
+                    "on-primary-fixed": "#231a11",
+                    "on-background": "#1d1b1a",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-low": "#f8f2f0",
+                    "on-secondary-fixed": "#211828",
+                    "tertiary": "#814f45",
+                    "on-surface": "#1d1b1a",
+                    "secondary-container": "#edddf5",
+                    "secondary-fixed-dim": "#d0c1d8",
+                    "on-secondary": "#ffffff",
+                    "tertiary-fixed": "#ffdad3",
+                    "on-tertiary-fixed-variant": "#683a31",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed-dim": "#d6c3b5",
+                    "surface-container-high": "#ede7e5",
+                    "surface-container-highest": "#e7e1df",
+                    "on-primary-container": "#fffbff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "2xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif", "serif"],
+                    "body": ["Manrope", "sans-serif"],
+                    "label": ["Manrope", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        font-family: 'Manrope', sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .serif-display {
+        font-family: 'Noto Serif', serif;
+      }.above-the-fold {
+        min-height: calc(100vh - 140px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#F7F5F0] text-on-surface flex flex-col items-center">
+<header class="sticky top-0 w-full z-50 bg-[#F7F5F0]/90 backdrop-blur-md flex items-center justify-between px-6 py-4">
+<div class="flex items-center gap-4">
+<button class="hover:opacity-80 transition-opacity active:scale-95 text-stone-700">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+<h1 class="serif-display text-stone-900 text-[18px] font-semibold">Unlock Premium</h1>
+</div>
+</header>
+<main class="w-full max-w-md px-5 flex flex-col items-center">
+<section class="above-the-fold w-full pt-4 pb-8">
+<div class="text-center mb-6">
+<h2 class="serif-display text-stone-900 text-2xl font-bold mb-2">Upgrade Your Journey</h2>
+<p class="text-stone-500 text-[13px] max-w-xs mx-auto leading-tight">Master your health with AI correlations and expert reports.</p>
+</div>
+<div class="bg-surface-container-high p-1 rounded-full flex items-center mb-6 w-full max-w-[280px] mx-auto shadow-inner border border-stone-200">
+<button class="flex-1 py-1.5 px-4 rounded-full text-xs font-semibold transition-all bg-transparent text-stone-500">Monthly</button>
+<button class="flex-1 py-1.5 px-4 rounded-full text-xs font-semibold transition-all bg-primary text-white flex items-center justify-center gap-1.5">
+                Annually
+                <span class="bg-[#e7f5e9] text-[#2e7d32] text-[9px] px-1.5 py-0.5 rounded-full font-bold">Save 33%</span>
+</button>
+</div>
+<div class="bg-[#E8E0F0] border-2 border-primary/40 rounded-2xl p-6 flex flex-col relative shadow-md">
+<div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
+                Efficient Choice
+            </div>
+<div class="flex justify-between items-start mb-5 mt-1">
+<div>
+<h3 class="text-secondary font-bold text-[10px] uppercase tracking-widest">Premium Plan</h3>
+<div class="flex items-baseline gap-1">
+<span class="text-2xl font-bold text-stone-900">$9.99</span>
+<span class="text-stone-500 text-xs">/mo</span>
+</div>
+</div>
+<div class="text-right">
+<span class="text-[10px] font-bold text-primary uppercase block">7-Day Free Trial</span>
+<span class="text-stone-400 text-[10px]">Cancel anytime</span>
+</div>
+</div>
+<ul class="grid grid-cols-1 gap-y-2.5 mb-6">
+<li class="flex items-center gap-2.5 text-stone-800 text-[13px] font-medium leading-none">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                    Unlimited Symptom Tracking
+                </li>
+<li class="flex items-center gap-2.5 text-stone-800 text-[13px] font-medium leading-none">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                    AI-Powered Trigger Correlations
+                </li>
+<li class="flex items-center gap-2.5 text-stone-800 text-[13px] font-medium leading-none">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                    Personalized Doctor Reports
+                </li>
+<li class="flex items-center gap-2.5 text-stone-800 text-[13px] font-medium leading-none">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                    Apple Health Integration
+                </li>
+</ul>
+<button class="w-full py-4 rounded-xl bg-primary text-white font-bold text-[15px] shadow-lg active:scale-[0.98] transition-transform">
+                Start Free Trial
+            </button>
+<p class="text-center text-stone-500 text-[10px] mt-3">
+                Current plan: Basic ($0) • <a class="underline" href="#">Switch to Basic</a>
+</p>
+</div>
+</section>
+<section class="w-full pt-12 pb-20 border-t border-stone-200">
+<div class="grid grid-cols-3 gap-2 w-full mb-12">
+<div class="flex flex-col items-center text-center px-1">
+<span class="material-symbols-outlined text-stone-400 text-xl mb-1.5" data-icon="lock">lock</span>
+<span class="text-[9px] font-bold text-stone-500 uppercase leading-none">Secure Payment</span>
+</div>
+<div class="flex flex-col items-center text-center px-1 border-x border-stone-200">
+<span class="material-symbols-outlined text-stone-400 text-xl mb-1.5" data-icon="shield_person">shield_person</span>
+<span class="text-[9px] font-bold text-stone-500 uppercase leading-none">Data Privacy</span>
+</div>
+<div class="flex flex-col items-center text-center px-1">
+<span class="material-symbols-outlined text-stone-400 text-xl mb-1.5" data-icon="verified_user">verified_user</span>
+<span class="text-[9px] font-bold text-stone-500 uppercase leading-none">Money-Back</span>
+</div>
+</div>
+<h4 class="serif-display text-stone-800 text-lg font-bold mb-6 text-center">Frequently Asked Questions</h4>
+<div class="space-y-3 mb-12">
+<div class="bg-white/50 border border-stone-100 rounded-xl p-4">
+<div class="flex items-center justify-between">
+<h5 class="text-[13px] font-bold text-stone-700">Can I cancel anytime?</h5>
+<span class="material-symbols-outlined text-stone-400 text-[20px]" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<div class="bg-white/50 border border-stone-100 rounded-xl p-4">
+<div class="flex items-center justify-between">
+<h5 class="text-[13px] font-bold text-stone-700">What if I don't like Premium?</h5>
+<span class="material-symbols-outlined text-stone-400 text-[20px]" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<div class="bg-white/50 border border-stone-100 rounded-xl p-4">
+<div class="flex items-center justify-between">
+<h5 class="text-[13px] font-bold text-stone-700">Is my payment secure?</h5>
+<span class="material-symbols-outlined text-stone-400 text-[20px]" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+</div>
+<div class="w-full rounded-2xl overflow-hidden mb-12 aspect-[21/9]">
+<img alt="Serene wellness scene" class="w-full h-full object-cover opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjMlK-cs1kNnG186NB4ZsI0bCENKKHCYePCE-cy3JqS8xEM5usMrEL7S5OuhH2PPp5VZL5nKoRrpTZhxI4Dgt7_SsZW97_5IXScN2hCGouyzxC5gbZpU5CKIWY9WBRGcIM7QFdpN3_99JQW8REUUTVcLpKF26T2jhkaeoZoeHSDWCN3qloOJK1Zr12YEE4mU_kOnOHPdWoC-DF8x4jMy3bkd2pDJvpDOz2vX3YSPk0PCfwUGBjoLBnmu7girZpkRVjeJe4g3IRESY"/>
+</div>
+<div class="flex justify-center gap-6 pb-24">
+<a class="text-[11px] font-bold text-stone-400 hover:text-primary" href="#">Privacy</a>
+<a class="text-[11px] font-bold text-stone-400 hover:text-primary" href="#">Terms</a>
+<a class="text-[11px] font-bold text-stone-400 hover:text-primary" href="#">Restore</a>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-[#F7F5F0]/90 backdrop-blur-xl z-50 border-t border-stone-200">
+<div class="flex flex-col items-center justify-center text-stone-400 px-4 py-1">
+<span class="material-symbols-outlined text-[22px]" data-icon="today">today</span>
+<span class="text-[10px] font-medium">Today</span>
+</div>
+<div class="flex flex-col items-center justify-center text-stone-400 px-4 py-1">
+<span class="material-symbols-outlined text-[22px]" data-icon="auto_stories">auto_stories</span>
+<span class="text-[10px] font-medium">Journal</span>
+</div>
+<div class="flex flex-col items-center justify-center text-stone-400 px-4 py-1">
+<span class="material-symbols-outlined text-[22px]" data-icon="insights">insights</span>
+<span class="text-[10px] font-medium">Insights</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-stone-200 text-stone-900 rounded-xl px-4 py-1.5">
+<span class="material-symbols-outlined text-[22px]" data-icon="person">person</span>
+<span class="text-[10px] font-medium">Account</span>
+</div>
+</nav>
+
+</body></html>

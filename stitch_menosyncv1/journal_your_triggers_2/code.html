@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Reflective Journaling</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-bright": "#fef8f6",
+                        "primary-fixed": "#f2dfd0",
+                        "primary-container": "#817266",
+                        "on-surface-variant": "#4d453f",
+                        "surface-container-high": "#ede7e5",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed": "#341009",
+                        "on-secondary-container": "#6c6074",
+                        "inverse-surface": "#32302f",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#edddf5",
+                        "on-tertiary": "#ffffff",
+                        "surface-dim": "#ded9d7",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "surface-container-low": "#f8f2f0",
+                        "on-primary-fixed": "#231a11",
+                        "on-primary-container": "#fffbff",
+                        "surface": "#fef8f6",
+                        "secondary": "#655a6e",
+                        "tertiary-fixed": "#ffdad3",
+                        "surface-container-highest": "#e7e1df",
+                        "on-background": "#1d1b1a",
+                        "on-surface": "#1d1b1a",
+                        "surface-variant": "#e7e1df",
+                        "primary": "#67594e",
+                        "on-error": "#ffffff",
+                        "inverse-on-surface": "#f5f0ed",
+                        "surface-container": "#f2edea",
+                        "inverse-primary": "#d6c3b5",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "on-tertiary-container": "#fffbff",
+                        "on-primary": "#ffffff",
+                        "background": "#fef8f6",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "tertiary": "#814f45",
+                        "secondary-container": "#edddf5",
+                        "on-secondary-fixed": "#211828",
+                        "outline-variant": "#d0c4bc",
+                        "on-primary-fixed-variant": "#51443a",
+                        "surface-tint": "#6a5c50",
+                        "outline": "#7f756e",
+                        "error": "#ba1a1a",
+                        "tertiary-container": "#9d675c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Manrope', sans-serif; background-color: #F7F5F0; }
+        h1, h2, h3 { font-family: 'Noto Serif', serif; }
+        .glass-header {
+            background: rgba(247, 245, 240, 0.85);
+            backdrop-filter: blur(12px);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        textarea::placeholder {
+            font-family: 'Noto Serif', serif;
+            font-style: italic;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface min-h-screen flex flex-col">
+<header class="sticky top-0 w-full z-50 glass-header border-b border-outline-variant/20">
+<div class="flex justify-between items-center px-5 h-16 w-full">
+<button class="text-[#67594e] hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline text-lg tracking-tight text-[#67594e] font-bold">Journal Your Influences</h1>
+<button class="text-[#67594e] hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+<div class="w-full h-1 bg-surface-container-highest">
+<div class="h-full w-full bg-[#9B8B7E]"></div>
+</div>
+</header>
+<main class="flex-1 px-6 pt-8 pb-32 max-w-md mx-auto w-full flex flex-col">
+<div class="mb-6">
+<h2 class="text-2xl font-headline mb-2 text-on-surface">Daily Reflection</h2>
+<p class="text-on-surface-variant font-body text-sm">A quiet space for your thoughts and minor lifestyle logs.</p>
+</div>
+<div class="mb-8">
+<div class="flex items-center justify-between mb-3 px-1">
+<span class="text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">Quick Logs</span>
+</div>
+<div class="flex gap-4 overflow-x-auto hide-scrollbar py-2 -mx-2 px-2">
+<button class="flex-shrink-0 flex flex-col items-center gap-2 group">
+<div class="w-14 h-14 rounded-full bg-white border border-outline-variant/30 shadow-sm flex items-center justify-center group-active:scale-95 transition-all text-primary">
+<span class="material-symbols-outlined text-2xl" data-icon="coffee">coffee</span>
+</div>
+<span class="text-[10px] font-semibold text-on-surface-variant">Caffeine</span>
+</button>
+<button class="flex-shrink-0 flex flex-col items-center gap-2 group">
+<div class="w-14 h-14 rounded-full bg-white border border-outline-variant/30 shadow-sm flex items-center justify-center group-active:scale-95 transition-all text-primary">
+<span class="material-symbols-outlined text-2xl" data-icon="wine_bar">wine_bar</span>
+</div>
+<span class="text-[10px] font-semibold text-on-surface-variant">Alcohol</span>
+</button>
+<button class="flex-shrink-0 flex flex-col items-center gap-2 group">
+<div class="w-14 h-14 rounded-full bg-white border border-outline-variant/30 shadow-sm flex items-center justify-center group-active:scale-95 transition-all text-primary">
+<span class="material-symbols-outlined text-2xl" data-icon="psychology">psychology</span>
+</div>
+<span class="text-[10px] font-semibold text-on-surface-variant">Stress</span>
+</button>
+<button class="flex-shrink-0 flex flex-col items-center gap-2 group">
+<div class="w-14 h-14 rounded-full bg-white border border-outline-variant/30 shadow-sm flex items-center justify-center group-active:scale-95 transition-all text-primary">
+<span class="material-symbols-outlined text-2xl" data-icon="restaurant">restaurant</span>
+</div>
+<span class="text-[10px] font-semibold text-on-surface-variant">Food</span>
+</button>
+<button class="flex-shrink-0 flex flex-col items-center gap-2 group opacity-60">
+<div class="w-14 h-14 rounded-full bg-white border border-outline-variant/30 shadow-sm flex items-center justify-center group-active:scale-95 transition-all text-primary">
+<span class="material-symbols-outlined text-2xl" data-icon="fitness_center">fitness_center</span>
+</div>
+<span class="text-[10px] font-semibold text-on-surface-variant">Exercise</span>
+</button>
+</div>
+</div>
+<section class="flex-1 flex flex-col">
+<div class="flex items-center gap-2 mb-4 px-1">
+<h3 class="font-headline text-xl text-on-surface">Evening Thoughts</h3>
+</div>
+<div class="flex-1 min-h-[300px] bg-white rounded-3xl shadow-sm border border-outline-variant/20 p-6 flex flex-col relative">
+<textarea class="w-full flex-1 bg-transparent border-none focus:ring-0 font-headline italic text-lg leading-relaxed text-on-surface placeholder:text-outline/40 resize-none p-0" placeholder="How did you feel today? Were there any moments of calm or tension you'd like to remember?"></textarea>
+<div class="absolute bottom-6 right-6 text-outline/30">
+<span class="material-symbols-outlined text-3xl">edit_note</span>
+</div>
+</div>
+</section>
+</main>
+<div class="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-[#F7F5F0] via-[#F7F5F0] to-transparent pointer-events-none">
+<div class="max-w-md mx-auto pointer-events-auto">
+<button class="w-full h-16 bg-[#9B8B7E] text-white rounded-full text-lg font-bold shadow-lg shadow-primary/20 flex items-center justify-center gap-2 active:scale-[0.98] transition-transform">
+            Save Log
+            <span class="material-symbols-outlined" data-icon="done_all">done_all</span>
+</button>
+</div>
+</div>
+
+</body></html>

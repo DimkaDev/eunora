@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-surface-variant": "#4d453f",
+                    "outline-variant": "#d0c4bc",
+                    "on-secondary-container": "#6c6074",
+                    "surface-dim": "#ded9d7",
+                    "background": "#fef8f6",
+                    "surface-variant": "#e7e1df",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "tertiary-container": "#9d675c",
+                    "on-error-container": "#93000a",
+                    "on-tertiary-fixed": "#341009",
+                    "surface": "#fef8f6",
+                    "primary-fixed": "#f2dfd0",
+                    "inverse-surface": "#32302f",
+                    "secondary-fixed": "#edddf5",
+                    "surface-bright": "#fef8f6",
+                    "on-primary": "#ffffff",
+                    "outline": "#7f756e",
+                    "secondary": "#655a6e",
+                    "on-tertiary-container": "#fffbff",
+                    "on-primary-fixed-variant": "#51443a",
+                    "surface-container": "#f2edea",
+                    "primary": "#67594e",
+                    "on-secondary-fixed-variant": "#4d4355",
+                    "surface-tint": "#6a5c50",
+                    "tertiary-fixed-dim": "#f9b7a9",
+                    "error": "#ba1a1a",
+                    "inverse-primary": "#d6c3b5",
+                    "inverse-on-surface": "#f5f0ed",
+                    "primary-container": "#817266",
+                    "on-primary-fixed": "#231a11",
+                    "on-background": "#1d1b1a",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-low": "#f8f2f0",
+                    "on-secondary-fixed": "#211828",
+                    "tertiary": "#814f45",
+                    "on-surface": "#1d1b1a",
+                    "secondary-container": "#edddf5",
+                    "secondary-fixed-dim": "#d0c1d8",
+                    "on-secondary": "#ffffff",
+                    "tertiary-fixed": "#ffdad3",
+                    "on-tertiary-fixed-variant": "#683a31",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed-dim": "#d6c3b5",
+                    "surface-container-high": "#ede7e5",
+                    "surface-container-highest": "#e7e1df",
+                    "on-primary-container": "#fffbff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif"],
+                    "body": ["Manrope"],
+                    "label": ["Manrope"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #9B8B7E;
+            border-radius: 10px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-background selection:bg-secondary-container selection:text-on-secondary-container">
+<!-- Scroll Indicator (Mandatory Layout Element) -->
+<div class="fixed top-0 left-0 w-full z-[60] h-[2px] bg-outline-variant/20">
+<div class="h-full bg-primary w-1/3"></div>
+</div>
+<!-- TopAppBar (Shared Component) -->
+<header class="fixed top-0 w-full z-50 bg-[#fef8f6]/70 dark:bg-[#1d1b1a]/70 backdrop-blur-xl border-b border-surface-container-high shadow-none">
+<div class="flex items-center px-5 py-4 w-full h-16">
+<div class="flex-none">
+<span class="material-symbols-outlined text-[#67594e] dark:text-[#f2edea] cursor-pointer active:scale-95 duration-150" data-icon="arrow_back">arrow_back</span>
+</div>
+<div class="flex-1 text-center">
+<h1 class="font-['Noto_Serif'] text-xl font-semibold tracking-tight text-[#67594e] dark:text-[#f2edea]">Terms &amp; Conditions</h1>
+</div>
+<div class="flex-none">
+<span class="font-label text-[10px] font-bold uppercase tracking-widest text-[#9B8B7E]">Updated 10/23</span>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-20 pb-32 px-[1.7rem]">
+<div class="max-w-2xl mx-auto space-y-10">
+<!-- Editorial Header for Wellness Feel -->
+<div class="mt-8 mb-12">
+<h2 class="font-headline text-[1.75rem] leading-tight text-primary mb-4">Agreement to Terms</h2>
+<p class="text-on-surface-variant font-body text-[14px] leading-relaxed italic">
+                    Welcome to MenoSync. Before you begin your journey toward holistic wellness balance, please review our usage guidelines.
+                </p>
+</div>
+<!-- Content Sections with Asymmetrical Styling -->
+<div class="space-y-12">
+<!-- 1. User Agreement -->
+<section class="group">
+<div class="flex items-baseline space-x-3 mb-4">
+<span class="font-headline text-2xl text-tertiary-container/40">01</span>
+<h3 class="font-bold text-[13px] uppercase tracking-[0.1em] text-on-surface">User Agreement</h3>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl">
+<p class="text-[12px] leading-[1.6] text-on-surface-variant">
+                            By accessing MenoSync, you agree to be bound by these Terms of Service and all applicable laws and regulations. This app is designed for symptom tracking and wellness education for women transitioning through menopause. You must provide accurate registration information and maintain the security of your account credentials. Your use of the service constitutes your full acceptance of these legally binding terms.
+                        </p>
+</div>
+</section>
+<!-- 2. Acceptable Use -->
+<section class="group">
+<div class="flex items-baseline space-x-3 mb-4">
+<span class="font-headline text-2xl text-tertiary-container/40">02</span>
+<h3 class="font-bold text-[13px] uppercase tracking-[0.1em] text-on-surface">Acceptable Use</h3>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/10">
+<p class="text-[12px] leading-[1.6] text-on-surface-variant">
+                            MenoSync is a space for personal wellness reflection. You agree not to: (a) Use the tracker for any unlawful purposes; (b) Attempt to decompile or reverse engineer any software contained in the app; (c) Harvest data or personal information from other users; (d) Input false or misleading health data with the intent to manipulate system insights. We reserve the right to terminate access for behavior that compromises our serene community standards.
+                        </p>
+</div>
+</section>
+<!-- 3. Limitation of Liability -->
+<section class="group">
+<div class="flex items-baseline space-x-3 mb-4">
+<span class="font-headline text-2xl text-tertiary-container/40">03</span>
+<h3 class="font-bold text-[13px] uppercase tracking-[0.1em] text-on-surface">Limitation of Liability</h3>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl">
+<div class="border-l-2 border-primary-container pl-4">
+<p class="text-[12px] font-bold text-primary mb-2">NOT MEDICAL ADVICE</p>
+<p class="text-[12px] leading-[1.6] text-on-surface-variant">
+                                MenoSync is a supportive tool, not a medical provider. The insights, tracking, and content provided are for informational purposes only. We do not guarantee the accuracy of symptom correlations. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition. In no event shall MenoSync be liable for any damages arising out of the use or inability to use the materials on our platform.
+                            </p>
+</div>
+</div>
+</section>
+<!-- 4. Changes to Terms -->
+<section class="group">
+<div class="flex items-baseline space-x-3 mb-4">
+<span class="font-headline text-2xl text-tertiary-container/40">04</span>
+<h3 class="font-bold text-[13px] uppercase tracking-[0.1em] text-on-surface">Changes to Terms</h3>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/10">
+<p class="text-[12px] leading-[1.6] text-on-surface-variant">
+                            As MenoSync evolves to better serve your needs, we may update these terms. Any changes will be posted here with an updated "Effective Date." Continued use of the app after such changes constitutes your acceptance of the new Terms &amp; Conditions. We recommend periodic review to stay informed about your rights and obligations.
+                        </p>
+</div>
+</section>
+<!-- Final Legal Disclaimer -->
+<div class="pt-8 pb-12 border-t border-outline-variant/20">
+<p class="text-center font-label text-[11px] text-outline italic">
+                        (14) Please review carefully
+                    </p>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Shared Component - Specialized as Transactional Footer) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-between items-center px-4 pb-10 pt-4 bg-[#fef8f6]/70 dark:bg-[#1d1b1a]/70 backdrop-blur-xl z-50 rounded-t-3xl shadow-[0_-4px_24px_rgba(29,27,26,0.06)]">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#9B8B7E]/20 to-transparent"></div>
+<!-- Decline Button -->
+<button class="flex-1 flex items-center justify-center py-3 bg-white border border-[#9B8B7E] text-[#67594e] rounded-full mx-2 font-['Manrope'] text-sm font-bold uppercase tracking-wider active:scale-[0.98] transition-all hover:bg-surface-container-low">
+<span class="material-symbols-outlined mr-2" data-icon="close">close</span>
+            Decline
+        </button>
+<!-- Accept Button (Initially Disabled State per logic, but styled for brand) -->
+<button class="flex-1 flex items-center justify-center py-3 bg-[#CCCCCC] text-on-surface-variant/50 rounded-full mx-2 font-['Manrope'] text-sm font-bold uppercase tracking-wider cursor-not-allowed">
+<span class="material-symbols-outlined mr-2" data-icon="check_circle">check_circle</span>
+            Accept Terms
+        </button>
+</nav>
+<!-- Visual Anchor Ornament (Subtle Branding) -->
+<div class="fixed top-1/2 -right-20 -translate-y-1/2 opacity-10 pointer-events-none rotate-90">
+<p class="font-headline text-7xl text-primary select-none whitespace-nowrap">MENOSYNC WELLNESS</p>
+</div>
+</body></html>

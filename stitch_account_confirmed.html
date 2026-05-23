@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Account Confirmed | MenoSync</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-tint": "#6a5c50",
+            "on-surface-variant": "#4d453f",
+            "surface-container-high": "#ede7e5",
+            "primary-fixed-dim": "#d6c3b5",
+            "secondary-fixed-dim": "#d0c1d8",
+            "on-primary": "#ffffff",
+            "error": "#ba1a1a",
+            "secondary-fixed": "#edddf5",
+            "on-primary-fixed-variant": "#51443a",
+            "surface-container": "#f2edea",
+            "on-tertiary-fixed": "#341009",
+            "on-primary-container": "#fffbff",
+            "surface-container-lowest": "#ffffff",
+            "on-secondary-fixed": "#211828",
+            "on-background": "#1d1b1a",
+            "primary-container": "#817266",
+            "inverse-on-surface": "#f5f0ed",
+            "surface-container-highest": "#e7e1df",
+            "secondary": "#655a6e",
+            "surface-container-low": "#f8f2f0",
+            "tertiary-container": "#9d675c",
+            "surface-bright": "#fef8f6",
+            "inverse-primary": "#d6c3b5",
+            "secondary-container": "#edddf5",
+            "on-surface": "#1d1b1a",
+            "tertiary": "#814f45",
+            "primary-fixed": "#f2dfd0",
+            "on-primary-fixed": "#231a11",
+            "on-tertiary-fixed-variant": "#683a31",
+            "on-error-container": "#93000a",
+            "surface": "#fef8f6",
+            "inverse-surface": "#32302f",
+            "outline-variant": "#d0c4bc",
+            "surface-dim": "#ded9d7",
+            "on-secondary-container": "#6c6074",
+            "on-secondary-fixed-variant": "#4d4355",
+            "tertiary-fixed": "#ffdad3",
+            "on-tertiary-container": "#fffbff",
+            "on-error": "#ffffff",
+            "primary": "#67594e",
+            "on-secondary": "#ffffff",
+            "background": "#fef8f6",
+            "tertiary-fixed-dim": "#f9b7a9",
+            "surface-variant": "#e7e1df",
+            "outline": "#7f756e",
+            "on-tertiary": "#ffffff",
+            "error-container": "#ffdad6"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "1.5rem",
+            "full": "9999px"
+          },
+          "fontFamily": {
+            "headline": ["Noto Serif"],
+            "body": ["Manrope"],
+            "label": ["Manrope"]
+          }
+        },
+      },
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Manrope', sans-serif;
+      background-color: #fef8f6;
+      /* Surface background */
+    }
+
+    .font-noto-serif {
+      font-family: 'Noto Serif', serif;
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+  <style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+
+<body class="flex flex-col min-h-screen text-on-surface">
+  <!-- TopAppBar Fragment (Logic: Sequential step, back prohibited to maintain confirmation flow) -->
+  <header
+    class="bg-[#fef8f6] dark:bg-[#1d1b1a] font-noto-serif text-headline-md tracking-tight flex justify-between items-center w-full px-5 py-4 docked full-width top-0 tonal-transition">
+    <div class="flex items-center gap-4">
+      <span
+        class="material-symbols-outlined text-[#9B8B7E] dark:text-[#D8C9E0] hover:opacity-80 transition-opacity cursor-pointer"
+        data-icon="arrow_back">arrow_back</span>
+      <h1 class="text-[#67594e] dark:text-[#f2edea] font-bold">Step 5 of 7</h1>
+    </div>
+    <div class="w-10"></div> <!-- Spacer for centering title if needed by 'small_center_aligned' type -->
+  </header>
+  <!-- Main Content Container -->
+  <main class="flex-grow flex flex-col items-center justify-center px-6 py-12 md:py-24">
+    <div class="w-full max-w-[420px] md:w-[65%] flex flex-col items-center text-center">
+      <!-- Progress Indicator Layer -->
+      <div class="w-full mb-12">
+        <div class="flex justify-between items-end mb-2">
+          <span class="text-[10px] uppercase tracking-widest text-outline font-semibold">Step 5 of 7 - Health
+            Setup</span>
+          <span class="text-[10px] font-bold text-primary">70%</span>
+        </div>
+        <div class="h-1 w-full bg-surface-container-highest rounded-full overflow-hidden">
+          <div class="h-full bg-primary-container w-[70%] rounded-full"></div>
+        </div>
+      </div>
+      <!-- Celebration Illustration -->
+      <div class="relative w-20 h-20 mb-8 flex items-center justify-center">
+        <div class="absolute inset-0 bg-secondary-fixed opacity-40 rounded-full blur-xl"></div>
+        <div
+          class="relative w-20 h-20 bg-gradient-to-br from-secondary-container to-tertiary-fixed rounded-2xl rotate-12 flex items-center justify-center shadow-sm">
+          <span class="material-symbols-outlined text-primary text-4xl -rotate-12" data-icon="check_circle"
+            style="font-variation-settings: 'FILL' 1;">check_circle</span>
+        </div>
+        <!-- Floating decorative "blobs" for asymmetric editorial feel -->
+        <div class="absolute -top-2 -right-2 w-4 h-4 bg-tertiary-fixed rounded-full opacity-60"></div>
+        <div class="absolute -bottom-1 -left-3 w-6 h-6 bg-secondary-fixed rounded-full opacity-50"></div>
+      </div>
+      <!-- Message Cluster -->
+      <div class="space-y-3 mb-10">
+        <h2 class="font-noto-serif text-2xl md:text-3xl text-on-surface font-bold">Account Confirmed! ✓</h2>
+        <p class="text-[13px] text-outline leading-relaxed font-medium">Your account is all set up and secure.</p>
+      </div>
+      <!-- Next Step Card -->
+      <div class="bg-surface-container-low p-6 rounded-xl w-full text-left mb-8 transition-all hover:shadow-sm">
+        <p class="text-[12px] text-on-surface leading-relaxed mb-6 font-medium">
+          Now let's set up your health profile. This takes about 3 minutes and helps us personalize your experience.
+        </p>
+        <ul class="space-y-4">
+          <li class="flex items-start gap-3">
+            <span class="material-symbols-outlined text-tertiary text-sm mt-0.5" data-icon="task_alt">task_alt</span>
+            <span class="text-[11px] text-on-surface-variant font-medium">Get personalized symptom insights</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="material-symbols-outlined text-tertiary text-sm mt-0.5" data-icon="task_alt">task_alt</span>
+            <span class="text-[11px] text-on-surface-variant font-medium">Generate reports for your doctor</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="material-symbols-outlined text-tertiary text-sm mt-0.5" data-icon="task_alt">task_alt</span>
+            <span class="text-[11px] text-on-surface-variant font-medium">Track your unique patterns</span>
+          </li>
+        </ul>
+      </div>
+      <!-- Action Cluster -->
+      <div class="w-full space-y-4 flex flex-col items-center">
+        <button
+          class="w-full py-4 px-6 bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold rounded-xl text-sm shadow-sm hover:opacity-90 active:scale-95 transition-all">
+          Continue to Health Setup
+        </button>
+        <button
+          class="w-full py-4 px-6 bg-surface-container-lowest border-2 border-primary-container text-primary-container font-bold rounded-xl text-sm hover:bg-surface-container-high transition-colors">
+          I'll Do This Later
+        </button>
+        <a class="text-[12px] text-primary underline underline-offset-4 font-semibold hover:text-primary-container transition-colors mt-2"
+          href="#">
+          Skip for now
+        </a>
+      </div>
+      <!-- Security Footer -->
+      <div class="mt-16 flex items-center gap-2 text-outline">
+        <span class="material-symbols-outlined text-sm" data-icon="lock">lock</span>
+        <span class="text-[10px] font-medium tracking-tight">Your data is encrypted and never shared</span>
+      </div>
+    </div>
+  </main>
+  <!-- BottomNavBar Suppressed (Logic: Transactional flow, requires focus on setup) -->
+</body>
+
+</html>

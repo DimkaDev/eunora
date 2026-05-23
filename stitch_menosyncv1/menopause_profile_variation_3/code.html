@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Symptom Journal - MenoSync Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Noto+Serif:ital,wght@0,400;0,500;0,700;1,400;1,700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error": "#ffffff",
+                    "secondary": "#655a6e",
+                    "surface": "#fef8f6",
+                    "on-secondary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "primary-fixed": "#f2dfd0",
+                    "primary": "#67594e",
+                    "on-primary-fixed": "#231a11",
+                    "inverse-surface": "#32302f",
+                    "on-background": "#1d1b1a",
+                    "secondary-fixed": "#edddf5",
+                    "surface-variant": "#e7e1df",
+                    "inverse-primary": "#d6c3b5",
+                    "background": "#fef8f6",
+                    "on-secondary-fixed": "#211828",
+                    "on-surface": "#1d1b1a",
+                    "inverse-on-surface": "#f5f0ed",
+                    "tertiary": "#814f45",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-bright": "#fef8f6",
+                    "on-tertiary": "#ffffff",
+                    "outline": "#7f756e",
+                    "on-tertiary-container": "#fffbff",
+                    "on-primary-fixed-variant": "#51443a",
+                    "surface-container-high": "#ede7e5",
+                    "primary-fixed-dim": "#d6c3b5",
+                    "surface-tint": "#6a5c50",
+                    "tertiary-container": "#9d675c",
+                    "on-surface-variant": "#4d453f",
+                    "tertiary-fixed": "#ffdad3",
+                    "surface-dim": "#ded9d7",
+                    "surface-container-low": "#f8f2f0",
+                    "on-primary-container": "#fffbff",
+                    "tertiary-fixed-dim": "#f9b7a9",
+                    "secondary-fixed-dim": "#d0c1d8",
+                    "surface-container": "#f2edea",
+                    "on-tertiary-fixed-variant": "#683a31",
+                    "outline-variant": "#d0c4bc",
+                    "on-secondary-container": "#6c6074",
+                    "surface-container-highest": "#e7e1df",
+                    "secondary-container": "#edddf5",
+                    "error": "#ba1a1a",
+                    "primary-container": "#817266",
+                    "on-tertiary-fixed": "#341009",
+                    "on-secondary-fixed-variant": "#4d4355",
+                    "on-primary": "#ffffff",
+                    "error-container": "#ffdad6"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {},
+            "fontFamily": {
+                    "headline": [
+                            "Noto Serif"
+                    ],
+                    "display": [
+                            "Noto Serif"
+                    ],
+                    "body": [
+                            "Manrope"
+                    ],
+                    "label": [
+                            "Manrope"
+                    ]
+            },
+            "fontSize": {}
+    },
+        },
+      }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="bg-[#fef8f6] dark:bg-stone-950 fixed top-0 w-full z-50 flex justify-between items-center w-full px-6 py-4">
+<button class="hover:bg-[#f2edea] dark:hover:bg-stone-800 transition-colors active:scale-95 duration-200 ease-in-out p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[#67594e] dark:text-[#9B8B7E]">close</span>
+</button>
+<h1 class="font-['Noto_Serif'] text-xl font-medium tracking-tight text-[#67594e] dark:text-[#9B8B7E]">Symptom Journal</h1>
+<div class="w-10 h-10"></div> <!-- Placeholder for balance -->
+</header>
+<!-- Separation Logic -->
+<div class="fixed top-[72px] bg-[#f2edea] dark:bg-stone-900 h-px w-full z-40"></div>
+<!-- Main Canvas -->
+<main class="pt-24 px-6 md:px-8 max-w-2xl mx-auto space-y-12">
+<!-- Hero Section / Context -->
+<section class="space-y-4">
+<h2 class="font-headline text-3xl font-medium text-primary tracking-tight">Your Profile</h2>
+<p class="font-body text-on-surface-variant leading-relaxed">Refining your details helps us tailor your insights and provide more accurate, supportive guidance along your journey.</p>
+</section>
+<!-- Form Sections -->
+<div class="space-y-10">
+<!-- HRT Status -->
+<section class="bg-surface-container-low rounded-xl p-8 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-tertiary-fixed/30 to-transparent rounded-bl-full pointer-events-none"></div>
+<h3 class="font-headline text-xl text-primary mb-6 relative z-10">Are you currently taking Hormone Replacement Therapy (HRT)?</h3>
+<div class="space-y-3 relative z-10">
+<label class="flex items-center space-x-4 p-4 rounded-xl bg-surface-container-lowest cursor-pointer transition-colors hover:bg-surface-container-high border border-outline-variant/15">
+<input class="form-radio text-tertiary-container focus:ring-tertiary-container h-5 w-5 bg-surface-container-highest border-outline-variant" name="hrt_status" type="radio" value="yes"/>
+<span class="font-body text-on-surface text-lg">Yes, I am on HRT</span>
+</label>
+<label class="flex items-center space-x-4 p-4 rounded-xl bg-secondary-container cursor-pointer transition-colors border border-outline-variant/15">
+<input checked="" class="form-radio text-tertiary-container focus:ring-tertiary-container h-5 w-5 bg-surface-container-highest border-outline-variant" name="hrt_status" type="radio" value="no"/>
+<span class="font-body text-on-surface text-lg">No, I am not</span>
+</label>
+<label class="flex items-center space-x-4 p-4 rounded-xl bg-surface-container-lowest cursor-pointer transition-colors hover:bg-surface-container-high border border-outline-variant/15">
+<input class="form-radio text-tertiary-container focus:ring-tertiary-container h-5 w-5 bg-surface-container-highest border-outline-variant" name="hrt_status" type="radio" value="considering"/>
+<span class="font-body text-on-surface text-lg">I'm considering it</span>
+</label>
+</div>
+</section>
+<!-- Image Insert -->
+<section class="rounded-xl overflow-hidden aspect-[1.83] relative w-full">
+<img alt="Soft abstract serene imagery" class="absolute inset-0 w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/ADBb0uhXMQAM0I5cp27WfHNJWhtYt4M5TJYCAcv1lzKoQgqYjKoiMgPBCrVz_cyGaPJ96St0K48pXbbqIzLmmB0llOMrURsubpka-32Od1iozMkYNm9EyVUwfKmqO098Rv1ipMDR-omFscI8Ri7XFnZVuxuqfMMoNjnK2t4zl7B65ceRkof-V3YHs5V2Y3g7tIN-zdVfgh_PEUb21v-5Gztaw3E6gYaWrgtUVkcMdffEb_L1EloTMhlhH9IHol0"/>
+</section>
+<!-- Period Timeline -->
+<section class="bg-surface-container rounded-xl p-8 shadow-[0_8px_24px_rgba(29,27,26,0.03)] relative">
+<h3 class="font-headline text-xl text-primary mb-6">When was your last period?</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<button class="bg-surface-container-lowest py-4 px-6 rounded-xl font-body text-on-surface text-left transition-colors hover:bg-surface-container-high focus:outline-none focus:ring-2 focus:ring-tertiary-container border border-outline-variant/15">
+                         Less than a month ago
+                     </button>
+<button class="bg-surface-container-lowest py-4 px-6 rounded-xl font-body text-on-surface text-left transition-colors hover:bg-surface-container-high focus:outline-none focus:ring-2 focus:ring-tertiary-container border border-outline-variant/15">
+                         1-6 months ago
+                     </button>
+<button class="bg-surface-container-lowest py-4 px-6 rounded-xl font-body text-on-surface text-left transition-colors hover:bg-surface-container-high focus:outline-none focus:ring-2 focus:ring-tertiary-container border border-outline-variant/15">
+                         6-12 months ago
+                     </button>
+<button class="bg-secondary-container py-4 px-6 rounded-xl font-body text-on-surface text-left transition-colors focus:outline-none focus:ring-2 focus:ring-tertiary-container border border-outline-variant/15">
+                         Over a year ago
+                     </button>
+</div>
+</section>
+<!-- Additional Detail Input -->
+<section class="space-y-2">
+<label class="block font-body text-sm font-medium text-on-surface-variant ml-2" for="cycle_notes">Any notes on your cycle regularity?</label>
+<textarea class="w-full bg-surface-container-highest border-none rounded-2xl p-4 font-body text-on-surface placeholder-on-surface-variant/50 focus:ring-2 focus:ring-primary-container" id="cycle_notes" placeholder="E.g., periods have become much heavier recently..." rows="3"></textarea>
+</section>
+</div>
+<!-- Action Button -->
+<div class="pt-8">
+<button class="w-full bg-gradient-to-br from-tertiary-container to-tertiary text-on-tertiary rounded-full py-4 text-lg font-body font-semibold tracking-wide shadow-[0_8px_24px_rgba(157,103,92,0.2)] hover:opacity-90 transition-opacity active:scale-[0.98]">
+                Save Profile Updates
+            </button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="bg-[#fef8f6]/70 backdrop-blur-xl dark:bg-stone-900/70 fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-4 rounded-t-[2rem] z-50 shadow-[0_-8px_30px_rgb(29,27,26,0.04)] hidden md:flex md:hidden">
+<div class="fixed top-0 bg-[#f2edea] dark:bg-stone-800 h-px w-full pointer-events-none"></div>
+<button class="flex flex-col items-center justify-center text-[#1d1b1a]/40 dark:text-stone-500 hover:text-[#67594e] dark:hover:text-[#9B8B7E] transition-all duration-300 ease-out group">
+<span class="material-symbols-outlined mb-1 group-active:scale-95 transition-transform" style="font-variation-settings: 'FILL' 0;">calendar_today</span>
+<span class="font-['Manrope'] text-[11px] font-semibold uppercase tracking-wider">Today</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#1d1b1a]/40 dark:text-stone-500 hover:text-[#67594e] dark:hover:text-[#9B8B7E] transition-all duration-300 ease-out group">
+<span class="material-symbols-outlined mb-1 group-active:scale-95 transition-transform" style="font-variation-settings: 'FILL' 0;">analytics</span>
+<span class="font-['Manrope'] text-[11px] font-semibold uppercase tracking-wider">Trends</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#1d1b1a]/40 dark:text-stone-500 hover:text-[#67594e] dark:hover:text-[#9B8B7E] transition-all duration-300 ease-out group">
+<span class="material-symbols-outlined mb-1 group-active:scale-95 transition-transform" style="font-variation-settings: 'FILL' 0;">auto_stories</span>
+<span class="font-['Manrope'] text-[11px] font-semibold uppercase tracking-wider">Journal</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#67594e] dark:text-[#D8C9E0] relative after:content-[''] after:absolute after:-bottom-1 after:w-1 after:h-1 after:bg-[#D8C9E0] after:rounded-full transition-all duration-300 ease-out group">
+<span class="material-symbols-outlined mb-1 group-active:scale-95 transition-transform" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-['Manrope'] text-[11px] font-semibold uppercase tracking-wider">Profile</span>
+</button>
+</nav>
+</body></html>

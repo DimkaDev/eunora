@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Edit Medication - MenoSync</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "surface-variant": "#e7e1df",
+                        "on-error-container": "#93000a",
+                        "inverse-surface": "#32302f",
+                        "on-secondary-fixed": "#211828",
+                        "on-secondary-container": "#6c6074",
+                        "secondary-fixed": "#edddf5",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "surface": "#fef8f6",
+                        "surface-container-high": "#ede7e5",
+                        "error": "#ba1a1a",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "outline-variant": "#d0c4bc",
+                        "error-container": "#ffdad6",
+                        "primary-container": "#817266",
+                        "outline": "#7f756e",
+                        "on-surface": "#1d1b1a",
+                        "secondary": "#655a6e",
+                        "on-error": "#ffffff",
+                        "surface-dim": "#ded9d7",
+                        "background": "#fef8f6",
+                        "surface-bright": "#fef8f6",
+                        "surface-container-highest": "#e7e1df",
+                        "inverse-primary": "#d6c3b5",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "primary": "#67594e",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f8f2f0",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed": "#231a11",
+                        "surface-container": "#f2edea",
+                        "on-primary-container": "#fffbff",
+                        "primary-fixed": "#f2dfd0",
+                        "on-tertiary-container": "#fffbff",
+                        "on-tertiary": "#ffffff",
+                        "on-background": "#1d1b1a",
+                        "surface-tint": "#6a5c50",
+                        "on-primary-fixed-variant": "#51443a",
+                        "tertiary-fixed": "#ffdad3",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "on-surface-variant": "#4d453f",
+                        "tertiary-container": "#9d675c",
+                        "on-secondary": "#ffffff",
+                        "tertiary": "#814f45",
+                        "on-tertiary-fixed": "#341009",
+                        "inverse-on-surface": "#f5f0ed",
+                        "secondary-container": "#edddf5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .backdrop-blur-xl { backdrop-filter: blur(24px); }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-on-surface/20 min-h-screen font-body flex items-end justify-center overflow-hidden">
+<!-- Modal Container -->
+<div class="relative w-full max-w-lg bg-surface rounded-t-[24px] shadow-2xl flex flex-col max-h-[813px] overflow-hidden">
+<!-- Drag Handle & Sticky Header -->
+<div class="flex flex-col items-center pt-3 pb-2 sticky top-0 bg-surface/90 backdrop-blur-md z-10">
+<div class="w-8 h-1 bg-outline-variant rounded-full mb-4"></div>
+<!-- Header Structure from JSON Guidance -->
+<header class="flex items-center justify-between px-6 pb-4 w-full">
+<div class="flex flex-col">
+<h1 class="font-headline text-on-surface text-xl font-semibold tracking-tight">Edit Medication</h1>
+<p class="font-body text-on-surface-variant text-sm font-medium">Estradiol · Patch</p>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full surface-container-high hover:opacity-80 transition-opacity active:scale-95">
+<span class="material-symbols-outlined text-on-surface" data-icon="close">close</span>
+</button>
+</header>
+</div>
+<!-- Scrollable Content Canvas -->
+<div class="overflow-y-auto px-6 pb-32 hide-scrollbar space-y-8">
+<!-- 1. Current Prescription Section -->
+<section class="mt-4">
+<div class="bg-surface-container-low rounded-xl p-5 flex items-center">
+<div class="flex-1 space-y-1">
+<label class="font-label text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Dose</label>
+<p class="text-on-surface text-lg font-bold">50 mcg</p>
+</div>
+<!-- No-line logic: using tonal spacing instead of borders where possible, but here a vertical divider is requested -->
+<div class="w-px h-10 bg-outline-variant/30 mx-4"></div>
+<div class="flex-1 space-y-1">
+<label class="font-label text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Frequency</label>
+<p class="text-on-surface text-lg font-bold">Twice weekly</p>
+</div>
+</div>
+</section>
+<!-- 2. Update To Section -->
+<section class="space-y-6">
+<div>
+<h3 class="font-headline text-on-surface text-base font-semibold mb-4">Update To</h3>
+<!-- Dose Input -->
+<div class="space-y-3">
+<label class="font-label text-xs font-bold text-on-surface-variant px-1">NEW DOSE</label>
+<div class="flex items-center gap-3">
+<input class="flex-1 h-14 px-6 rounded-full bg-surface-container-highest border-none focus:ring-2 focus:ring-primary/20 text-on-surface font-bold text-lg placeholder:text-on-surface-variant/40" placeholder="75" type="number"/>
+<!-- Unit Selector -->
+<div class="flex p-1 bg-surface-container-high rounded-full">
+<button class="px-4 py-2 rounded-full bg-primary text-on-primary text-xs font-bold transition-all shadow-sm">mcg</button>
+<button class="px-4 py-2 rounded-full text-on-surface-variant text-xs font-bold hover:bg-surface-container-highest transition-all">mg</button>
+<button class="px-4 py-2 rounded-full text-on-surface-variant text-xs font-bold hover:bg-surface-container-highest transition-all">pump</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Frequency Selection -->
+<div class="space-y-3">
+<label class="font-label text-xs font-bold text-on-surface-variant px-1">FREQUENCY</label>
+<div class="flex gap-2 overflow-x-auto hide-scrollbar pb-2 -mx-1 px-1">
+<button class="shrink-0 px-6 py-3 rounded-full bg-surface-container-high text-on-surface-variant text-sm font-bold border border-transparent hover:border-outline-variant/30 transition-all">Daily</button>
+<button class="shrink-0 px-6 py-3 rounded-full bg-primary text-on-primary text-sm font-bold shadow-md transition-all active:scale-95">Twice weekly</button>
+<button class="shrink-0 px-6 py-3 rounded-full bg-surface-container-high text-on-surface-variant text-sm font-bold border border-transparent hover:border-outline-variant/30 transition-all">Weekly</button>
+<button class="shrink-0 px-6 py-3 rounded-full bg-surface-container-high text-on-surface-variant text-sm font-bold border border-transparent hover:border-outline-variant/30 transition-all">Monthly</button>
+</div>
+</div>
+</section>
+<!-- 3. Prescription Change Toggle -->
+<section class="bg-surface-container-lowest rounded-xl p-5 shadow-sm border border-outline-variant/10">
+<div class="flex items-center justify-between gap-4">
+<div class="flex-1">
+<h4 class="text-on-surface font-bold text-sm">This is a prescription change</h4>
+<p class="text-on-surface-variant text-xs mt-1">Creates a before/after comparison in your health trends.</p>
+</div>
+<!-- iOS Style Toggle -->
+<div class="relative inline-flex h-7 w-12 items-center rounded-full bg-primary-container p-1 cursor-pointer">
+<span class="inline-block h-5 w-5 translate-x-5 transform rounded-full bg-white transition duration-200 ease-in-out"></span>
+</div>
+</div>
+</section>
+<!-- 4. Success/Warning Note (Active State) -->
+<section class="bg-tertiary-fixed rounded-xl p-5 flex gap-4 border border-tertiary/10">
+<div class="shrink-0 w-10 h-10 rounded-full bg-on-tertiary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-tertiary-fixed-variant" data-icon="info" style="font-variation-settings: 'FILL' 1;">info</span>
+</div>
+<p class="text-on-tertiary-fixed-variant text-sm leading-relaxed font-medium">
+                    Dose change logged from <span class="font-bold">50 mcg → 75 mcg</span>. A before/after comparison will appear in your Insights dashboard in 14 days.
+                </p>
+</section>
+<!-- Editorial Quote/Reflection Space -->
+<section class="py-4 opacity-60">
+<div class="bg-surface-container rounded-xl p-6 border-l-4 border-primary/20">
+<p class="font-headline italic text-on-surface-variant text-sm leading-relaxed">
+                        "Your hormonal journey is uniquely yours. Tracking these adjustments helps us build a more supportive path forward."
+                    </p>
+</div>
+</section>
+</div>
+<!-- Sticky Footer Actions -->
+<footer class="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-surface via-surface to-surface/0 pt-12 space-y-3">
+<button class="w-full h-[52px] bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-full font-bold text-sm shadow-xl active:scale-95 transition-all">
+                Save Changes
+            </button>
+<button class="w-full h-12 text-primary font-bold text-sm hover:bg-primary/5 rounded-full transition-colors active:scale-95">
+                Cancel
+            </button>
+</footer>
+</div>
+<!-- Background Decoration / Context -->
+<div class="fixed inset-0 -z-10 bg-on-surface/30 backdrop-blur-sm">
+<div class="absolute top-20 left-10 w-64 h-64 bg-secondary-fixed opacity-40 blur-[100px] rounded-full"></div>
+<div class="absolute bottom-20 right-10 w-80 h-80 bg-tertiary-fixed opacity-30 blur-[100px] rounded-full"></div>
+</div>
+</body></html>

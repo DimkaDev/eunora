@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Home Dashboard (Alert State)</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Noto+Serif:ital,wght@0,300;0,400;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#f5f0ed",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "tertiary-fixed": "#ffdad3",
+                        "inverse-surface": "#32302f",
+                        "on-surface": "#1d1b1a",
+                        "on-background": "#1d1b1a",
+                        "tertiary": "#814f45",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "on-primary-fixed-variant": "#51443a",
+                        "primary": "#67594e",
+                        "on-primary": "#ffffff",
+                        "surface-container-low": "#f8f2f0",
+                        "error": "#ba1a1a",
+                        "on-primary-container": "#fffbff",
+                        "outline-variant": "#d0c4bc",
+                        "surface": "#fef8f6",
+                        "on-tertiary-fixed": "#341009",
+                        "on-primary-fixed": "#231a11",
+                        "surface-tint": "#6a5c50",
+                        "outline": "#7f756e",
+                        "on-tertiary-container": "#fffbff",
+                        "surface-dim": "#ded9d7",
+                        "surface-container-highest": "#e7e1df",
+                        "surface-bright": "#fef8f6",
+                        "error-container": "#ffdad6",
+                        "inverse-primary": "#d6c3b5",
+                        "background": "#fef8f6",
+                        "secondary-fixed": "#edddf5",
+                        "surface-container": "#f2edea",
+                        "on-surface-variant": "#4d453f",
+                        "primary-fixed": "#f2dfd0",
+                        "secondary-container": "#edddf5",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "on-secondary-container": "#6c6074",
+                        "surface-variant": "#e7e1df",
+                        "secondary": "#655a6e",
+                        "tertiary-container": "#9d675c",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "surface-container-high": "#ede7e5",
+                        "on-secondary-fixed": "#211828",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "primary-container": "#817266"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "display": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    },
+                    "fontSize": {}
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body antialiased min-h-screen flex flex-col pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="bg-[#fef8f6]/70 dark:bg-stone-900/70 backdrop-blur-xl fixed top-0 w-full z-50 flex justify-between items-center w-full px-6 py-4 transition via surface-container-low">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container-highest border outline-variant/15 flex items-center justify-center">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="close-up portrait of a serene woman with natural light, soft focus background, editorial style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpRIzmY4aub4YyH-Jw-tF6D0hn9ljHcrUqC9ZeEopjemERgekGCEjSFiHpjnWkodYZ_CZK8bmJ9F3-aBzL7KADFrkyPLZLBDlKJrCb0pYsuDzWGxnYmY18PtXoZgVkPnM2DWhlxJ0g2O1BKvylglvdeSzj5oBgUAAIrsLBsFnZ4-5bdvIoGThfQa0vxi8W7-4lWcSssW7jhjQepkkzxiKupE9gx3VZ8lcGNE3eTqG1B3Rh5-pNGhMMKDk8pG_RZgzRxzsWDfWrR9Y"/>
+</div>
+</div>
+<h1 class="font-['Noto_Serif'] italic text-2xl text-[#67594e] dark:text-[#f2edea]">MenoSync</h1>
+<button class="text-[#67594e] dark:text-[#f2edea] hover:opacity-80 transition-opacity p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-24 px-5 md:px-8 max-w-3xl mx-auto w-full flex flex-col gap-8">
+<!-- Critical Alert Banner -->
+<section class="bg-tertiary-fixed rounded-[1.5rem] p-6 relative overflow-hidden flex flex-col gap-4">
+<div class="absolute -top-10 -right-10 w-40 h-40 bg-white/20 rounded-full blur-3xl"></div>
+<div class="flex items-start gap-4 relative z-10">
+<div class="w-12 h-12 rounded-full bg-white/40 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-tertiary-fixed text-3xl" data-icon="vital_signs">vital_signs</span>
+</div>
+<div class="flex flex-col gap-1">
+<h2 class="font-headline text-2xl text-on-tertiary-fixed font-semibold tracking-tight">Attention Needed</h2>
+<p class="font-body text-on-tertiary-fixed-variant text-base leading-relaxed">
+                        We've noticed a significant increase in your reported hot flashes and sleep disturbances over the last 48 hours. Let's take a moment to address this.
+                    </p>
+</div>
+</div>
+<div class="flex justify-end gap-3 mt-2 relative z-10">
+<button class="text-on-tertiary-fixed-variant font-body font-semibold px-4 py-2 hover:bg-white/10 rounded-full transition-colors text-sm">Dismiss</button>
+<button class="bg-on-tertiary-fixed text-white font-body font-semibold px-6 py-2 rounded-full shadow-sm hover:opacity-90 transition-opacity text-sm">Review Patterns</button>
+</div>
+</section>
+<!-- Proactive Insight Card -->
+<section class="bg-surface-container-lowest rounded-[1.5rem] p-6 shadow-[0_8px_24px_0_rgba(29,27,26,0.06)] relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-secondary-fixed/50 rounded-bl-full -z-0"></div>
+<div class="relative z-10 flex flex-col gap-5">
+<div class="flex justify-between items-center">
+<h3 class="font-headline text-xl text-primary font-semibold">Proactive Insight</h3>
+<span class="material-symbols-outlined text-primary" data-icon="spa" data-weight="fill" style="font-variation-settings: 'FILL' 1;">spa</span>
+</div>
+<p class="font-body text-on-surface-variant text-base leading-relaxed">
+                    Given the severity of your current symptoms, we suggest prioritizing restorative rest today. A cooling breathwork exercise might help mitigate the immediate intensity.
+                </p>
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary font-body font-semibold py-4 px-6 rounded-[1.5rem] shadow-sm hover:opacity-95 transition-opacity text-lg flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="air">air</span>
+                    Start 5-Min Breathwork
+                </button>
+</div>
+</section>
+<!-- Symptoms Card (Bento Style) -->
+<section class="flex flex-col gap-4">
+<div class="flex justify-between items-baseline px-2">
+<h3 class="font-headline text-2xl text-on-surface font-semibold">Today's Log</h3>
+<button class="text-primary font-body font-semibold text-sm hover:opacity-80 transition-opacity">Edit</button>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<!-- Severe Symptom 1 -->
+<div class="bg-surface-container-lowest rounded-[1.5rem] p-5 shadow-[0_4px_16px_0_rgba(29,27,26,0.04)] flex flex-col gap-3 relative border outline-variant/15 border-opacity-15">
+<span class="material-symbols-outlined absolute top-4 right-4 text-tertiary-fixed text-sm" data-icon="priority_high" data-weight="fill" style="font-variation-settings: 'FILL' 1;">priority_high</span>
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="thermostat">thermostat</span>
+</div>
+<div>
+<p class="font-body text-on-surface-variant text-sm font-medium">Hot Flashes</p>
+<p class="font-headline text-lg text-error font-semibold">Severe</p>
+</div>
+</div>
+<!-- Severe Symptom 2 -->
+<div class="bg-surface-container-lowest rounded-[1.5rem] p-5 shadow-[0_4px_16px_0_rgba(29,27,26,0.04)] flex flex-col gap-3 relative border outline-variant/15 border-opacity-15">
+<span class="material-symbols-outlined absolute top-4 right-4 text-tertiary-fixed text-sm" data-icon="priority_high" data-weight="fill" style="font-variation-settings: 'FILL' 1;">priority_high</span>
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="bedtime">bedtime</span>
+</div>
+<div>
+<p class="font-body text-on-surface-variant text-sm font-medium">Sleep Quality</p>
+<p class="font-headline text-lg text-error font-semibold">Poor</p>
+</div>
+</div>
+<!-- Moderate Symptom -->
+<div class="bg-surface-container-low rounded-[1.5rem] p-5 flex flex-col gap-3 col-span-2">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary" data-icon="mood_bad">mood_bad</span>
+</div>
+<div class="flex-grow">
+<p class="font-body text-on-surface-variant text-sm font-medium">Mood</p>
+<p class="font-headline text-lg text-primary-container font-semibold">Anxious</p>
+</div>
+<div class="w-16 h-2 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-3/4 rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-[2rem] bg-[#fef8f6]/70 dark:bg-stone-900/70 backdrop-blur-xl shadow-[0_-4px_24px_0_rgba(29,27,26,0.06)] md:hidden">
+<ul class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 tonal shift using surface-container">
+<!-- Active Tab: Insights (Given the dashboard context, though typically home might be first, insights fits dashboard best) -->
+<li>
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] dark:text-[#817266] px-5 py-2 hover:text-[#67594e] dark:hover:text-[#f2edea] transition-colors" href="#">
+<span class="material-symbols-outlined mb-1 text-[22px]" data-icon="menu_book">menu_book</span>
+<span class="font-['Manrope'] text-[10px] font-semibold tracking-wider uppercase">Journal</span>
+</a>
+</li>
+<li>
+<a class="flex flex-col items-center justify-center bg-[#f2edea] dark:bg-stone-800 text-[#67594e] dark:text-[#f2edea] rounded-2xl px-5 py-2 scale-95 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mb-1 text-[22px]" data-icon="insights" data-weight="fill" style="font-variation-settings: 'FILL' 1;">insights</span>
+<span class="font-['Manrope'] text-[10px] font-semibold tracking-wider uppercase">Insights</span>
+</a>
+</li>
+<li>
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] dark:text-[#817266] px-5 py-2 hover:text-[#67594e] dark:hover:text-[#f2edea] transition-colors" href="#">
+<span class="material-symbols-outlined mb-1 text-[22px]" data-icon="sync_alt">sync_alt</span>
+<span class="font-['Manrope'] text-[10px] font-semibold tracking-wider uppercase">Sync</span>
+</a>
+</li>
+<li>
+<a class="flex flex-col items-center justify-center text-[#9B8B7E] dark:text-[#817266] px-5 py-2 hover:text-[#67594e] dark:hover:text-[#f2edea] transition-colors" href="#">
+<span class="material-symbols-outlined mb-1 text-[22px]" data-icon="spa">spa</span>
+<span class="font-['Manrope'] text-[10px] font-semibold tracking-wider uppercase">Support</span>
+</a>
+</li>
+</ul>
+</nav>
+</body></html>

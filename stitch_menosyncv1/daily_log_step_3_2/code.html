@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Log Your Symptoms - Dashboard | MenoSync</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-container": "#edddf5",
+                      "on-tertiary-fixed-variant": "#683a31",
+                      "surface-tint": "#6a5c50",
+                      "secondary-fixed": "#edddf5",
+                      "on-tertiary-container": "#fffbff",
+                      "on-error-container": "#93000a",
+                      "tertiary": "#814f45",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-fixed-variant": "#51443a",
+                      "surface": "#fef8f6",
+                      "error-container": "#ffdad6",
+                      "surface-bright": "#fef8f6",
+                      "outline-variant": "#d0c4bc",
+                      "on-primary": "#ffffff",
+                      "on-surface-variant": "#4d453f",
+                      "tertiary-fixed-dim": "#f9b7a9",
+                      "secondary": "#655a6e",
+                      "primary": "#67594e",
+                      "on-background": "#1d1b1a",
+                      "surface-container-low": "#f8f2f0",
+                      "surface-variant": "#e7e1df",
+                      "on-primary-container": "#fffbff",
+                      "on-secondary-fixed": "#211828",
+                      "on-error": "#ffffff",
+                      "primary-fixed-dim": "#d6c3b5",
+                      "surface-container": "#f2edea",
+                      "inverse-primary": "#d6c3b5",
+                      "error": "#ba1a1a",
+                      "background": "#fef8f6",
+                      "surface-container-highest": "#e7e1df",
+                      "primary-container": "#817266",
+                      "on-secondary-fixed-variant": "#4d4355",
+                      "on-secondary-container": "#6c6074",
+                      "on-surface": "#1d1b1a",
+                      "primary-fixed": "#f2dfd0",
+                      "on-secondary": "#ffffff",
+                      "outline": "#7f756e",
+                      "on-tertiary-fixed": "#341009",
+                      "surface-dim": "#ded9d7",
+                      "on-primary-fixed": "#231a11",
+                      "surface-container-high": "#ede7e5",
+                      "secondary-fixed-dim": "#d0c1d8",
+                      "tertiary-fixed": "#ffdad3",
+                      "tertiary-container": "#9d675c",
+                      "surface-container-lowest": "#ffffff",
+                      "inverse-surface": "#32302f",
+                      "inverse-on-surface": "#f5f0ed"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "1.5rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Noto Serif"],
+                      "body": ["Manrope"],
+                      "label": ["Manrope"]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: #fef8f6;
+            min-height: 100dvh;
+        }
+        .serif {
+            font-family: 'Noto Serif', serif;
+        }
+        .pill-toggle-active {
+            background-color: #67594e;
+            color: white;
+        }
+        .meter-segment {
+            transition: all 0.2s ease;
+        }
+        .meter-segment:active {
+            transform: scale(0.95);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface flex flex-col pb-36">
+<header class="fixed top-0 w-full z-50 bg-[#fef8f6]/80 backdrop-blur-xl border-b border-surface-container">
+<div class="flex justify-between items-center w-full px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary cursor-pointer active:scale-95 duration-200">arrow_back</span>
+<h1 class="serif text-xl font-semibold tracking-tight text-primary">Daily Review</h1>
+</div>
+<div class="flex items-center gap-2 px-3 py-1 bg-primary/5 rounded-full">
+<span class="material-symbols-outlined text-xs text-primary" style="font-variation-settings: 'FILL' 1;">history</span>
+<span class="text-[10px] font-bold text-primary uppercase tracking-tighter">Previous Day Context</span>
+</div>
+</div>
+</header>
+<main class="mt-20 px-4 max-w-lg mx-auto w-full space-y-4">
+<div class="mb-2">
+<div class="flex justify-between items-center mb-1">
+<p class="text-[10px] font-extrabold uppercase tracking-widest text-primary/60">Logging Progress</p>
+<p class="text-[10px] font-extrabold text-primary">Ready to confirm</p>
+</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 100%;"></div>
+</div>
+</div>
+<div class="mb-4">
+<h2 class="serif text-2xl font-semibold text-on-surface">At-a-glance</h2>
+<p class="text-xs text-outline leading-tight">Review your usual daily inputs and tap to adjust.</p>
+</div>
+<section>
+<div class="flex justify-between items-center mb-2 px-1">
+<label class="text-[10px] font-bold text-primary uppercase tracking-wider">Daily Medications</label>
+<span class="text-[10px] font-medium text-outline">3 items</span>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div class="bg-surface-container-low p-3 rounded-2xl border border-surface-variant/40 flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-xs font-bold text-on-surface">Estradiol</span>
+<span class="text-[10px] text-outline">0.05mg Patch</span>
+</div>
+<div class="w-10 h-6 bg-primary rounded-full relative cursor-pointer">
+<div class="absolute right-1 top-1 bg-white w-4 h-4 rounded-full shadow-sm"></div>
+</div>
+</div>
+<div class="bg-surface-container-low p-3 rounded-2xl border border-surface-variant/40 flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-xs font-bold text-on-surface">Progesterone</span>
+<span class="text-[10px] text-outline">100mg Oral</span>
+</div>
+<div class="w-10 h-6 bg-primary rounded-full relative cursor-pointer">
+<div class="absolute right-1 top-1 bg-white w-4 h-4 rounded-full shadow-sm"></div>
+</div>
+</div>
+<div class="bg-surface-container-low p-3 rounded-2xl border border-surface-variant/40 flex items-center justify-between col-span-2">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-sm text-primary">medication</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs font-bold text-on-surface">Calcium + Vit D</span>
+<span class="text-[10px] text-outline">Twice Daily Tablet</span>
+</div>
+</div>
+<div class="w-10 h-6 bg-primary rounded-full relative cursor-pointer">
+<div class="absolute right-1 top-1 bg-white w-4 h-4 rounded-full shadow-sm"></div>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-surface-container-lowest p-5 rounded-3xl border border-surface-container">
+<div class="flex justify-between items-center mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">bedtime</span>
+<label class="text-[10px] font-bold text-primary uppercase tracking-wider">Sleep Duration</label>
+</div>
+<div class="flex items-center gap-1">
+<span class="text-lg font-bold text-on-surface">7.5</span>
+<span class="text-[10px] font-bold text-outline uppercase">hrs</span>
+<span class="material-symbols-outlined text-xs text-primary ml-1" style="font-variation-settings: 'FILL' 1;">edit</span>
+</div>
+</div>
+<div class="flex gap-1.5 h-3 items-center">
+<div class="flex-1 h-full bg-primary rounded-full opacity-100 cursor-pointer"></div>
+<div class="flex-1 h-full bg-primary rounded-full opacity-100 cursor-pointer"></div>
+<div class="flex-1 h-full bg-primary rounded-full opacity-100 cursor-pointer"></div>
+<div class="flex-1 h-full bg-primary rounded-full opacity-100 cursor-pointer"></div>
+<div class="flex-1 h-full bg-primary rounded-full opacity-100 cursor-pointer"></div>
+<div class="flex-1 h-full bg-primary rounded-full opacity-100 cursor-pointer"></div>
+<div class="flex-1 h-full bg-primary/20 rounded-full cursor-pointer"></div>
+<div class="flex-1 h-full bg-primary/20 rounded-full cursor-pointer"></div>
+<div class="flex-1 h-full bg-primary/20 rounded-full cursor-pointer"></div>
+<div class="flex-1 h-full bg-primary/20 rounded-full cursor-pointer"></div>
+</div>
+<div class="flex justify-between mt-2 px-1">
+<span class="text-[9px] font-bold text-outline uppercase tracking-tighter">Poor</span>
+<span class="text-[9px] font-bold text-primary uppercase tracking-tighter">Restful</span>
+</div>
+</section>
+<section class="bg-surface-container-lowest p-5 rounded-3xl border border-surface-container">
+<div class="flex justify-between items-center mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">water_drop</span>
+<label class="text-[10px] font-bold text-primary uppercase tracking-wider">Daily Hydration</label>
+</div>
+<div class="flex items-center gap-1">
+<span class="text-lg font-bold text-on-surface">6</span>
+<span class="text-[10px] font-bold text-outline uppercase">Glasses</span>
+<span class="material-symbols-outlined text-xs text-primary ml-1" style="font-variation-settings: 'FILL' 1;">edit</span>
+</div>
+</div>
+<div class="grid grid-cols-8 gap-2">
+<div class="flex flex-col items-center gap-1 cursor-pointer">
+<span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">local_drink</span>
+</div>
+<div class="flex flex-col items-center gap-1 cursor-pointer">
+<span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">local_drink</span>
+</div>
+<div class="flex flex-col items-center gap-1 cursor-pointer">
+<span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">local_drink</span>
+</div>
+<div class="flex flex-col items-center gap-1 cursor-pointer">
+<span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">local_drink</span>
+</div>
+<div class="flex flex-col items-center gap-1 cursor-pointer">
+<span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">local_drink</span>
+</div>
+<div class="flex flex-col items-center gap-1 cursor-pointer">
+<span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">local_drink</span>
+</div>
+<div class="flex flex-col items-center gap-1 cursor-pointer">
+<span class="material-symbols-outlined text-outline-variant text-2xl">local_drink</span>
+</div>
+<div class="flex flex-col items-center gap-1 cursor-pointer">
+<span class="material-symbols-outlined text-outline-variant text-2xl">local_drink</span>
+</div>
+</div>
+</section>
+<section class="mt-2">
+<div class="flex justify-between items-center mb-1 px-1">
+<label class="text-[10px] font-bold text-primary uppercase tracking-wider">Quick Note</label>
+<span class="text-[10px] text-outline">Optional</span>
+</div>
+<div class="relative">
+<textarea class="w-full bg-surface-container-lowest border border-secondary-container rounded-2xl p-3 text-sm text-on-surface focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-outline/40 serif" placeholder="Add anything extra..." rows="2"></textarea>
+<span class="absolute bottom-3 right-3 material-symbols-outlined text-outline/30 text-sm">edit_note</span>
+</div>
+</section>
+</main>
+<div class="fixed bottom-0 left-0 w-full p-4 bg-[#fef8f6]/90 backdrop-blur-md border-t border-surface-container-highest z-40">
+<div class="flex gap-3 max-w-lg mx-auto">
+<button class="w-16 h-16 bg-white border border-primary/20 text-primary font-bold rounded-2xl active:scale-95 duration-200 transition-transform flex items-center justify-center">
+<span class="material-symbols-outlined text-xl">arrow_back</span>
+</button>
+<button class="flex-1 h-16 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/20 active:scale-[0.98] duration-200 transition-transform flex items-center justify-center gap-3">
+<div class="flex flex-col items-start leading-none">
+<span class="text-[10px] uppercase tracking-widest opacity-80 font-extrabold">Finalize</span>
+<span class="text-base">Confirm &amp; Log Today</span>
+</div>
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'wght' 700;">check_circle</span>
+</button>
+</div>
+</div>
+
+</body></html>

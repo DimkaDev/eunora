@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-dim": "#ded9d7",
+                      "surface-container-highest": "#e7e1df",
+                      "secondary-fixed": "#edddf5",
+                      "secondary": "#655a6e",
+                      "on-secondary-fixed-variant": "#4d4355",
+                      "surface-bright": "#fef8f6",
+                      "primary-fixed": "#f2dfd0",
+                      "error": "#ba1a1a",
+                      "tertiary-fixed": "#ffdad3",
+                      "on-tertiary-fixed": "#341009",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-fixed": "#231a11",
+                      "primary": "#67594e",
+                      "inverse-primary": "#d6c3b5",
+                      "tertiary-fixed-dim": "#f9b7a9",
+                      "on-secondary-container": "#6c6074",
+                      "on-primary": "#ffffff",
+                      "outline-variant": "#d0c4bc",
+                      "on-secondary-fixed": "#211828",
+                      "surface-container-high": "#ede7e5",
+                      "on-primary-container": "#fffbff",
+                      "inverse-on-surface": "#f5f0ed",
+                      "primary-fixed-dim": "#d6c3b5",
+                      "on-primary-fixed-variant": "#51443a",
+                      "on-tertiary-fixed-variant": "#683a31",
+                      "surface": "#fef8f6",
+                      "on-surface": "#1d1b1a",
+                      "on-secondary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "on-surface-variant": "#4d453f",
+                      "surface-variant": "#e7e1df",
+                      "tertiary-container": "#9d675c",
+                      "on-background": "#1d1b1a",
+                      "surface-container-lowest": "#ffffff",
+                      "on-tertiary-container": "#fffbff",
+                      "secondary-container": "#edddf5",
+                      "on-surface": "#1d1b1a",
+                      "surface-container-low": "#f8f2f0",
+                      "background": "#fef8f6",
+                      "tertiary": "#814f45",
+                      "secondary-fixed-dim": "#d0c1d8",
+                      "surface-container": "#f2edea",
+                      "outline": "#7f756e",
+                      "error-container": "#ffdad6",
+                      "surface-tint": "#6a5c50",
+                      "inverse-surface": "#32302f",
+                      "primary-container": "#817266"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Noto Serif"],
+                      "body": ["Manrope"],
+                      "label": ["Manrope"]
+              }
+            },
+          }
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        .tonal-shift {
+            background: linear-gradient(180deg, rgba(254, 248, 246, 0) 0%, rgba(242, 237, 234, 0.5) 100%);
+        }
+      </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background font-body text-on-surface antialiased min-h-screen flex flex-col items-center">
+<header class="w-full top-0 sticky bg-[#fef8f6] dark:bg-stone-950 flex items-center justify-between px-6 py-4 z-10 no-border tonal-shift">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#9B8B7E] hover:opacity-80 transition-opacity cursor-pointer scale-95 duration-150" data-icon="arrow_back">arrow_back</span>
+</div>
+<h1 class="font-noto-serif text-xl italic text-[#67594e] dark:text-[#f2edea]">MenoSync</h1>
+<div class="w-6"></div>
+</header>
+<main class="max-w-md w-full px-8 pt-12 pb-24 flex flex-col items-center">
+<section class="flex flex-col items-center text-center mb-10">
+<div class="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-[40px] text-[#9B8B7E]" data-icon="mail">mail</span>
+</div>
+<h2 class="font-headline text-3xl font-bold text-[#3A3A3A] mb-3 tracking-tight">Verify Your Email</h2>
+<p class="font-body text-[#3A3A3A] text-opacity-80 max-w-[280px] leading-relaxed">
+                We sent a verification code to <span class="font-semibold">sarah@email.com</span>
+</p>
+</section>
+<section class="w-full space-y-6 mb-8">
+<div class="space-y-2">
+<label class="block font-label font-bold text-[#3A3A3A] text-sm ml-1">Enter verification code</label>
+<input class="w-full h-[52px] bg-[#EEEEEE] border-2 border-[#9B8B7E] rounded-lg px-4 text-center text-2xl font-mono tracking-[0.5em] focus:ring-0 focus:outline-none placeholder:text-outline-variant/50" placeholder="000000" type="text"/>
+<p class="text-outline font-label text-xs ml-1">Check your email (spam folder too)</p>
+</div>
+<button class="w-full h-[52px] bg-gradient-to-r from-[#67594e] to-[#817266] text-white font-label font-semibold rounded-xl shadow-sm hover:opacity-90 transition-all active:scale-[0.98] duration-150">
+                Verify Email
+            </button>
+</section>
+<section class="w-full space-y-4 mb-8">
+<div class="flex items-center gap-3 p-4 bg-[#fff1f0] border border-[#ffccc7] rounded-xl">
+<span class="material-symbols-outlined text-error" data-icon="error">error</span>
+<p class="text-error text-sm font-medium">Invalid code. Please try again</p>
+</div>
+<div class="flex items-center gap-3 p-4 bg-[#f6ffed] border border-[#b7eb8f] rounded-xl">
+<span class="material-symbols-outlined text-[#52c41a]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<p class="text-[#389e0d] text-sm font-medium">✓ Email verified! Setting up your account...</p>
+</div>
+</section>
+<section class="w-full flex flex-col items-center gap-3 mb-10">
+<p class="font-label text-sm text-on-surface-variant">Didn't receive the code?</p>
+<button class="w-full h-[48px] bg-white border border-[#9B8B7E] text-[#67594e] font-label font-medium rounded-xl hover:bg-surface-container-low transition-colors">
+                Resend Code
+            </button>
+<span class="text-outline font-label text-xs">Resend in 45s</span>
+</section>
+<section class="w-full pt-4 border-t border-outline-variant/10">
+<a class="block text-center text-[#9B8B7E] font-label text-sm font-medium underline underline-offset-4 decoration-1 hover:text-primary transition-colors" href="#">
+                Use a different email
+            </a>
+</section>
+<div class="mt-12 w-full aspect-video overflow-hidden rounded-3xl relative">
+<img alt="Zen atmosphere" class="w-full h-full object-cover opacity-60 mix-blend-multiply" data-alt="Soft focused image of a ceramic bowl and linen fabric in a sunlit room with earthy neutral tones and warm shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAS7EoCvEhtD0OJ2RFKWGJYarpvqK8zsQPw1zmwwXyR8NpgP5ICFvgMfr_AxwVAwz6ELumGTW8VcvvCH9d6n302VcNNa3k4iuYirqcw1Mr50qd5fFbFxAGx-0U_IVpy1PRZS7HcxZMoJMsit0mwMmlpH6DEXLdA-DCEKMOGdFXKEG01HrR9CSrYMrY9PywcyyuJqexiKl_js65iHlGwAxBsXWjL3-wDrXYVS9E2Ho1nXjLcZkGh6xG6dH6z-mCuN9m_FLc-pH1MM_E"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"></div>
+</div>
+</main>
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-6 pb-8 pt-4 bg-[#f2edea]/70 dark:bg-stone-900/70 backdrop-blur-lg z-50 rounded-t-[2rem] shadow-[0_-4px_24px_0_rgba(29,27,26,0.06)]">
+<div class="flex flex-col items-center justify-center text-[#9B8B7E] dark:text-[#817266] px-4 py-1.5 hover:bg-white/50 dark:hover:bg-stone-800/50 scale-90 duration-200 ease-out cursor-pointer">
+<span class="material-symbols-outlined" data-icon="auto_stories">auto_stories</span>
+<span class="font-manrope text-[10px] tracking-wide uppercase mt-1">Journal</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#9B8B7E] dark:text-[#817266] px-4 py-1.5 hover:bg-white/50 dark:hover:bg-stone-800/50 scale-90 duration-200 ease-out cursor-pointer">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-manrope text-[10px] tracking-wide uppercase mt-1">Insights</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#9B8B7E] dark:text-[#817266] px-4 py-1.5 hover:bg-white/50 dark:hover:bg-stone-800/50 scale-90 duration-200 ease-out cursor-pointer">
+<span class="material-symbols-outlined" data-icon="sync_lock">sync_lock</span>
+<span class="font-manrope text-[10px] tracking-wide uppercase mt-1">Sync</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-[#ffffff] dark:bg-stone-800 text-[#67594e] dark:text-[#f2edea] rounded-2xl px-4 py-1.5 scale-90 duration-200 ease-out cursor-pointer">
+<span class="material-symbols-outlined" data-icon="person_2" style="font-variation-settings: 'FILL' 1;">person_2</span>
+<span class="font-manrope text-[10px] tracking-wide uppercase mt-1">Profile</span>
+</div>
+</nav>
+</body></html>

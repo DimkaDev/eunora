@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Cycle &amp; Care - Calendar View</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#9B8B7E",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#E5E0DA",
+                        "on-primary-container": "#4A4036",
+                        "secondary": "#D8C9E0",
+                        "on-secondary": "#312039",
+                        "secondary-container": "#F2ECF5",
+                        "on-secondary-container": "#5D4B63",
+                        "tertiary": "#A64D4D", /* Red for triggers as requested */
+                        "on-tertiary": "#ffffff",
+                        "quaternary": "#4D8C72", /* Green for HRT as requested */
+                        "on-quaternary": "#ffffff",
+                        "background": "#F7F5F0", /* Soft Cream */
+                        "surface": "#F7F5F0",
+                        "surface-container": "#EAE5DC",
+                        "surface-container-low": "#F2EEE6",
+                        "surface-container-lowest": "#FFFFFF",
+                        "on-surface": "#2D2A26",
+                        "on-surface-variant": "#6B655E",
+                        "outline": "#857E75",
+                        "outline-variant": "#D1CDC5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: #F7F5F0; color: #2D2A26; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        body { min-height: max(884px, 100dvh); }
+    </style>
+</head>
+<body class="text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation Anchor -->
+<header class="bg-surface sticky top-0 z-50 transition-colors border-b border-outline-variant/30">
+<div class="flex justify-between items-center px-8 h-16 w-full max-w-7xl mx-auto">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-primary hover:bg-surface-container transition-colors p-2 rounded-full Active:scale-95 duration-150" data-icon="menu">menu</button>
+<h1 class="text-primary font-bold italic font-['Inter'] text-lg tracking-tight">Cycle &amp; Care</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-8">
+<a class="text-on-surface-variant hover:text-primary font-medium transition-colors" href="#">Today</a>
+<a class="text-primary font-bold transition-colors underline decoration-2 underline-offset-4" href="#">Calendar</a>
+<a class="text-on-surface-variant hover:text-primary font-medium transition-colors" href="#">Insights</a>
+<a class="text-on-surface-variant hover:text-primary font-medium transition-colors" href="#">More</a>
+</nav>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="portrait of a mature woman with warm smiling expression and soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCeIdezuKr_2L1C74lg7ojSG0wyluspRQz99eSh82Zj2c2PnDCBpa7DTRwVTlf2Fh1rHP9A7iq0UUfGTHra1dgysubjs9pnQut_A_S4riWVqb0V3sHmpAMOtdgsZAandF6qoN68-SleXeKTCVifrCXb7rxCbCty7ir9mSc3rrydcPd5k8oG6QYl0X8_fDi4j9RQWcQA8_MjcvT3PIHEODxNjdIVqatuOv1LQKYi0BwqJmq_pd5F7-giSZ1-EOrsXDbzPu29kHAHQ5M"/>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-6 md:px-11 pt-8 pb-32">
+<!-- Calendar Header Section -->
+<section class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+<div>
+<span class="text-primary font-bold tracking-widest text-xs uppercase mb-2 block">Monthly Overview</span>
+<h2 class="text-on-surface font-bold text-4xl md:text-5xl leading-tight">March 2025</h2>
+</div>
+<div class="flex gap-2">
+<button class="bg-surface-container-low hover:bg-surface-container-high border border-outline-variant transition-colors p-3 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">chevron_left</span>
+</button>
+<button class="bg-surface-container-low hover:bg-surface-container-high border border-outline-variant transition-colors p-3 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">chevron_right</span>
+</button>
+</div>
+</section>
+<!-- Bento Grid Layout for Calendar and Stats -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- Calendar Core (Bento Large) -->
+<div class="lg:col-span-8 bg-surface-container-lowest rounded-[2.5rem] p-8 shadow-[0_8px_32px_rgba(155,139,126,0.1)] overflow-hidden border border-outline-variant/20">
+<div class="grid grid-cols-7 mb-6">
+<div class="text-center text-on-surface-variant/60 font-bold text-xs py-2">S</div>
+<div class="text-center text-on-surface-variant/60 font-bold text-xs py-2">M</div>
+<div class="text-center text-on-surface-variant/60 font-bold text-xs py-2">T</div>
+<div class="text-center text-on-surface-variant/60 font-bold text-xs py-2">W</div>
+<div class="text-center text-on-surface-variant/60 font-bold text-xs py-2">T</div>
+<div class="text-center text-on-surface-variant/60 font-bold text-xs py-2">F</div>
+<div class="text-center text-on-surface-variant/60 font-bold text-xs py-2">S</div>
+</div>
+<div class="grid grid-cols-7 gap-y-6">
+<!-- Week 1 (March starts on Saturday) -->
+<div class="text-outline-variant text-center py-4 text-lg">23</div>
+<div class="text-outline-variant text-center py-4 text-lg">24</div>
+<div class="text-outline-variant text-center py-4 text-lg">25</div>
+<div class="text-outline-variant text-center py-4 text-lg">26</div>
+<div class="text-outline-variant text-center py-4 text-lg">27</div>
+<div class="text-outline-variant text-center py-4 text-lg">28</div>
+<div class="flex flex-col items-center justify-center relative py-4">
+<span class="text-on-surface font-medium text-lg">1</span>
+<div class="flex gap-1 mt-1">
+<div class="w-1.5 h-1.5 rounded-full bg-quaternary"></div>
+</div>
+</div>
+<!-- Week 2 -->
+<div class="flex flex-col items-center justify-center relative py-4">
+<span class="text-on-surface font-medium text-lg">2</span>
+</div>
+<div class="flex flex-col items-center justify-center relative py-4">
+<span class="text-on-surface font-medium text-lg">3</span>
+<div class="flex gap-1 mt-1">
+<div class="w-1.5 h-1.5 rounded-full bg-tertiary"></div>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center relative py-4">
+<span class="text-on-surface font-medium text-lg">4</span>
+<span class="absolute top-0 right-1 material-symbols-outlined text-xs text-primary" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+<div class="flex flex-col items-center justify-center relative py-4">
+<span class="text-on-surface font-medium text-lg">5</span>
+<div class="flex gap-1 mt-1">
+<div class="w-1.5 h-1.5 rounded-full bg-quaternary"></div>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center relative py-4">
+<span class="text-on-surface font-medium text-lg">6</span>
+</div>
+<div class="flex flex-col items-center justify-center relative py-4">
+<span class="text-on-surface font-medium text-lg">7</span>
+<div class="flex gap-1 mt-1">
+<div class="w-1.5 h-1.5 rounded-full bg-quaternary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-tertiary"></div>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center relative py-4">
+<span class="text-on-surface font-medium text-lg">8</span>
+</div>
+<!-- Week 3 -->
+<div class="flex flex-col items-center justify-center relative py-4">
+<span class="text-on-surface font-medium text-lg">9</span>
+<div class="flex gap-1 mt-1">
+<div class="w-1.5 h-1.5 rounded-full bg-quaternary"></div>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center relative py-4">
+<span class="text-on-surface font-medium text-lg">10</span>
+</div>
+<div class="flex flex-col items-center justify-center relative py-4">
+<!-- Today Indicator -->
+<div class="w-10 h-10 border-2 border-primary rounded-full flex items-center justify-center">
+<span class="text-primary font-bold text-lg">11</span>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center relative py-4">
+<!-- Selected Indicator -->
+<div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center shadow-sm">
+<span class="text-white font-bold text-lg">12</span>
+</div>
+<div class="flex gap-1 mt-1">
+<div class="w-1.5 h-1.5 rounded-full bg-quaternary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-tertiary"></div>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center relative py-4">
+<span class="text-on-surface font-medium text-lg">13</span>
+</div>
+<div class="flex flex-col items-center justify-center relative py-4">
+<span class="text-on-surface font-medium text-lg">14</span>
+<div class="flex gap-1 mt-1">
+<div class="w-1.5 h-1.5 rounded-full bg-quaternary"></div>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center relative py-4">
+<span class="text-on-surface font-medium text-lg">15</span>
+</div>
+<!-- Simplified remaining grid for visual layout -->
+<div class="text-center py-4 text-lg">16</div>
+<div class="text-center py-4 text-lg">17</div>
+<div class="text-center py-4 text-lg">18</div>
+<div class="text-center py-4 text-lg">19</div>
+<div class="text-center py-4 text-lg">20</div>
+<div class="text-center py-4 text-lg">21</div>
+<div class="text-center py-4 text-lg">22</div>
+</div>
+</div>
+<!-- Side Info (Bento Small) -->
+<div class="lg:col-span-4 space-y-8">
+<!-- Legend Card -->
+<div class="bg-surface-container-low rounded-[2rem] p-6 border border-outline-variant/30">
+<h3 class="text-primary font-bold mb-4">Calendar Legend</h3>
+<div class="space-y-4">
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 rounded-full bg-quaternary"></div>
+<span class="text-sm font-medium text-on-surface">HRT Dosage Logged</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 rounded-full bg-tertiary"></div>
+<span class="text-sm font-medium text-on-surface">Triggers Logged</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<span class="text-sm font-medium text-on-surface">HRT Dose Change Event</span>
+</div>
+</div>
+</div>
+<!-- Monthly Health Tip -->
+<div class="bg-secondary text-on-secondary rounded-[2rem] p-8 relative overflow-hidden shadow-sm">
+<div class="relative z-10">
+<span class="material-symbols-outlined text-on-secondary/70 mb-4">lightbulb</span>
+<h3 class="text-xl font-bold mb-3 leading-snug">Spring Vitality</h3>
+<p class="text-sm opacity-90 leading-relaxed font-medium">As temperatures shift in March, evening walks can help regulate cortisol levels and improve sleep quality during hormonal shifts.</p>
+</div>
+<div class="absolute -bottom-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+</div>
+</div>
+</div>
+<!-- Day Detail Panel -->
+<section class="mt-12 bg-surface-container-low rounded-[2.5rem] p-8 md:p-12 border border-outline-variant/30">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+<div>
+<h3 class="text-3xl font-bold text-on-surface mb-1">Wednesday, March 12</h3>
+<p class="text-on-surface-variant font-medium">Summary of your hormonal well-being</p>
+</div>
+<a class="flex items-center gap-2 text-primary font-bold text-sm hover:underline transition-all" href="#">
+                Edit this log
+                <span class="material-symbols-outlined text-xs">edit</span>
+</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+<!-- Symptoms Column -->
+<div>
+<h4 class="text-primary font-bold uppercase tracking-widest text-xs mb-6">Logged Symptoms</h4>
+<div class="flex flex-wrap gap-3">
+<div class="px-5 py-2.5 bg-surface-container-lowest border border-outline-variant/30 rounded-full text-on-surface font-semibold flex items-center gap-2 shadow-sm">
+<span class="w-2 h-2 rounded-full bg-quaternary"></span>
+                        Hot Flashes
+                    </div>
+<div class="px-5 py-2.5 bg-surface-container-lowest border border-outline-variant/30 rounded-full text-on-surface font-semibold flex items-center gap-2 shadow-sm">
+<span class="w-2 h-2 rounded-full bg-quaternary"></span>
+                        Sleep Quality (Low)
+                    </div>
+<div class="px-5 py-2.5 bg-surface-container-lowest border border-outline-variant/30 rounded-full text-on-surface font-semibold flex items-center gap-2 shadow-sm">
+<span class="w-2 h-2 rounded-full bg-quaternary"></span>
+                        Low Mood
+                    </div>
+</div>
+</div>
+<!-- Triggers & HRT Column -->
+<div>
+<h4 class="text-primary font-bold uppercase tracking-widest text-xs mb-6">Triggers &amp; Meds</h4>
+<div class="flex flex-wrap gap-3">
+<div class="px-5 py-2.5 bg-tertiary/10 text-tertiary border border-tertiary/20 rounded-full font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">local_bar</span>
+                        Alcohol
+                    </div>
+<div class="px-5 py-2.5 bg-tertiary/10 text-tertiary border border-tertiary/20 rounded-full font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">psychology</span>
+                        High Stress
+                    </div>
+<div class="px-5 py-2.5 bg-quaternary/10 text-quaternary border border-quaternary/20 rounded-full font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">medication</span>
+                        HRT Taken
+                    </div>
+</div>
+</div>
+</div>
+<!-- Detailed Note Section -->
+<div class="mt-12 p-8 bg-surface-container-lowest rounded-3xl border border-outline-variant/30 shadow-sm">
+<p class="italic text-on-surface-variant leading-relaxed text-lg">
+                "Felt a bit restless after that glass of wine at dinner. Hot flashes spiked around 3 AM. HRT dose seems stable otherwise, but might need to watch evening stress levels."
+            </p>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Anchor -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-6 pb-6 pt-3 bg-surface/90 backdrop-blur-md z-50 rounded-t-[2rem] shadow-[0_-4px_32px_rgba(155,139,126,0.15)] border-t border-outline-variant/40">
+<a class="flex flex-col items-center justify-center text-on-surface-variant/60 p-2 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="today">today</span>
+<span class="font-['Inter'] text-[12px] font-medium">Today</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary/10 text-primary rounded-2xl px-4 py-2 transition-transform Active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+<span class="font-['Inter'] text-[12px] font-bold">Calendar</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/60 p-2 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-['Inter'] text-[12px] font-medium">Insights</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/60 p-2 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="more_horiz">more_horiz</span>
+<span class="font-['Inter'] text-[12px] font-medium">More</span>
+</a>
+</nav>
+<!-- Mobile FAB Anchor - Focused Task -->
+<button class="fixed bottom-28 right-6 w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-xl md:hidden z-40 transition-transform active:scale-90">
+<span class="material-symbols-outlined">add</span>
+</button>
+</body></html>

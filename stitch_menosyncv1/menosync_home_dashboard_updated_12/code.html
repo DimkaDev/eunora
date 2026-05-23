@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync • Zen Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,300;0,400;0,600;1,400&amp;family=Manrope:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "zen-taupe": "#6A5C50",
+                        "zen-lavender": "#DED3E6",
+                        "zen-rose": "#F5E6E1",
+                        "zen-bg": "#FCFAF9",
+                        "zen-surface": "#F2EDE9",
+                        "zen-text": "#4A4542",
+                        "zen-text-light": "#8C8682"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif", "serif"],
+                        "body": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "organic": "2.5rem"
+                    }
+                }
+            }
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body {
+                @apply bg-zen-bg text-zen-text font-body antialiased;
+                -webkit-font-smoothing: antialiased;
+            }
+            h1, h2, h3 {
+                @apply font-headline;
+            }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .fade-dot {
+            @apply w-2 h-2 rounded-full;
+        }
+        .organic-shape-1 {
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+        }
+        .organic-shape-2 {
+            border-radius: 60% 40% 30% 70% / 50% 30% 70% 50%;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen pb-32">
+<header class="w-full px-8 pt-10 pb-6">
+<div class="flex justify-between items-start">
+<div class="space-y-1">
+<h1 class="text-3xl font-light tracking-tight text-zen-taupe">Good morning, Sarah</h1>
+<p class="text-xs font-semibold tracking-widest text-zen-text-light uppercase opacity-70">Wednesday, March 19</p>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-zen-taupe text-2xl">notifications</button>
+<div class="w-11 h-11 rounded-full overflow-hidden grayscale-[20%]">
+<img alt="Sarah's Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcyvRmigFQWEnghTEoPCUvu6Lls83qWwGf81JXXAHmxs_PI1albuWzfyX8hJHYDK2oDWVWOWPMCqACZzrOSiUrEriDUDMizBdlzmoikkKEMsviNymTb1SmeDL2M5mjpE7ZBB0lVSTa1Di99-xd5i_L5XTTvhH9uNbS-BEM4dPF7EevWWNXW_jzlWxSVjPjBZ3OPwiDpUtKeUmcOYd5ry2dtceFPJ-WL6Bp-ZEtlShywIcbEgix84xxFqoBGr1QXN6ehV00Hjb-W4c"/>
+</div>
+</div>
+</div>
+</header>
+<main class="px-6 space-y-10">
+<section class="relative bg-zen-rose/40 rounded-organic p-10 overflow-hidden">
+<div class="absolute -top-10 -right-10 w-40 h-40 bg-zen-lavender/30 organic-shape-1 blur-2xl"></div>
+<div class="relative z-10 flex flex-col items-center text-center space-y-6">
+<div class="space-y-2">
+<h2 class="text-2xl text-zen-taupe">How are you feeling?</h2>
+<p class="text-sm font-light text-zen-text-light italic">A moment to reflect on your day</p>
+</div>
+<button class="w-24 h-24 bg-white/60 rounded-full flex items-center justify-center transition-transform hover:scale-105 active:scale-95">
+<span class="material-symbols-outlined text-4xl text-zen-taupe font-extralight">add_circle</span>
+</button>
+<button class="px-10 py-4 bg-zen-taupe text-white font-medium rounded-full tracking-wide text-sm hover:opacity-90 transition-opacity">
+                    Record Entry
+                </button>
+</div>
+</section>
+<section class="space-y-6 px-2">
+<div class="flex justify-between items-end px-2">
+<div class="space-y-1">
+<h3 class="text-xl text-zen-taupe">Medication &amp; HRT</h3>
+<p class="text-[10px] font-semibold text-zen-text-light uppercase tracking-widest">Active protocol</p>
+</div>
+<button class="text-xs font-medium text-zen-taupe/60 underline underline-offset-4">Adjust</button>
+</div>
+<div class="space-y-3">
+<div class="flex items-center justify-between p-6 bg-zen-lavender/20 rounded-organic">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-white flex items-center justify-center">
+<span class="material-symbols-outlined text-zen-taupe text-xl">medication</span>
+</div>
+<div>
+<p class="text-base font-medium text-zen-text">Estradiol Patch</p>
+<p class="text-xs text-zen-text-light">Twice weekly • Today</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-[10px] font-bold text-zen-taupe uppercase tracking-widest">Taken</span>
+<div class="w-12 h-7 bg-zen-taupe/80 rounded-full flex items-center px-1">
+<div class="ml-auto w-5 h-5 bg-white rounded-full"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between p-6 bg-zen-surface rounded-organic">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-white/80 flex items-center justify-center">
+<span class="material-symbols-outlined text-zen-text-light text-xl">pill</span>
+</div>
+<div>
+<p class="text-base font-medium text-zen-text opacity-70">Progesterone</p>
+<p class="text-xs text-zen-text-light">100mg • Bedtime</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-[10px] font-bold text-zen-text-light uppercase tracking-widest">Pending</span>
+<div class="w-12 h-7 bg-zen-text-light/20 rounded-full flex items-center px-1">
+<div class="w-5 h-5 bg-white rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="space-y-6 px-2">
+<div class="flex justify-between items-end px-2">
+<h3 class="text-xl text-zen-taupe">Today's Symptoms</h3>
+<button class="material-symbols-outlined text-zen-text-light text-2xl">edit_square</button>
+</div>
+<div class="flex flex-wrap gap-4">
+<div class="flex flex-col gap-3 px-6 py-5 bg-zen-rose/20 rounded-organic min-w-[160px]">
+<span class="text-sm font-medium text-zen-text">Hot Flashes</span>
+<div class="flex gap-1.5 items-center">
+<div class="fade-dot bg-zen-taupe"></div>
+<div class="fade-dot bg-zen-taupe"></div>
+<div class="fade-dot bg-zen-taupe"></div>
+<div class="fade-dot bg-zen-taupe"></div>
+<span class="text-[10px] font-bold text-zen-taupe uppercase ml-2 tracking-widest">High</span>
+</div>
+</div>
+<div class="flex flex-col gap-3 px-6 py-5 bg-zen-rose/20 rounded-organic min-w-[160px]">
+<span class="text-sm font-medium text-zen-text">Sleep Issues</span>
+<div class="flex gap-1.5 items-center">
+<div class="fade-dot bg-zen-taupe"></div>
+<div class="fade-dot bg-zen-taupe/30"></div>
+<div class="fade-dot bg-zen-taupe/10"></div>
+<div class="fade-dot bg-zen-taupe/10"></div>
+<span class="text-[10px] font-bold text-zen-text-light uppercase ml-2 tracking-widest">Mild</span>
+</div>
+</div>
+<button class="w-16 h-16 rounded-full border border-zen-taupe/20 border-dashed flex items-center justify-center hover:bg-zen-taupe/5 transition-colors">
+<span class="material-symbols-outlined text-zen-text-light">add</span>
+</button>
+</div>
+</section>
+<section class="space-y-6 px-2">
+<div class="flex justify-between items-end px-2">
+<div class="space-y-1">
+<h3 class="text-xl text-zen-taupe">Daily Triggers</h3>
+<p class="text-[10px] font-semibold text-zen-text-light uppercase tracking-widest">3 environmental factors</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="flex flex-col gap-3 p-6 bg-zen-lavender/30 rounded-organic">
+<span class="material-symbols-outlined text-zen-taupe">psychology</span>
+<div>
+<p class="text-sm font-medium text-zen-text">Stress</p>
+<p class="text-[10px] font-bold text-zen-taupe uppercase tracking-tighter opacity-60">Moderate</p>
+</div>
+</div>
+<div class="flex flex-col gap-3 p-6 bg-zen-surface rounded-organic">
+<span class="material-symbols-outlined text-zen-text-light">coffee</span>
+<div>
+<p class="text-sm font-medium text-zen-text opacity-80">Caffeine</p>
+<p class="text-[10px] font-bold text-zen-text-light uppercase tracking-tighter opacity-60">2 Cups</p>
+</div>
+</div>
+<div class="flex flex-col gap-3 p-6 bg-zen-surface rounded-organic">
+<span class="material-symbols-outlined text-zen-text-light">wine_bar</span>
+<div>
+<p class="text-sm font-medium text-zen-text opacity-80">Alcohol</p>
+<p class="text-[10px] font-bold text-zen-text-light uppercase tracking-tighter opacity-60">1 Glass</p>
+</div>
+</div>
+<button class="flex flex-col items-center justify-center gap-2 p-6 border border-dashed border-zen-taupe/30 rounded-organic hover:bg-zen-taupe/5 transition-colors">
+<span class="material-symbols-outlined text-zen-text-light text-2xl">add_circle</span>
+<span class="text-[10px] font-bold text-zen-text-light uppercase tracking-widest">Log Trigger</span>
+</button>
+</div>
+</section>
+<section class="space-y-6 px-2">
+<h3 class="text-xl text-zen-taupe px-2">Weekly Harmony</h3>
+<div class="space-y-5 px-2">
+<div class="grid grid-cols-[40px_1fr] items-center gap-4">
+<span class="text-[10px] font-bold text-zen-text-light uppercase tracking-widest">Mon</span>
+<div class="h-1.5 bg-zen-surface rounded-full overflow-hidden">
+<div class="h-full bg-zen-lavender w-[40%]"></div>
+</div>
+</div>
+<div class="grid grid-cols-[40px_1fr] items-center gap-4">
+<span class="text-[10px] font-bold text-zen-text-light uppercase tracking-widest">Tue</span>
+<div class="h-1.5 bg-zen-surface rounded-full overflow-hidden">
+<div class="h-full bg-zen-rose w-[85%]"></div>
+</div>
+</div>
+<div class="grid grid-cols-[40px_1fr] items-center gap-4">
+<span class="text-[10px] font-bold text-zen-taupe uppercase tracking-widest">Wed</span>
+<div class="h-1.5 bg-zen-surface rounded-full overflow-hidden">
+<div class="h-full bg-zen-taupe w-[60%]"></div>
+</div>
+</div>
+<div class="grid grid-cols-[40px_1fr] items-center gap-4 opacity-30">
+<span class="text-[10px] font-bold text-zen-text-light uppercase tracking-widest">Thu</span>
+<div class="h-1.5 bg-zen-surface rounded-full overflow-hidden"></div>
+</div>
+</div>
+<div class="flex items-center gap-4 p-5 bg-zen-rose/10 organic-shape-2">
+<span class="material-symbols-outlined text-zen-taupe">self_improvement</span>
+<p class="text-xs italic text-zen-text-light leading-relaxed">Most prevalent: <span class="font-semibold text-zen-taupe not-italic">Hot Flashes (6 days)</span></p>
+</div>
+</section>
+<section class="bg-[#EEF2F0] rounded-organic p-8 space-y-4">
+<div class="flex items-center gap-2">
+<span class="text-xl">✨</span>
+<h3 class="text-lg text-[#3D4D44] font-medium">Zen Insight</h3>
+</div>
+<p class="text-sm text-[#5D6D64] leading-loose font-light">
+                Your logs indicate a correlation between <span class="font-semibold">elevated stress</span> and symptom intensity. A brief meditation tonight may help restore your balance.
+            </p>
+<a class="inline-block text-xs font-bold text-[#3D4D44] uppercase tracking-widest underline underline-offset-8 decoration-[#3D4D44]/20 pt-2" href="#">Reflect further</a>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-white/80 backdrop-blur-xl flex justify-around items-end px-6 pb-8 pt-4 rounded-t-[3rem]">
+<a class="flex flex-col items-center gap-1 group" href="#">
+<span class="material-symbols-outlined text-zen-taupe" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-[9px] font-bold text-zen-taupe uppercase tracking-widest">Home</span>
+<div class="w-1 h-1 bg-zen-taupe rounded-full mt-1"></div>
+</a>
+<a class="flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity" href="#">
+<span class="material-symbols-outlined text-zen-text">calendar_today</span>
+<span class="text-[9px] font-bold text-zen-text uppercase tracking-widest">Log</span>
+</a>
+<a class="flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity" href="#">
+<span class="material-symbols-outlined text-zen-text">bubble_chart</span>
+<span class="text-[9px] font-bold text-zen-text uppercase tracking-widest">Trends</span>
+</a>
+<a class="flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity" href="#">
+<span class="material-symbols-outlined text-zen-text">spa</span>
+<span class="text-[9px] font-bold text-zen-text uppercase tracking-widest">Care</span>
+</a>
+<a class="flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity" href="#">
+<span class="material-symbols-outlined text-zen-text">menu</span>
+<span class="text-[9px] font-bold text-zen-text uppercase tracking-widest">More</span>
+</a>
+</nav>
+
+</body></html>

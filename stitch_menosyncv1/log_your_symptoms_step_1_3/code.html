@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync Daily Log</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400;1,700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#6c6074",
+                        "primary-fixed": "#f2dfd0",
+                        "on-surface": "#1d1b1a",
+                        "on-secondary": "#ffffff",
+                        "surface-container": "#f2edea",
+                        "inverse-primary": "#d6c3b5",
+                        "surface-container-highest": "#e7e1df",
+                        "primary-container": "#817266",
+                        "error": "#ba1a1a",
+                        "background": "#fef8f6",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "surface-container-high": "#ede7e5",
+                        "tertiary-fixed": "#ffdad3",
+                        "tertiary-container": "#9d675c",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#32302f",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "inverse-on-surface": "#f5f0ed",
+                        "outline": "#7f756e",
+                        "on-tertiary-fixed": "#341009",
+                        "surface-dim": "#ded9d7",
+                        "on-primary-fixed": "#231a11",
+                        "secondary-fixed": "#edddf5",
+                        "on-tertiary-container": "#fffbff",
+                        "on-error-container": "#93000a",
+                        "tertiary": "#814f45",
+                        "on-tertiary": "#ffffff",
+                        "secondary-container": "#edddf5",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "surface-tint": "#6a5c50",
+                        "surface-variant": "#e7e1df",
+                        "surface-container-low": "#f8f2f0",
+                        "on-primary-container": "#fffbff",
+                        "on-secondary-fixed": "#211828",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "on-primary-fixed-variant": "#51443a",
+                        "surface-bright": "#fef8f6",
+                        "outline-variant": "#d0c4bc",
+                        "on-primary": "#ffffff",
+                        "surface": "#fef8f6",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "secondary": "#655a6e",
+                        "primary": "#67594e",
+                        "on-background": "#1d1b1a",
+                        "on-surface-variant": "#4d453f"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Manrope', sans-serif; }
+        h1, h2, h3 { font-family: 'Noto Serif', serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col">
+<!-- Top Navigation Anchor (Shared Component Mapping) -->
+<header class="w-full sticky top-0 z-50 bg-[#fef8f6] dark:bg-stone-950">
+<div class="flex items-center justify-between px-6 py-4 w-full">
+<button class="text-[#67594e] dark:text-stone-200 hover:opacity-80 transition-opacity Active: scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<span class="font-['Noto_Serif'] text-lg font-medium italic text-[#67594e] dark:text-stone-200">Step 1 of 3</span>
+<div class="w-10"></div> <!-- Balancing spacer -->
+</div>
+<!-- Progress Bar (The Progress Veil) -->
+<div class="w-full h-1 bg-surface-container overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary to-primary-container" style="width: 33%"></div>
+</div>
+<div class="bg-gradient-to-r from-transparent via-[#9B8B7E]/20 to-transparent h-px"></div>
+</header>
+<main class="flex-grow px-8 pt-8 pb-32 max-w-2xl mx-auto w-full">
+<!-- Hero Section -->
+<section class="mb-10">
+<h1 class="text-3xl font-bold tracking-tight text-primary leading-tight mb-3">
+                What are you experiencing today?
+            </h1>
+<p class="text-on-surface-variant font-body">Select all that apply to your current well-being.</p>
+</section>
+<!-- Symptom Bento Grid -->
+<div class="grid grid-cols-2 gap-4">
+<!-- Symptom Card: Active State Example -->
+<button class="flex items-center gap-3 p-4 bg-secondary-container border-2 border-primary rounded-xl text-left relative transition-all duration-200">
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined" data-icon="light_mode">light_mode</span>
+</div>
+<span class="text-on-surface font-semibold text-sm leading-tight">Hot Flashes</span>
+<div class="absolute -top-2 -right-2 bg-[#4caf50] text-white rounded-full p-0.5 shadow-sm">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</button>
+<!-- Regular Cards -->
+<button class="flex items-center gap-3 p-4 bg-surface-container-lowest border-2 border-secondary-fixed rounded-xl text-left hover:border-outline-variant transition-all duration-200">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="bedtime">bedtime</span>
+</div>
+<span class="text-on-surface font-medium text-sm leading-tight">Sleep Issues</span>
+</button>
+<button class="flex items-center gap-3 p-4 bg-surface-container-lowest border-2 border-secondary-fixed rounded-xl text-left hover:border-outline-variant transition-all duration-200">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+</div>
+<span class="text-on-surface font-medium text-sm leading-tight">Brain Fog</span>
+</button>
+<button class="flex items-center gap-3 p-4 bg-surface-container-lowest border-2 border-secondary-fixed rounded-xl text-left hover:border-outline-variant transition-all duration-200">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="mood">mood</span>
+</div>
+<span class="text-on-surface font-medium text-sm leading-tight">Mood Changes</span>
+</button>
+<button class="flex items-center gap-3 p-4 bg-surface-container-lowest border-2 border-secondary-fixed rounded-xl text-left hover:border-outline-variant transition-all duration-200">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="water_drop">water_drop</span>
+</div>
+<span class="text-on-surface font-medium text-sm leading-tight">Night Sweats</span>
+</button>
+<button class="flex items-center gap-3 p-4 bg-surface-container-lowest border-2 border-secondary-fixed rounded-xl text-left hover:border-outline-variant transition-all duration-200">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="fitness_center">fitness_center</span>
+</div>
+<span class="text-on-surface font-medium text-sm leading-tight">Joint Pain</span>
+</button>
+<button class="flex items-center gap-3 p-4 bg-surface-container-lowest border-2 border-secondary-fixed rounded-xl text-left hover:border-outline-variant transition-all duration-200">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="medical_services">medical_services</span>
+</div>
+<span class="text-on-surface font-medium text-sm leading-tight">Headache</span>
+</button>
+<button class="flex items-center gap-3 p-4 bg-surface-container-lowest border-2 border-secondary-fixed rounded-xl text-left hover:border-outline-variant transition-all duration-200">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="battery_low">battery_low</span>
+</div>
+<span class="text-on-surface font-medium text-sm leading-tight">Fatigue</span>
+</button>
+<button class="flex items-center gap-3 p-4 bg-surface-container-lowest border-2 border-secondary-fixed rounded-xl text-left hover:border-outline-variant transition-all duration-200">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="opacity">opacity</span>
+</div>
+<span class="text-on-surface font-medium text-sm leading-tight">Dryness</span>
+</button>
+<button class="flex items-center gap-3 p-4 bg-surface-container-lowest border-2 border-secondary-fixed rounded-xl text-left hover:border-outline-variant transition-all duration-200">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+</div>
+<span class="text-on-surface font-medium text-sm leading-tight">Weight Gain</span>
+</button>
+<button class="flex items-center gap-3 p-4 bg-surface-container-lowest border-2 border-secondary-fixed rounded-xl text-left hover:border-outline-variant transition-all duration-200">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+</div>
+<span class="text-on-surface font-medium text-sm leading-tight">Irregularity</span>
+</button>
+<button class="flex items-center gap-3 p-4 bg-surface-container-lowest border-2 border-secondary-fixed rounded-xl text-left hover:border-outline-variant transition-all duration-200">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+</div>
+<span class="text-on-surface font-medium text-sm leading-tight">Palpitations</span>
+</button>
+<button class="flex items-center gap-3 p-4 bg-surface-container-lowest border-2 border-secondary-fixed rounded-xl text-left hover:border-outline-variant transition-all duration-200">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="potted_plant">potted_plant</span>
+</div>
+<span class="text-on-surface font-medium text-sm leading-tight">Anxiety</span>
+</button>
+<button class="flex items-center gap-3 p-4 bg-surface-container-lowest border-2 border-secondary-fixed rounded-xl text-left hover:border-outline-variant transition-all duration-200">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="bolt">bolt</span>
+</div>
+<span class="text-on-surface font-medium text-sm leading-tight">Irritability</span>
+</button>
+<!-- Reflection Space Card (Unique high-end pattern) -->
+<div class="col-span-2 mt-6 p-6 bg-surface-container-low rounded-xl border border-outline-variant/15">
+<h3 class="text-xl font-bold text-primary mb-4">Something else?</h3>
+<div class="relative">
+<textarea class="w-full bg-surface-container-lowest border-none rounded-xl p-4 font-body text-on-surface focus:ring-2 focus:ring-primary/20 min-h-[100px] italic" placeholder="Journal your thoughts today..."></textarea>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Action Bar (Transactional Suppression of Nav Shell) -->
+<footer class="fixed bottom-0 left-0 w-full p-6 bg-white/70 backdrop-blur-xl border-t border-surface-container-highest flex justify-center items-center z-50">
+<!-- Disabled state: taupe-colored gradient once selected, gray initially. 
+             Instruction says "initially disabled (gray), becomes taupe once a symptom is selected". 
+             Visualized here as "Active" based on selected symptom above. -->
+<button class="w-full max-w-md py-4 px-8 rounded-full bg-gradient-to-r from-primary to-primary-container text-white font-bold text-lg shadow-lg hover:opacity-90 transition-all Active: scale-95 duration-150 flex items-center justify-center gap-2">
+<span>Next → Select Severity</span>
+</button>
+</footer>
+<!-- Decorative Aesthetic Background Image (Editorial Style) -->
+<div class="fixed top-0 right-0 -z-10 opacity-10 pointer-events-none">
+<img alt="Ethereal overlapping botanical shadows in soft sepia and lavender tones" class="w-full h-screen object-cover" data-alt="soft aesthetic background with delicate dried botanical silhouettes and warm natural light creating subtle shadows on a cream paper texture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAts6W1Pzme3wZE0CMhtaeED5H8XJ9qcUJfAhJYskXlXNw1ifTI6-6JxIfcVRQIK_GPa-leTROctEsNetFVmQCB_mLcAFUBM_KO4v-M36SY8QOVb3EfW6aUl7blitrT2ggLzz33AM23_vIPwTAbLXjiaExGieMpwD6dQ_HHiGJXjwer7xJlCWMQHS7ltN-233OUSSXIr4skHHOiGQmwKeEBN8BH_uBJeH-8__H7Co4AtoN8oduYkRTmELmO4NQDq7HSRG0-ZKjkkXo"/>
+</div>
+</body></html>

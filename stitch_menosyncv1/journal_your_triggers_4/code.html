@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "charcoal": "#121412",
+                        "emerald-dark": "#062e1d",
+                        "emerald-glow": "#10b981",
+                        "gold-accent": "#d4af37",
+                        "gold-muted": "#a68932",
+                        "surface-dark": "#1a1f1a",
+                        "on-surface-gold": "#e5d5a1",
+                        "botanical-green": "#2d4a3e"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body {
+                @apply bg-charcoal text-on-surface-gold font-body min-h-screen pb-32;
+                background-image: radial-gradient(circle at top right, #1a2f23 0%, #121412 60%);
+            }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 48;
+        }
+        .card-glow {
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.05), 0 0 40px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+        }
+        .emerald-button-glow {
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+        }
+        .bg-glass-dark {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(18, 20, 18, 0.85);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #2d4a3e;
+            border-radius: 10px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-charcoal font-body">
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-6 py-5 bg-glass-dark border-b border-emerald-dark/30">
+<div class="flex items-center gap-4">
+<button class="hover:text-gold-accent transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined !fill-none">arrow_back</span>
+</button>
+<span class="font-headline italic font-bold text-gold-accent tracking-tight">MenoSync</span>
+</div>
+<div class="text-emerald-glow/70 font-label text-[10px] tracking-[0.2em] uppercase font-bold">Evening Log • Step 3</div>
+</header>
+<main class="pt-28 px-6 max-w-md mx-auto">
+<div class="mb-12">
+<div class="flex justify-between items-end mb-3">
+<h1 class="font-headline text-3xl font-medium text-white leading-tight">Journal Your <br/><span class="text-gold-accent italic">Influences</span></h1>
+</div>
+<p class="font-body text-emerald-glow/60 text-sm mb-6">Embrace the quiet of the evening and reflect on your day.</p>
+<div class="relative w-full h-1 bg-emerald-dark rounded-full overflow-hidden">
+<div class="absolute top-0 left-0 h-full w-full bg-gradient-to-r from-gold-muted to-gold-accent shadow-[0_0_10px_rgba(212,175,55,0.4)]"></div>
+</div>
+</div>
+<div class="space-y-8">
+<section class="bg-surface-dark/40 p-6 rounded-3xl card-glow relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[100px]">coffee</span>
+</div>
+<div class="flex justify-between items-start mb-6">
+<div>
+<h2 class="font-headline text-xl text-white">Caffeine</h2>
+<p class="font-label text-[10px] text-gold-accent/60 uppercase tracking-widest mt-1">Daily consumption</p>
+</div>
+<span class="material-symbols-outlined text-gold-accent text-3xl">coffee</span>
+</div>
+<div class="flex items-center justify-between bg-charcoal/60 border border-emerald-dark/50 rounded-2xl p-2">
+<button class="w-12 h-12 flex items-center justify-center bg-emerald-dark/40 text-gold-accent rounded-xl hover:bg-emerald-dark transition-colors active:scale-90">
+<span class="material-symbols-outlined !fill-none">remove</span>
+</button>
+<div class="text-center">
+<span class="block font-headline text-2xl text-white font-bold">2</span>
+<span class="block text-[10px] uppercase tracking-tighter text-emerald-glow/60">cups</span>
+</div>
+<button class="w-12 h-12 flex items-center justify-center bg-emerald-dark/40 text-gold-accent rounded-xl hover:bg-emerald-dark transition-colors active:scale-90">
+<span class="material-symbols-outlined !fill-none">add</span>
+</button>
+</div>
+</section>
+<section class="bg-surface-dark/40 p-6 rounded-3xl card-glow relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[100px]">wine_bar</span>
+</div>
+<div class="flex justify-between items-start mb-6">
+<div>
+<h2 class="font-headline text-xl text-white">Alcohol</h2>
+<p class="font-label text-[10px] text-gold-accent/60 uppercase tracking-widest mt-1">Evening spirits</p>
+</div>
+<span class="material-symbols-outlined text-gold-accent text-3xl">wine_bar</span>
+</div>
+<div class="flex items-center justify-between bg-charcoal/60 border border-emerald-dark/50 rounded-2xl p-2">
+<button class="w-12 h-12 flex items-center justify-center bg-emerald-dark/40 text-gold-accent rounded-xl hover:bg-emerald-dark transition-colors active:scale-90">
+<span class="material-symbols-outlined !fill-none">remove</span>
+</button>
+<div class="text-center">
+<span class="block font-headline text-2xl text-white font-bold">1</span>
+<span class="block text-[10px] uppercase tracking-tighter text-emerald-glow/60">glass</span>
+</div>
+<button class="w-12 h-12 flex items-center justify-center bg-emerald-dark/40 text-gold-accent rounded-xl hover:bg-emerald-dark transition-colors active:scale-90">
+<span class="material-symbols-outlined !fill-none">add</span>
+</button>
+</div>
+</section>
+<section class="bg-surface-dark/40 p-6 rounded-3xl card-glow relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[100px]">psychology</span>
+</div>
+<div class="flex justify-between items-start mb-6">
+<div>
+<h2 class="font-headline text-xl text-white">Stress</h2>
+<p class="font-label text-[10px] text-gold-accent/60 uppercase tracking-widest mt-1">Internal state</p>
+</div>
+<span class="material-symbols-outlined text-gold-accent text-3xl">spa</span>
+</div>
+<div class="grid grid-cols-3 gap-3">
+<button class="py-4 px-1 rounded-2xl text-[11px] uppercase tracking-widest font-bold bg-emerald-dark/30 text-emerald-glow border border-emerald-glow/20 transition-all">Calm</button>
+<button class="py-4 px-1 rounded-2xl text-[11px] uppercase tracking-widest font-bold bg-gold-accent text-charcoal shadow-[0_0_15px_rgba(212,175,55,0.3)] transition-all">Moderate</button>
+<button class="py-4 px-1 rounded-2xl text-[11px] uppercase tracking-widest font-bold bg-emerald-dark/30 text-emerald-glow border border-emerald-glow/20 transition-all">High</button>
+</div>
+</section>
+<section class="bg-surface-dark/40 p-6 rounded-3xl card-glow relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[100px]">eco</span>
+</div>
+<div class="flex justify-between items-center mb-6">
+<div>
+<h2 class="font-headline text-xl text-white">Foods</h2>
+<p class="font-label text-[10px] text-gold-accent/60 uppercase tracking-widest mt-1">Nutritional notes</p>
+</div>
+<div class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-12 h-6 bg-emerald-dark/50 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-emerald-glow after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-botanical-green border border-emerald-dark"></div>
+</div>
+</div>
+<div class="relative">
+<textarea class="w-full bg-charcoal/60 border border-emerald-dark/50 rounded-2xl p-4 font-headline italic text-on-surface-gold placeholder:text-emerald-glow/30 focus:ring-1 focus:ring-gold-accent text-sm resize-none custom-scrollbar" placeholder="Capture your evening thoughts..." rows="3"></textarea>
+</div>
+</section>
+</div>
+<div class="mt-10 mb-16 p-6 bg-emerald-dark/20 rounded-3xl flex items-start gap-5 border border-emerald-glow/10">
+<div class="w-12 h-12 shrink-0 bg-gold-accent/10 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-gold-accent">mode_night</span>
+</div>
+<p class="text-xs font-body text-emerald-glow/80 leading-relaxed">
+<span class="font-bold text-gold-accent block mb-1 uppercase tracking-widest text-[10px]">Evening Wisdom</span>
+                Deep hydration in the evening, combined with low sodium intake, supports your body's natural cooling rhythm during sleep.
+            </p>
+</div>
+</main>
+<footer class="fixed bottom-0 left-0 w-full px-6 pb-12 pt-6 bg-glass-dark border-t border-emerald-dark/30 flex flex-col gap-4">
+<div class="flex gap-4">
+<button class="flex-1 py-4 px-6 rounded-2xl bg-emerald-dark/40 text-gold-accent border border-gold-accent/20 font-bold text-xs uppercase tracking-widest active:scale-95 transition-all">
+                Back
+            </button>
+<button class="flex-[2] py-4 px-6 rounded-2xl bg-gradient-to-br from-gold-muted to-gold-accent text-charcoal font-bold text-xs uppercase tracking-widest shadow-lg shadow-gold-accent/10 active:scale-95 transition-all emerald-button-glow">
+                Save Log
+            </button>
+</div>
+</footer>
+<div class="h-10"></div>
+
+</body></html>

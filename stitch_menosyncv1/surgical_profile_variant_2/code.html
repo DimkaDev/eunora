@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Surgical Menopause Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          serif: ['Lora', 'serif'],
+          sans: ['Inter', 'sans-serif'],
+        },
+        colors: {
+          serene: {
+            bg: '#F6F4F0',
+            text: '#3D3935',
+            taupe: '#685A50',
+            card: '#FFFFFF',
+            purpleLight: '#EADEEB',
+            greenLight: '#E8F2EA',
+            redLight: '#FCE4E4',
+            redText: '#A12222',
+            border: '#EAE6DF',
+            muted: '#8A847C'
+          }
+        }
+      }
+    }
+  }
+</script>
+<style data-purpose="custom-inputs">
+  /* Custom radio button styles to match the design */
+  input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #D1D1D1;
+    border-radius: 50%;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  input[type="radio"]:checked {
+    border-color: #685A50;
+  }
+  input[type="radio"]:checked::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background-color: #685A50;
+    border-radius: 50%;
+    position: absolute;
+  }
+  
+  /* Custom range slider */
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    background: transparent;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 24px;
+    width: 24px;
+    border-radius: 50%;
+    background: #685A50;
+    cursor: pointer;
+    margin-top: -10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    border: 2px solid white;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 6px;
+    cursor: pointer;
+    background: linear-gradient(to right, #D32F2F, #FBC02D 50%, #388E3C);
+    border-radius: 3px;
+  }
+</style>
+</head>
+<body class="bg-serene-bg text-serene-text font-sans antialiased">
+<!-- BEGIN: Mobile Container -->
+<main class="max-w-md mx-auto min-h-screen relative pb-32">
+<!-- BEGIN: Header -->
+<header class="flex items-center px-4 py-4 pt-12 sticky top-0 bg-serene-bg/90 backdrop-blur z-10" data-purpose="top-navigation">
+<button aria-label="Go back" class="p-2 -ml-2 text-serene-text">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<h1 class="ml-2 text-lg font-serif font-semibold text-serene-text">Health Profile</h1>
+</header>
+<!-- END: Header -->
+<!-- BEGIN: Progress & Title -->
+<section class="px-6 pt-2 pb-6" data-purpose="page-intro">
+<div class="flex justify-between items-center mb-4 text-xs font-semibold tracking-wider text-serene-muted uppercase">
+<span>Step 2D of 7</span>
+<span class="bg-serene-redLight text-serene-redText px-3 py-1 rounded-full flex items-center gap-1 normal-case font-medium">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" fill-rule="evenodd"></path>
+</svg>
+          Rapid Onset
+        </span>
+</div>
+<h2 class="text-3xl font-serif font-bold leading-tight mb-3">Your Surgical Menopause Profile</h2>
+<p class="text-serene-muted text-sm leading-relaxed">
+        Surgical menopause has a different timeline and intensity. We're built to support that.
+      </p>
+</section>
+<!-- END: Progress & Title -->
+<!-- BEGIN: Clinical Data Group -->
+<!-- Grouping clinical inputs closely together with reduced bottom margins -->
+<div class="px-6 flex flex-col gap-4" data-purpose="clinical-data-group">
+<!-- Date Procedure Card -->
+<section class="bg-serene-card rounded-2xl p-5 shadow-sm" data-purpose="procedure-date-input">
+<label class="block text-xs font-bold tracking-wider text-serene-text mb-4 uppercase">When did you have your procedure?</label>
+<div class="relative bg-serene-bg rounded-xl border border-transparent focus-within:border-serene-taupe transition-colors">
+<input class="w-full bg-transparent border-none py-4 pl-4 pr-12 text-sm focus:ring-0 placeholder:text-serene-muted" placeholder="-- / -- / ----" readonly="" type="text"/>
+<div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-serene-text">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+</div>
+<p class="text-xs text-serene-muted mt-3 italic">This helps us track symptom timeline</p>
+</section>
+<!-- Procedure Type Card -->
+<section class="bg-serene-card rounded-2xl p-5 shadow-sm" data-purpose="procedure-type-selection">
+<div class="flex justify-between items-baseline mb-4">
+<label class="block text-xs font-bold tracking-wider text-serene-text uppercase">What type of procedure?</label>
+<span class="text-xs text-serene-muted italic">Optional</span>
+</div>
+<div class="space-y-3">
+<label class="flex items-center p-3 border border-serene-border rounded-xl cursor-pointer hover:bg-serene-bg/50 transition-colors">
+<input class="mr-3" name="procedure_type" type="radio" value="hysterectomy"/>
+<span class="text-sm">Hysterectomy</span>
+</label>
+<label class="flex items-center p-3 border border-serene-border rounded-xl cursor-pointer hover:bg-serene-bg/50 transition-colors">
+<input class="mr-3" name="procedure_type" type="radio" value="bilateral_oophorectomy"/>
+<span class="text-sm">Bilateral oophorectomy</span>
+</label>
+<label class="flex items-center p-3 border border-serene-border rounded-xl cursor-pointer hover:bg-serene-bg/50 transition-colors">
+<input class="mr-3" name="procedure_type" type="radio" value="both"/>
+<span class="text-sm">Both</span>
+</label>
+<label class="flex items-center p-3 border border-serene-border rounded-xl cursor-pointer hover:bg-serene-bg/50 transition-colors">
+<input class="mr-3" name="procedure_type" type="radio" value="other"/>
+<span class="text-sm">Other</span>
+</label>
+<label class="flex items-center p-3 border border-serene-border rounded-xl cursor-pointer hover:bg-serene-bg/50 transition-colors">
+<input class="mr-3" name="procedure_type" type="radio" value="prefer_not"/>
+<span class="text-sm">Prefer not to say</span>
+</label>
+</div>
+</section>
+<!-- HRT Card -->
+<section class="bg-serene-purpleLight rounded-2xl p-5 shadow-sm" data-purpose="hrt-status-selection">
+<label class="block text-xs font-bold tracking-wider text-serene-text mb-2 uppercase">Were you prescribed HRT after your surgery?</label>
+<p class="text-xs text-serene-text/80 mb-4">Most gynecologists recommend HRT for surgical menopause</p>
+<div class="space-y-3 mb-5">
+<label class="flex items-center p-3 bg-white rounded-xl cursor-pointer">
+<input checked="" class="mr-3" name="hrt_status" type="radio" value="yes_immediately"/>
+<span class="text-sm">Yes - immediately</span>
+</label>
+<label class="flex items-center p-3 bg-white/60 rounded-xl cursor-pointer hover:bg-white transition-colors">
+<input class="mr-3" name="hrt_status" type="radio" value="yes_delayed"/>
+<span class="text-sm">Yes - but delayed</span>
+</label>
+<label class="flex items-center p-3 bg-white/60 rounded-xl cursor-pointer hover:bg-white transition-colors">
+<input class="mr-3" name="hrt_status" type="radio" value="no"/>
+<span class="text-sm">No</span>
+</label>
+<label class="flex items-center p-3 bg-white/60 rounded-xl cursor-pointer hover:bg-white transition-colors">
+<input class="mr-3" name="hrt_status" type="radio" value="not_yet"/>
+<span class="text-sm">Not yet</span>
+</label>
+</div>
+<div class="border-t border-serene-text/10 pt-4" data-purpose="hrt-start-dropdown">
+<label class="block text-xs text-serene-text mb-2">When did you start HRT?</label>
+<div class="relative">
+<select class="w-full bg-white border-none rounded-xl py-3 pl-4 pr-10 text-sm appearance-none focus:ring-0 text-serene-text">
+<option>Right after surgery</option>
+<option>1-3 months after</option>
+<option>3-6 months after</option>
+<option>6+ months after</option>
+</select>
+<div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-serene-muted">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M19.5 8.25l-7.5 7.5-7.5-7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- END: Clinical Data Group -->
+<!-- Separation from clinical to subjective data -->
+<div class="h-10"></div>
+<!-- BEGIN: Subjective Data Group -->
+<div class="px-6 flex flex-col gap-4" data-purpose="subjective-data-group">
+<!-- Wellbeing Score Card -->
+<section class="bg-serene-card rounded-2xl p-6 shadow-sm" data-purpose="wellbeing-slider">
+<label class="block text-xs font-bold tracking-wider text-serene-text mb-8 uppercase text-center">How are you feeling overall since surgery?</label>
+<div class="flex items-center justify-between mb-4">
+<span aria-hidden="true" class="text-2xl">😔</span>
+<span class="text-4xl font-serif text-serene-text">7</span>
+<span aria-hidden="true" class="text-2xl">😊</span>
+</div>
+<div class="relative pt-2 pb-4">
+<input aria-label="Wellbeing score slider" max="10" min="1" type="range" value="7"/>
+</div>
+</section>
+<!-- Context/Support Info -->
+<section class="bg-serene-greenLight rounded-2xl p-5 flex gap-4 mt-2" data-purpose="educational-note">
+<div class="flex-shrink-0 mt-1">
+<div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-[#385C4B]">
+<svg class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z"></path>
+</svg>
+</div>
+</div>
+<p class="text-sm text-[#385C4B] leading-relaxed">
+          Surgical menopause is a significant transition. MenoSync is here to help you understand and manage your symptoms during this time.
+        </p>
+</section>
+</div>
+<!-- END: Subjective Data Group -->
+<!-- BEGIN: Sticky Footer -->
+<footer class="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-6 bg-serene-bg/95 backdrop-blur shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)]" data-purpose="action-buttons">
+<button class="w-full bg-serene-taupe text-white font-semibold tracking-wider text-sm py-4 rounded-full uppercase hover:bg-opacity-90 transition-opacity mb-3">
+        Continue
+      </button>
+<div class="text-center">
+<a class="text-sm text-serene-taupe font-medium underline decoration-serene-taupe/30 underline-offset-4 hover:decoration-serene-taupe transition-colors" href="#">
+          Get Support Resources
+        </a>
+</div>
+</footer>
+<!-- END: Sticky Footer -->
+</main>
+<!-- END: Mobile Container -->
+</body></html>

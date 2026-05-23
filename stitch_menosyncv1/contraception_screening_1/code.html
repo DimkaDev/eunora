@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Health Setup - Contraception</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "primary": "#67594e",
+                        "surface-dim": "#ded9d7",
+                        "primary-container": "#817266",
+                        "secondary-container": "#edddf5",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "on-error-container": "#93000a",
+                        "primary-fixed": "#f2dfd0",
+                        "on-primary-fixed": "#231a11",
+                        "on-primary-container": "#fffbff",
+                        "secondary-fixed": "#edddf5",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "secondary": "#655a6e",
+                        "tertiary": "#814f45",
+                        "surface": "#f7f5f0",
+                        "on-tertiary-fixed": "#341009",
+                        "tertiary-fixed": "#ffdad3",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "tertiary-container": "#9d675c",
+                        "surface-variant": "#e7e1df",
+                        "surface-container": "#f2edea",
+                        "surface-bright": "#fef8f6",
+                        "inverse-on-surface": "#f5f0ed",
+                        "on-error": "#ffffff",
+                        "on-tertiary-container": "#fffbff",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "on-primary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "surface-tint": "#6a5c50",
+                        "on-surface-variant": "#4d453f",
+                        "on-background": "#1d1b1a",
+                        "background": "#f7f5f0",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed-variant": "#51443a",
+                        "inverse-surface": "#32302f",
+                        "outline": "#7f756e",
+                        "on-secondary-container": "#6c6074",
+                        "on-secondary-fixed": "#211828",
+                        "on-surface": "#1d1b1a",
+                        "surface-container-low": "#f8f2f0",
+                        "error": "#ba1a1a",
+                        "outline-variant": "#d0c4bc",
+                        "surface-container-highest": "#e7e1df",
+                        "inverse-primary": "#d6c3b5",
+                        "surface-container-high": "#ede7e5",
+                        "primary-fixed-dim": "#d6c3b5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif", "serif"],
+                        "body": ["Manrope", "sans-serif"],
+                        "label": ["Manrope", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body {
+            font-family: 'Manrope', sans-serif;
+            min-height: max(884px, 100dvh);
+        }
+        h1, h2, h3, h4, h5, h6, .font-headline {
+            font-family: 'Noto Serif', serif;
+        }
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #ffffff;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #67594e;
+        }
+        .toggle-label {
+            background-color: #d0c4bc;
+            transition: background-color 0.2s ease-in;
+        }
+        .toggle-checkbox {
+            transition: transform 0.2s ease-in, border-color 0.2s ease-in;
+        }
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom, 1.25rem);
+        }
+        .info-tooltip {
+            @apply text-[10px] leading-relaxed text-on-surface-variant/80 mt-1 pl-1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased min-h-screen flex flex-col overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+<header class="sticky top-0 z-50 bg-surface/80 backdrop-blur-md px-5 py-4 flex items-center justify-between border-b border-outline-variant/10">
+<button class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-container-highest transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20">
+<span class="material-symbols-outlined text-on-surface" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="flex flex-col items-center">
+<h1 class="font-headline text-lg font-bold text-on-surface leading-tight tracking-[-0.015em]">Health Setup</h1>
+<span class="font-body text-xs text-on-surface-variant mt-0.5">Step 4 of 7</span>
+</div>
+<div class="w-10"></div>
+</header>
+<div class="w-full bg-surface-container-low h-1 mt-0">
+<div class="bg-gradient-to-r from-primary to-primary-container h-full rounded-r-full" style="width: 57%;"></div>
+</div>
+<main class="flex-1 flex flex-col px-5 py-8 pb-36 max-w-2xl mx-auto w-full">
+<header class="mb-6 pl-1">
+<h2 class="font-headline text-3xl font-bold text-on-surface mb-2">Contraception</h2>
+<p class="font-body text-xs text-on-surface-variant opacity-80">(Optional - but helpful for understanding your health)</p>
+</header>
+<div class="bg-surface-container-lowest rounded-[1.25rem] border border-outline-variant/20 shadow-[0_2px_12px_rgba(29,27,26,0.04)] overflow-hidden">
+<div class="p-6">
+<div class="flex items-start justify-between gap-4">
+<div class="flex-1">
+<div class="flex items-center gap-1.5 mb-1">
+<span class="font-body text-[13px] font-bold text-on-surface uppercase tracking-wider">Contraception</span>
+<span class="material-symbols-outlined text-primary/60 text-lg cursor-help">info</span>
+</div>
+<label class="font-body text-base font-medium text-on-surface block" for="contraception-toggle">
+                        Are you currently using any form of contraception?
+                    </label>
+<p class="info-tooltip">This helps us differentiate between natural cycles and hormonal regulation.</p>
+</div>
+<div class="relative inline-block w-14 h-8 align-middle select-none transition duration-200 ease-in mt-1">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-surface-container-lowest border-4 border-primary appearance-none cursor-pointer translate-x-7 z-10 top-1 left-1 checked:border-surface-container-lowest" id="contraception-toggle" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-8 rounded-full cursor-pointer" for="contraception-toggle"></label>
+</div>
+</div>
+</div>
+<div class="h-px bg-outline-variant/10 mx-6"></div>
+<div class="bg-[#E8E0F0]/30 p-6 flex flex-col gap-6">
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-1.5">
+<label class="font-body text-sm font-semibold text-on-surface" for="contraception-type">What type?</label>
+<span class="material-symbols-outlined text-primary/50 text-base cursor-help">info</span>
+</div>
+<p class="info-tooltip !mt-0 !mb-1">Specific methods impact hormone levels differently (e.g., copper vs. hormonal).</p>
+<div class="relative">
+<select class="w-full bg-surface-container-lowest border-outline-variant/30 text-on-surface text-base rounded-xl py-3 pl-4 pr-10 appearance-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm font-body" id="contraception-type">
+<option disabled="" value="">Select an option</option>
+<option value="combination">Combination birth control pill</option>
+<option selected="" value="progestin">Progestin-only pill</option>
+<option value="copper-iud">Copper IUD</option>
+<option value="hormonal-iud">Hormonal IUD</option>
+<option value="implant">Subdermal implant</option>
+<option value="injection">Injection</option>
+<option value="barrier">Barrier method</option>
+<option value="other">Other</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-1.5">
+<label class="font-body text-sm font-semibold text-on-surface" for="brand-name">Brand name <span class="font-normal text-on-surface-variant text-xs">(if applicable)</span></label>
+<span class="material-symbols-outlined text-primary/50 text-base cursor-help">info</span>
+</div>
+<p class="info-tooltip !mt-0 !mb-1">Knowing the brand allows us to track specific progestin types used.</p>
+<input class="w-full bg-surface-container-lowest border-outline-variant/30 text-on-surface placeholder:text-on-surface-variant/40 text-base rounded-xl py-3 px-4 focus:border-primary focus:ring-1 focus:ring-primary shadow-sm font-body" id="brand-name" placeholder="e.g., Yasmin, Mirena" type="text" value="Cerazette"/>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-1.5">
+<label class="font-body text-sm font-semibold text-on-surface" for="dose">Dose <span class="font-normal text-on-surface-variant text-xs">(if applicable)</span></label>
+<span class="material-symbols-outlined text-primary/50 text-base cursor-help">info</span>
+</div>
+<p class="info-tooltip !mt-0 !mb-1">Dosage levels correlate with potential side effect profiles.</p>
+<input class="w-full bg-surface-container-lowest border-outline-variant/30 text-on-surface placeholder:text-on-surface-variant/40 text-base rounded-xl py-3 px-4 focus:border-primary focus:ring-1 focus:ring-primary shadow-sm font-body" id="dose" placeholder="e.g., 30 mcg ethinyl estradiol" type="text"/>
+</div>
+</div>
+</div>
+<div class="mt-8 px-4 py-4 rounded-2xl bg-surface-container-low/50 border border-outline-variant/10">
+<p class="font-body italic text-on-surface-variant text-center text-xs leading-relaxed">
+            "Your contraception choice is a key contextual factor in how we interpret your daily symptom patterns."
+        </p>
+</div>
+</main>
+<div class="fixed bottom-0 left-0 right-0 p-5 bg-surface/90 backdrop-blur-xl border-t border-outline-variant/20 pb-safe">
+<div class="max-w-2xl mx-auto flex gap-4">
+<button class="font-body text-sm font-semibold text-primary px-6 py-4 rounded-xl hover:bg-surface-container-low transition-colors">
+            Skip
+        </button>
+<button class="flex-1 bg-primary text-on-primary font-body text-base font-semibold py-4 px-8 rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-container transition-all flex items-center justify-center gap-2">
+            Continue
+            <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+
+</body></html>

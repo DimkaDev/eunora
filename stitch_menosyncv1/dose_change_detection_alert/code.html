@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Dose Change Alert</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "tertiary-container": "#9d675c",
+                  "error": "#ba1a1a",
+                  "primary-fixed": "#f2dfd0",
+                  "secondary-fixed-dim": "#d0c1d8",
+                  "surface-container-highest": "#e7e1df",
+                  "primary": "#67594e",
+                  "surface-container": "#f2edea",
+                  "primary-container": "#817266",
+                  "on-surface-variant": "#4d453f",
+                  "primary-fixed-dim": "#d6c3b5",
+                  "surface-container-high": "#ede7e5",
+                  "on-background": "#1d1b1a",
+                  "inverse-surface": "#32302f",
+                  "surface-tint": "#6a5c50",
+                  "on-tertiary-fixed": "#341009",
+                  "surface-container-low": "#f8f2f0",
+                  "on-secondary-fixed-variant": "#4d4355",
+                  "error-container": "#ffdad6",
+                  "tertiary-fixed-dim": "#f9b7a9",
+                  "on-surface": "#1d1b1a",
+                  "on-secondary": "#ffffff",
+                  "outline-variant": "#d0c4bc",
+                  "on-primary-fixed-variant": "#51443a",
+                  "on-error": "#ffffff",
+                  "secondary": "#655a6e",
+                  "secondary-container": "#edddf5",
+                  "on-primary-fixed": "#231a11",
+                  "inverse-primary": "#d6c3b5",
+                  "tertiary-fixed": "#ffdad3",
+                  "on-secondary-fixed": "#211828",
+                  "outline": "#7f756e",
+                  "on-tertiary-container": "#fffbff",
+                  "on-error-container": "#93000a",
+                  "surface-container-lowest": "#ffffff",
+                  "surface": "#fef8f6",
+                  "on-tertiary-fixed-variant": "#683a31",
+                  "inverse-on-surface": "#f5f0ed",
+                  "on-secondary-container": "#6c6074",
+                  "on-primary-container": "#fffbff",
+                  "background": "#fef8f6",
+                  "on-tertiary": "#ffffff",
+                  "surface-bright": "#fef8f6",
+                  "secondary-fixed": "#edddf5",
+                  "on-primary": "#ffffff",
+                  "surface-dim": "#ded9d7",
+                  "tertiary": "#814f45",
+                  "surface-variant": "#e7e1df"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "2xl": "1.5rem",
+                  "full": "9999px"
+          },
+          "fontFamily": {
+                  "headline": ["Noto Serif"],
+                  "body": ["Manrope"],
+                  "label": ["Manrope"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body { font-family: 'Manrope', sans-serif; }
+    h1, h2, h3 { font-family: 'Noto Serif', serif; }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#fef8f6] min-h-screen text-on-surface">
+<!-- Background Content (Simulated Journal Dashboard) -->
+<header class="fixed top-0 left-0 w-full z-10 bg-[#fef8f6]/80 backdrop-blur-md px-5 py-3 flex justify-between items-center">
+<div class="font-['Noto_Serif'] text-xl font-bold text-[#67594e]">MenoSync</div>
+<span class="material-symbols-outlined text-[#67594e]" data-icon="account_circle">account_circle</span>
+</header>
+<main class="pt-20 px-6 pb-24 space-y-8">
+<section class="space-y-2">
+<p class="font-label text-xs uppercase tracking-widest text-outline">Today, October 24</p>
+<h1 class="text-3xl text-on-surface font-bold">Good morning, Elena</h1>
+</section>
+<!-- Content Placeholder Cards -->
+<div class="grid grid-cols-1 gap-6">
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/10">
+<h3 class="text-lg mb-4 text-primary">Daily Checklist</h3>
+<div class="space-y-4 opacity-40">
+<div class="flex items-center gap-4">
+<div class="w-6 h-6 rounded-full border-2 border-primary"></div>
+<div class="h-4 w-32 bg-surface-container rounded"></div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-6 h-6 rounded-full border-2 border-primary"></div>
+<div class="h-4 w-48 bg-surface-container rounded"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Modal Overlay (Non-dismissible focus) -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-on-background/40 backdrop-blur-sm px-6">
+<!-- Modal Card -->
+<div class="w-full max-w-[340px] bg-surface-container-lowest rounded-2xl overflow-hidden shadow-[0_12px_40px_rgba(29,27,26,0.15)] ring-1 ring-on-surface/5">
+<!-- Modal Body -->
+<div class="p-6 flex flex-col items-center text-center">
+<!-- Header Icon -->
+<div class="mb-4">
+<span class="material-symbols-outlined text-[#9B8B7E] text-[32px]" data-icon="info_outline">help_outline</span>
+</div>
+<!-- Alert Content -->
+<h2 class="text-[18px] text-on-surface font-bold leading-tight mb-3">
+          We Noticed a Dose Change
+        </h2>
+<p class="font-body text-[12px] text-on-surface-variant leading-relaxed mb-6">
+          Your last entry for <span class="font-semibold">[Estradiol]</span> showed 50 mcg. 
+          Your new entry shows 75 mcg. Did your doctor change your dose?
+        </p>
+<!-- Visual Comparison -->
+<div class="w-full flex items-center justify-center gap-4 mb-6 bg-surface-container-low/50 py-3 rounded-xl border border-outline-variant/10">
+<div class="flex flex-col items-center">
+<span class="text-[10px] uppercase tracking-tighter text-outline mb-1 font-semibold">Before</span>
+<span class="text-sm font-bold text-outline">50 mcg</span>
+</div>
+<span class="material-symbols-outlined text-[#9B8B7E]" data-icon="arrow_forward">arrow_forward</span>
+<div class="flex flex-col items-center">
+<span class="text-[10px] uppercase tracking-tighter text-[#9B8B7E] mb-1 font-semibold">After</span>
+<span class="text-sm font-bold text-[#9B8B7E]">75 mcg</span>
+</div>
+</div>
+<!-- Explanation Card -->
+<div class="bg-[#edddf5] p-3 rounded-lg w-full text-left mb-6 border-l-2 border-secondary/20">
+<p class="font-body text-[11px] text-on-secondary-container italic leading-relaxed">
+            Tracking dose changes helps us show you the impact 
+            on your symptoms. We'll track the next 14 days and compare.
+          </p>
+</div>
+<!-- Button Section -->
+<div class="w-full space-y-3">
+<button class="w-full bg-[#9B8B7E] hover:opacity-90 active:scale-[0.98] transition-all text-white font-bold text-[14px] py-[12px] rounded-[10px]">
+            Yes, My Dose Changed
+          </button>
+<button class="w-full bg-white border-2 border-outline-variant hover:bg-surface-container transition-colors active:scale-[0.98] text-on-surface font-semibold text-[14px] py-[12px] rounded-[10px]">
+            No, That Was a Mistake
+          </button>
+</div>
+<!-- Optional Link / Info Expansion -->
+<div class="mt-5 group cursor-pointer">
+<div class="flex items-center justify-center gap-1">
+<span class="text-[11px] text-[#9B8B7E] underline decoration-[#9B8B7E]/30 underline-offset-2 font-medium">How does before/after comparison work?</span>
+</div>
+<!-- Info text (Hidden by default in a real app, shown here for representation) -->
+<p class="mt-3 text-[11px] text-on-surface-variant leading-snug bg-surface-container-high/30 p-2 rounded hidden group-hover:block transition-all">
+            We'll track your symptoms for 14 days after your 
+            dose change. Then we'll show you patterns like "hot flashes decreased 
+            by 30%". This helps you and your doctor see if the new dose is working.
+          </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation Shell (Consistent with Shared Components) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-6 pb-6 pt-3 bg-[#fef8f6]/70 backdrop-blur-xl border-t border-[#9B8B7E]/15 shadow-[0_-4px_24px_rgba(29,27,26,0.06)] rounded-t-[1.5rem] z-40">
+<div class="flex flex-col items-center justify-center text-[#67594e] bg-[#f2edea] rounded-xl px-3 py-1">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+<span class="font-['Manrope'] text-[10px] font-semibold uppercase tracking-wider mt-1">Journal</span>
+</div>
+<div class="flex flex-col items-center justify-center text-stone-400 px-3 py-1">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-['Manrope'] text-[10px] font-semibold uppercase tracking-wider mt-1">Insights</span>
+</div>
+<div class="flex flex-col items-center justify-center text-stone-400 px-3 py-1">
+<span class="material-symbols-outlined" data-icon="auto_stories">auto_stories</span>
+<span class="font-['Manrope'] text-[10px] font-semibold uppercase tracking-wider mt-1">Library</span>
+</div>
+<div class="flex flex-col items-center justify-center text-stone-400 px-3 py-1">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-['Manrope'] text-[10px] font-semibold uppercase tracking-wider mt-1">Settings</span>
+</div>
+</nav>
+</body></html>

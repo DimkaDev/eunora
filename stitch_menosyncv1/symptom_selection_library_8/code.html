@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#814f45",
+                        "surface-container-lowest": "#ffffff",
+                        "surface": "#fef8f6",
+                        "primary": "#67594e",
+                        "outline": "#7f756e",
+                        "outline-variant": "#d0c4bc",
+                        "tertiary-fixed": "#ffdad3",
+                        "on-secondary-fixed": "#211828",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "primary-fixed": "#f2dfd0",
+                        "inverse-primary": "#d6c3b5",
+                        "surface-container-highest": "#e7e1df",
+                        "on-primary-fixed": "#231a11",
+                        "inverse-surface": "#32302f",
+                        "on-tertiary-container": "#fffbff",
+                        "on-error-container": "#93000a",
+                        "surface-variant": "#e7e1df",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "secondary": "#655a6e",
+                        "error": "#ba1a1a",
+                        "primary-container": "#817266",
+                        "surface-container-high": "#ede7e5",
+                        "surface-container": "#f2edea",
+                        "surface-container-low": "#f8f2f0",
+                        "background": "#fef8f6",
+                        "on-secondary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "on-primary-container": "#fffbff",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "secondary-fixed": "#edddf5",
+                        "on-secondary-container": "#6c6074",
+                        "on-surface": "#1d1b1a",
+                        "on-tertiary": "#ffffff",
+                        "inverse-on-surface": "#f5f0ed",
+                        "surface-dim": "#ded9d7",
+                        "on-background": "#1d1b1a",
+                        "surface-tint": "#6a5c50",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "surface-bright": "#fef8f6",
+                        "secondary-container": "#edddf5",
+                        "on-surface-variant": "#4d453f",
+                        "tertiary-container": "#9d675c",
+                        "on-primary-fixed-variant": "#51443a",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed": "#341009"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-border { border: none !important; }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface antialiased pb-32">
+<!-- TopAppBar -->
+<header class="bg-[#fef8f6]/70 backdrop-blur-xl fixed top-0 w-full z-50 sticky no-border transition-colors duration-300">
+<div class="flex justify-between items-center px-6 py-4 w-full">
+<button class="text-stone-700 hover:opacity-80 transition-opacity Active: scale-95 duration-150 ease-in-out">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-['Noto_Serif'] font-medium text-lg leading-relaxed text-stone-700">Symptom Library</h1>
+<button class="text-stone-700 hover:opacity-80 transition-opacity Active: scale-95 duration-150 ease-in-out">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+</div>
+</header>
+<main class="px-6 max-w-2xl mx-auto">
+<!-- Search Section -->
+<section class="mt-4 mb-8">
+<div class="relative group">
+<div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined" data-icon="magnifying_glass">magnification_large</span>
+</div>
+<input class="w-full bg-surface-container-highest border-none rounded-full py-4 pl-12 pr-6 text-on-surface-variant focus:ring-2 focus:ring-primary/20 placeholder:text-outline-variant font-medium" placeholder="Search symptoms..." type="text"/>
+</div>
+</section>
+<!-- Add Custom Card -->
+<section class="mb-10">
+<button class="w-full bg-surface-container-lowest rounded-xl border-2 border-dashed border-outline-variant p-6 flex flex-col items-center justify-center gap-2 hover:bg-surface-container-low transition-colors duration-200">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="add_circle">add_circle</span>
+<span class="font-headline text-lg font-medium text-primary">Add Custom Symptom</span>
+<span class="text-on-surface-variant text-sm font-label">Can't find what you're looking for?</span>
+</button>
+</section>
+<!-- Categories Section -->
+<div class="space-y-12">
+<!-- Vasomotor Symptoms -->
+<section>
+<div class="flex items-center gap-3 mb-6">
+<div class="h-[2px] flex-1 bg-gradient-to-r from-transparent to-surface-container-highest"></div>
+<h2 class="font-headline text-2xl font-bold text-on-surface-variant px-2">Vasomotor</h2>
+<div class="h-[2px] flex-1 bg-gradient-to-l from-transparent to-surface-container-highest"></div>
+</div>
+<div class="grid grid-cols-1 gap-4">
+<div class="flex items-center justify-between p-5 bg-secondary-container rounded-xl">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-tertiary" data-icon="thermostat">thermostat</span>
+<span class="font-label font-semibold text-on-secondary-container">Hot flashes</span>
+</div>
+<div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm" data-icon="check" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-5 bg-surface-container-lowest rounded-xl hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-outline" data-icon="ac_unit">ac_unit</span>
+<span class="font-label font-medium">Cold flashes</span>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant"></div>
+</div>
+<div class="flex items-center justify-between p-5 bg-surface-container-lowest rounded-xl hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-outline" data-icon="nights_stay">nights_stay</span>
+<span class="font-label font-medium">Night sweats</span>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant"></div>
+</div>
+</div>
+</section>
+<!-- Emotional & Cognitive -->
+<section>
+<div class="flex items-center gap-3 mb-6">
+<div class="h-[2px] flex-1 bg-gradient-to-r from-transparent to-surface-container-highest"></div>
+<h2 class="font-headline text-2xl font-bold text-on-surface-variant px-2">Emotional &amp; Cognitive</h2>
+<div class="h-[2px] flex-1 bg-gradient-to-l from-transparent to-surface-container-highest"></div>
+</div>
+<div class="grid grid-cols-1 gap-4">
+<div class="flex items-center justify-between p-5 bg-surface-container-lowest rounded-xl">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-outline" data-icon="psychology">psychology</span>
+<span class="font-label font-medium">Brain fog</span>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant"></div>
+</div>
+<div class="flex items-center justify-between p-5 bg-secondary-container rounded-xl">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-tertiary" data-icon="sentiment_dissatisfied">sentiment_dissatisfied</span>
+<span class="font-label font-semibold text-on-secondary-container">Anxiety</span>
+</div>
+<div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm" data-icon="check" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-5 bg-surface-container-lowest rounded-xl">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-outline" data-icon="mood_bad">mood_bad</span>
+<span class="font-label font-medium">Mood swings</span>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant"></div>
+</div>
+</div>
+</section>
+<!-- Physical Wellbeing -->
+<section>
+<div class="flex items-center gap-3 mb-6">
+<div class="h-[2px] flex-1 bg-gradient-to-r from-transparent to-surface-container-highest"></div>
+<h2 class="font-headline text-2xl font-bold text-on-surface-variant px-2">Physical</h2>
+<div class="h-[2px] flex-1 bg-gradient-to-l from-transparent to-surface-container-highest"></div>
+</div>
+<!-- Bento Grid Layout for Physical -->
+<div class="grid grid-cols-2 gap-4">
+<div class="p-6 bg-surface-container-lowest rounded-xl flex flex-col items-center gap-3 text-center border border-outline-variant/10">
+<span class="material-symbols-outlined text-outline text-3xl" data-icon="accessibility_new">accessibility_new</span>
+<span class="font-label text-sm font-medium">Joint pain</span>
+</div>
+<div class="p-6 bg-surface-container-lowest rounded-xl flex flex-col items-center gap-3 text-center border border-outline-variant/10">
+<span class="material-symbols-outlined text-outline text-3xl" data-icon="bolt">bolt</span>
+<span class="font-label text-sm font-medium">Fatigue</span>
+</div>
+<div class="p-6 bg-secondary-container rounded-xl flex flex-col items-center gap-3 text-center col-span-2 relative">
+<div class="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[10px]" data-icon="check" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+<span class="material-symbols-outlined text-tertiary text-3xl" data-icon="face_retouching_natural">face_retouching_natural</span>
+<span class="font-label text-sm font-bold text-on-secondary-container">Dry skin</span>
+</div>
+</div>
+</section>
+</div>
+<!-- Reflection Box -->
+<section class="my-16 p-8 bg-surface-container-lowest rounded-xl shadow-sm italic text-outline text-center">
+<p class="font-headline text-lg opacity-60">"Journaling your symptoms is the first step toward reclaiming your rhythm."</p>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full px-6 py-3 flex justify-around items-center pb-safe bg-[#fef8f6]/70 backdrop-blur-xl z-50 rounded-t-3xl shadow-[0_-4px_24px_rgba(29,27,26,0.06)]">
+<a class="flex flex-col items-center justify-center text-stone-500 hover:text-stone-800 transition-opacity px-3 py-1.5" href="#">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+<span class="font-['Manrope'] text-[11px] uppercase tracking-widest font-medium">Journal</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 hover:text-stone-800 transition-opacity px-3 py-1.5" href="#">
+<span class="material-symbols-outlined" data-icon="auto_graph">auto_graph</span>
+<span class="font-['Manrope'] text-[11px] uppercase tracking-widest font-medium">Insights</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-stone-200/50 text-stone-900 rounded-xl px-3 py-1.5 font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="font-['Manrope'] text-[11px] uppercase tracking-widest font-medium">Library</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 hover:text-stone-800 transition-opacity px-3 py-1.5" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-['Manrope'] text-[11px] uppercase tracking-widest font-medium">Profile</span>
+</a>
+</nav>
+<!-- Contextual FAB (Save) -->
+<button class="fixed bottom-24 right-6 bg-gradient-to-br from-primary to-primary-container text-white p-4 rounded-full shadow-lg flex items-center gap-2 hover:scale-105 active:scale-95 transition-transform duration-200 z-40 px-6">
+<span class="font-label font-bold text-sm tracking-wide">Update Log</span>
+<span class="material-symbols-outlined" data-icon="done_all">done_all</span>
+</button>
+</body></html>

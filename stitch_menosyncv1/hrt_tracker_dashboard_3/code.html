@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HRT Tracker - MenoSync Pro</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#67594e",
+                        "taupe": "#9B8B7E",
+                        "lavender": "#D8C9E0",
+                        "peachy": "#E8A89B",
+                        "cream": "#F7F5F0",
+                        "surface": "#ffffff",
+                        "on-surface": "#1d1b1a",
+                        "on-surface-variant": "#4d453f",
+                        "outline-variant": "#d0c4bc"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif", "serif"],
+                        "body": ["Manrope", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style type="text/tailwindcss">
+        body { font-family: 'Manrope', sans-serif; background-color: #F7F5F0; }
+        .font-serif { font-family: 'Noto Serif', serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        .glass-header { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .card-shadow { box-shadow: 0 4px 20px -2px rgba(155, 139, 126, 0.12); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface min-h-screen pb-32">
+<header class="fixed top-0 w-full z-50 glass-header bg-cream/80 border-b border-taupe/10 px-6 py-4 flex justify-between items-center">
+<div class="flex flex-col">
+<h1 class="font-serif text-[20px] font-semibold text-primary">HRT Tracker</h1>
+<p class="font-body text-[12px] text-primary/60">Track your medications and see dose impact on symptoms</p>
+</div>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-taupe/20">
+<img alt="Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOkX9kPPAHTcpzWcimRjyXcsLKWgpZRn-v2sJYdVPyWj_w96X6Ji6U__wJ_1fCVvWeHPmFeJo_I9NuqjqQGPGrVVjEViB_WAEIaV2RT1WcA0Dpy9gKtP0adBlPZEY9ZubWAfiYbv5WGELJPNA-TeF-iTEYhgCL3Scsh-5RfE6OcM-x87CYpSZCq-lNs3s5bxQdmqe14ewJOap4avTpd7mQwjUQlMYjumXktHIT3N6yAKBLPqFlb8OtW6ps_3NEqk3i8G9LdYzdbGc"/>
+</div>
+</header>
+<main class="px-6 pt-24 space-y-8">
+<section class="space-y-3">
+<div class="flex justify-between items-center">
+<h2 class="text-[13px] font-bold text-primary">Today's Dose</h2>
+<span class="text-[11px] text-taupe">Wednesday, March 19, 2024</span>
+</div>
+<div class="grid grid-cols-1 gap-3">
+<div class="bg-surface rounded-2xl p-4 card-shadow flex justify-between items-center border border-taupe/5">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-peachy/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-peachy" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+</div>
+<div>
+<h3 class="font-serif text-[15px] font-bold text-primary">Estradiol</h3>
+<p class="text-[11px] text-taupe">50 mcg patch • Since March 2024</p>
+<div class="flex items-center gap-1 text-[10px] text-primary font-bold mt-0.5">
+<span class="material-symbols-outlined text-[12px] text-green-600" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-green-700">Taken at 8:30 AM</span>
+</div>
+</div>
+</div>
+<div class="w-10 h-5 bg-taupe rounded-full relative p-0.5 flex items-center justify-end">
+<div class="h-4 w-4 bg-white rounded-full shadow-sm"></div>
+</div>
+</div>
+<div class="bg-surface rounded-2xl p-4 card-shadow flex justify-between items-center border border-taupe/5">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-lavender/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-lavender" style="font-variation-settings: 'FILL' 1;">pill</span>
+</div>
+<div>
+<h3 class="font-serif text-[15px] font-bold text-primary">Utrogestan</h3>
+<p class="text-[11px] text-taupe">100 mg capsule • Since March 2024</p>
+<p class="text-[10px] text-taupe/60 italic">Not logged yet</p>
+</div>
+</div>
+<div class="w-10 h-5 bg-taupe/20 rounded-full relative p-0.5 flex items-center justify-start border border-taupe/10">
+<div class="h-4 w-4 bg-white rounded-full shadow-sm"></div>
+</div>
+</div>
+</div>
+</section>
+<section class="space-y-4">
+<div class="flex justify-between items-center">
+<div>
+<h2 class="text-[13px] font-bold text-primary uppercase tracking-wide">Monthly Schedule</h2>
+<p class="text-[11px] text-taupe">Tap dates to view or log past doses</p>
+</div>
+<div class="flex gap-2">
+<button class="p-1 text-taupe"><span class="material-symbols-outlined text-[20px]">chevron_left</span></button>
+<span class="text-[13px] font-bold text-primary self-center">March 2024</span>
+<button class="p-1 text-taupe"><span class="material-symbols-outlined text-[20px]">chevron_right</span></button>
+</div>
+</div>
+<div class="bg-surface rounded-3xl p-5 card-shadow border border-taupe/5">
+<div class="calendar-grid mb-3">
+<span class="text-center text-[10px] font-bold text-taupe uppercase">M</span>
+<span class="text-center text-[10px] font-bold text-taupe uppercase">T</span>
+<span class="text-center text-[10px] font-bold text-taupe uppercase">W</span>
+<span class="text-center text-[10px] font-bold text-taupe uppercase">T</span>
+<span class="text-center text-[10px] font-bold text-taupe uppercase">F</span>
+<span class="text-center text-[10px] font-bold text-taupe uppercase">S</span>
+<span class="text-center text-[10px] font-bold text-taupe uppercase">S</span>
+</div>
+<div class="calendar-grid">
+<div class="h-10"></div><div class="h-10"></div><div class="h-10"></div><div class="h-10"></div>
+<div class="relative h-10 flex flex-col items-center justify-center">
+<span class="text-[12px] font-medium text-primary">1</span>
+<div class="w-1 h-1 rounded-full bg-taupe/40 mt-1"></div>
+</div>
+<div class="h-10 flex items-center justify-center text-[12px] font-medium text-primary">2</div>
+<div class="h-10 flex items-center justify-center text-[12px] font-medium text-primary">3</div>
+<div class="h-10 flex items-center justify-center text-[12px] font-medium text-primary">4</div>
+<div class="h-10 flex items-center justify-center text-[12px] font-medium text-primary">5</div>
+<div class="h-10 flex items-center justify-center text-[12px] font-medium text-primary">6</div>
+<div class="h-10 flex items-center justify-center text-[12px] font-medium text-primary">7</div>
+<div class="h-10 flex items-center justify-center text-[12px] font-medium text-primary">8</div>
+<div class="h-10 flex items-center justify-center text-[12px] font-medium text-primary">9</div>
+<div class="h-10 flex items-center justify-center text-[12px] font-medium text-primary">10</div>
+<div class="h-10 flex items-center justify-center text-[12px] font-medium text-primary">11</div>
+<div class="h-10 flex items-center justify-center text-[12px] font-medium text-primary">12</div>
+<div class="h-10 flex items-center justify-center text-[12px] font-medium text-primary">13</div>
+<div class="h-10 flex items-center justify-center text-[12px] font-medium text-primary">14</div>
+<div class="relative h-10 flex flex-col items-center justify-center rounded-lg bg-peachy/10 border border-peachy/30">
+<span class="text-[12px] font-bold text-primary">15</span>
+<span class="material-symbols-outlined text-[8px] text-peachy mt-0.5">north</span>
+</div>
+<div class="h-10 flex items-center justify-center text-[12px] font-medium text-primary">16</div>
+<div class="h-10 flex items-center justify-center text-[12px] font-medium text-primary">17</div>
+<div class="h-10 flex items-center justify-center text-[12px] font-medium text-primary">18</div>
+<div class="h-10 flex items-center justify-center rounded-full bg-primary text-white text-[12px] font-bold scale-90">19</div>
+<div class="h-10 flex items-center justify-center text-[12px] font-medium text-taupe/40">20</div>
+<div class="h-10 flex items-center justify-center text-[12px] font-medium text-taupe/40">21</div>
+<div class="h-10 flex items-center justify-center text-[12px] font-medium text-taupe/40">22</div>
+<div class="h-10 flex items-center justify-center text-[12px] font-medium text-taupe/40">23</div>
+<div class="h-10 flex items-center justify-center text-[12px] font-medium text-taupe/40">24</div>
+</div>
+<div class="mt-6 pt-5 border-t border-taupe/10">
+<div class="flex justify-between items-center mb-4">
+<h3 class="text-[11px] font-bold text-primary uppercase">Activity Log</h3>
+<div class="flex gap-2">
+<span class="text-[9px] px-2 py-0.5 bg-lavender/30 text-primary rounded-full font-bold">Meds</span>
+<span class="text-[9px] px-2 py-0.5 bg-peachy/20 text-primary rounded-full font-bold">Dose ↑</span>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex gap-4">
+<div class="w-1 bg-primary rounded-full h-auto"></div>
+<div>
+<p class="text-[12px] font-bold text-primary">Today: Wednesday, Mar 19</p>
+<p class="text-[11px] text-taupe">2 medications scheduled. 1 logged. Symptoms: Mild headache.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="w-1 bg-peachy rounded-full h-auto"></div>
+<div>
+<p class="text-[12px] font-bold text-primary">Friday, Mar 15</p>
+<p class="text-[11px] text-taupe">Dose change: Estradiol increased to 75 mcg.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="w-1 bg-taupe/30 rounded-full h-auto"></div>
+<div>
+<p class="text-[12px] font-bold text-taupe">Friday, Mar 1</p>
+<p class="text-[11px] text-taupe/70">Started initial HRT protocol.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section>
+<div class="bg-[#E8F0E8] rounded-2xl p-5 flex items-center justify-between border border-emerald-900/5 card-shadow">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-white/60 flex items-center justify-center">
+<span class="material-symbols-outlined text-emerald-800" style="font-variation-settings: 'opsz' 20;">analytics</span>
+</div>
+<div>
+<p class="text-[12px] font-bold text-primary">Adherence this month: 92%</p>
+<p class="text-[10px] text-emerald-800/70">You're staying consistent! Keep it up.</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-emerald-800/30">trending_up</span>
+</div>
+</section>
+</main>
+<div class="fixed bottom-24 left-0 w-full px-6 flex justify-center pointer-events-none">
+<button class="pointer-events-auto bg-white border-2 border-primary text-primary px-8 py-3 rounded-[10px] font-bold text-[14px] shadow-lg active:scale-95 transition-transform flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+        Add New Medication
+    </button>
+</div>
+<nav class="fixed bottom-0 left-0 w-full z-50 rounded-t-[32px] border-t border-taupe/15 bg-cream/80 backdrop-blur-md shadow-[0_-8px_30px_rgba(155,139,126,0.1)] flex justify-around items-center px-4 pb-6 pt-4">
+<div class="flex flex-col items-center justify-center text-taupe px-5 py-2 hover:text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined" style="font-variation-settings: 'opsz' 24;">auto_stories</span>
+<span class="text-[10px] font-bold tracking-wider uppercase mt-1">Journal</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary text-white rounded-2xl px-6 py-2.5 shadow-md shadow-primary/20 cursor-pointer">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+<span class="text-[10px] font-bold tracking-wider uppercase mt-1">Planner</span>
+</div>
+<div class="flex flex-col items-center justify-center text-taupe px-5 py-2 hover:text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-[10px] font-bold tracking-wider uppercase mt-1">Insights</span>
+</div>
+<div class="flex flex-col items-center justify-center text-taupe px-5 py-2 hover:text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-bold tracking-wider uppercase mt-1">Profile</span>
+</div>
+</nav>
+
+</body></html>

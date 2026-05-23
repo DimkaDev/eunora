@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Select Triggers</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Noto+Serif:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-fixed-variant": "#51443a",
+                    "error": "#ba1a1a",
+                    "on-tertiary-container": "#fffbff",
+                    "surface-container-lowest": "#ffffff",
+                    "on-error": "#ffffff",
+                    "inverse-on-surface": "#f5f0ed",
+                    "secondary-fixed": "#edddf5",
+                    "secondary": "#655a6e",
+                    "on-error-container": "#93000a",
+                    "surface-variant": "#e7e1df",
+                    "on-primary": "#ffffff",
+                    "inverse-surface": "#32302f",
+                    "background": "#fef8f6",
+                    "primary-container": "#817266",
+                    "outline": "#7f756e",
+                    "surface": "#fef8f6",
+                    "on-primary-container": "#fffbff",
+                    "surface-container-highest": "#e7e1df",
+                    "secondary-fixed-dim": "#d0c1d8",
+                    "tertiary-fixed": "#ffdad3",
+                    "on-tertiary-fixed": "#341009",
+                    "on-primary-fixed": "#231a11",
+                    "on-secondary-fixed-variant": "#4d4355",
+                    "surface-tint": "#6a5c50",
+                    "tertiary": "#814f45",
+                    "on-secondary-container": "#6c6074",
+                    "surface-bright": "#fef8f6",
+                    "inverse-primary": "#d6c3b5",
+                    "error-container": "#ffdad6",
+                    "surface-container": "#f2edea",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#683a31",
+                    "tertiary-fixed-dim": "#f9b7a9",
+                    "primary": "#67594e",
+                    "surface-dim": "#ded9d7",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-low": "#f8f2f0",
+                    "primary-fixed": "#f2dfd0",
+                    "on-surface-variant": "#4d453f",
+                    "primary-fixed-dim": "#d6c3b5",
+                    "on-secondary-fixed": "#211828",
+                    "secondary-container": "#edddf5",
+                    "tertiary-container": "#9d675c",
+                    "outline-variant": "#d0c4bc",
+                    "on-surface": "#1d1b1a",
+                    "surface-container-high": "#ede7e5",
+                    "on-background": "#1d1b1a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif"],
+                    "body": ["Manrope"],
+                    "label": ["Manrope"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        font-family: 'Manrope', sans-serif;
+        background-color: #fef8f6; /* Custom background from JSON/Design System */
+      }
+      .serif-heading {
+        font-family: 'Noto Serif', serif;
+      }
+      .custom-glass {
+        background: rgba(254, 248, 246, 0.7);
+        backdrop-filter: blur(20px);
+      }
+      .selected-trigger {
+        background-color: #edddf5; /* secondary-container */
+        border: 1.5px solid #67594e; /* primary/taupe */
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface antialiased">
+<!-- Top Navigation Anchor (Shared Component Execution) -->
+<header class="fixed top-0 w-full z-50 bg-[#fef8f6]/70 dark:bg-stone-950/70 backdrop-blur-md px-6 py-4 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<button class="hover:opacity-80 transition-opacity scale-95 duration-200 ease-in-out flex items-center justify-center">
+<span class="material-symbols-outlined text-[#67594e] text-2xl" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="flex flex-col">
+<h1 class="font-noto-serif text-xl font-medium tracking-tight text-[#67594e]">Select Triggers</h1>
+<div class="flex items-center gap-2 mt-1">
+<div class="h-1 w-16 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full w-[75%] bg-primary"></div>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-primary/60">Step 3 of 4</span>
+</div>
+</div>
+</div>
+<div class="flex items-center">
+<button class="material-symbols-outlined text-[#67594e]" data-icon="more_vert">more_vert</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-24 pb-32 px-6 max-w-2xl mx-auto">
+<!-- Header Text Section (Editorial Style) -->
+<section class="mb-10">
+<h2 class="font-headline text-3xl text-on-surface leading-tight mb-3">What sparked a shift today?</h2>
+<p class="font-body text-on-surface-variant text-lg leading-relaxed opacity-80">Identifying common triggers helps us tailor your insights and predict future cycles of well-being.</p>
+</section>
+<!-- Triggers Grid Section -->
+<section class="mb-12">
+<div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+<!-- Selected Chip: Caffeine -->
+<div class="selected-trigger flex flex-col items-start p-5 rounded-xl transition-all duration-300 shadow-sm cursor-pointer group">
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-primary" data-icon="coffee" style="font-variation-settings: 'FILL' 1;">coffee</span>
+</div>
+<span class="font-label font-semibold text-primary">Caffeine</span>
+</div>
+<!-- Unselected Chip: Alcohol -->
+<div class="bg-surface-container-lowest flex flex-col items-start p-5 rounded-xl transition-all duration-300 hover:bg-surface-container-low border border-transparent cursor-pointer">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-outline" data-icon="wine_bar">wine_bar</span>
+</div>
+<span class="font-label font-semibold text-on-surface-variant">Alcohol</span>
+</div>
+<!-- Selected Chip: Stress -->
+<div class="selected-trigger flex flex-col items-start p-5 rounded-xl transition-all duration-300 shadow-sm cursor-pointer group">
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-primary" data-icon="psychology" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+<span class="font-label font-semibold text-primary">Stress</span>
+</div>
+<!-- Unselected Chip: Exercise -->
+<div class="bg-surface-container-lowest flex flex-col items-start p-5 rounded-xl transition-all duration-300 hover:bg-surface-container-low border border-transparent cursor-pointer">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-outline" data-icon="fitness_center">fitness_center</span>
+</div>
+<span class="font-label font-semibold text-on-surface-variant">Exercise</span>
+</div>
+<!-- Unselected Chip: Weather -->
+<div class="bg-surface-container-lowest flex flex-col items-start p-5 rounded-xl transition-all duration-300 hover:bg-surface-container-low border border-transparent cursor-pointer">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-outline" data-icon="thermostat">thermostat</span>
+</div>
+<span class="font-label font-semibold text-on-surface-variant">Weather</span>
+</div>
+<!-- Unselected Chip: Foods -->
+<div class="bg-surface-container-lowest flex flex-col items-start p-5 rounded-xl transition-all duration-300 hover:bg-surface-container-low border border-transparent cursor-pointer">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-outline" data-icon="restaurant">restaurant</span>
+</div>
+<span class="font-label font-semibold text-on-surface-variant">Specific Foods</span>
+</div>
+<!-- Add Custom Trigger Button -->
+<button class="col-span-full border-2 border-dashed border-outline-variant rounded-xl p-6 flex items-center justify-center gap-3 text-primary font-semibold hover:bg-surface-container-low transition-colors mt-2">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+<span class="font-label">+ Add Your Own Trigger</span>
+</button>
+</div>
+</section>
+<!-- Reflection Area Section -->
+<section class="space-y-4">
+<div class="flex items-center justify-between px-1">
+<h3 class="font-headline text-xl text-on-surface">How did these affect you?</h3>
+<span class="material-symbols-outlined text-tertiary-fixed-dim" data-icon="edit_note">edit_note</span>
+</div>
+<div class="relative">
+<textarea class="w-full bg-surface-container-lowest border-none rounded-2xl p-5 font-body text-on-surface-variant focus:ring-2 focus:ring-secondary-container placeholder:italic placeholder:text-outline/40 shadow-sm" placeholder="Add more detail..." rows="4"></textarea>
+<div class="absolute bottom-4 right-4 flex items-center gap-1 opacity-40">
+<span class="text-[10px] font-bold uppercase tracking-widest">Optional</span>
+</div>
+</div>
+</section>
+<!-- Decorative Card (Editorial Depth) -->
+<section class="mt-12 bg-tertiary-fixed/10 p-8 rounded-3xl relative overflow-hidden">
+<div class="relative z-10">
+<h4 class="font-headline italic text-lg text-on-tertiary-fixed-variant mb-2">Curated Tip</h4>
+<p class="font-body text-on-tertiary-fixed-variant opacity-90 leading-relaxed text-sm max-w-[80%]">
+                    Recording triggers like caffeine can reveal patterns in night sweats and restless sleep. Keep it up!
+                </p>
+</div>
+<div class="absolute -right-6 -bottom-6 w-24 h-24 bg-tertiary-fixed rounded-full opacity-20 blur-2xl"></div>
+</section>
+</main>
+<!-- Fixed Bottom Bar -->
+<div class="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-surface via-surface/95 to-transparent z-40">
+<div class="max-w-2xl mx-auto">
+<button class="w-full py-5 bg-gradient-to-r from-primary to-primary-container text-on-primary rounded-full font-label font-bold text-lg shadow-xl hover:opacity-95 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                Save &amp; Continue
+                <span class="material-symbols-outlined text-xl" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Bottom Navigation Component Logic (Hidden for Transactional/Input screen as per Filter rules) -->
+<!-- The "Destination" Rule: Suppressed since this is a "Log/Entry" task screen. -->
+</body></html>

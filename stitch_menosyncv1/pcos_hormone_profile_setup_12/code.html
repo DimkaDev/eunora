@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Clinical Clarity Dashboard - Health Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&amp;family=Manrope:wght@400;500;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style type="text/tailwindcss">
+        :root {
+            --clinical-blue: #4A6D7C;
+            --clinical-green: #5C8B7E;
+            --clinical-bg: #F8FAFB;
+            --clinical-border: #E2E8F0;
+            --text-main: #334155;
+            --text-muted: #64748B;
+        }
+        body {
+            background-color: var(--clinical-bg);
+            color: var(--text-main);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        input[type="checkbox"]:checked, input[type="radio"]:checked {
+            background-color: var(--clinical-blue);
+            border-color: var(--clinical-blue);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#4A6D7C",
+                        secondary: "#5C8B7E",
+                        accent: "#94A3B8",
+                        surface: "#FFFFFF",
+                        "on-surface": "#334155"
+                    },
+                    fontFamily: {
+                        headline: ["Noto Serif", "serif"],
+                        body: ["Manrope", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body antialiased">
+<div class="relative flex min-h-screen w-full flex-col max-w-md mx-auto bg-white shadow-sm overflow-x-hidden">
+<header class="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-[var(--clinical-border)] px-6 py-4">
+<div class="flex items-center gap-3 mb-1">
+<button aria-label="Go back" class="text-primary hover:bg-slate-50 p-1 rounded-md transition-colors">
+<span class="material-symbols-outlined align-middle">arrow_back</span>
+</button>
+<span class="text-[10px] font-bold text-primary tracking-[0.1em] uppercase">Phase 2.5 • Clinical Profile</span>
+</div>
+<h1 class="font-headline text-xl text-slate-800 font-bold">Clinical Clarity Dashboard</h1>
+<p class="text-[11px] text-slate-500 mt-1 leading-relaxed">Customize your tracking parameters for professional medical review.</p>
+</header>
+<div class="w-full bg-slate-100 h-1">
+<div class="bg-primary h-full w-[70%]"></div>
+</div>
+<main class="flex-1 pb-40">
+<div class="px-6 py-6 border-b border-[var(--clinical-border)] bg-slate-50/30">
+<h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Primary Diagnosis
+                </h2>
+<div class="space-y-3">
+<label class="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-lg cursor-pointer hover:border-primary transition-all">
+<div class="flex flex-col">
+<span class="text-sm font-semibold">PCOS</span>
+<span class="text-[11px] text-slate-500">Polycystic Ovary Syndrome</span>
+</div>
+<input class="h-5 w-5 rounded border-slate-300 text-primary focus:ring-primary" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-lg cursor-pointer hover:border-primary transition-all">
+<div class="flex flex-col">
+<span class="text-sm font-semibold">PMDD</span>
+<span class="text-[11px] text-slate-500">Premenstrual Dysphoric Disorder</span>
+</div>
+<input class="h-5 w-5 rounded border-slate-300 text-primary focus:ring-primary" type="checkbox"/>
+</label>
+<div class="grid grid-cols-2 gap-3">
+<label class="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-lg cursor-pointer">
+<input class="h-4 w-4 rounded border-slate-300 text-primary" type="checkbox"/>
+<span class="text-xs font-medium">Thyroid</span>
+</label>
+<label class="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-lg cursor-pointer">
+<input class="h-4 w-4 rounded border-slate-300 text-primary" type="checkbox"/>
+<span class="text-xs font-medium">Insulin Res.</span>
+</label>
+</div>
+<div class="relative mt-2">
+<input class="w-full text-sm border-slate-200 rounded-lg bg-white focus:border-primary focus:ring-0 placeholder:text-slate-400" placeholder="Other medical condition..." type="text"/>
+</div>
+</div>
+</div>
+<div class="px-6 py-6 border-b border-[var(--clinical-border)]">
+<h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Cycle Characteristics
+                </h2>
+<div class="grid grid-cols-2 gap-x-4 gap-y-3">
+<label class="flex items-center gap-2 py-1 cursor-pointer">
+<input class="rounded border-slate-300 text-primary" type="checkbox"/><span class="text-sm">Irregular</span>
+</label>
+<label class="flex items-center gap-2 py-1 cursor-pointer">
+<input class="rounded border-slate-300 text-primary" type="checkbox"/><span class="text-sm">Very heavy</span>
+</label>
+<label class="flex items-center gap-2 py-1 cursor-pointer">
+<input class="rounded border-slate-300 text-primary" type="checkbox"/><span class="text-sm">Light/minimal</span>
+</label>
+<label class="flex items-center gap-2 py-1 cursor-pointer">
+<input class="rounded border-slate-300 text-primary" type="checkbox"/><span class="text-sm">Absent</span>
+</label>
+<label class="flex items-center gap-2 py-1 cursor-pointer">
+<input class="rounded border-slate-300 text-primary" type="checkbox"/><span class="text-sm">Frequent</span>
+</label>
+<label class="flex items-center gap-2 py-1 cursor-pointer">
+<input class="rounded border-slate-300 text-primary" type="checkbox"/><span class="text-sm">No pattern</span>
+</label>
+</div>
+</div>
+<div class="px-6 py-6 border-b border-[var(--clinical-border)] bg-slate-50/30">
+<h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Current Protocols
+                </h2>
+<div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+<div class="grid grid-cols-1 divide-y divide-slate-100">
+<div class="flex items-center justify-between p-3">
+<span class="text-sm">Oral Contraceptives</span>
+<input class="rounded border-slate-300 text-secondary" type="checkbox"/>
+</div>
+<div class="flex items-center justify-between p-3">
+<span class="text-sm">Metformin / Inositol</span>
+<input class="rounded border-slate-300 text-secondary" type="checkbox"/>
+</div>
+<div class="flex items-center justify-between p-3">
+<span class="text-sm">Spironolactone</span>
+<input class="rounded border-slate-300 text-secondary" type="checkbox"/>
+</div>
+<div class="flex items-center justify-between p-3">
+<span class="text-sm">HRT</span>
+<input class="rounded border-slate-300 text-secondary" type="checkbox"/>
+</div>
+</div>
+</div>
+<div class="mt-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
+<p class="text-[11px] font-bold text-primary mb-2 uppercase">Dosage Tracking</p>
+<div class="space-y-2">
+<input class="w-full text-xs border-slate-200 rounded-md py-2 px-3" placeholder="Medication name" type="text"/>
+<input class="w-full text-xs border-slate-200 rounded-md py-2 px-3" placeholder="Dose (e.g., 50mg)" type="text"/>
+<button class="w-full text-[11px] font-bold text-primary py-2 hover:underline">+ Add another</button>
+</div>
+</div>
+</div>
+<div class="px-6 py-6 border-b border-[var(--clinical-border)]">
+<h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Data Focus Points
+                </h2>
+<div class="grid grid-cols-2 gap-x-6 gap-y-2">
+<label class="flex items-center gap-2 py-1 cursor-pointer">
+<input class="rounded border-slate-300 text-primary" type="checkbox"/><span class="text-xs">Cycle Irregularity</span>
+</label>
+<label class="flex items-center gap-2 py-1 cursor-pointer">
+<input class="rounded border-slate-300 text-primary" type="checkbox"/><span class="text-xs">Hormonal Acne</span>
+</label>
+<label class="flex items-center gap-2 py-1 cursor-pointer">
+<input class="rounded border-slate-300 text-primary" type="checkbox"/><span class="text-xs">Mood Swings</span>
+</label>
+<label class="flex items-center gap-2 py-1 cursor-pointer">
+<input class="rounded border-slate-300 text-primary" type="checkbox"/><span class="text-xs">Weight Mgmt</span>
+</label>
+<label class="flex items-center gap-2 py-1 cursor-pointer">
+<input class="rounded border-slate-300 text-primary" type="checkbox"/><span class="text-xs">Hair Growth</span>
+</label>
+<label class="flex items-center gap-2 py-1 cursor-pointer">
+<input class="rounded border-slate-300 text-primary" type="checkbox"/><span class="text-xs">Energy Levels</span>
+</label>
+</div>
+</div>
+<div class="px-6 py-6 border-b border-[var(--clinical-border)] bg-slate-50/30">
+<h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Specialist Care</h2>
+<div class="space-y-2">
+<select class="w-full text-sm border-slate-200 rounded-lg bg-white focus:ring-primary focus:border-primary">
+<option>Endocrinologist</option>
+<option>Reproductive Specialist</option>
+<option>Gynecologist</option>
+<option>Primary Care</option>
+<option>I don't see a specialist</option>
+</select>
+<div class="flex items-center gap-3 mt-4 bg-white p-3 rounded-lg border border-slate-200">
+<input class="rounded border-slate-300 text-primary" id="reports" type="checkbox"/>
+<label class="text-xs font-medium leading-tight" for="reports">Enable automated specialist-focused reporting</label>
+</div>
+</div>
+</div>
+<div class="px-6 py-6 border-b border-[var(--clinical-border)] bg-secondary/5">
+<h2 class="text-xs font-bold text-secondary uppercase tracking-wider mb-4">Fertility Goals</h2>
+<div class="flex flex-wrap gap-2">
+<label class="flex-1 min-w-[100px]">
+<input class="hidden peer" name="fertility" type="radio"/>
+<div class="text-center py-2 px-3 border border-slate-200 bg-white rounded-md text-xs peer-checked:bg-secondary peer-checked:text-white peer-checked:border-secondary transition-all cursor-pointer">Yes</div>
+</label>
+<label class="flex-1 min-w-[100px]">
+<input class="hidden peer" name="fertility" type="radio"/>
+<div class="text-center py-2 px-3 border border-slate-200 bg-white rounded-md text-xs peer-checked:bg-secondary peer-checked:text-white peer-checked:border-secondary transition-all cursor-pointer">Not now</div>
+</label>
+<label class="flex-1 min-w-[100px]">
+<input class="hidden peer" name="fertility" type="radio"/>
+<div class="text-center py-2 px-3 border border-slate-200 bg-white rounded-md text-xs peer-checked:bg-secondary peer-checked:text-white peer-checked:border-secondary transition-all cursor-pointer">Maybe</div>
+</label>
+</div>
+</div>
+<div class="px-6 py-6 bg-white">
+<h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Data Privacy &amp; Support</h2>
+<div class="space-y-3">
+<label class="flex items-center gap-3 cursor-pointer">
+<input class="h-4 w-4 rounded border-slate-300 text-primary" type="checkbox"/>
+<span class="text-sm">Condition-specific clinical articles</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer">
+<input class="h-4 w-4 rounded border-slate-300 text-primary" type="checkbox"/>
+<span class="text-sm">Connect with medical community</span>
+</label>
+</div>
+</div>
+</main>
+<div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 border-t border-slate-200 p-6 pb-8 backdrop-blur-md">
+<button class="w-full bg-primary py-4 text-white font-bold rounded-lg shadow-lg shadow-primary/20 hover:bg-slate-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                Save Clinical Profile
+                <span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+<div class="mt-4 text-center">
+<button class="text-xs text-slate-400 font-medium hover:text-primary transition-colors underline decoration-slate-200 underline-offset-4">Skip detailed medical setup</button>
+</div>
+</div>
+</div>
+
+</body></html>

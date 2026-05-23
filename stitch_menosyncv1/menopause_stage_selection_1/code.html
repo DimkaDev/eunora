@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Journey Selection</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#6c6074",
+                        "on-secondary-fixed": "#211828",
+                        "primary-container": "#817266",
+                        "surface-tint": "#6a5c50",
+                        "tertiary-fixed-dim": "#f9b7a9",
+                        "on-primary-container": "#fffbff",
+                        "error": "#ba1a1a",
+                        "primary-fixed": "#f2dfd0",
+                        "surface-variant": "#e7e1df",
+                        "outline-variant": "#d0c4bc",
+                        "tertiary": "#814f45",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e7e1df",
+                        "tertiary-container": "#9d675c",
+                        "secondary": "#655a6e",
+                        "background": "#fef8f6",
+                        "tertiary-fixed": "#ffdad3",
+                        "inverse-primary": "#d6c3b5",
+                        "on-primary-fixed-variant": "#51443a",
+                        "on-tertiary-fixed-variant": "#683a31",
+                        "on-primary": "#ffffff",
+                        "outline": "#7f756e",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed-variant": "#4d4355",
+                        "primary-fixed-dim": "#d6c3b5",
+                        "surface-container-high": "#ede7e5",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#fffbff",
+                        "on-background": "#1d1b1a",
+                        "on-error-container": "#93000a",
+                        "inverse-surface": "#32302f",
+                        "surface-container": "#f2edea",
+                        "on-error": "#ffffff",
+                        "surface-dim": "#ded9d7",
+                        "surface-bright": "#fef8f6",
+                        "surface": "#fef8f6",
+                        "secondary-container": "#edddf5",
+                        "inverse-on-surface": "#f5f0ed",
+                        "secondary-fixed": "#edddf5",
+                        "on-tertiary-fixed": "#341009",
+                        "on-primary-fixed": "#231a11",
+                        "primary": "#67594e",
+                        "on-surface": "#1d1b1a",
+                        "secondary-fixed-dim": "#d0c1d8",
+                        "on-surface-variant": "#4d453f",
+                        "on-secondary": "#ffffff",
+                        "surface-container-low": "#f8f2f0"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif", "serif"],
+                        "body": ["Manrope", "sans-serif"],
+                        "label": ["Manrope", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: #fef8f6;
+        }
+        h1, h2, h3, .font-headline {
+            font-family: 'Noto Serif', serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface h-screen flex flex-col antialiased">
+<!-- Header Section (Non-scrolling) -->
+<header class="bg-surface pt-6 pb-4 px-6 shrink-0 z-10 sticky top-0">
+<div class="flex items-center mb-6">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors text-on-surface">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+</button>
+</div>
+<div class="mb-6">
+<div class="flex justify-between items-center mb-2">
+<span class="text-xs font-medium text-on-surface-variant font-label tracking-wide uppercase">Step 1 of 7</span>
+</div>
+<div class="h-1 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[14%] rounded-full"></div>
+</div>
+</div>
+<h1 class="text-3xl font-headline font-bold text-on-surface leading-tight mb-3">
+            Tell us where you are in your journey
+        </h1>
+<p class="text-base text-on-surface-variant font-body">
+            There are no wrong answers. You can change this anytime in Settings.
+        </p>
+</header>
+<!-- Scrollable Content -->
+<main class="flex-1 overflow-y-auto px-6 pb-24 space-y-4">
+<!-- Tile 1 (Selected State) -->
+<label class="block relative w-full cursor-pointer group">
+<input checked="" class="peer sr-only" name="journey_stage" type="radio"/>
+<div class="w-full bg-secondary-container rounded-xl p-5 flex items-center gap-4 transition-all outline outline-2 outline-primary">
+<div class="w-12 h-12 rounded-full bg-surface-container-lowest flex items-center justify-center shrink-0 text-primary shadow-sm">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 0;">autorenew</span>
+</div>
+<div class="flex-1">
+<h3 class="text-lg font-semibold text-on-surface mb-1">My periods have become irregular</h3>
+<p class="text-sm text-on-surface-variant">Not sure what's happening yet</p>
+</div>
+</div>
+</label>
+<!-- Tile 2 -->
+<label class="block relative w-full cursor-pointer group">
+<input class="peer sr-only" name="journey_stage" type="radio"/>
+<div class="w-full bg-surface-container-lowest rounded-xl p-5 flex items-center gap-4 transition-all hover:bg-surface-container shadow-sm outline-1 outline outline-transparent outline-offset-0 peer-checked:bg-secondary-container peer-checked:outline-primary peer-checked:outline-2">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0 text-primary group-hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 0;">schedule</span>
+</div>
+<div class="flex-1">
+<h3 class="text-lg font-semibold text-on-surface mb-1">I haven't had a period for 12+ months</h3>
+<p class="text-sm text-on-surface-variant">The clinical marker of menopause</p>
+</div>
+</div>
+</label>
+<!-- Tile 3 -->
+<label class="block relative w-full cursor-pointer group">
+<input class="peer sr-only" name="journey_stage" type="radio"/>
+<div class="w-full bg-surface-container-lowest rounded-xl p-5 flex items-center gap-4 transition-all hover:bg-surface-container shadow-sm outline-1 outline outline-transparent outline-offset-0 peer-checked:bg-secondary-container peer-checked:outline-primary peer-checked:outline-2">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0 text-primary group-hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 0;">check_circle</span>
+</div>
+<div class="flex-1">
+<h3 class="text-lg font-semibold text-on-surface mb-1">I've been through menopause</h3>
+<p class="text-sm text-on-surface-variant">It's been several years now</p>
+</div>
+</div>
+</label>
+<!-- Tile 4 -->
+<label class="block relative w-full cursor-pointer group">
+<input class="peer sr-only" name="journey_stage" type="radio"/>
+<div class="w-full bg-surface-container-lowest rounded-xl p-5 flex items-center gap-4 transition-all hover:bg-surface-container shadow-sm outline-1 outline outline-transparent outline-offset-0 peer-checked:bg-secondary-container peer-checked:outline-primary peer-checked:outline-2">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0 text-primary group-hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 0;">medical_services</span>
+</div>
+<div class="flex-1">
+<h3 class="text-lg font-semibold text-on-surface mb-1">I had a surgical or medical menopause</h3>
+<p class="text-sm text-on-surface-variant">My menopause started suddenly</p>
+</div>
+</div>
+</label>
+<!-- Tile 5 -->
+<label class="block relative w-full cursor-pointer group">
+<input class="peer sr-only" name="journey_stage" type="radio"/>
+<div class="w-full bg-surface-container-lowest rounded-xl p-5 flex items-center gap-4 transition-all hover:bg-surface-container shadow-sm outline-1 outline outline-transparent outline-offset-0 peer-checked:bg-secondary-container peer-checked:outline-primary peer-checked:outline-2">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0 text-primary group-hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 0;">info</span>
+</div>
+<div class="flex-1">
+<h3 class="text-lg font-semibold text-on-surface mb-1">I have PCOS or a hormone condition</h3>
+<p class="text-sm text-on-surface-variant">Different patterns, different tracking</p>
+</div>
+</div>
+</label>
+</main>
+<!-- Sticky Bottom Button Area -->
+<div class="fixed bottom-0 left-0 w-full bg-surface/80 backdrop-blur-xl pt-4 pb-8 px-6 z-20 shadow-[0_-4px_24px_rgba(29,27,26,0.06)]">
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary font-semibold text-[15px] py-[14px] rounded-full shadow-sm hover:opacity-95 transition-opacity font-body">
+            Continue
+        </button>
+</div>
+</body></html>

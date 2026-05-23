@@ -1,0 +1,127 @@
+<html class="light" lang="en"><head><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="min-h-screen flex flex-col items-center">```html
+
+
+
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Roboto+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "research-bg": "#F4F7F8",
+                        "research-charcoal": "#1A1C1E",
+                        "research-gray": "#44474E",
+                        "research-border": "#C4C7C8",
+                        "research-teal": "#006874",
+                        "research-surface": "#FFFFFF",
+                        "research-accent": "#006874"
+                    },
+                    borderRadius: {
+                        "sharp": "2px",
+                        "md": "4px",
+                        "lg": "8px"
+                    },
+                    fontFamily: {
+                        "sans": ["Inter", "sans-serif"],
+                        "mono": ["Roboto Mono", "monospace"]
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body {
+                @apply bg-research-bg text-research-charcoal antialiased;
+                font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+            }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+        }
+    </style>
+
+
+<header class="w-full h-14 border-b border-research-border/30 bg-research-surface flex justify-between items-center px-6 fixed top-0 z-50">
+<div class="flex items-center gap-4">
+<button class="text-research-gray hover:text-research-charcoal">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<span class="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-research-gray">Status: Step 05/07</span>
+</div>
+<div class="font-bold text-research-charcoal tracking-tighter text-sm uppercase italic">MenoSync</div>
+</header>
+<main class="w-full max-w-[90%] md:max-w-[400px] flex flex-col items-center pt-24 pb-12">
+<div class="w-full mb-10">
+<div class="flex justify-between items-end mb-2">
+<span class="font-mono text-[10px] text-research-teal font-semibold uppercase tracking-wider">Protocol: Health Setup</span>
+<span class="font-mono text-[10px] text-research-gray">70%</span>
+</div>
+<div class="h-1 w-full bg-research-border/30 rounded-full">
+<div class="h-full bg-research-teal rounded-full transition-all duration-500" style="width: 70%;"></div>
+</div>
+</div>
+<div class="w-full flex flex-col items-center mb-8">
+<div class="w-16 h-16 border border-research-border flex items-center justify-center bg-research-surface mb-6 shadow-sm">
+<span class="material-symbols-outlined text-research-teal text-3xl">check</span>
+</div>
+<h1 class="text-2xl font-semibold tracking-tight text-research-charcoal mb-2">Account Confirmed</h1>
+<p class="text-research-gray text-sm text-center leading-relaxed">System verification complete. Identity and encryption protocols active.</p>
+</div>
+<div class="w-full bg-research-surface border border-research-border p-6 mb-8 shadow-sm">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-research-teal text-sm">database</span>
+<h3 class="font-mono text-[11px] font-bold uppercase tracking-widest text-research-gray">Next Phase: Health Profiling</h3>
+</div>
+<p class="text-sm text-research-charcoal leading-relaxed mb-6">
+                Establish your clinical baseline. Completion time estimated at 180 seconds. Data is utilized exclusively for personalized algorithmic insights.
+            </p>
+<ul class="space-y-4">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-research-teal text-[18px] mt-0.5">check_circle</span>
+<span class="text-xs text-research-gray leading-tight">Aggregate personalized symptom correlations</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-research-teal text-[18px] mt-0.5">check_circle</span>
+<span class="text-xs text-research-gray leading-tight">Generate clinical-grade reports for medical review</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-research-teal text-[18px] mt-0.5">check_circle</span>
+<span class="text-xs text-research-gray leading-tight">Identify longitudinal physiological patterns</span>
+</li>
+</ul>
+</div>
+<div class="w-full flex flex-col gap-3">
+<button class="w-full h-12 bg-research-charcoal text-white text-xs font-semibold uppercase tracking-widest border border-research-charcoal hover:bg-research-gray transition-colors">
+                Initialize Health Setup
+            </button>
+<button class="w-full h-12 bg-transparent text-research-charcoal text-xs font-semibold uppercase tracking-widest border border-research-border hover:bg-research-border/10 transition-colors">
+                Defer to later session
+            </button>
+<button class="w-full py-2 text-research-gray text-[10px] font-mono uppercase tracking-widest hover:text-research-teal underline transition-colors mt-2">
+                Skip for now
+            </button>
+</div>
+<div class="mt-auto pt-10 flex items-center justify-center gap-2 text-research-gray/60">
+<span class="material-symbols-outlined text-[14px]">encrypted</span>
+<p class="font-mono text-[9px] uppercase tracking-widest">AES-256 Encrypted • Privacy Compliant</p>
+</div>
+</main>
+<style>@media (min-height: 700px) {
+            body {
+                overflow: hidden;
+            }
+        }
+    </style>
+
+```</body></html>

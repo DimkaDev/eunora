@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MenoSync - Analytical Insights</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-error": "#ffffff",
+                      "primary-fixed": "#f2dfd0",
+                      "surface-container": "#f2edea",
+                      "surface": "#F7F5F0",
+                      "surface-tint": "#6a5c50",
+                      "secondary-fixed": "#edddf5",
+                      "background": "#F7F5F0",
+                      "on-primary-container": "#fffbff",
+                      "surface-bright": "#fef8f6",
+                      "tertiary-fixed-dim": "#f9b7a9",
+                      "inverse-on-surface": "#f5f0ed",
+                      "error-container": "#ffdad6",
+                      "on-secondary-fixed": "#211828",
+                      "surface-dim": "#ded9d7",
+                      "secondary-fixed-dim": "#d0c1d8",
+                      "tertiary-fixed": "#ffdad3",
+                      "on-tertiary-container": "#fffbff",
+                      "primary": "#67594e",
+                      "surface-container-highest": "#e7e1df",
+                      "on-surface-variant": "#4d453f",
+                      "on-surface": "#1d1b1a",
+                      "on-background": "#1d1b1a",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary-container": "#edddf5",
+                      "tertiary-container": "#9d675c",
+                      "outline": "#7f756e",
+                      "on-secondary": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "surface-variant": "#e7e1df",
+                      "surface-container-high": "#ede7e5",
+                      "primary-fixed-dim": "#d6c3b5",
+                      "on-primary-fixed": "#231a11",
+                      "secondary": "#655a6e",
+                      "primary-container": "#817266",
+                      "on-primary-fixed-variant": "#51443a",
+                      "error": "#ba1a1a",
+                      "on-secondary-container": "#6c6074",
+                      "inverse-surface": "#32302f",
+                      "inverse-primary": "#d6c3b5",
+                      "outline-variant": "#d0c4bc",
+                      "tertiary": "#814f45",
+                      "on-secondary-fixed-variant": "#4d4355",
+                      "surface-container-low": "#f8f2f0",
+                      "on-tertiary-fixed-variant": "#683a31",
+                      "on-tertiary-fixed": "#341009",
+                      "on-tertiary": "#ffffff",
+                      "on-error-container": "#93000a"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "2xl": "1rem",
+                      "3xl": "1.5rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Noto Serif"],
+                      "body": ["Manrope"],
+                      "label": ["Manrope"]
+              }
+            },
+          }
+        }
+    </script>
+<style type="text/tailwindcss">
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Manrope', sans-serif; }
+        .font-noto-serif { font-family: 'Noto Serif', serif; }.intensity-bar {
+            @apply w-1 rounded-full absolute bottom-1.5;
+        }
+        .intensity-high { @apply bg-tertiary h-4; }
+        .intensity-med { @apply bg-tertiary-fixed-dim h-2.5; }
+        .intensity-low { @apply bg-tertiary-fixed h-1.5; }
+        .hrt-indicator { @apply w-full h-1 bg-teal-400/40 absolute bottom-0; }.sparkline-dot { @apply w-1.5 h-1.5 rounded-full bg-secondary; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface selection:bg-secondary-fixed antialiased">
+<header class="fixed top-0 w-full z-50 bg-[#F7F5F0]/80 backdrop-blur-md shadow-sm">
+<div class="flex justify-between items-center px-6 h-16 w-full max-w-screen-xl mx-auto">
+<button class="text-[#9B8B7E] hover:opacity-80 transition-opacity active:scale-95">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<h1 class="font-noto-serif text-xl font-bold tracking-tight text-[#1d1b1a]">March 2025</h1>
+<button class="text-[#9B8B7E] hover:opacity-80 transition-opacity active:scale-95">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</header>
+<main class="pt-20 pb-80 px-4 max-w-screen-xl mx-auto">
+<div class="grid grid-cols-7 gap-1 mb-2">
+<div class="text-center py-2 text-stone-400 font-bold text-[10px] uppercase tracking-[0.15em]">Mon</div>
+<div class="text-center py-2 text-stone-400 font-bold text-[10px] uppercase tracking-[0.15em]">Tue</div>
+<div class="text-center py-2 text-stone-400 font-bold text-[10px] uppercase tracking-[0.15em]">Wed</div>
+<div class="text-center py-2 text-stone-400 font-bold text-[10px] uppercase tracking-[0.15em]">Thu</div>
+<div class="text-center py-2 text-stone-400 font-bold text-[10px] uppercase tracking-[0.15em]">Fri</div>
+<div class="text-center py-2 text-stone-400 font-bold text-[10px] uppercase tracking-[0.15em]">Sat</div>
+<div class="text-center py-2 text-stone-400 font-bold text-[10px] uppercase tracking-[0.15em]">Sun</div>
+</div>
+<div class="grid grid-cols-7 gap-1 bg-white rounded-3xl overflow-hidden shadow-sm border border-stone-100">
+<div class="aspect-[4/5] bg-stone-50/50"></div>
+<div class="aspect-[4/5] bg-stone-50/50"></div>
+<div class="aspect-[4/5] bg-stone-50/50"></div>
+<div class="aspect-[4/5] bg-stone-50/50"></div>
+<div class="aspect-[4/5] bg-stone-50/50"></div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative">
+<span class="text-xs font-medium text-stone-500">1</span>
+<div class="flex gap-0.5 justify-center items-end h-full w-full pb-4 px-1">
+<div class="intensity-bar intensity-med bg-tertiary-fixed-dim left-1/4"></div>
+<div class="intensity-bar intensity-low bg-secondary-fixed left-1/2"></div>
+</div>
+<div class="hrt-indicator"></div>
+</div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative">
+<span class="text-xs font-medium text-stone-500">2</span>
+</div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative">
+<span class="text-xs font-medium text-stone-500">3</span>
+<div class="intensity-bar intensity-low left-1/2"></div>
+</div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative">
+<span class="text-xs font-medium text-stone-500">4</span>
+<div class="intensity-bar intensity-high left-1/2"></div>
+</div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative"><span class="text-xs font-medium text-stone-500">5</span></div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative">
+<span class="text-xs font-medium text-stone-500">6</span>
+<div class="intensity-bar intensity-med left-1/2"></div>
+<div class="hrt-indicator"></div>
+</div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative"><span class="text-xs font-medium text-stone-500">7</span></div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative">
+<span class="text-xs font-medium text-stone-500">8</span>
+<div class="intensity-bar intensity-med left-1/2"></div>
+</div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative"><span class="text-xs font-medium text-stone-500">9</span></div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative">
+<span class="text-xs font-medium text-stone-500">10</span>
+<div class="intensity-bar intensity-low left-1/2"></div>
+</div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative"><span class="text-xs font-medium text-stone-500">11</span></div>
+<div class="aspect-[4/5] bg-primary flex flex-col items-center pt-2 relative">
+<span class="text-xs font-bold text-white">12</span>
+<div class="intensity-bar intensity-med bg-white/40 left-1/2"></div>
+<div class="w-full h-1 bg-teal-200/50 absolute bottom-0"></div>
+</div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative"><span class="text-xs font-medium text-stone-500">13</span></div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative">
+<span class="text-xs font-medium text-stone-500">14</span>
+<div class="intensity-bar intensity-med left-1/2"></div>
+</div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative">
+<span class="text-xs font-medium text-stone-500">15</span>
+<span class="material-symbols-outlined text-[12px] text-amber-500 absolute top-1 right-1" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<div class="hrt-indicator"></div>
+</div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative"><span class="text-xs font-medium text-stone-500">16</span></div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative"><span class="text-xs font-medium text-stone-500">17</span></div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative">
+<span class="text-xs font-medium text-stone-500">18</span>
+<div class="intensity-bar intensity-high left-1/2"></div>
+</div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative">
+<div class="absolute top-1.5 w-6 h-6 rounded-full border border-primary flex items-center justify-center">
+<span class="text-xs font-bold text-primary">19</span>
+</div>
+<div class="intensity-bar intensity-med left-1/2"></div>
+</div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative"><span class="text-xs font-medium text-stone-500">20</span></div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative">
+<span class="text-xs font-medium text-stone-500">21</span>
+<div class="intensity-bar intensity-low left-1/2"></div>
+<div class="hrt-indicator"></div>
+</div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative"><span class="text-xs font-medium text-stone-500">22</span></div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative"><span class="text-xs font-medium text-stone-500">23</span></div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative"><span class="text-xs font-medium text-stone-500">24</span></div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative"><span class="text-xs font-medium text-stone-500">25</span><div class="intensity-bar intensity-low left-1/2"></div></div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative"><span class="text-xs font-medium text-stone-500">26</span></div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative"><span class="text-xs font-medium text-stone-500">27</span></div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative"><span class="text-xs font-medium text-stone-500">28</span><div class="hrt-indicator"></div></div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative"><span class="text-xs font-medium text-stone-500">29</span></div>
+<div class="aspect-[4/5] bg-white border-[0.5px] border-stone-50 flex flex-col items-center pt-2 relative"><span class="text-xs font-medium text-stone-500">30</span><div class="intensity-bar intensity-low left-1/2"></div></div>
+</div>
+</main>
+<section class="fixed bottom-0 left-0 w-full z-40 transform translate-y-0 transition-transform duration-300">
+<div class="max-w-screen-xl mx-auto px-1">
+<div class="bg-white rounded-t-[2.5rem] shadow-[0_-12px_48px_rgba(0,0,0,0.12)] pt-3 pb-24 px-6 border-t border-stone-100 overflow-y-auto max-h-[663px]">
+<div class="w-12 h-1.5 bg-stone-200 rounded-full mx-auto mb-6"></div>
+<div class="flex justify-between items-start mb-6">
+<div>
+<h2 class="font-noto-serif text-2xl font-bold text-[#1d1b1a]">Weekly Trends</h2>
+<p class="text-stone-400 text-sm font-semibold">March 10 — March 16</p>
+</div>
+<button class="text-secondary font-bold text-sm flex items-center gap-1 mt-1 hover:opacity-70">
+                    Full analysis
+                    <span class="material-symbols-outlined text-sm">trending_up</span>
+</button>
+</div>
+<div class="grid grid-cols-2 gap-3 mb-8">
+<div class="bg-[#F7F5F0] p-4 rounded-3xl border border-stone-100">
+<div class="flex items-center justify-between mb-2">
+<span class="material-symbols-outlined text-tertiary text-xl">thermostat</span>
+<span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">-12%</span>
+</div>
+<p class="text-[10px] font-bold uppercase tracking-wider text-stone-400">Hot Flashes</p>
+<p class="text-lg font-bold text-on-surface mt-1">Down 10% <span class="text-xs font-normal text-stone-400">wk/wk</span></p>
+<div class="mt-3 h-6 flex items-end gap-1">
+<div class="w-2 bg-stone-200 rounded-t h-[60%]"></div>
+<div class="w-2 bg-stone-200 rounded-t h-[40%]"></div>
+<div class="w-2 bg-tertiary rounded-t h-[80%]"></div>
+<div class="w-2 bg-stone-200 rounded-t h-[50%]"></div>
+<div class="w-2 bg-stone-200 rounded-t h-[30%]"></div>
+<div class="w-2 bg-stone-200 rounded-t h-[20%]"></div>
+<div class="w-2 bg-stone-200 rounded-t h-[40%]"></div>
+</div>
+</div>
+<div class="bg-[#F7F5F0] p-4 rounded-3xl border border-stone-100">
+<div class="flex items-center justify-between mb-2">
+<span class="material-symbols-outlined text-secondary text-xl">bedtime</span>
+<span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">+15%</span>
+</div>
+<p class="text-[10px] font-bold uppercase tracking-wider text-stone-400">Sleep Quality</p>
+<p class="text-lg font-bold text-on-surface mt-1">Better consistency</p>
+<div class="mt-3 h-6 flex items-end gap-1">
+<div class="w-2 bg-secondary rounded-t h-[30%]"></div>
+<div class="w-2 bg-secondary rounded-t h-[35%]"></div>
+<div class="w-2 bg-secondary rounded-t h-[60%]"></div>
+<div class="w-2 bg-secondary rounded-t h-[70%]"></div>
+<div class="w-2 bg-secondary rounded-t h-[65%]"></div>
+<div class="w-2 bg-secondary rounded-t h-[85%]"></div>
+<div class="w-2 bg-secondary rounded-t h-[90%]"></div>
+</div>
+</div>
+</div>
+<div class="bg-white rounded-3xl border border-stone-100 p-5 shadow-sm">
+<div class="flex justify-between items-center mb-4 pb-4 border-b border-stone-50">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-2xl bg-primary flex flex-col items-center justify-center text-white">
+<span class="text-[10px] uppercase font-bold leading-none">Wed</span>
+<span class="text-lg font-bold leading-none">12</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Daily Log Details</p>
+<div class="flex items-center gap-1 text-teal-600 font-bold text-xs">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+<span>HRT Adhered</span>
+</div>
+</div>
+</div>
+<button class="text-stone-400"><span class="material-symbols-outlined">edit_note</span></button>
+</div>
+<div class="space-y-4">
+<div>
+<div class="flex flex-wrap gap-2">
+<div class="bg-secondary-container/50 px-3 py-1.5 rounded-xl flex items-center gap-2 border border-secondary-fixed-dim/20">
+<span class="material-symbols-outlined text-secondary text-[16px]">thermostat</span>
+<span class="text-on-secondary-container text-xs font-semibold">Hot flashes 3/5</span>
+</div>
+<div class="bg-secondary-container/50 px-3 py-1.5 rounded-xl flex items-center gap-2 border border-secondary-fixed-dim/20">
+<span class="material-symbols-outlined text-secondary text-[16px]">bedtime</span>
+<span class="text-on-secondary-container text-xs font-semibold">Sleep 2/5</span>
+</div>
+<div class="bg-secondary-container/50 px-3 py-1.5 rounded-xl flex items-center gap-2 border border-secondary-fixed-dim/20">
+<span class="material-symbols-outlined text-secondary text-[16px]">mood</span>
+<span class="text-on-secondary-container text-xs font-semibold">Mood 3/5</span>
+</div>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="flex-1">
+<span class="text-[9px] font-bold uppercase tracking-widest text-stone-400 block mb-1">Triggers</span>
+<div class="flex gap-2">
+<span class="text-xs font-medium text-stone-600 bg-tertiary-fixed/20 px-2 py-1 rounded-lg">🍷 Alcohol</span>
+<span class="text-xs font-medium text-stone-600 bg-tertiary-fixed/20 px-2 py-1 rounded-lg">😰 Stress</span>
+</div>
+</div>
+<div class="flex-[1.5]">
+<span class="text-[9px] font-bold uppercase tracking-widest text-stone-400 block mb-1">Journal Note</span>
+<p class="italic text-stone-500 font-noto-serif text-xs leading-relaxed">"Had a work presentation today..."</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<nav class="fixed bottom-0 left-0 w-full px-8 pb-6 pt-3 flex justify-around items-center bg-[#F7F5F0]/90 backdrop-blur-xl z-50 rounded-t-3xl border-t border-stone-200/40 shadow-lg">
+<button class="flex flex-col items-center justify-center text-stone-500 opacity-60">
+<span class="material-symbols-outlined">today</span>
+<span class="text-[10px] font-semibold uppercase tracking-wider">Today</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-primary text-white rounded-2xl px-4 py-1.5 shadow-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">calendar_month</span>
+<span class="text-[10px] font-semibold uppercase tracking-wider">Calendar</span>
+</button>
+<button class="flex flex-col items-center justify-center text-stone-500 opacity-60">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-[10px] font-semibold uppercase tracking-wider">Insights</span>
+</button>
+<button class="flex flex-col items-center justify-center text-stone-500 opacity-60">
+<span class="material-symbols-outlined">auto_stories</span>
+<span class="text-[10px] font-semibold uppercase tracking-wider">Journal</span>
+</button>
+</nav>
+
+</body></html>
