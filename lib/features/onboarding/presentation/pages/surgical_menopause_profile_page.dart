@@ -544,7 +544,7 @@ class _SurgicalMenopauseProfilePageState extends State<SurgicalMenopauseProfileP
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Surgical menopause is a significant transition. MenoSync is here to help you understand and manage your symptoms during this time.',
+              'Surgical menopause is a significant transition. Eunora is here to help you understand and manage your symptoms during this time.',
               style: GoogleFonts.manrope(
                 fontSize: 13,
                 color: const Color(0xFF2E7D32),

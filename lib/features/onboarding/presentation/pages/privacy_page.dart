@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/gestures.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
+import 'package:eunora/core/utils/animation_system.dart';
 import '../providers/privacy_provider.dart';
 
 class PrivacyPage extends ConsumerWidget {
@@ -37,25 +38,14 @@ class PrivacyPage extends ConsumerWidget {
               ),
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back, color: Color(0xFF9B8B7E)),
-                onPressed: () => context.pop(),
+                onPressed: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go('/onboarding');
+                  }
+                },
               ),
-              actions: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 16.0),
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppTheme.surfaceContainer,
-                      image: DecorationImage(
-                        image: NetworkImage('https://lh3.googleusercontent.com/aida-public/AB6AXuAjwMzU84YjCLcv_smaIPYpbBgeht6Alfpw3PA1yIbbZwRGwzHXN0VRkMcx5sNjl5KGc2ThFobSuyBTvGJQilJZToav-v34AbAmpVA7b6897f5hs-dsSztvttIctohQy-aKJ3-WKH4gArM4-V3JCnCiadyzctQZBQ-rCFBE95utmCciG6rIozEF48SE5SAj2aaGFYlLP6qer9uWN0DHSAoAtcjVv_-FdNRV4rrwyPfggeFv-xEZbHNVtDl_ierib_0zJ9B6pW6hgOo'),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
             ),
           ),
         ),
@@ -66,7 +56,7 @@ class PrivacyPage extends ConsumerWidget {
           Positioned.fill(
             child: SingleChildScrollView(
               padding: const EdgeInsets.only(
-                top: 100, // Space for AppBar
+                top: 140, // Space for AppBar
                 left: 24,
                 right: 24,
                 bottom: 140, // Space for Footer
@@ -219,7 +209,7 @@ class PrivacyPage extends ConsumerWidget {
                         _buildCheckboxItem(
                           value: state.shareAnonymousData,
                           onChanged: (val) => controller.toggleAnonymousData(),
-                          title: const Text('Share anonymous usage data to help improve MenoSync'),
+                          title: const Text('Share anonymous usage data to help improve Eunora'),
                           subtitle: 'No personal health info is shared',
                         ),
                         const SizedBox(height: 24),
@@ -323,59 +313,68 @@ class PrivacyPage extends ConsumerWidget {
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                 child: Container(
-                  padding: const EdgeInsets.only(left: 24, right: 24, top: 16, bottom: 40),
+                  padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 40),
                   decoration: BoxDecoration(
-                    color: AppTheme.surface.withOpacity(0.95),
+                    color: AppTheme.surface.withValues(alpha: 0.7),
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF9B8B7E).withOpacity(0.08),
-                        blurRadius: 40,
-                        offset: const Offset(0, -10),
+                        color: const Color(0xFF1D1B1A).withValues(alpha: 0.06),
+                        blurRadius: 24,
+                        offset: const Offset(0, -4),
                       ),
                     ],
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      SizedBox(
-                        width: double.infinity,
-                        height: 56,
-                        child: ElevatedButton(
-                          onPressed: state.isSubmitting || !state.canSubmit
-                              ? null
-                              : () async {
-                                  final success = await controller.submitConsent();
-                                  if (success && context.mounted) {
-                                    context.push('/signup');
-                                  }
-                                },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.primary,
-                            disabledBackgroundColor: AppTheme.primary.withOpacity(0.5),
-                            foregroundColor: Colors.white,
-                            disabledForegroundColor: Colors.white.withOpacity(0.7),
-                            elevation: 4,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Bounceable(
+                              onTap: state.isSubmitting || !state.canSubmit
+                                  ? null
+                                  : () async {
+                                      final success = await controller.submitConsent();
+                                      if (success && context.mounted) {
+                                        context.push('/signup');
+                                      }
+                                    },
+                              child: IgnorePointer(
+                                child: ElevatedButton(
+                                  onPressed: state.isSubmitting || !state.canSubmit ? null : () {},
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppTheme.primary,
+                                    disabledBackgroundColor: AppTheme.primary.withValues(alpha: 0.5),
+                                    foregroundColor: Colors.white,
+                                    disabledForegroundColor: Colors.white.withValues(alpha: 0.7),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(24),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    elevation: 0,
+                                  ),
+                                  child: state.isSubmitting
+                                      ? const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                        )
+                                      : Text(
+                                          'CONTINUE',
+                                          style: GoogleFonts.manrope(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                ),
+                              ),
                             ),
                           ),
-                          child: state.isSubmitting
-                              ? const SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                                )
-                              : Text(
-                                  'I Understand & Accept',
-                                  style: GoogleFonts.manrope(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                        ),
+                        ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       Text(
                         'YOU CAN UPDATE THESE PREFERENCES ANYTIME IN SETTINGS',
                         style: GoogleFonts.manrope(
@@ -406,18 +405,10 @@ class PrivacyPage extends ConsumerWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 20,
-          height: 20,
-          child: Checkbox(
-            value: value,
-            onChanged: onChanged,
-            activeColor: AppTheme.primary,
-            side: const BorderSide(color: Color(0xFFD0C4BC)), // outline-variant
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
+        AnimatedCheckbox(
+          value: value,
+          onChanged: (val) => onChanged(val),
+          activeColor: AppTheme.primary,
         ),
         const SizedBox(width: 16),
         Expanded(

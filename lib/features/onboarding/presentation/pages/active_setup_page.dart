@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/onboarding_header.dart';
 
 class ActiveSetupPage extends ConsumerStatefulWidget {
@@ -332,7 +334,16 @@ class _ActiveSetupPageState extends ConsumerState<ActiveSetupPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ElevatedButton(
-              onPressed: () => context.push('/home'),
+              onPressed: () async {
+                final user = FirebaseAuth.instance.currentUser;
+                if (user != null) {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('onboarding_completed_${user.uid}', true);
+                }
+                if (context.mounted) {
+                  context.go('/home');
+                }
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF67594E),
                 foregroundColor: Colors.white,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:eunora/core/utils/animation_system.dart';
 import '../widgets/onboarding_header.dart';
 
 class HealthConditionsPage extends ConsumerStatefulWidget {
@@ -127,7 +128,7 @@ class _HealthConditionsPageState extends ConsumerState<HealthConditionsPage> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Select any conditions that apply. This helps personalize your MenoSync experience.',
+          'Select any conditions that apply. This helps personalize your Eunora experience.',
           style: TextStyle(
             fontFamily: 'Manrope',
             fontSize: 14,
@@ -197,7 +198,7 @@ class _HealthConditionsPageState extends ConsumerState<HealthConditionsPage> {
 
   Widget _buildConditionCard(String id, String title, String subtitle, IconData icon) {
     final isSelected = _selectedConditions.contains(id);
-    return GestureDetector(
+    return Bounceable(
       onTap: () => _toggleCondition(id),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -259,7 +260,7 @@ class _HealthConditionsPageState extends ConsumerState<HealthConditionsPage> {
     final isSelected = _selectedConditions.contains(id);
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: GestureDetector(
+      child: Bounceable(
         onTap: () => _toggleCondition(id),
         child: Container(
           padding: const EdgeInsets.all(16),
@@ -312,10 +313,10 @@ class _HealthConditionsPageState extends ConsumerState<HealthConditionsPage> {
         children: [
           Row(
             children: [
-              Checkbox(
+              AnimatedCheckbox(
                 value: _selectedConditions.contains('other'),
                 onChanged: (val) {
-                  if (val == true) {
+                  if (val) {
                     _toggleCondition('other');
                   } else {
                     _selectedConditions.remove('other');
@@ -323,8 +324,8 @@ class _HealthConditionsPageState extends ConsumerState<HealthConditionsPage> {
                   }
                 },
                 activeColor: const Color(0xFF67594E),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
               ),
+              const SizedBox(width: 12),
               const Text(
                 'OTHER CONDITION',
                 style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.1),
@@ -364,11 +365,11 @@ class _HealthConditionsPageState extends ConsumerState<HealthConditionsPage> {
             },
             child: Row(
               children: [
-                Checkbox(
+                AnimatedCheckbox(
                   value: _noneOfAbove,
                   onChanged: (val) {
                     setState(() {
-                      _noneOfAbove = val ?? false;
+                      _noneOfAbove = val;
                       if (_noneOfAbove) {
                         _selectedConditions.clear();
                         _otherConditionController.clear();
@@ -376,8 +377,8 @@ class _HealthConditionsPageState extends ConsumerState<HealthConditionsPage> {
                     });
                   },
                   activeColor: const Color(0xFF67594E),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                 ),
+                const SizedBox(width: 12),
                 const Expanded(
                   child: Text(
                     'None of the above / Prefer not to disclose',
@@ -410,7 +411,7 @@ class _HealthConditionsPageState extends ConsumerState<HealthConditionsPage> {
           const SizedBox(width: 16),
           Expanded(
             child: Text(
-              'These conditions don\'t disqualify you from using MenoSync. They help us provide safe guidance and encourage conversation with your care provider.',
+              'These conditions don\'t disqualify you from using Eunora. They help us provide safe guidance and encourage conversation with your care provider.',
               style: TextStyle(
                 fontSize: 11,
                 fontStyle: FontStyle.italic,
@@ -445,26 +446,36 @@ class _HealthConditionsPageState extends ConsumerState<HealthConditionsPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ElevatedButton(
-              onPressed: () => context.push('/contraception_screening'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF67594E),
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 56),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                elevation: 0,
+            Bounceable(
+              onTap: () => context.push('/contraception_screening'),
+              child: IgnorePointer(
+                child: ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF67594E),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 56),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 0,
+                  ),
+                  child: const Text('Continue', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                ),
               ),
-              child: const Text('Continue', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
             ),
             const SizedBox(height: 12),
-            TextButton(
-              onPressed: () => context.push('/contraception_screening'),
-              child: const Text(
-                'I\'d rather not share this right now',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF4D453F),
+            Bounceable(
+              onTap: () => context.push('/contraception_screening'),
+              child: IgnorePointer(
+                child: TextButton(
+                  onPressed: () {},
+                  child: const Text(
+                    'I\'d rather not share this right now',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF4D453F),
+                    ),
+                  ),
                 ),
               ),
             ),

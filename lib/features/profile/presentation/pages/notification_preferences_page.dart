@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
+import 'package:eunora/core/utils/animation_system.dart';
 import 'package:eunora/features/profile/presentation/widgets/notification_permission_dialog.dart';
 
 class NotificationPreferencesPage extends StatefulWidget {
@@ -97,7 +98,7 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'MenoSync HRT Reminder',
+                        'Eunora HRT Reminder',
                         style: GoogleFonts.manrope(
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -494,12 +495,10 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
           ),
         ),
         const SizedBox(width: 12),
-        Switch(
+        AnimatedSwitch(
           value: value,
-          activeColor: Colors.white,
-          activeTrackColor: AppTheme.primary,
-          inactiveTrackColor: AppTheme.surfaceContainerHighest,
           onChanged: onChanged,
+          activeColor: AppTheme.primary,
         ),
       ],
     );
@@ -507,7 +506,7 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
 
   Widget _buildRadioOption(String optionName) {
     final isSelected = _notificationType == optionName;
-    return InkWell(
+    return Bounceable(
       onTap: () {
         setState(() {
           _notificationType = optionName;

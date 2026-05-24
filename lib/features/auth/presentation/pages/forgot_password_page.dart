@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:eunora/core/services/auth_service.dart';
+import 'package:eunora/core/utils/animation_system.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class ForgotPasswordPage extends StatefulWidget {
+class ForgotPasswordPage extends ConsumerStatefulWidget {
   const ForgotPasswordPage({super.key});
 
   @override
-  State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
+  ConsumerState<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
 }
 
-class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
+class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   final _emailController = TextEditingController();
   bool _isLoading = false;
   String? _errorText;
@@ -36,17 +40,26 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       return;
     }
 
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 1));
-
-    if (mounted) {
-      setState(() => _isLoading = false);
-      if (email.contains('error')) {
-        setState(() {
-          _errorText = "We couldn't find an account associated with this email.";
-        });
-      } else {
+    try {
+      final auth = ref.read(authServiceProvider);
+      await auth.sendPasswordReset(email);
+      if (mounted) {
+        setState(() => _isLoading = false);
         context.push('/forgot-password-success', extra: email);
+      }
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorText = e.message ?? "We couldn't find an account associated with this email.";
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorText = 'An error occurred. Please try again.';
+        });
       }
     }
   }
@@ -251,37 +264,42 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           ),
         ],
       ),
-      child: ElevatedButton(
-        onPressed: _isLoading ? null : _handleSubmit,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        child: _isLoading
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Send Reset Link',
-                    style: GoogleFonts.manrope(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+      child: Bounceable(
+        onTap: _isLoading ? null : _handleSubmit,
+        child: IgnorePointer(
+          child: ElevatedButton(
+            onPressed: _isLoading ? null : () {},
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: _isLoading
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Send Reset Link',
+                        style: GoogleFonts.manrope(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.arrow_forward, size: 20, color: Colors.white),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  const Icon(Icons.arrow_forward, size: 20, color: Colors.white),
-                ],
-              ),
+          ),
+        ),
       ),
     );
   }

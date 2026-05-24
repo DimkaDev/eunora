@@ -21,15 +21,15 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
     },
     {
       'question': 'Is my health data private and secure?',
-      'answer': 'Yes, MenoSync encrypts your health data. Only you have access to it, and you can download or delete your records at any time from Settings.'
+      'answer': 'Yes, Eunora encrypts your health data. Only you have access to it, and you can download or delete your records at any time from Settings.'
     },
     {
       'question': 'Can I export my data for my doctor?',
       'answer': 'Absolutely! Go to Profile > Download Your Data to export your records as a CSV, or use the Passport tab to generate a clinical PDF report.'
     },
     {
-      'question': 'How does MenoSync predict cycles?',
-      'answer': 'MenoSync uses advanced algorithms to track your historical symptom patterns and predict cycle phases, even during perimenopause.'
+      'question': 'How does Eunora predict cycles?',
+      'answer': 'Eunora uses advanced algorithms to track your historical symptom patterns and predict cycle phases, even during perimenopause.'
     },
     {
       'question': 'What are "Insights" and how do they help?',
@@ -37,15 +37,15 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
     },
     {
       'question': 'How do I sync with Apple Health?',
-      'answer': 'Go to Profile > Integrations and toggle the Apple Health switch. Allow MenoSync access when prompted on your device.'
+      'answer': 'Go to Profile > Integrations and toggle the Apple Health switch. Allow Eunora access when prompted on your device.'
     },
     {
       'question': 'Can I change my notification settings?',
       'answer': 'Yes, tap Notifications in Settings to configure your reminder times for HRT doses and daily symptom journals.'
     },
     {
-      'question': 'Is MenoSync suitable for perimenopause?',
-      'answer': 'Yes! MenoSync is designed specifically for all stages, including perimenopause, menopause transition, and postmenopause.'
+      'question': 'Is Eunora suitable for perimenopause?',
+      'answer': 'Yes! Eunora is designed specifically for all stages, including perimenopause, menopause transition, and postmenopause.'
     },
   ];
 
@@ -398,7 +398,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
             const SizedBox(height: 32),
 
             Text(
-              'MENOSYNC V2.4.0 • MADE WITH CARE',
+              'EUNORA V2.4.0 • MADE WITH CARE',
               style: GoogleFonts.manrope(
                 fontSize: 10,
                 letterSpacing: 2.0,

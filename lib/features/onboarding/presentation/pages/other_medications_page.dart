@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/theme/app_theme.dart';
+import 'package:eunora/core/utils/animation_system.dart';
 import '../providers/other_medications_provider.dart';
 import '../../domain/models/other_medication.dart';
 import '../widgets/onboarding_header.dart';
+import '../widgets/other_medication_list_item.dart';
 
 class OtherMedicationsPage extends ConsumerWidget {
   const OtherMedicationsPage({super.key});
@@ -117,10 +118,10 @@ class OtherMedicationsPage extends ConsumerWidget {
               ),
             ),
           ),
-          Switch.adaptive(
+          AnimatedSwitch(
             value: value,
             onChanged: notifier.toggleIsTakingAnythingElse,
-            activeColor: const Color(0xFF817266), // primary-container
+            activeColor: const Color(0xFF817266),
           ),
         ],
       ),
@@ -166,7 +167,25 @@ class OtherMedicationsPage extends ConsumerWidget {
               ),
             )
           else
-            ...medications.map((med) => _buildItemRow(context, notifier, med)),
+            ...medications.asMap().entries.map((entry) {
+              final index = entry.key;
+              final med = entry.value;
+              return Padding(
+                padding: EdgeInsets.only(bottom: index == medications.length - 1 ? 0 : 12),
+                child: OtherMedicationListItem(
+                  medication: med,
+                  onDelete: () => notifier.removeMedication(med.id),
+                  onEdit: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) => AddOtherMedicationModal(medication: med),
+                    );
+                  },
+                ),
+              );
+            }),
           
           const SizedBox(height: 32),
           _buildAddButton(context),
@@ -191,69 +210,9 @@ class OtherMedicationsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildItemRow(BuildContext context, OtherMedicationsNotifier notifier, OtherMedication med) {
-    return Dismissible(
-      key: Key(med.id),
-      direction: DismissDirection.endToStart,
-      onDismissed: (direction) => notifier.removeMedication(med.id),
-      background: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          color: const Color(0xFFBA1A1A), // error
-          borderRadius: BorderRadius.circular(16),
-        ),
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: const Icon(Icons.delete_outline, color: Colors.white),
-      ),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8F2F0), // surface-container-low
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    med.name,
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Color(0xFF1D1B1A)),
-                  ),
-                  if (med.dose != null || med.frequency != null)
-                    Text(
-                      '${med.dose ?? ''}${med.dose != null && med.frequency != null ? ' • ' : ''}${med.frequency ?? ''}',
-                      style: const TextStyle(fontSize: 12, color: Color(0xFF4D453F)),
-                    ),
-                ],
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.edit_outlined, color: Color(0xFF7F756E), size: 20),
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (context) => AddOtherMedicationModal(medication: med),
-                );
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.delete_outline, color: const Color(0xFF7F756E).withOpacity(0.5), size: 20),
-              onPressed: () => notifier.removeMedication(med.id),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildAddButton(BuildContext context) {
-    return InkWell(
+    return Bounceable(
       onTap: () {
         showModalBottomSheet(
           context: context,
@@ -368,19 +327,24 @@ class OtherMedicationsPage extends ConsumerWidget {
             stops: const [0.0, 0.4],
           ),
         ),
-        child: ElevatedButton(
-          onPressed: () => context.push('/health-conditions'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF817266),
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 18),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
-            elevation: 8,
-            shadowColor: const Color(0xFF817266).withOpacity(0.3),
-          ),
-          child: const Text(
-            'CONTINUE',
-            style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5, fontSize: 14),
+        child: Bounceable(
+          onTap: () => context.push('/health-conditions'),
+          child: IgnorePointer(
+            child: ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF817266),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 18),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+                elevation: 8,
+                shadowColor: const Color(0xFF817266).withOpacity(0.3),
+              ),
+              child: const Text(
+                'CONTINUE',
+                style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5, fontSize: 14),
+              ),
+            ),
           ),
         ),
       ),
@@ -566,7 +530,7 @@ class _AddOtherMedicationModalState extends ConsumerState<AddOtherMedicationModa
                             ],
                           ),
                         ),
-                        Switch.adaptive(
+                        AnimatedSwitch(
                           value: _hasReminder,
                           onChanged: (v) => setState(() => _hasReminder = v),
                           activeColor: const Color(0xFF817266),

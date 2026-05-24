@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:eunora/core/utils/animation_system.dart';
 import '../widgets/onboarding_header.dart';
 
 class ContraceptionPage extends ConsumerStatefulWidget {
@@ -144,7 +145,7 @@ class _ContraceptionPageState extends ConsumerState<ContraceptionPage> {
     required IconData icon,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
+    return Bounceable(
       onTap: onTap,
       child: Container(
         height: 120,
@@ -341,35 +342,45 @@ class _ContraceptionPageState extends ConsumerState<ContraceptionPage> {
         ),
         child: Row(
           children: [
-            TextButton(
-              onPressed: () => context.push('/weight'),
-              child: const Text(
-                'Skip',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF67594E),
+            Bounceable(
+              onTap: () => context.push('/weight'),
+              child: IgnorePointer(
+                child: TextButton(
+                  onPressed: () {},
+                  child: const Text(
+                    'Skip',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF67594E),
+                    ),
+                  ),
                 ),
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: ElevatedButton(
-                onPressed: () => context.push('/weight'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF67594E),
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 56),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('Continue', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    SizedBox(width: 8),
-                    Icon(Icons.arrow_forward, size: 20),
-                  ],
+              child: Bounceable(
+                onTap: () => context.push('/weight'),
+                child: IgnorePointer(
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF67594E),
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 56),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 0,
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Continue', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        SizedBox(width: 8),
+                        Icon(Icons.arrow_forward, size: 20),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),

@@ -1,4 +1,4 @@
-# MenoSyncV1 Design Tokens
+# Eunora Design Tokens
 
 ## Typography
 - **Headline Font:** Noto Serif

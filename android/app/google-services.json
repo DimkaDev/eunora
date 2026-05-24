@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "221753431117",
+    "project_id": "eunora-54218",
+    "storage_bucket": "eunora-54218.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:221753431117:android:eddd27c92ecf6203bbf804",
+        "android_client_info": {
+          "package_name": "com.example.eunora"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "221753431117-tac6949m1v1ncl4sk5tcfc1u4d6q3bs5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.eunora",
+            "certificate_hash": "b89fc81383e32712afd87e4e1ca730b5ecdfcfec"
+          }
+        },
+        {
+          "client_id": "221753431117-ah7h7rtncs1tqlfd0l4dc003k9fd6m8g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGfpi8NN25naoR_fdfcd2KvuAG_PZ08iA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "221753431117-ah7h7rtncs1tqlfd0l4dc003k9fd6m8g.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "221753431117-454i8mn9qo48g38r2d5k6h0tpjua9o67.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.eunora"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -2,14 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/features/auth/presentation/providers/signup_provider.dart';
+import 'package:eunora/core/utils/animation_system.dart';
+import 'package:eunora/core/services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class SignUpPage extends ConsumerWidget {
+class SignUpPage extends ConsumerStatefulWidget {
   const SignUpPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SignUpPage> createState() => _SignUpPageState();
+}
+
+class _SignUpPageState extends ConsumerState<SignUpPage> {
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(signUpProvider);
     final notifier = ref.read(signUpProvider.notifier);
 
@@ -23,7 +34,7 @@ class SignUpPage extends ConsumerWidget {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          'Create Your MenoSync Account',
+          'Create Your Eunora Account',
           style: GoogleFonts.notoSerif(
             color: const Color(0xFF1D1B1A),
             fontSize: 24,
@@ -50,17 +61,25 @@ class SignUpPage extends ConsumerWidget {
               label: 'Password',
               placeholder: 'Create a secure password',
               value: state.password,
-              obscureText: true,
+              obscureText: _obscurePassword,
               onChanged: notifier.updatePassword,
               errorText: state.showErrors && state.passwordError != null ? state.passwordError : null,
               bottomWidget: _buildPasswordRequirements(state),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                  size: 20,
+                  color: const Color(0xFF4D453F).withOpacity(0.6),
+                ),
+                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+              ),
             ),
             const SizedBox(height: 20),
             _buildInputField(
               label: 'Confirm Password',
               placeholder: 'Confirm your password',
               value: state.confirmPassword,
-              obscureText: true,
+              obscureText: _obscureConfirmPassword,
               onChanged: notifier.updateConfirmPassword,
               errorText: state.showErrors ? state.confirmPasswordError : null,
               bottomWidget: Text(
@@ -70,33 +89,74 @@ class SignUpPage extends ConsumerWidget {
                   color: state.showErrors && !state.passwordsMatch ? const Color(0xFFE8A89B) : Colors.grey,
                 ),
               ),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscureConfirmPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                  size: 20,
+                  color: const Color(0xFF4D453F).withOpacity(0.6),
+                ),
+                onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+              ),
             ),
             const SizedBox(height: 40),
+            if (state.generalError != null) ...[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Row(
+                  children: [
+                    const Icon(Icons.error_outline, size: 16, color: Color(0xFFBA1A1A)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        state.generalError!,
+                        style: GoogleFonts.manrope(
+                          fontSize: 12,
+                          color: const Color(0xFFBA1A1A),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  // if (notifier.validate()) {
-                  //   context.push('/verify-email');
-                  // }
-                  //TODO
-                    context.push('/verify-email');
-
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF9B8B7E),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  elevation: 0,
-                ),
-                child: Text(
-                  'Create Account',
-                  style: GoogleFonts.manrope(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+              child: Bounceable(
+                onTap: state.isLoading
+                    ? null
+                    : () async {
+                        final success = await notifier.signUp();
+                        if (success && context.mounted) {
+                          context.go('/verify-email');
+                        }
+                      },
+                child: IgnorePointer(
+                  child: ElevatedButton(
+                    onPressed: state.isLoading ? null : () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF9B8B7E),
+                      disabledBackgroundColor: const Color(0xFF9B8B7E).withOpacity(0.5),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: state.isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          )
+                        : Text(
+                            'Create Account',
+                            style: GoogleFonts.manrope(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
               ),
@@ -120,13 +180,84 @@ class SignUpPage extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildSocialButton('G'),
-                const SizedBox(width: 16),
-                _buildSocialButton('A'),
-              ],
+            SizedBox(
+              width: double.infinity,
+              child: Bounceable(
+                onTap: state.isLoading
+                    ? null
+                    : () async {
+                        notifier.setLoading(true);
+                        notifier.setGeneralError(null);
+                        try {
+                           final credentials = await ref.read(authServiceProvider).signInWithGoogle();
+                           if (credentials != null && context.mounted) {
+                             final user = credentials.user;
+                             if (user != null) {
+                               final prefs = await SharedPreferences.getInstance();
+                               if (!mounted) return;
+                               final isCompleted = prefs.getBool('onboarding_completed_${user.uid}') ?? false;
+                               if (isCompleted) {
+                                 context.go('/home');
+                               } else {
+                                 context.go('/menopause-stage');
+                               }
+                             } else {
+                               context.go('/menopause-stage');
+                             }
+                           } else {
+                             notifier.setLoading(false);
+                           }
+                        } on FirebaseAuthException catch (e) {
+                          notifier.setLoading(false);
+                          notifier.setGeneralError(e.message ?? 'Google Sign-In failed.');
+                        } catch (e) {
+                          notifier.setLoading(false);
+                          notifier.setGeneralError('Google Sign-In was cancelled or failed.');
+                        }
+                      },
+                child: IgnorePointer(
+                  child: OutlinedButton(
+                    onPressed: state.isLoading ? null : () {},
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Color(0xFF9B8B7E), width: 2),
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color(0xFF4D453F),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: const Color(0xFFD0C4BC)),
+                          ),
+                          child: Image.network(
+                            'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/3840px-Google_%22G%22_logo.svg.png',
+                            width: 18,
+                            height: 18,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Continue with Google',
+                          style: GoogleFonts.manrope(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF4D453F),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 32),
             TextButton(
@@ -172,6 +303,7 @@ class SignUpPage extends ConsumerWidget {
     String? errorText,
     TextInputType keyboardType = TextInputType.text,
     Widget? bottomWidget,
+    Widget? suffixIcon,
   }) {
     final bool hasError = errorText != null;
 
@@ -199,6 +331,7 @@ class SignUpPage extends ConsumerWidget {
             filled: true,
             fillColor: hasError ? const Color(0xFFFFF9F8) : const Color(0xFFEEEEEE),
             contentPadding: const EdgeInsets.all(16),
+            suffixIcon: suffixIcon,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(
@@ -279,35 +412,6 @@ class SignUpPage extends ConsumerWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSocialButton(String label) {
-    return Container(
-      width: 48,
-      height: 48,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.grey[300]!),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Text(
-          label,
-          style: GoogleFonts.manrope(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: const Color(0xFF444444),
-          ),
-        ),
       ),
     );
   }

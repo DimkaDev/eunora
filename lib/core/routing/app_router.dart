@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:eunora/core/routing/route_transitions.dart';
 import 'package:eunora/features/onboarding/presentation/pages/onboarding_page.dart';
+import 'package:eunora/features/onboarding/presentation/pages/splash_screen.dart';
 import 'package:eunora/features/onboarding/presentation/pages/privacy_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/terms_page.dart';
-
 import 'package:eunora/features/onboarding/presentation/pages/privacy_policy_page.dart';
 import 'package:eunora/features/auth/presentation/pages/signup_page.dart';
 import 'package:eunora/features/auth/presentation/pages/sign_in_page.dart';
@@ -43,204 +44,302 @@ final GoRouter appRouter = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      builder: (BuildContext context, GoRouterState state) {
-        return const OnboardingPage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const SplashScreen(),
+      ),
+    ),
+    GoRoute(
+      path: '/onboarding',
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const OnboardingPage(),
+      ),
     ),
     GoRoute(
       path: '/privacy',
-      builder: (BuildContext context, GoRouterState state) {
-        return const PrivacyPage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const PrivacyPage(),
+      ),
     ),
     GoRoute(
       path: '/terms',
-      builder: (BuildContext context, GoRouterState state) {
-        return const TermsPage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const TermsPage(),
+      ),
     ),
     GoRoute(
       path: '/privacy-policy',
-      builder: (BuildContext context, GoRouterState state) {
-        return const PrivacyPolicyPage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const PrivacyPolicyPage(),
+      ),
     ),
     GoRoute(
       path: '/signup',
-      builder: (BuildContext context, GoRouterState state) {
-        return const SignUpPage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const SignUpPage(),
+      ),
     ),
     GoRoute(
       path: '/signin',
-      builder: (BuildContext context, GoRouterState state) {
-        return const SignInPage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const SignInPage(),
+      ),
     ),
     GoRoute(
       path: '/forgot-password',
-      builder: (BuildContext context, GoRouterState state) {
-        return const ForgotPasswordPage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const ForgotPasswordPage(),
+      ),
     ),
     GoRoute(
       path: '/forgot-password-success',
-      builder: (BuildContext context, GoRouterState state) {
+      pageBuilder: (BuildContext context, GoRouterState state) {
         final email = state.extra as String? ?? 'your email';
-        return ForgotPasswordEmailSentPage(email: email);
+        return buildSmoothPageTransition(
+          context: context,
+          state: state,
+          child: ForgotPasswordEmailSentPage(email: email),
+        );
       },
     ),
     GoRoute(
       path: '/forgot-password-otp',
-      builder: (BuildContext context, GoRouterState state) {
-        return const ForgotPasswordOTPPage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const ForgotPasswordOTPPage(),
+      ),
     ),
     GoRoute(
       path: '/reset-password',
-      builder: (BuildContext context, GoRouterState state) {
-        return const ResetPasswordPage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const ResetPasswordPage(),
+      ),
     ),
     GoRoute(
       path: '/reset-password-success',
-      builder: (BuildContext context, GoRouterState state) {
-        return const ResetPasswordSuccessPage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const ResetPasswordSuccessPage(),
+      ),
     ),
     GoRoute(
       path: '/verify-email',
-      builder: (BuildContext context, GoRouterState state) {
-        return const VerifyEmailPage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const VerifyEmailPage(),
+      ),
     ),
     GoRoute(
       path: '/account-confirmed',
-      builder: (BuildContext context, GoRouterState state) {
-        return const AccountConfirmedPage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const AccountConfirmedPage(),
+      ),
     ),
     GoRoute(
       path: '/menopause-stage',
-      builder: (BuildContext context, GoRouterState state) {
-        return const MenopauseStagePage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const MenopauseStagePage(),
+      ),
     ),
     GoRoute(
       path: '/perimenopause-profile',
-      builder: (BuildContext context, GoRouterState state) {
-        return const PerimenopauseProfilePage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const PerimenopauseProfilePage(),
+      ),
     ),
     GoRoute(
       path: '/menopause-stage-profile',
-      builder: (BuildContext context, GoRouterState state) {
-        return const MenopauseStageProfilePage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const MenopauseStageProfilePage(),
+      ),
     ),
     GoRoute(
       path: '/postmenopause-profile',
-      builder: (BuildContext context, GoRouterState state) {
-        return const PostmenopauseProfilePage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const PostmenopauseProfilePage(),
+      ),
     ),
     GoRoute(
       path: '/surgical-menopause-profile',
-      builder: (BuildContext context, GoRouterState state) {
-        return const SurgicalMenopauseProfilePage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const SurgicalMenopauseProfilePage(),
+      ),
     ),
     GoRoute(
       path: '/pcos-profile',
-      builder: (BuildContext context, GoRouterState state) {
-        return const PCOSProfilePage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const PCOSProfilePage(),
+      ),
     ),
     GoRoute(
       path: '/medications',
-      builder: (BuildContext context, GoRouterState state) {
-        return const YourMedicationsPage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const YourMedicationsPage(),
+      ),
     ),
     GoRoute(
       path: '/add-medication',
-      builder: (BuildContext context, GoRouterState state) {
-        return AddMedicationPage(initialData: state.extra);
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: AddMedicationPage(initialData: state.extra),
+      ),
     ),
     GoRoute(
       path: '/symptom-logging',
-      builder: (BuildContext context, GoRouterState state) {
-        return const FrequentSymptomsPage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const FrequentSymptomsPage(),
+      ),
     ),
     GoRoute(
       path: '/symptom-library',
-      builder: (BuildContext context, GoRouterState state) {
-        return const SymptomLibraryPage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const SymptomLibraryPage(),
+      ),
     ),
     GoRoute(
       path: '/other-medications',
-      builder: (BuildContext context, GoRouterState state) {
-        return const OtherMedicationsPage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const OtherMedicationsPage(),
+      ),
     ),
     GoRoute(
       path: '/health-conditions',
-      builder: (BuildContext context, GoRouterState state) {
-        return const HealthConditionsPage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const HealthConditionsPage(),
+      ),
     ),
     GoRoute(
       path: '/contraception_screening',
-      builder: (BuildContext context, GoRouterState state) {
-        return const ContraceptionPage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const ContraceptionPage(),
+      ),
     ),
     GoRoute(
       path: '/home',
-      builder: (BuildContext context, GoRouterState state) {
-        return const HomePage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const HomePage(),
+      ),
     ),
     GoRoute(
       path: '/daily-logging',
-      builder: (BuildContext context, GoRouterState state) {
-        return const DailyLoggingPage();
-      },
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const DailyLoggingPage(),
+      ),
     ),
     GoRoute(
       path: '/weight',
-      builder: (context, state) => const WeightPage(),
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const WeightPage(),
+      ),
     ),
     GoRoute(
       path: '/lifestyle-habits',
-      builder: (context, state) => const LifestyleHabitsPage(),
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const LifestyleHabitsPage(),
+      ),
     ),
     GoRoute(
       path: '/active-setup',
-      builder: (context, state) => const ActiveSetupPage(),
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const ActiveSetupPage(),
+      ),
     ),
     GoRoute(
       path: '/hrt-tracker',
-      builder: (context, state) => const HrtTrackerPage(),
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const HrtTrackerPage(),
+      ),
     ),
     GoRoute(
       path: '/profile',
-      builder: (context, state) => const ProfilePage(),
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const ProfilePage(),
+      ),
     ),
     GoRoute(
       path: '/help-center',
-      builder: (context, state) => const HelpCenterPage(),
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const HelpCenterPage(),
+      ),
     ),
     GoRoute(
       path: '/notification-preferences',
-      builder: (context, state) => const NotificationPreferencesPage(),
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const NotificationPreferencesPage(),
+      ),
     ),
     GoRoute(
       path: '/premium-upgrade',
-      builder: (context, state) => const PremiumUpgradePage(),
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const PremiumUpgradePage(),
+      ),
     ),
   ],
 );

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/features/onboarding/presentation/widgets/onboarding_header.dart';
+import 'package:eunora/core/utils/animation_system.dart';
 
 class DailyLoggingPage extends StatefulWidget {
   const DailyLoggingPage({super.key});
@@ -845,8 +846,8 @@ class _DailyLoggingPageState extends State<DailyLoggingPage> {
               onSkip: () => context.go('/home'),
             ),
             Expanded(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
+              child: DirectionalAnimatedSwitcher(
+                currentIndex: _currentStep,
                 child: KeyedSubtree(
                   key: ValueKey<int>(_currentStep),
                   child: SingleChildScrollView(
@@ -876,7 +877,7 @@ class _DailyLoggingPageState extends State<DailyLoggingPage> {
       case 4:
         return 'Daily Entry';
       default:
-        return 'MenoSync';
+        return 'Eunora';
     }
   }
 
@@ -944,7 +945,7 @@ class _DailyLoggingPageState extends State<DailyLoggingPage> {
           itemBuilder: (context, index) {
             if (index == allSymptoms.length) {
               // Add Custom Other Button
-              return GestureDetector(
+              return Bounceable(
                 onTap: _addCustomSymptom,
                 child: Container(
                   decoration: BoxDecoration(
@@ -982,7 +983,7 @@ class _DailyLoggingPageState extends State<DailyLoggingPage> {
             final symColor = _getSymptomColor(symId);
             final symBg = _getSymptomBg(symId);
 
-            return GestureDetector(
+            return Bounceable(
               onTap: () {
                 setState(() {
                   if (isSelected) {
@@ -1937,10 +1938,10 @@ class _DailyLoggingPageState extends State<DailyLoggingPage> {
                   ),
                 ],
               ),
-              Switch(
+              AnimatedSwitch(
                 value: _foodsTriggered,
                 onChanged: (val) => setState(() => _foodsTriggered = val),
-                activeColor: AppTheme.primaryContainer,
+                activeColor: AppTheme.primary,
               ),
             ],
           ),
@@ -2279,9 +2280,9 @@ class _DailyLoggingPageState extends State<DailyLoggingPage> {
       ),
       title: Text(title, style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.onSurface)),
       subtitle: Text(subtitle, style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.outline)),
-      trailing: Checkbox(
+      trailing: AnimatedCheckbox(
         value: checked,
-        onChanged: onCheckedChange,
+        onChanged: (val) => onCheckedChange(val),
         activeColor: AppTheme.primary,
       ),
     );
@@ -2302,15 +2303,20 @@ class _DailyLoggingPageState extends State<DailyLoggingPage> {
               flex: 1,
               child: SizedBox(
                 height: 52,
-                child: OutlinedButton(
-                  onPressed: _prevStep,
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFFD0C4BC)),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                  ),
-                  child: Text(
-                    'Back',
-                    style: GoogleFonts.manrope(fontWeight: FontWeight.bold, color: AppTheme.primary, fontSize: 13),
+                child: Bounceable(
+                  onTap: _prevStep,
+                  child: IgnorePointer(
+                    child: OutlinedButton(
+                      onPressed: () {},
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Color(0xFFD0C4BC)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                      ),
+                      child: Text(
+                        'Back',
+                        style: GoogleFonts.manrope(fontWeight: FontWeight.bold, color: AppTheme.primary, fontSize: 13),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -2321,23 +2327,28 @@ class _DailyLoggingPageState extends State<DailyLoggingPage> {
             flex: 2,
             child: SizedBox(
               height: 52,
-              child: ElevatedButton(
-                onPressed: _nextStep,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      _currentStep == 4 ? 'Save Log' : 'Continue',
-                      style: GoogleFonts.manrope(fontWeight: FontWeight.bold, fontSize: 14),
+              child: Bounceable(
+                onTap: _nextStep,
+                child: IgnorePointer(
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                     ),
-                    const SizedBox(width: 8),
-                    const Icon(Icons.arrow_forward, size: 16),
-                  ],
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          _currentStep == 4 ? 'Save Log' : 'Continue',
+                          style: GoogleFonts.manrope(fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.arrow_forward, size: 16),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -2407,7 +2418,7 @@ class _DailyLoggingPageState extends State<DailyLoggingPage> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  "Daily Sync Complete. MenoSync is personalised for your journey.",
+                  "Daily Sync Complete. Eunora is personalised for your journey.",
                   textAlign: TextAlign.center,
                   style: GoogleFonts.manrope(
                     fontSize: 14,

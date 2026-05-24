@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/features/onboarding/presentation/providers/menopause_stage_provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:eunora/core/utils/animation_system.dart';
 
 class MenopauseStagePage extends ConsumerStatefulWidget {
   const MenopauseStagePage({super.key});
@@ -226,8 +227,9 @@ class _MenopauseStagePageState extends ConsumerState<MenopauseStagePage> {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
+    return Bounceable(
       onTap: onTap,
+      scaleFactor: 0.98,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -396,30 +398,35 @@ class _MenopauseStagePageState extends ConsumerState<MenopauseStagePage> {
           Row(
             children: [
               Expanded(
-                child: ElevatedButton(
-                  onPressed: () => context.pop(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.surfaceContainerHighest,
-                    foregroundColor: AppTheme.onSurfaceVariant,
-                    minimumSize: const Size(0, 56),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: Text(
-                    'Previous',
-                    style: GoogleFonts.manrope(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
+                child: Bounceable(
+                  onTap: () => context.pop(),
+                  child: IgnorePointer(
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.surfaceContainerHighest,
+                        foregroundColor: AppTheme.onSurfaceVariant,
+                        minimumSize: const Size(0, 56),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: Text(
+                        'Previous',
+                        style: GoogleFonts.manrope(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: ElevatedButton(
-                  onPressed: state.selectedStage != null ? () {
+                child: Bounceable(
+                  onTap: state.selectedStage != null ? () {
                     switch (state.selectedStage) {
                       case MenopauseStage.irregular:
                         context.push('/perimenopause-profile');
@@ -440,21 +447,26 @@ class _MenopauseStagePageState extends ConsumerState<MenopauseStagePage> {
                         context.go('/home');
                     }
                   } : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primary,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(0, 56),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 8,
-                    shadowColor: AppTheme.primary.withOpacity(0.4),
-                  ),
-                  child: Text(
-                    'Next Path',
-                    style: GoogleFonts.manrope(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
+                  child: IgnorePointer(
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primary,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(0, 56),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 8,
+                        shadowColor: AppTheme.primary.withOpacity(0.4),
+                      ),
+                      child: Text(
+                        'Next Path',
+                        style: GoogleFonts.manrope(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ),

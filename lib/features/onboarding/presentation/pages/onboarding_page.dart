@@ -83,7 +83,7 @@ class OnboardingPage extends ConsumerWidget {
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  'MENOSYNC',
+                                  'EUNORA',
                                   style: theme.textTheme.labelSmall?.copyWith(
                                     color: AppTheme.primary,
                                     fontWeight: FontWeight.bold,
@@ -109,7 +109,7 @@ class OnboardingPage extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Welcome to MenoSync',
+                          'Welcome to Eunora',
                           style: theme.textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             fontSize: 36,
@@ -173,16 +173,7 @@ class OnboardingPage extends ConsumerWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 32),
-                        Text(
-                          'BY CONTINUING, YOU AGREE TO OUR PRIVACY POLICY',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            fontSize: 9,
-                            letterSpacing: 2.0,
-                            color: AppTheme.onSurface.withValues(alpha: 0.5),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+                        const SizedBox(height: 16),
                       ],
                     ),
                   ),

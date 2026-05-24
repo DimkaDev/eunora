@@ -276,7 +276,7 @@ class _CalendarPageState extends State<CalendarPage> {
                 Icon(Icons.menu, color: Colors.grey[700]),
                 const SizedBox(width: 12),
                 Text(
-                  'MenoSync',
+                  'Eunora',
                   style: GoogleFonts.notoSerif(
                     fontSize: 22,
                     fontWeight: FontWeight.normal,

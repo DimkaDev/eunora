@@ -8,13 +8,17 @@ class PrivacyState {
   final bool shareAnonymousData;
   final bool sendProductUpdates;
   final bool isSubmitting;
+  final bool acceptedTermsPage;
+  final bool acceptedPrivacyPolicyPage;
 
   const PrivacyState({
     this.agreedToTerms = false,
     this.consentToAI = false,
-    this.shareAnonymousData = false,
-    this.sendProductUpdates = false,
+    this.shareAnonymousData = true,
+    this.sendProductUpdates = true,
     this.isSubmitting = false,
+    this.acceptedTermsPage = false,
+    this.acceptedPrivacyPolicyPage = false,
   });
 
   bool get canSubmit => agreedToTerms && consentToAI;
@@ -25,6 +29,8 @@ class PrivacyState {
     bool? shareAnonymousData,
     bool? sendProductUpdates,
     bool? isSubmitting,
+    bool? acceptedTermsPage,
+    bool? acceptedPrivacyPolicyPage,
   }) {
     return PrivacyState(
       agreedToTerms: agreedToTerms ?? this.agreedToTerms,
@@ -32,6 +38,8 @@ class PrivacyState {
       shareAnonymousData: shareAnonymousData ?? this.shareAnonymousData,
       sendProductUpdates: sendProductUpdates ?? this.sendProductUpdates,
       isSubmitting: isSubmitting ?? this.isSubmitting,
+      acceptedTermsPage: acceptedTermsPage ?? this.acceptedTermsPage,
+      acceptedPrivacyPolicyPage: acceptedPrivacyPolicyPage ?? this.acceptedPrivacyPolicyPage,
     );
   }
 }
@@ -57,6 +65,24 @@ class PrivacyController extends _$PrivacyController {
 
   void toggleProductUpdates() {
     state = state.copyWith(sendProductUpdates: !state.sendProductUpdates);
+  }
+
+  void acceptTermsPage() {
+    final nextAcceptedTerms = true;
+    final nextAcceptedPrivacy = state.acceptedPrivacyPolicyPage;
+    state = state.copyWith(
+      acceptedTermsPage: nextAcceptedTerms,
+      agreedToTerms: nextAcceptedTerms && nextAcceptedPrivacy,
+    );
+  }
+
+  void acceptPrivacyPolicyPage() {
+    final nextAcceptedTerms = state.acceptedTermsPage;
+    final nextAcceptedPrivacy = true;
+    state = state.copyWith(
+      acceptedPrivacyPolicyPage: nextAcceptedPrivacy,
+      agreedToTerms: nextAcceptedTerms && nextAcceptedPrivacy,
+    );
   }
 
   Future<bool> submitConsent() async {

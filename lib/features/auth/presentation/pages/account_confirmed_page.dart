@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
+import 'package:eunora/core/utils/animation_system.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AccountConfirmedPage extends StatelessWidget {
   const AccountConfirmedPage({super.key});
@@ -13,15 +16,12 @@ class AccountConfirmedPage extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(context),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
                   children: [
-                    const SizedBox(height: 24),
-                    _buildProgressIndicator(),
-                    const SizedBox(height: 48),
+                    const SizedBox(height: 40),
                     _buildCelebrationIcon(),
                     const SizedBox(height: 32),
                     Text(
@@ -55,77 +55,6 @@ class AccountConfirmedPage extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back, color: Color(0xFF9B8B7E)),
-            onPressed: () => context.pop(),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            'Step 5 of 7',
-            style: GoogleFonts.notoSerif(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProgressIndicator() {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'STEP 5 OF 7 - HEALTH SETUP',
-              style: GoogleFonts.manrope(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.2,
-                color: AppTheme.outline,
-              ),
-            ),
-            Text(
-              '70%',
-              style: GoogleFonts.manrope(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.primary,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Container(
-          height: 4,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: const Color(0xFFE7E1DF),
-            borderRadius: BorderRadius.circular(2),
-          ),
-          child: FractionallySizedBox(
-            alignment: Alignment.centerLeft,
-            widthFactor: 0.7,
-            child: Container(
-              decoration: BoxDecoration(
-                color: AppTheme.primary,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -266,21 +195,26 @@ class AccountConfirmedPage extends StatelessWidget {
             ),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: ElevatedButton(
-            onPressed: () => context.push('/menopause-stage'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.transparent,
-              shadowColor: Colors.transparent,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Text(
-              'Continue to Health Setup',
-              style: GoogleFonts.manrope(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+          child: Bounceable(
+            onTap: () => context.push('/menopause-stage'),
+            child: IgnorePointer(
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  'Continue to Health Setup',
+                  style: GoogleFonts.manrope(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           ),
@@ -289,34 +223,35 @@ class AccountConfirmedPage extends StatelessWidget {
         SizedBox(
           width: double.infinity,
           height: 52,
-          child: OutlinedButton(
-            onPressed: () => context.push('/home'),
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Color(0xFF817266), width: 2),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+          child: Bounceable(
+            onTap: () async {
+              final user = FirebaseAuth.instance.currentUser;
+              if (user != null) {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setBool('onboarding_completed_${user.uid}', true);
+              }
+              if (context.mounted) {
+                context.go('/home');
+              }
+            },
+            child: IgnorePointer(
+              child: OutlinedButton(
+                onPressed: () {},
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFF817266), width: 2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  "I'll Do This Later",
+                  style: GoogleFonts.manrope(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF817266),
+                  ),
+                ),
               ),
-            ),
-            child: Text(
-              "I'll Do This Later",
-              style: GoogleFonts.manrope(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF817266),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        TextButton(
-          onPressed: () => context.push('/home'),
-          child: Text(
-            'Skip for now',
-            style: GoogleFonts.manrope(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primary,
-              decoration: TextDecoration.underline,
             ),
           ),
         ),

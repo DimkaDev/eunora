@@ -624,7 +624,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
             ),
             const SizedBox(height: 8),
             Text(
-              "Log your symptoms for 7 days and MenoSync will start finding patterns. You're on day 3.",
+              "Log your symptoms for 7 days and Eunora will start finding patterns. You're on day 3.",
               style: GoogleFonts.manrope(
                 fontSize: 14,
                 color: const Color(0xFF7F756E),
@@ -1310,7 +1310,7 @@ extension _CorrelationWidgets on _AnalyticsPageState {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'MenoSync AI has found 5 patterns in your data',
+                  'Eunora AI has found 5 patterns in your data',
                   style: GoogleFonts.manrope(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,

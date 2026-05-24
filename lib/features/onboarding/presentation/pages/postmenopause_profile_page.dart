@@ -248,7 +248,7 @@ class _PostmenopauseProfilePageState extends State<PostmenopauseProfilePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'What brings you to MenoSync?',
+            'What brings you to Eunora?',
             style: GoogleFonts.manrope(
               fontSize: 16,
               fontWeight: FontWeight.bold,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import 'package:eunora/core/theme/app_theme.dart';
 
 class OnboardingHeader extends StatelessWidget {
   final int currentStep;
@@ -20,7 +19,7 @@ class OnboardingHeader extends StatelessWidget {
     this.subtitle,
     this.onBack,
     this.onSkip,
-    this.showStepPill = true,
+    this.showStepPill = false,
   });
 
   @override
@@ -43,7 +42,9 @@ class OnboardingHeader extends StatelessWidget {
                     child: Column(
                       children: [
                         Text(
-                          title ?? 'MenoSync',
+                          title == null || title == 'Eunora' || title == 'Health Profile'
+                              ? 'Step ${currentStep + 1} of $totalSteps'
+                              : title!,
                           style: GoogleFonts.notoSerif(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,

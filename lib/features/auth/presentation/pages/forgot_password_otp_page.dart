@@ -95,7 +95,7 @@ class _ForgotPasswordOTPPageState extends State<ForgotPasswordOTPPage> {
           onPressed: () => context.pop(),
         ),
         Text(
-          'MenoSync',
+          'Eunora',
           style: GoogleFonts.notoSerif(
             fontSize: 20,
             fontStyle: FontStyle.italic,

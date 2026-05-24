@@ -19,6 +19,7 @@ import 'package:eunora/features/home/presentation/pages/calendar_page.dart';
 import 'package:eunora/features/home/presentation/pages/analytics_page.dart';
 import 'package:eunora/features/home/presentation/pages/passport_page.dart';
 import 'package:eunora/features/home/presentation/pages/hrt_tracker_page.dart';
+import 'package:eunora/core/utils/animation_system.dart';
 
 
 
@@ -167,36 +168,57 @@ class _HomePageState extends State<HomePage> {
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 120),
             child: Column(
               children: [
-                DailyLogCard(
-                  progress: progress,
-                  onStartLog: _handleStartOrResumeLogging,
+                FadeInEntrance(
+                  delay: Duration.zero,
+                  child: DailyLogCard(
+                    progress: progress,
+                    onStartLog: _handleStartOrResumeLogging,
+                  ),
                 ),
                 const SizedBox(height: 24),
-                MedicationHrtCard(
-                  estradiolTaken: _estradiolTaken,
-                  progesteroneTaken: _progesteroneTaken,
-                  onEstradiolChanged: (val) => setState(() => _estradiolTaken = val),
-                  onProgesteroneChanged: (val) => setState(() => _progesteroneTaken = val),
-                  onManageTap: () => setState(() => _selectedIndex = 4),
+                FadeInEntrance(
+                  delay: const Duration(milliseconds: 100),
+                  child: MedicationHrtCard(
+                    estradiolTaken: _estradiolTaken,
+                    progesteroneTaken: _progesteroneTaken,
+                    onEstradiolChanged: (val) => setState(() => _estradiolTaken = val),
+                    onProgesteroneChanged: (val) => setState(() => _progesteroneTaken = val),
+                    onManageTap: () => setState(() => _selectedIndex = 4),
+                  ),
                 ),
                 const SizedBox(height: 24),
-                TodaySymptomsCard(
-                  loggedSymptoms: _loggedSymptoms,
-                  onAddSymptom: _showAddSymptomSheet,
-                  onEditSymptom: _showEditSymptomsSheet,
+                FadeInEntrance(
+                  delay: const Duration(milliseconds: 150),
+                  child: TodaySymptomsCard(
+                    loggedSymptoms: _loggedSymptoms,
+                    onAddSymptom: _showAddSymptomSheet,
+                    onEditSymptom: _showEditSymptomsSheet,
+                  ),
                 ),
                 const SizedBox(height: 24),
-                DailyTriggersCard(
-                  loggedTriggers: _loggedTriggers,
-                  onAddTrigger: _showAddTriggerSheet,
-                  onEditTrigger: _showEditTriggersSheet,
+                FadeInEntrance(
+                  delay: const Duration(milliseconds: 200),
+                  child: DailyTriggersCard(
+                    loggedTriggers: _loggedTriggers,
+                    onAddTrigger: _showAddTriggerSheet,
+                    onEditTrigger: _showEditTriggersSheet,
+                  ),
                 ),
                 const SizedBox(height: 24),
-                InsightCard(type: _insightType),
+                FadeInEntrance(
+                  delay: const Duration(milliseconds: 250),
+                  child: InsightCard(type: _insightType),
+                ),
                 const SizedBox(height: 24),
-                const WeeklyPatternsCard(),
+                FadeInEntrance(
+                  delay: const Duration(milliseconds: 300),
+                  child: const WeeklyPatternsCard(),
+                ),
                 const SizedBox(height: 24),
-                const InsightTeaserCard(),
+                FadeInEntrance(
+                  delay: const Duration(milliseconds: 350),
+                  child: const InsightTeaserCard(),
+                ),
                 const SizedBox(height: 32),
               ],
             ),
@@ -204,6 +226,23 @@ class _HomePageState extends State<HomePage> {
         ),
       ],
     );
+  }
+
+  Widget _buildSelectedTab(double progress) {
+    switch (_selectedIndex) {
+      case 0:
+        return _buildHomeDashboard(progress);
+      case 1:
+        return const CalendarPage();
+      case 2:
+        return const AnalyticsPage();
+      case 3:
+        return const PassportPage();
+      case 4:
+        return const HrtTrackerPage();
+      default:
+        return _buildHomeDashboard(progress);
+    }
   }
 
   @override
@@ -215,15 +254,23 @@ class _HomePageState extends State<HomePage> {
       body: SafeArea(
         child: Stack(
           children: [
-            IndexedStack(
-              index: _selectedIndex,
-              children: [
-                _buildHomeDashboard(progress),
-                const CalendarPage(),
-                const AnalyticsPage(),
-                const PassportPage(),
-                const HrtTrackerPage(),
-              ],
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 320),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: ScaleTransition(
+                    scale: Tween<double>(begin: 0.98, end: 1.0).animate(animation),
+                    child: child,
+                  ),
+                );
+              },
+              child: KeyedSubtree(
+                key: ValueKey<int>(_selectedIndex),
+                child: _buildSelectedTab(progress),
+              ),
             ),
             Positioned(
               bottom: 0,
@@ -260,28 +307,31 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildNavItem(int index, IconData icon, String label) {
     final isSelected = _selectedIndex == index;
-    return InkWell(
+    return Bounceable(
       onTap: () => setState(() => _selectedIndex = index),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            color: isSelected ? AppTheme.primary : const Color(0xFFA8A29E),
-            size: 24,
-            shadows: isSelected ? [const Shadow(color: AppTheme.primary, blurRadius: 2)] : null,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label.toUpperCase(),
-            style: GoogleFonts.manrope(
-              fontSize: 9,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.0,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
               color: isSelected ? AppTheme.primary : const Color(0xFFA8A29E),
+              size: 24,
+              shadows: isSelected ? [const Shadow(color: AppTheme.primary, blurRadius: 2)] : null,
             ),
-          ),
-        ],
+            const SizedBox(height: 4),
+            Text(
+              label.toUpperCase(),
+              style: GoogleFonts.manrope(
+                fontSize: 9,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.0,
+                color: isSelected ? AppTheme.primary : const Color(0xFFA8A29E),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

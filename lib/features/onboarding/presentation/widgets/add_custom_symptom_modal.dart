@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:eunora/core/utils/animation_system.dart';
 import '../providers/symptoms_provider.dart';
 
 class AddCustomSymptomModal extends ConsumerStatefulWidget {
@@ -115,7 +116,7 @@ class _AddCustomSymptomModalState extends ConsumerState<AddCustomSymptomModal> {
             runSpacing: 8,
             children: _categories.map((cat) {
               final isSelected = _selectedCategory == cat;
-              return GestureDetector(
+              return Bounceable(
                 onTap: () => setState(() => _selectedCategory = cat),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -166,7 +167,7 @@ class _AddCustomSymptomModalState extends ConsumerState<AddCustomSymptomModal> {
                     ),
                   ],
                 ),
-                Switch.adaptive(
+                AnimatedSwitch(
                   value: _trackIntensity,
                   onChanged: (val) => setState(() => _trackIntensity = val),
                   activeColor: const Color(0xFF67594E),
@@ -177,30 +178,40 @@ class _AddCustomSymptomModalState extends ConsumerState<AddCustomSymptomModal> {
           const SizedBox(height: 32),
           
           // Action Buttons
-          ElevatedButton(
-            onPressed: _isSaving ? null : _handleSave,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF67594E),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 18),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
-              elevation: 0,
+          Bounceable(
+            onTap: _isSaving ? null : _handleSave,
+            child: IgnorePointer(
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF67594E),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+                  elevation: 0,
+                ),
+                child: _isSaving 
+                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : const Text('Save symptom', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
             ),
-            child: _isSaving 
-              ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-              : const Text('Save symptom', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ),
           const SizedBox(height: 12),
-          OutlinedButton(
-            onPressed: () => context.pop(),
-            style: OutlinedButton.styleFrom(
-              side: BorderSide(color: const Color(0xFF67594E).withOpacity(0.2), width: 2),
-              padding: const EdgeInsets.symmetric(vertical: 18),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
-            ),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF67594E)),
+          Bounceable(
+            onTap: () => context.pop(),
+            child: IgnorePointer(
+              child: OutlinedButton(
+                onPressed: () {},
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: const Color(0xFF67594E).withOpacity(0.2), width: 2),
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+                ),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF67594E)),
+                ),
+              ),
             ),
           ),
         ],

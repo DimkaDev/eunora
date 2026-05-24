@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -123,7 +125,7 @@ class _ProfilePageState extends State<ProfilePage> {
             onPressed: () {
               Navigator.pop(context);
               // Route to onboarding or signin page
-              context.go('/');
+              context.go('/onboarding');
             },
             child: Text(
               'Delete',
@@ -148,7 +150,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
         content: Text(
-          'Are you sure you want to sign out from MenoSync?',
+          'Are you sure you want to sign out from Eunora?',
           style: GoogleFonts.manrope(color: AppTheme.onSurface),
         ),
         actions: [
@@ -164,9 +166,15 @@ class _ProfilePageState extends State<ProfilePage> {
               backgroundColor: AppTheme.primary,
               foregroundColor: Colors.white,
             ),
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              context.go('/signin');
+              try {
+                await GoogleSignIn.instance.signOut();
+              } catch (_) {}
+              await FirebaseAuth.instance.signOut();
+              if (context.mounted) {
+                context.go('/signin');
+              }
             },
             child: Text(
               'Sign Out',

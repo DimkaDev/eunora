@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:eunora/core/services/auth_service.dart';
+import 'package:eunora/core/utils/animation_system.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignInPage extends ConsumerStatefulWidget {
   const SignInPage({super.key});
@@ -30,19 +34,41 @@ class _SignInPageState extends ConsumerState<SignInPage> {
       _errorText = null;
     });
 
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 2));
-
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-        // For demonstration, trigger error if email contains "error"
-        if (_emailController.text.contains('error')) {
-          _errorText = 'Invalid email or password. Please try again.';
+    try {
+      final auth = ref.read(authServiceProvider);
+      await auth.signInWithEmail(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
+      if (mounted) {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          final prefs = await SharedPreferences.getInstance();
+          if (!mounted) return;
+          final isCompleted = prefs.getBool('onboarding_completed_${user.uid}') ?? false;
+          if (isCompleted) {
+            context.go('/home');
+          } else {
+            context.go('/menopause-stage');
+          }
         } else {
-          context.go('/home');
+          context.go('/menopause-stage');
         }
-      });
+      }
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorText = e.message ?? 'Invalid email or password. Please try again.';
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorText = 'An unexpected error occurred. Please try again.';
+        });
+      }
     }
   }
 
@@ -110,7 +136,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         ),
         const SizedBox(height: 4),
         Text(
-          'Sign in to your MenoSync account',
+          'Sign in to your Eunora account',
           style: GoogleFonts.manrope(
             fontSize: 12,
             fontWeight: FontWeight.w500,
@@ -285,30 +311,35 @@ class _SignInPageState extends ConsumerState<SignInPage> {
           ),
         ],
       ),
-      child: ElevatedButton(
-        onPressed: _isLoading ? null : _handleSignIn,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Bounceable(
+        onTap: _isLoading ? null : _handleSignIn,
+        child: IgnorePointer(
+          child: ElevatedButton(
+            onPressed: _isLoading ? null : () {},
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : Text(
+                    'Sign In',
+                    style: GoogleFonts.manrope(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+          ),
         ),
-        child: _isLoading
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              )
-            : Text(
-                'Sign In',
-                style: GoogleFonts.manrope(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
       ),
     );
   }
@@ -354,15 +385,61 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFD0C4BC).withOpacity(0.3)),
       ),
-      child: InkWell(
-        onTap: _isLoading ? null : () {},
-        borderRadius: BorderRadius.circular(12),
+      child: Bounceable(
+        onTap: _isLoading
+            ? null
+            : () async {
+                if (isGoogle) {
+                  setState(() {
+                    _isLoading = true;
+                    _errorText = null;
+                  });
+                  try {
+                    final credentials = await ref.read(authServiceProvider).signInWithGoogle();
+                    if (credentials != null && mounted) {
+                      final user = credentials.user;
+                      if (user != null) {
+                        final prefs = await SharedPreferences.getInstance();
+                        if (!mounted) return;
+                        final isCompleted = prefs.getBool('onboarding_completed_${user.uid}') ?? false;
+                        if (isCompleted) {
+                          context.go('/home');
+                        } else {
+                          context.go('/menopause-stage');
+                        }
+                      } else {
+                        context.go('/menopause-stage');
+                      }
+                    } else {
+                      if (mounted) {
+                        setState(() => _isLoading = false);
+                      }
+                    }
+                  } on FirebaseAuthException catch (e) {
+                    if (mounted) {
+                      setState(() {
+                        _isLoading = false;
+                        _errorText = e.message ?? 'Google Sign-In failed.';
+                      });
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      setState(() {
+                        _isLoading = false;
+                        _errorText = 'Google Sign-In was cancelled or failed.';
+                      });
+                    }
+                  }
+                } else {
+                  // Apple Sign-In mock
+                }
+              },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (isGoogle)
               Image.network(
-                'https://lh3.googleusercontent.com/aida-public/AB6AXuB3RKwb287WL6LcvvN-g0EuUlzOBO_YTt9wEWApQdRZ7ZlVuvNiO3-IHmqFoX-1BoYEw_rk_bnr2lTT0sIqnSfd9IXLxGQwPAlSLpUVfXjKnYkZNyH3mJFyrtteggj1wLvkxod3cN1coUOuAIUwlVE9g-h2yN1zbshyZbjmj2bk0ozdSUMVlkGO55gwogcLlxOeLjVfNHal7UTiV5ntTf4yM6dhXzr752CP80RWPNm1T_ML-DAot2HIxgcRA3C8lR6E8ifo1nw1tiA',
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/3840px-Google_%22G%22_logo.svg.png',
                 width: 18,
                 height: 18,
               )

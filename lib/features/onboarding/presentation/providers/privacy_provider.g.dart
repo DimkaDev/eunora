@@ -6,7 +6,7 @@ part of 'privacy_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$privacyControllerHash() => r'afd58b44e88bc0c47fbbbc75363079dc62c1b33c';
+String _$privacyControllerHash() => r'91e1d50dd60bf95edc26aed322e01a92742b7e88';
 
 /// See also [PrivacyController].
 @ProviderFor(PrivacyController)

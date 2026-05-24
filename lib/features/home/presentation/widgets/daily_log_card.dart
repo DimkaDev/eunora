@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
+import 'package:eunora/core/utils/animation_system.dart';
 
 class DailyLogCard extends StatelessWidget {
   final double progress;
@@ -14,13 +15,26 @@ class DailyLogCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (progress == 0.0) {
-      return _buildEmptyState(context);
-    } else if (progress < 1.0) {
-      return _buildInProgressState(context);
-    } else {
-      return _buildCompletedState(context);
-    }
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 380),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (child, animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.98, end: 1.0).animate(animation),
+            child: child,
+          ),
+        );
+      },
+      child: KeyedSubtree(
+        key: ValueKey<double>(progress == 0.0 ? 0.0 : (progress < 1.0 ? 0.5 : 1.0)),
+        child: progress == 0.0
+            ? _buildEmptyState(context)
+            : (progress < 1.0 ? _buildInProgressState(context) : _buildCompletedState(context)),
+      ),
+    );
   }
 
   // 1. Morning Empty State (0% progress)
@@ -215,23 +229,11 @@ class DailyLogCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 // Custom progress bar
-                Container(
+                SizedBox(
                   width: 192,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: FractionallySizedBox(
-                    alignment: Alignment.centerLeft,
-                    widthFactor: progress,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: AppTheme.primary,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
+                  child: AnimatedProgressBar(
+                    progress: progress,
+                    height: 8,
                   ),
                 ),
                 const SizedBox(height: 20),

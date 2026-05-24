@@ -281,7 +281,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
               ),
               const SizedBox(height: 12),
               Text(
-                'Tracking your HRT helps MenoSync find patterns in your cycle wellness.',
+                'Tracking your HRT helps Eunora find patterns in your cycle wellness.',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.manrope(
                   fontSize: 15,

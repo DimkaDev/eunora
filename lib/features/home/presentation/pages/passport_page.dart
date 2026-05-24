@@ -478,7 +478,7 @@ class _PassportPageState extends State<PassportPage> {
                   color: AppTheme.primary,
                   alignment: Alignment.center,
                   child: Text(
-                    'MENOPAUSE PASSPORT · MENOSYNC',
+                    'MENOPAUSE PASSPORT · EUNORA',
                     style: GoogleFonts.manrope(
                       fontSize: 8,
                       fontWeight: FontWeight.bold,
@@ -502,7 +502,7 @@ class _PassportPageState extends State<PassportPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'MenoSync Health',
+                                  'Eunora Health',
                                   style: GoogleFonts.manrope(
                                     fontSize: 8,
                                     fontWeight: FontWeight.bold,

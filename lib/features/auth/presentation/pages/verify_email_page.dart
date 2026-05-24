@@ -1,25 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
+import 'package:eunora/core/utils/animation_system.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 
-class VerifyEmailPage extends StatefulWidget {
+class VerifyEmailPage extends ConsumerStatefulWidget {
   const VerifyEmailPage({super.key});
 
   @override
-  State<VerifyEmailPage> createState() => _VerifyEmailPageState();
+  ConsumerState<VerifyEmailPage> createState() => _VerifyEmailPageState();
 }
 
-class _VerifyEmailPageState extends State<VerifyEmailPage> {
-  final TextEditingController _codeController = TextEditingController();
+class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
   int _resendSeconds = 45;
   Timer? _timer;
+  bool _isLoading = false;
+  String? _errorText;
+  String? _infoText;
 
   @override
   void initState() {
     super.initState();
+    _sendVerificationEmail();
     _startTimer();
+  }
+
+  void _sendVerificationEmail() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null && !user.emailVerified) {
+        await user.sendEmailVerification();
+        setState(() {
+          _infoText = "Verification link sent successfully.";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorText = "Could not send verification email: ${e.toString()}";
+      });
+    }
   }
 
   void _startTimer() {
@@ -35,61 +57,84 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
   @override
   void dispose() {
     _timer?.cancel();
-    _codeController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    final email = user?.email ?? 'your email';
+
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: SafeArea(
-        child: Stack(
+        child: Column(
           children: [
-            Column(
-              children: [
-                _buildHeader(context),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 32),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 48),
-                        _buildIcon(),
-                        const SizedBox(height: 24),
-                        Text(
-                          'Verify Your Email',
-                          style: GoogleFonts.notoSerif(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF3A3A3A),
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'We sent a verification code to sarah@email.com',
+            _buildHeader(context),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 48),
+                    _buildIcon(),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Verify Your Email',
+                      style: GoogleFonts.notoSerif(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF3A3A3A),
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'We sent a verification link to $email.\nPlease check your inbox and click the link to activate your account.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.manrope(
+                        fontSize: 14,
+                        color: const Color(0xFF3A3A3A).withOpacity(0.8),
+                        height: 1.6,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    if (_infoText != null && _errorText == null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Text(
+                          _infoText!,
                           textAlign: TextAlign.center,
                           style: GoogleFonts.manrope(
                             fontSize: 14,
-                            color: const Color(0xFF3A3A3A).withOpacity(0.8),
-                            height: 1.6,
+                            color: Colors.green[700],
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(height: 40),
-                        _buildCodeInput(),
-                        const SizedBox(height: 24),
-                        _buildVerifyButton(context),
-                        const SizedBox(height: 40),
-                        _buildResendSection(),
-                        const SizedBox(height: 40),
-                        _buildFooter(),
-                        const SizedBox(height: 48),
-                      ],
-                    ),
-                  ),
+                      ),
+                    if (_errorText != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Text(
+                          _errorText!,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.manrope(
+                            fontSize: 14,
+                            color: const Color(0xFFBA1A1A),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 16),
+                    _buildVerifyButton(context),
+                    const SizedBox(height: 40),
+                    _buildResendSection(),
+                    const SizedBox(height: 40),
+                    _buildFooter(),
+                    const SizedBox(height: 48),
+                  ],
                 ),
-              ],
+              ),
             ),
           ],
         ),
@@ -108,7 +153,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
             onPressed: () => context.pop(),
           ),
           Text(
-            'MenoSync',
+            'Eunora',
             style: GoogleFonts.notoSerif(
               fontSize: 20,
               fontStyle: FontStyle.italic,
@@ -138,69 +183,6 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
     );
   }
 
-  Widget _buildCodeInput() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text(
-            'Enter verification code',
-            style: GoogleFonts.manrope(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF3A3A3A),
-            ),
-          ),
-        ),
-        TextField(
-          controller: _codeController,
-          textAlign: TextAlign.center,
-          keyboardType: TextInputType.number,
-          maxLength: 6,
-          style: GoogleFonts.manrope(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 12,
-            color: const Color(0xFF3A3A3A),
-          ),
-          decoration: InputDecoration(
-            counterText: '',
-            filled: true,
-            fillColor: const Color(0xFFEEEEEE),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFF9B8B7E), width: 2),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFF9B8B7E), width: 2),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppTheme.primary, width: 2),
-            ),
-            hintText: '000000',
-            hintStyle: GoogleFonts.manrope(
-              color: Colors.grey.withOpacity(0.5),
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Padding(
-          padding: const EdgeInsets.only(left: 4),
-          child: Text(
-            'Check your email (spam folder too)',
-            style: GoogleFonts.manrope(
-              fontSize: 12,
-              color: AppTheme.outline,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildVerifyButton(BuildContext context) {
     return Container(
       width: double.infinity,
@@ -218,20 +200,71 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
           ),
         ],
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () => context.push('/account-confirmed'),
-          child: Center(
-            child: Text(
-              'Verify Email',
-              style: GoogleFonts.manrope(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+      child: Bounceable(
+        onTap: _isLoading
+            ? null
+            : () async {
+                setState(() {
+                  _isLoading = true;
+                  _errorText = null;
+                  _infoText = null;
+                });
+                try {
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user != null) {
+                    await user.reload();
+                    final updatedUser = FirebaseAuth.instance.currentUser;
+                    if (updatedUser != null && updatedUser.emailVerified) {
+                      if (mounted) {
+                        context.push('/account-confirmed');
+                      }
+                    } else {
+                      if (mounted) {
+                        setState(() {
+                          _isLoading = false;
+                          _errorText = "Your email has not been verified yet. Please check your inbox and click the link.";
+                        });
+                      }
+                    }
+                  } else {
+                    if (mounted) {
+                      setState(() {
+                        _isLoading = false;
+                        _errorText = "No user currently signed in.";
+                      });
+                    }
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    setState(() {
+                      _isLoading = false;
+                      _errorText = "Error verifying email: ${e.toString()}";
+                    });
+                  }
+                }
+              },
+        child: IgnorePointer(
+          child: ElevatedButton(
+            onPressed: () {},
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
+            child: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                  )
+                : Text(
+                    'I Have Verified My Email',
+                    style: GoogleFonts.manrope(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
           ),
         ),
       ),
@@ -242,7 +275,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
     return Column(
       children: [
         Text(
-          "Didn't receive the code?",
+          "Didn't receive the link?",
           style: GoogleFonts.manrope(
             fontSize: 14,
             color: const Color(0xFF4D453F),
@@ -250,10 +283,13 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
         ),
         const SizedBox(height: 12),
         OutlinedButton(
-          onPressed: _resendSeconds == 0 ? () {
-            setState(() => _resendSeconds = 45);
-            _startTimer();
-          } : null,
+          onPressed: _resendSeconds == 0
+              ? () {
+                  _sendVerificationEmail();
+                  setState(() => _resendSeconds = 45);
+                  _startTimer();
+                }
+              : null,
           style: OutlinedButton.styleFrom(
             minimumSize: const Size(double.infinity, 48),
             side: const BorderSide(color: Color(0xFF9B8B7E)),
@@ -262,7 +298,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
             ),
           ),
           child: Text(
-            'Resend Code',
+            'Resend Link',
             style: GoogleFonts.manrope(
               fontSize: 15,
               fontWeight: FontWeight.w500,
@@ -295,7 +331,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
         ),
         const SizedBox(height: 16),
         TextButton(
-          onPressed: () {},
+          onPressed: () => context.go('/signup'),
           child: Text(
             'Use a different email',
             style: GoogleFonts.manrope(
