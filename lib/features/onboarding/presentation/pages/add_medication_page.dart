@@ -100,7 +100,7 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F5F0),
+      backgroundColor: const Color(0xFFFEF8F6),
       appBar: AppBar(
         backgroundColor: Colors.white.withOpacity(0.8),
         elevation: 0,

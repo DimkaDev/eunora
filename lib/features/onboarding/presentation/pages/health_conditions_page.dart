@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/utils/animation_system.dart';
 import '../widgets/onboarding_header.dart';
 
@@ -42,7 +43,10 @@ class _HealthConditionsPageState extends ConsumerState<HealthConditionsPage> {
           SafeArea(
             child: Column(
               children: [
-                const OnboardingHeader(currentStep: 5),
+                const OnboardingHeader(
+                  currentStep: 5,
+                  subtitle: 'HEALTH CONDITIONS',
+                ),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
@@ -117,23 +121,20 @@ class _HealthConditionsPageState extends ConsumerState<HealthConditionsPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'HEALTH CONDITIONS & MEDICAL HISTORY',
-          style: TextStyle(
-            fontFamily: 'Manrope',
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.2,
+          'Health Conditions & Medical History',
+          style: GoogleFonts.notoSerif(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
             color: const Color(0xFF1D1B1A),
+            height: 1.2,
           ),
         ),
         const SizedBox(height: 8),
         Text(
           'Select any conditions that apply. This helps personalize your Eunora experience.',
-          style: TextStyle(
-            fontFamily: 'Manrope',
-            fontSize: 14,
-            color: const Color(0xFF4D453F),
-            height: 1.5,
+          style: GoogleFonts.manrope(
+            fontSize: 16,
+            color: const Color(0xFF1D1B1A).withOpacity(0.6),
           ),
         ),
       ],
@@ -430,27 +431,30 @@ class _HealthConditionsPageState extends ConsumerState<HealthConditionsPage> {
       bottom: 0,
       left: 0,
       right: 0,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.9),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            height: 10,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  const Color(0xFFFEF8F6).withOpacity(0),
+                  const Color(0xFFFEF8F6),
+                ],
+              ),
             ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Bounceable(
-              onTap: () => context.push('/contraception_screening'),
-              child: IgnorePointer(
-                child: ElevatedButton(
-                  onPressed: () {},
+          ),
+          Container(
+            color: const Color(0xFFFEF8F6),
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton(
+                  onPressed: () => context.push('/contraception_screening'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF67594E),
                     foregroundColor: Colors.white,
@@ -458,29 +462,25 @@ class _HealthConditionsPageState extends ConsumerState<HealthConditionsPage> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     elevation: 0,
                   ),
-                  child: const Text('Continue', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                  child: const Text('CONTINUE', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
                 ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Bounceable(
-              onTap: () => context.push('/contraception_screening'),
-              child: IgnorePointer(
-                child: TextButton(
-                  onPressed: () {},
-                  child: const Text(
-                    'I\'d rather not share this right now',
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () => context.push('/contraception_screening'),
+                  child: Text(
+                    'SKIP THIS STEP',
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF4D453F),
+                      color: const Color(0xFF4D453F).withOpacity(0.6),
+                      letterSpacing: 1,
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

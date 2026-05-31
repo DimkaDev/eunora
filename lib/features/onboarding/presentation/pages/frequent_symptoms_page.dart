@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../providers/symptoms_provider.dart';
 import '../../domain/models/symptom.dart';
@@ -22,14 +23,17 @@ class FrequentSymptomsPage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: const Color(
-        0xFFFAF9F6,
+        0xFFFEF8F6,
       ), // brand-cream from symptom_logging_23
       body: Stack(
         children: [
           SafeArea(
             child: Column(
               children: [
-                const OnboardingHeader(currentStep: 3),
+                const OnboardingHeader(
+                  currentStep: 3,
+                  subtitle: 'SYMPTOMS',
+                ),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(
@@ -40,23 +44,21 @@ class FrequentSymptomsPage extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 24),
-                        const Text(
+                        Text(
                           'Your Most Frequent Symptoms',
-                          style: TextStyle(
-                            fontFamily: 'Noto Serif',
-                            fontSize: 32,
+                          style: GoogleFonts.notoSerif(
+                            fontSize: 28,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF1D1B1A),
-                            height: 1.1,
+                            color: const Color(0xFF1D1B1A),
+                            height: 1.2,
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        const Text(
+                        const SizedBox(height: 8),
+                        Text(
                           'Select your most frequent ones. We\'ll emphasize tracking them in your daily log.',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF9B8B7E), // brand-taupe
-                            height: 1.5,
+                          style: GoogleFonts.manrope(
+                            fontSize: 16,
+                            color: const Color(0xFF1D1B1A).withOpacity(0.6),
                           ),
                         ),
                         const SizedBox(height: 48),
@@ -280,69 +282,59 @@ class FrequentSymptomsPage extends ConsumerWidget {
       bottom: 0,
       left: 0,
       right: 0,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
-        decoration: BoxDecoration(
-          color: const Color(0xFFFAF9F6).withOpacity(0.95),
-          border: Border(
-            top: BorderSide(color: const Color(0xFF9B8B7E).withOpacity(0.05)),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            height: 10,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  const Color(0xFFFEF8F6).withOpacity(0),
+                  const Color(0xFFFEF8F6),
+                ],
+              ),
+            ),
           ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          Container(
+            color: const Color(0xFFFEF8F6),
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  'PRIVATE & SECURE',
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFFA8A29E),
-                    letterSpacing: 1.5,
+                ElevatedButton(
+                  onPressed: () => context.push('/other-medications'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF67594E),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 56),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'CONTINUE',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.2),
                   ),
                 ),
-                SizedBox(height: 4),
-                Text(
-                  "Next: Daily Goal Setting",
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    fontStyle: FontStyle.italic,
-                    color: Color(0xFF78716C),
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () => context.push('/other-medications'),
+                  child: Text(
+                    'SKIP THIS STEP',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF4D453F).withOpacity(0.6),
+                      letterSpacing: 1,
+                    ),
                   ),
                 ),
               ],
             ),
-            ElevatedButton(
-              onPressed: () => context.push('/other-medications'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF9B8B7E),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 40,
-                  vertical: 16,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                elevation: 4,
-              ),
-              child: const Row(
-                children: [
-                  Text(
-                    'Next',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                  ),
-                  SizedBox(width: 8),
-                  Icon(Icons.arrow_forward, size: 16),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

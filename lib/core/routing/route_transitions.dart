@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-/// Reusable transition helper for GoRouter routes to provide a high-end
-/// Apple/Stripe-level transition (slight scale + slide + fade).
+/// Subtle slide + fade transition.
+/// Entering page slides in slightly (8% offset) from the right with a smooth fade,
+/// providing a polished, high-performance page transition.
 CustomTransitionPage<T> buildSmoothPageTransition<T>({
   required BuildContext context,
   required GoRouterState state,
@@ -20,49 +21,28 @@ CustomTransitionPage<T> buildSmoothPageTransition<T>({
   return CustomTransitionPage<T>(
     key: state.pageKey,
     child: child,
+    opaque: true,
+    barrierColor: null,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       final slideTween = Tween<Offset>(
-        begin: const Offset(0.0, 0.04),
+        begin: const Offset(0.08, 0.0),
         end: Offset.zero,
-      ).animate(
-        CurvedAnimation(
-          parent: animation,
-          curve: const Cubic(0.16, 1, 0.3, 1), // easeOutExpo
-        ),
+      ).animate(CurvedAnimation(
+        parent: animation,
+        curve: const Cubic(0.16, 1, 0.3, 1),
+        reverseCurve: const Cubic(0.16, 1, 0.3, 1),
+      ));
+
+      final fadeTween = Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(parent: animation, curve: Curves.easeOut),
       );
 
-      final scaleTween = Tween<double>(
-        begin: 0.98,
-        end: 1.0,
-      ).animate(
-        CurvedAnimation(
-          parent: animation,
-          curve: const Cubic(0.16, 1, 0.3, 1),
-        ),
-      );
-
-      final fadeTween = Tween<double>(
-        begin: 0.0,
-        end: 1.0,
-      ).animate(
-        CurvedAnimation(
-          parent: animation,
-          curve: Curves.easeOut,
-        ),
-      );
-
-      return FadeTransition(
-        opacity: fadeTween,
-        child: ScaleTransition(
-          scale: scaleTween,
-          child: SlideTransition(
-            position: slideTween,
-            child: child,
-          ),
-        ),
+      return SlideTransition(
+        position: slideTween,
+        child: FadeTransition(opacity: fadeTween, child: child),
       );
     },
-    transitionDuration: const Duration(milliseconds: 380),
-    reverseTransitionDuration: const Duration(milliseconds: 280),
+    transitionDuration: const Duration(milliseconds: 300),
+    reverseTransitionDuration: const Duration(milliseconds: 250),
   );
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../widgets/onboarding_header.dart';
 import '../widgets/medication_list_item.dart';
@@ -16,7 +17,7 @@ class YourMedicationsPage extends ConsumerWidget {
     final notifier = ref.read(medicationsProvider.notifier);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F5F0),
+      backgroundColor: const Color(0xFFFEF8F6),
       body: Stack(
         children: [
           SafeArea(
@@ -24,6 +25,7 @@ class YourMedicationsPage extends ConsumerWidget {
               children: [
                 OnboardingHeader(
                   currentStep: 2,
+                  subtitle: 'MEDICATIONS',
                   onBack: () {
                     if (context.canPop()) {
                       context.pop();
@@ -40,22 +42,21 @@ class YourMedicationsPage extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 8),
-                        const Text(
+                        Text(
                           'Your Medications',
-                          style: TextStyle(
-                            fontFamily: 'Noto Serif',
-                            fontSize: 24,
+                          style: GoogleFonts.notoSerif(
+                            fontSize: 28,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF231A11),
+                            color: const Color(0xFF1D1B1A),
+                            height: 1.2,
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
+                        Text(
                           'Track your current hormone therapy and other medications to identify patterns.',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF78716C),
-                            height: 1.5,
+                          style: GoogleFonts.manrope(
+                            fontSize: 16,
+                            color: const Color(0xFF1D1B1A).withOpacity(0.6),
                           ),
                         ),
                         const SizedBox(height: 32),
@@ -325,56 +326,67 @@ class YourMedicationsPage extends ConsumerWidget {
       bottom: 0,
       left: 0,
       right: 0,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF7F5F0).withOpacity(0.8),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  if (hasMedications) {
-                    context.push('/symptom-logging');
-                  } else {
-                    ref.read(medicationsProvider.notifier).setError(
-                      'Please select or add a medication to continue, or tap Skip if you are not on HRT.'
-                    );
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            height: 10,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  const Color(0xFFFEF8F6).withOpacity(0),
+                  const Color(0xFFFEF8F6),
+                ],
+              ),
+            ),
+          ),
+          Container(
+            color: const Color(0xFFFEF8F6),
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    if (hasMedications) {
+                      context.push('/symptom-logging');
+                    } else {
+                      ref.read(medicationsProvider.notifier).setError(
+                        'Please select or add a medication to continue, or tap Skip if you are not on HRT.'
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF67594E),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 56),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 0,
                   ),
-                  elevation: 5,
-                  shadowColor: AppTheme.primary.withOpacity(0.2),
+                  child: const Text(
+                    'CONTINUE',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                  ),
                 ),
-                child: const Text(
-                  'Continue',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () => context.push('/symptom-logging'),
+                  child: Text(
+                    'SKIP THIS STEP',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF4D453F).withOpacity(0.6),
+                      letterSpacing: 1,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-            const SizedBox(height: 16),
-            TextButton(
-              onPressed: () => context.push('/home'),
-              child: const Text(
-                'Skip for now',
-                style: TextStyle(
-                  color: Color(0xFFA8A29E),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -97,42 +97,46 @@ class _PCOSProfilePageState extends State<PCOSProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.surface,
-      body: SafeArea(
-        child: Column(
-          children: [
-            OnboardingHeader(
-              currentStep: 1,
-              title: 'Health Profile',
-              subtitle: 'PCOS & HORMONE CONDITION',
-              onSkip: _showInfoDialog,
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildTitleSection(),
-                    const SizedBox(height: 32),
-                    _buildConditionsSection(),
-                    const SizedBox(height: 24),
-                    _buildCyclesSection(),
-                    const SizedBox(height: 24),
-                    _buildSpecialistSection(),
-                    const SizedBox(height: 24),
-                    _buildHRTSection(),
-                    const SizedBox(height: 24),
-                    _buildConceiveSection(),
-                    const SizedBox(height: 24),
-                    _buildInterestsSection(),
-                    const SizedBox(height: 40),
-                    _buildFooter(),
-                  ],
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                OnboardingHeader(
+                  currentStep: 1,
+                  title: 'Health Profile',
+                  subtitle: 'PCOS & HORMONE CONDITION',
+                  onSkip: _showInfoDialog,
                 ),
-              ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildTitleSection(),
+                        const SizedBox(height: 32),
+                        _buildConditionsSection(),
+                        const SizedBox(height: 24),
+                        _buildCyclesSection(),
+                        const SizedBox(height: 24),
+                        _buildSpecialistSection(),
+                        const SizedBox(height: 24),
+                        _buildHRTSection(),
+                        const SizedBox(height: 24),
+                        _buildConceiveSection(),
+                        const SizedBox(height: 24),
+                        _buildInterestsSection(),
+                        const SizedBox(height: 160), // Space for footer
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          _buildStickyFooter(context),
+        ],
       ),
     );
   }
@@ -596,61 +600,57 @@ class _PCOSProfilePageState extends State<PCOSProfilePage> {
     );
   }
 
-  Widget _buildFooter() {
-    return Column(
-      children: [
-        ElevatedButton(
-          onPressed: () => context.push('/medications'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF9B8B7E),
-            foregroundColor: Colors.white,
-            minimumSize: const Size(double.infinity, 56),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(100),
-            ),
-            elevation: 0,
-          ),
-          child: Text(
-            'CONTINUE',
-            style: GoogleFonts.manrope(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.5,
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextButton(
-              onPressed: () => context.pop(),
-              child: Text(
-                'BACK',
-                style: GoogleFonts.manrope(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.5,
-                  color: Colors.grey,
-                ),
+  Widget _buildStickyFooter(BuildContext context) {
+    final bool isReady = _conditions.isNotEmpty &&
+        _cycleType != null &&
+        _seesSpecialist != null &&
+        _tryingToConceive != null &&
+        _hrtStatus != null;
+    return Positioned(
+      bottom: 0,
+      left: 0,
+      right: 0,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            height: 10,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  const Color(0xFFFEF8F6).withOpacity(0),
+                  const Color(0xFFFEF8F6),
+                ],
               ),
             ),
-            const Text('|', style: TextStyle(color: Colors.grey)),
-            TextButton(
-              onPressed: () => context.push('/medications'),
-              child: Text(
-                'SKIP THIS DETAILED SETUP',
-                style: GoogleFonts.manrope(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.5,
-                  color: Colors.grey,
+          ),
+          Container(
+            color: const Color(0xFFFEF8F6),
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton(
+                  onPressed: isReady ? () => context.push('/medications') : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF67594E),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 56),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'CONTINUE',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 }

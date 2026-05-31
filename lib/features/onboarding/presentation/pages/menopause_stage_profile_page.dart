@@ -91,34 +91,38 @@ class _MenopauseStageProfilePageState extends State<MenopauseStageProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.surface,
-      body: SafeArea(
-        child: Column(
-          children: [
-            OnboardingHeader(
-              currentStep: 1,
-              title: 'Health Profile',
-              subtitle: 'MENOPAUSE STAGE',
-              onSkip: _showInfoDialog,
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildTitleSection(),
-                    const SizedBox(height: 32),
-                    _buildHRTSection(),
-                    const SizedBox(height: 24),
-                    _buildLastPeriodSection(),
-                    const SizedBox(height: 40),
-                    _buildFooter(),
-                  ],
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                OnboardingHeader(
+                  currentStep: 1,
+                  title: 'Health Profile',
+                  subtitle: 'MENOPAUSE STAGE',
+                  onSkip: _showInfoDialog,
                 ),
-              ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildTitleSection(),
+                        const SizedBox(height: 32),
+                        _buildHRTSection(),
+                        const SizedBox(height: 24),
+                        _buildLastPeriodSection(),
+                        const SizedBox(height: 160), // Space for footer
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          _buildStickyFooter(context),
+        ],
       ),
     );
   }
@@ -245,42 +249,53 @@ class _MenopauseStageProfilePageState extends State<MenopauseStageProfilePage> {
     );
   }
 
-  Widget _buildFooter() {
-    return Column(
-      children: [
-        ElevatedButton(
-          onPressed: (_hrtStatus != null && _lastPeriodDuration != null) ? () => context.push('/medications') : null,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppTheme.primary,
-            foregroundColor: Colors.white,
-            minimumSize: const Size(double.infinity, 56),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            elevation: 0,
-          ),
-          child: Text(
-            'Continue',
-            style: GoogleFonts.manrope(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        TextButton(
-          onPressed: () => context.push('/medications'),
-          child: Text(
-            'SKIP FOR NOW',
-            style: GoogleFonts.manrope(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.5,
-              color: const Color(0xFF1D1B1A).withOpacity(0.5),
+  Widget _buildStickyFooter(BuildContext context) {
+    final bool isReady = _hrtStatus != null && _lastPeriodDuration != null;
+    return Positioned(
+      bottom: 0,
+      left: 0,
+      right: 0,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            height: 10,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  const Color(0xFFFEF8F6).withOpacity(0),
+                  const Color(0xFFFEF8F6),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+          Container(
+            color: const Color(0xFFFEF8F6),
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton(
+                  onPressed: isReady ? () => context.push('/medications') : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF67594E),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 56),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'CONTINUE',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -26,7 +26,7 @@ class _ActiveSetupPageState extends ConsumerState<ActiveSetupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F5F0), // background
+      backgroundColor: const Color(0xFFFEF8F6), // background
       body: Stack(
         children: [
           SafeArea(
@@ -331,96 +331,111 @@ class _ActiveSetupPageState extends ConsumerState<ActiveSetupPage> {
       bottom: 0,
       left: 0,
       right: 0,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF7F5F0).withOpacity(0.9),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ElevatedButton(
-              onPressed: () async {
-                final user = FirebaseAuth.instance.currentUser;
-                if (user != null) {
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.setBool('onboarding_completed_${user.uid}', true);
-
-                  // Retrieve onboarding data from providers
-                  final stageState = ref.read(menopauseStageProvider);
-                  final selectedStage = stageState.selectedStage ?? MenopauseStage.irregular;
-
-                  final symptomsState = ref.read(symptomsProvider);
-                  final activeMeds = ref.read(medicationsProvider).medications;
-                  final otherMeds = ref.read(otherMedicationsProvider).medications;
-
-                  final profile = UserProfile(
-                    uid: user.uid,
-                    email: user.email ?? '',
-                    age: 50, // default age
-                    menopauseStage: selectedStage,
-                    yearsInStage: '1',
-                    selectedStageSymptoms: symptomsState.frequentSymptomIds,
-                    medications: activeMeds,
-                    otherMedications: otherMeds,
-                    notificationSettings: NotificationSettings(
-                      hrtTimeHour: _hrtTime.hour,
-                      hrtTimeMinute: _hrtTime.minute,
-                      eveningLogTimeHour: _logTime.hour,
-                      eveningLogTimeMinute: _logTime.minute,
-                    ),
-                    isOnboardingCompleted: true,
-                    createdAt: DateTime.now(),
-                    updatedAt: DateTime.now(),
-                  );
-
-                  try {
-                    await ref.read(firestoreServiceProvider).saveUserProfile(profile);
-                  } catch (e) {
-                    debugPrint("Error saving user profile to firestore: $e");
-                  }
-                }
-                if (context.mounted) {
-                  context.go('/home');
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF67594E),
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 56),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                elevation: 0,
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Save & Start Tracking',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 0.5),
-                  ),
-                  SizedBox(width: 8),
-                  Icon(Icons.arrow_forward, size: 18),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            height: 10,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  const Color(0xFFFEF8F6).withOpacity(0),
+                  const Color(0xFFFEF8F6),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+          ),
+          Container(
+            color: const Color(0xFFFEF8F6),
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.lock, size: 14, color: Colors.grey),
-                const SizedBox(width: 6),
-                Text(
-                  'Your data is private, secure, and never sold. 🔒',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: const Color(0xFF4D453F).withOpacity(0.6),
+                ElevatedButton(
+                  onPressed: () async {
+                    final user = FirebaseAuth.instance.currentUser;
+                    if (user != null) {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setBool('onboarding_completed_${user.uid}', true);
+
+                      // Retrieve onboarding data from providers
+                      final stageState = ref.read(menopauseStageProvider);
+                      final selectedStage = stageState.selectedStage ?? MenopauseStage.irregular;
+
+                      final symptomsState = ref.read(symptomsProvider);
+                      final activeMeds = ref.read(medicationsProvider).medications;
+                      final otherMeds = ref.read(otherMedicationsProvider).medications;
+
+                      final profile = UserProfile(
+                        uid: user.uid,
+                        email: user.email ?? '',
+                        age: 50, // default age
+                        menopauseStage: selectedStage,
+                        yearsInStage: '1',
+                        selectedStageSymptoms: symptomsState.frequentSymptomIds,
+                        medications: activeMeds,
+                        otherMedications: otherMeds,
+                        notificationSettings: NotificationSettings(
+                          hrtTimeHour: _hrtTime.hour,
+                          hrtTimeMinute: _hrtTime.minute,
+                          eveningLogTimeHour: _logTime.hour,
+                          eveningLogTimeMinute: _logTime.minute,
+                        ),
+                        isOnboardingCompleted: true,
+                        createdAt: DateTime.now(),
+                        updatedAt: DateTime.now(),
+                      );
+
+                      try {
+                        await ref.read(firestoreServiceProvider).saveUserProfile(profile);
+                      } catch (e) {
+                        debugPrint("Error saving user profile to firestore: $e");
+                      }
+                    }
+                    if (context.mounted) {
+                      context.go('/home');
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF67594E),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 56),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 0,
                   ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Save & Start Tracking',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                      ),
+                      SizedBox(width: 8),
+                      Icon(Icons.arrow_forward, size: 18),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.lock, size: 14, color: Colors.grey),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Your data is private, secure, and never sold. 🔒',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: const Color(0xFF4D453F).withOpacity(0.6),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -92,36 +92,40 @@ class _PerimenopauseProfilePageState extends State<PerimenopauseProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.surface,
-      body: SafeArea(
-        child: Column(
-          children: [
-            OnboardingHeader(
-              currentStep: 1,
-              title: 'Health Profile',
-              subtitle: 'PERIMENOPAUSE',
-              onSkip: _showInfoDialog,
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildTitleSection(),
-                    const SizedBox(height: 32),
-                    _buildIrregularPeriodsSection(),
-                    const SizedBox(height: 24),
-                    _buildHormoneTreatmentSection(),
-                    const SizedBox(height: 24),
-                    _buildTimelineSection(),
-                    const SizedBox(height: 40),
-                    _buildFooter(),
-                  ],
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                OnboardingHeader(
+                  currentStep: 1,
+                  title: 'Health Profile',
+                  subtitle: 'PERIMENOPAUSE',
+                  onSkip: _showInfoDialog,
                 ),
-              ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildTitleSection(),
+                        const SizedBox(height: 32),
+                        _buildIrregularPeriodsSection(),
+                        const SizedBox(height: 24),
+                        _buildHormoneTreatmentSection(),
+                        const SizedBox(height: 24),
+                        _buildTimelineSection(),
+                        const SizedBox(height: 160), // Space for footer
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          _buildStickyFooter(context),
+        ],
       ),
     );
   }
@@ -323,50 +327,53 @@ class _PerimenopauseProfilePageState extends State<PerimenopauseProfilePage> {
     );
   }
 
-  Widget _buildFooter() {
+  Widget _buildStickyFooter(BuildContext context) {
     final bool isReady = _irregularDuration != null && _hormoneTreatment != null;
-    return Column(
-      children: [
-        ElevatedButton(
-          onPressed: isReady ? () => context.push('/medications') : null,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppTheme.primary,
-            foregroundColor: Colors.white,
-            minimumSize: const Size(double.infinity, 56),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            elevation: 0,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Continue',
-                style: GoogleFonts.manrope(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+    return Positioned(
+      bottom: 0,
+      left: 0,
+      right: 0,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            height: 10,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  const Color(0xFFFEF8F6).withOpacity(0),
+                  const Color(0xFFFEF8F6),
+                ],
               ),
-              const SizedBox(width: 8),
-              const Icon(Icons.arrow_forward, size: 18),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        TextButton(
-          onPressed: () => context.push('/medications'),
-          child: Text(
-            'SKIP',
-            style: GoogleFonts.manrope(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.5,
-              color: const Color(0xFF1D1B1A).withOpacity(0.5),
             ),
           ),
-        ),
-      ],
+          Container(
+            color: const Color(0xFFFEF8F6),
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton(
+                  onPressed: isReady ? () => context.push('/medications') : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF67594E),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 56),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'CONTINUE',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

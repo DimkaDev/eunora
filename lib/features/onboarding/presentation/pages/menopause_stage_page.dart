@@ -257,6 +257,7 @@ class _MenopauseStagePageState extends ConsumerState<MenopauseStagePage> {
   Widget _buildHeader(BuildContext context) {
     return OnboardingHeader(
       currentStep: 0,
+      subtitle: 'MENOPAUSE STAGE',
       onSkip: _showInfoDialog,
     );
   }
@@ -286,16 +287,30 @@ class _MenopauseStagePageState extends ConsumerState<MenopauseStagePage> {
   }
 
   Widget _buildTitleSection() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Text(
-        'Tell us where you are in your journey...',
-        textAlign: TextAlign.center,
-        style: GoogleFonts.notoSerif(
-          fontSize: 20,
-          color: const Color(0xFF1D1B1A).withOpacity(0.6),
-          height: 1.2,
-        ),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Your Journey',
+            style: GoogleFonts.notoSerif(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF1D1B1A),
+              height: 1.2,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Tell us where you are in your journey',
+            style: GoogleFonts.manrope(
+              fontSize: 16,
+              color: const Color(0xFF1D1B1A).withOpacity(0.6),
+            ),
+          ),
+        ],
       ),
     );
   }

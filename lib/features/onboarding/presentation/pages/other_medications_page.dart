@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import 'package:eunora/core/utils/animation_system.dart';
 import '../providers/other_medications_provider.dart';
@@ -23,7 +24,10 @@ class OtherMedicationsPage extends ConsumerWidget {
           SafeArea(
             child: Column(
               children: [
-                const OnboardingHeader(currentStep: 4),
+                const OnboardingHeader(
+                  currentStep: 4,
+                  subtitle: 'OTHER MEDICATIONS',
+                ),
                 Expanded(
                   child: CustomScrollView(
                     slivers: [
@@ -71,34 +75,36 @@ class OtherMedicationsPage extends ConsumerWidget {
 
   Widget _buildTitle() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         RichText(
-          textAlign: TextAlign.center,
-          text: const TextSpan(
-            style: TextStyle(
-              fontFamily: 'Noto Serif',
-              fontSize: 32,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF1D1B1A), // on-surface
-              height: 1.1,
+          textAlign: TextAlign.start,
+          text: TextSpan(
+            style: GoogleFonts.notoSerif(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF1D1B1A), // on-surface
+              height: 1.2,
             ),
             children: [
-              TextSpan(text: 'Other Medications & '),
+              const TextSpan(text: 'Other Medications & '),
               TextSpan(
                 text: 'Supplements',
-                style: TextStyle(fontStyle: FontStyle.italic, color: Color(0xFF67594E)), // primary
+                style: GoogleFonts.notoSerif(
+                  fontStyle: FontStyle.italic,
+                  color: const Color(0xFF67594E),
+                  fontWeight: FontWeight.bold,
+                ), // primary
               ),
             ],
           ),
         ),
-        const SizedBox(height: 12),
-        const Text(
+        const SizedBox(height: 8),
+        Text(
           "Let's keep track of your overall wellness routine to ensure holistic care.",
-          textAlign: TextAlign.center,
-          style: TextStyle(
+          style: GoogleFonts.manrope(
             fontSize: 16,
-            color: Color(0xFF4D453F), // on-surface-variant
-            height: 1.5,
+            color: const Color(0xFF1D1B1A).withOpacity(0.6),
           ),
         ),
       ],
@@ -408,39 +414,59 @@ class OtherMedicationsPage extends ConsumerWidget {
       bottom: 0,
       left: 0,
       right: 0,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              const Color(0xFFFEF8F6).withOpacity(0.0),
-              const Color(0xFFFEF8F6),
-            ],
-            stops: const [0.0, 0.4],
-          ),
-        ),
-        child: Bounceable(
-          onTap: () => context.push('/health-conditions'),
-          child: IgnorePointer(
-            child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF817266),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 18),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
-                elevation: 8,
-                shadowColor: const Color(0xFF817266).withOpacity(0.3),
-              ),
-              child: const Text(
-                'CONTINUE',
-                style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5, fontSize: 14),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            height: 10,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  const Color(0xFFFEF8F6).withOpacity(0),
+                  const Color(0xFFFEF8F6),
+                ],
               ),
             ),
           ),
-        ),
+          Container(
+            color: const Color(0xFFFEF8F6),
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton(
+                  onPressed: () => context.push('/health-conditions'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF67594E),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 56),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'CONTINUE',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () => context.push('/health-conditions'),
+                  child: Text(
+                    'SKIP THIS STEP',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF4D453F).withOpacity(0.6),
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

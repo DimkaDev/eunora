@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../widgets/onboarding_header.dart';
 
 class LifestyleHabitsPage extends ConsumerStatefulWidget {
@@ -26,7 +27,10 @@ class _LifestyleHabitsPageState extends ConsumerState<LifestyleHabitsPage> {
           SafeArea(
             child: Column(
               children: [
-                const OnboardingHeader(currentStep: 8),
+                const OnboardingHeader(
+                  currentStep: 8,
+                  subtitle: 'LIFESTYLE',
+                ),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
@@ -77,23 +81,21 @@ class _LifestyleHabitsPageState extends ConsumerState<LifestyleHabitsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Your Lifestyle Baseline',
-          style: TextStyle(
-            fontFamily: 'Noto Serif',
-            fontSize: 32,
+          style: GoogleFonts.notoSerif(
+            fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1D1B1A),
+            color: const Color(0xFF1D1B1A),
+            height: 1.2,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         Text(
           'Help us understand your baseline. This identifies lifestyle patterns that may correlate with your symptoms.',
-          style: TextStyle(
-            fontFamily: 'Manrope',
-            fontSize: 14,
-            color: const Color(0xFF4D453F),
-            height: 1.5,
+          style: GoogleFonts.manrope(
+            fontSize: 16,
+            color: const Color(0xFF1D1B1A).withOpacity(0.6),
           ),
         ),
       ],
@@ -333,51 +335,59 @@ class _LifestyleHabitsPageState extends ConsumerState<LifestyleHabitsPage> {
       bottom: 0,
       left: 0,
       right: 0,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.9),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ElevatedButton(
-              onPressed: () => context.push('/active-setup'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF67594E),
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 56),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                elevation: 0,
-              ),
-              child: const Text(
-                'CONTINUE',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            height: 10,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  const Color(0xFFFEF8F6).withOpacity(0),
+                  const Color(0xFFFEF8F6),
+                ],
               ),
             ),
-            const SizedBox(height: 12),
-            TextButton(
-              onPressed: () => context.push('/active-setup'),
-              child: const Text(
-                'SKIP THIS STEP',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF4D453F),
-                  letterSpacing: 1,
+          ),
+          Container(
+            color: const Color(0xFFFEF8F6),
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton(
+                  onPressed: () => context.push('/active-setup'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF67594E),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 56),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'CONTINUE',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () => context.push('/active-setup'),
+                  child: Text(
+                    'SKIP THIS STEP',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF4D453F).withOpacity(0.6),
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
