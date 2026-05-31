@@ -339,105 +339,132 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
   Widget _buildDashboard(List<Medication> medications) {
     final currentMonth = _months[_selectedMonthOffset];
 
-    return Column(
-      children: [
-        // Fixed premium header with glass backdrop effect
-        _buildHeader(),
-        
-        // Scrollable content area
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 140),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Today's Dose Section
-                _buildTodayDoseSection(medications),
-                const SizedBox(height: 28),
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 24, 20, 140),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'HRT Tracker',
+              style: GoogleFonts.notoSerif(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primary,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Track your medications and see dose impact on symptoms.',
+              style: GoogleFonts.manrope(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppTheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 24),
 
-                // Monthly Schedule Section
-                _buildMonthlyScheduleSection(currentMonth),
-                const SizedBox(height: 24),
+            // Today's Dose Section
+            _buildTodayDoseSection(medications),
+            const SizedBox(height: 28),
 
-                // Adherence Section
-                _buildAdherenceCard(),
-                const SizedBox(height: 32),
+            // Monthly Schedule Section
+            _buildMonthlyScheduleSection(currentMonth),
+            const SizedBox(height: 24),
 
-                // Quick tester reset option (Helper for reviewers)
-                Center(
-                  child: TextButton.icon(
-                    onPressed: _clearMedications,
-                    icon: const Icon(Icons.refresh, size: 16, color: Color(0xFF8C3A25)),
-                    label: Text(
-                      'Reset to Empty State',
-                      style: GoogleFonts.manrope(
-                        fontSize: 12,
-                        color: const Color(0xFF8C3A25),
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+            // Adherence Section
+            _buildAdherenceCard(),
+            const SizedBox(height: 32),
+
+            // Quick tester reset option (Helper for reviewers)
+            Center(
+              child: TextButton.icon(
+                onPressed: _clearMedications,
+                icon: const Icon(Icons.refresh, size: 16, color: Color(0xFF8C3A25)),
+                label: Text(
+                  'Reset to Empty State',
+                  style: GoogleFonts.manrope(
+                    fontSize: 12,
+                    color: const Color(0xFF8C3A25),
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 60, 24, 20),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF7F5F0).withOpacity(0.9),
-        border: const Border(
-          bottom: BorderSide(color: Color(0xFFEAE6E0), width: 1),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'HRT Tracker',
-                  style: GoogleFonts.notoSerif(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.primary,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Track your medications and see dose impact on symptoms',
-                  style: GoogleFonts.manrope(
-                    fontSize: 12,
-                    color: AppTheme.primary.withOpacity(0.7),
-                  ),
-                ),
-              ],
+  void _showMonthPicker() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFFF7F5F0),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
             ),
           ),
-          const SizedBox(width: 12),
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFFD6C3B5), width: 1.5),
-              image: const DecorationImage(
-                image: NetworkImage(
-                  'https://lh3.googleusercontent.com/aida-public/AB6AXuCcyvRmigFQWEnghTEoPCUvu6Lls83qWwGf81JXXAHmxs_PI1albuWzfyX8hJHYDK2oDWVWOWPMCqACZzrOSiUrEriDUDMizBdlzmoikkKEMsviNymTb1SmeDL2M5mjpE7ZBB0lVSTa1Di99-xd5i_L5XTTvhH9uNbS-BEM4dPF7EevWWNXW_jzlWxSVjPjBZ3OPwiDpUtKeUmcOYd5ry2dtceFPJ-WL6Bp-ZEtlShywIcbEgix84xxFqoBGr1QXN6ehV00Hjb-W4c',
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 48),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Select Month',
+                style: GoogleFonts.notoSerif(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primary,
                 ),
-                fit: BoxFit.cover,
               ),
-            ),
+              const SizedBox(height: 16),
+              Row(
+                children: List.generate(_months.length, (index) {
+                  final isSelected = _selectedMonthOffset == index;
+                  return Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedMonthOffset = index;
+                          _selectedDay = 1;
+                        });
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: isSelected ? AppTheme.primary : Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isSelected ? AppTheme.primary : const Color(0xFFE7E5E4),
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          _months[index].toUpperCase(),
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.manrope(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected ? Colors.white : AppTheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -655,12 +682,22 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                   constraints: const BoxConstraints(),
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  currentMonth,
-                  style: GoogleFonts.manrope(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.primary,
+                GestureDetector(
+                  onTap: _showMonthPicker,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        currentMonth,
+                        style: GoogleFonts.manrope(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      const Icon(Icons.arrow_drop_down, size: 16, color: AppTheme.primary),
+                    ],
                   ),
                 ),
                 const SizedBox(width: 8),

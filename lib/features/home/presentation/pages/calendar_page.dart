@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/features/home/presentation/widgets/calendar_symptom_edit_sheet.dart';
 import 'package:eunora/features/home/presentation/widgets/calendar_trigger_edit_sheet.dart';
 import 'package:eunora/features/home/presentation/widgets/calendar_hrt_edit_sheet.dart';
+import 'package:eunora/core/services/firestore_service.dart';
+import 'package:eunora/features/home/domain/entities/daily_log.dart';
+import 'package:eunora/features/onboarding/domain/models/symptom.dart';
 
 class MockDailyLog {
   List<String> symptoms;
@@ -24,22 +29,22 @@ class MockDailyLog {
   });
 }
 
-class CalendarPage extends StatefulWidget {
+class CalendarPage extends ConsumerStatefulWidget {
   const CalendarPage({super.key});
 
   @override
-  State<CalendarPage> createState() => _CalendarPageState();
+  ConsumerState<CalendarPage> createState() => _CalendarPageState();
 }
 
-class _CalendarPageState extends State<CalendarPage> {
+class _CalendarPageState extends ConsumerState<CalendarPage> {
   // Navigation states
-  int _selectedMonthOffset = 1; // 0 = March 2026, 1 = April 2026, 2 = May 2026
+  DateTime _focusedMonth = DateTime(2026, 4); // Default to April 2026 for mock data
   int _selectedDay = 13; // Selected day of month
   bool _legendExpanded = false;
 
-  final List<String> _months = ['March 2026', 'April 2026', 'May 2026'];
-  final List<String> _prevLabels = ['Feb', 'Mar', 'Apr'];
-  final List<String> _nextLabels = ['Apr', 'May', 'Jun'];
+  // Firestore Database Logs
+  Map<int, MockDailyLog> _dbLogs = {};
+  bool _isLoadingDbLogs = false;
 
   // Mock Database for April 2026
   late final Map<int, MockDailyLog> _aprilLogs;
@@ -126,28 +131,110 @@ class _CalendarPageState extends State<CalendarPage> {
         itemsCount: 4,
       ),
     };
+    // Fetch logs from firestore post build phase
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchLogsForFocusedMonth();
+    });
+  }
+
+  Future<void> _fetchLogsForFocusedMonth() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    setState(() {
+      _isLoadingDbLogs = true;
+    });
+
+    try {
+      final daysInMonth = DateUtils.getDaysInMonth(_focusedMonth.year, _focusedMonth.month);
+      final start = DateTime(_focusedMonth.year, _focusedMonth.month, 1);
+      final end = DateTime(_focusedMonth.year, _focusedMonth.month, daysInMonth, 23, 59, 59);
+
+      final dbLogs = await ref.read(firestoreServiceProvider).getDailyLogsHistory(user.uid, start, end);
+
+      final Map<int, MockDailyLog> fetchedMap = {};
+      for (final log in dbLogs) {
+        final day = log.date.day;
+
+        final symptomsList = log.symptoms.map((s) {
+          final sev = s.severity == 'Mild'
+              ? '1/5'
+              : s.severity == 'Moderate'
+                  ? '3/5'
+                  : '5/5';
+          return '${s.symptom.name} · $sev';
+        }).toList();
+
+        final List<Map<String, String>> hrtList = [];
+        if (log.estradiolChecked) {
+          hrtList.add({
+            'name': 'Estradiol',
+            'details': '${log.estradiolDose.toStringAsFixed(0)} ${log.estradiolUnit} · Patch',
+            'status': 'Taken ${log.estradiolTime}',
+            'isTaken': 'true',
+          });
+        }
+        if (log.progesteroneChecked) {
+          hrtList.add({
+            'name': 'Progesterone',
+            'details': '${log.progesteroneDose.toStringAsFixed(0)} ${log.progesteroneUnit} · Tablet',
+            'status': 'Taken ${log.progesteroneTime}',
+            'isTaken': 'true',
+          });
+        }
+
+        fetchedMap[day] = MockDailyLog(
+          symptoms: symptomsList,
+          sleepInfo: '${log.sleepDuration} hours',
+          moodInfo: 'Logged',
+          hrt: hrtList,
+          triggers: log.triggers,
+          itemsCount: symptomsList.length + hrtList.length + log.triggers.length,
+        );
+      }
+
+      setState(() {
+        _dbLogs = fetchedMap;
+        _isLoadingDbLogs = false;
+      });
+    } catch (e) {
+      debugPrint("Error fetching logs: $e");
+      setState(() {
+        _isLoadingDbLogs = false;
+      });
+    }
+  }
+
+  MockDailyLog? _getLogForDay(int day) {
+    if (_dbLogs.containsKey(day)) {
+      return _dbLogs[day];
+    }
+    final isApril = _focusedMonth.year == 2026 && _focusedMonth.month == 4;
+    if (isApril && _aprilLogs.containsKey(day)) {
+      return _aprilLogs[day];
+    }
+    return null;
   }
 
   void _previousMonth() {
-    if (_selectedMonthOffset > 0) {
-      setState(() {
-        _selectedMonthOffset--;
-        _selectedDay = 1;
-      });
-    }
+    setState(() {
+      _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
+      _selectedDay = 1;
+    });
+    _fetchLogsForFocusedMonth();
   }
 
   void _nextMonth() {
-    if (_selectedMonthOffset < 2) {
-      setState(() {
-        _selectedMonthOffset++;
-        _selectedDay = 1;
-      });
-    }
+    setState(() {
+      _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1);
+      _selectedDay = 1;
+    });
+    _fetchLogsForFocusedMonth();
   }
 
   void _selectDay(int day) {
-    if (day > 0 && day <= 30) {
+    final totalDays = DateUtils.getDaysInMonth(_focusedMonth.year, _focusedMonth.month);
+    if (day > 0 && day <= totalDays) {
       setState(() {
         _selectedDay = day;
       });
@@ -221,153 +308,217 @@ class _CalendarPageState extends State<CalendarPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isApril = _selectedMonthOffset == 1;
-    final activeLog = isApril ? _aprilLogs[_selectedDay] : null;
+    final isApril = _focusedMonth.year == 2026 && _focusedMonth.month == 4;
+    final activeLog = _getLogForDay(_selectedDay);
 
     return Container(
       color: AppTheme.background,
-      child: Column(
-        children: [
-          _buildHeader(),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildMonthNavigation(),
-                  const SizedBox(height: 16),
-                  _buildCalendarCard(isApril),
-                  const SizedBox(height: 24),
-                  if (!isApril)
-                    _buildEmptyState()
-                  else if (activeLog == null)
-                    _buildUnloggedState()
-                  else
-                    _buildLoggedDetailsState(activeLog),
-                ],
+      child: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 120),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Cycle Tracker',
+                style: GoogleFonts.notoSerif(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primary,
+                ),
               ),
-            ),
+              const SizedBox(height: 4),
+              Text(
+                "Track your cycle, symptoms, and daily logs.",
+                style: GoogleFonts.manrope(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppTheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 24),
+              _buildMonthNavigation(),
+              const SizedBox(height: 16),
+              _buildCalendarCard(isApril),
+              const SizedBox(height: 24),
+              if (!isApril)
+                _buildEmptyState()
+              else if (activeLog == null)
+                _buildUnloggedState()
+              else
+                _buildLoggedDetailsState(activeLog),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFEF8F6).withValues(alpha: 0.8),
-        border: Border(
-          bottom: BorderSide(
-            color: AppTheme.outlineVariant.withValues(alpha: 0.2),
-            width: 1,
-          ),
-        ),
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.menu, color: Colors.grey[700]),
-                const SizedBox(width: 12),
-                Text(
-                  'Eunora',
-                  style: GoogleFonts.notoSerif(
-                    fontSize: 22,
-                    fontWeight: FontWeight.normal,
-                    fontStyle: FontStyle.italic,
-                    color: Colors.grey[800],
-                  ),
-                ),
-              ],
+  void _showMonthPicker() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final monthNames = [
+          'January', 'February', 'March', 'April', 'May', 'June',
+          'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        return Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFFF7F5F0),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
             ),
-            Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                image: DecorationImage(
-                  image: NetworkImage(
-                    'https://lh3.googleusercontent.com/aida-public/AB6AXuCbE0Oy8C6RtCTRmMNSUO1AD8jh6lHoqHsAAOULs3UCLZcD4F0r6Ogp56jOilWIE09b_c36iZZaqYycJc7vdS2K_C-DSka3Hw3U0NgrVKR8HHocqghBV07CruKv4E__3CnX7-VpGUAkE1y_MTRufVUkLVK94SmDhIglXLR6FBXl6kvj93X825YlrwAbJEL5wu2kI4XbdEQo7A29EUo0yvyh4O4Lcks_qUrxJx29qnHG18GvadYDlCs5MIaOqYKanz4xepfpPEav874',
-                  ),
-                  fit: BoxFit.cover,
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 48),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Select Month (2026)',
+                style: GoogleFonts.notoSerif(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primary,
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
+              const SizedBox(height: 16),
+              Flexible(
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    childAspectRatio: 2.2,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                  ),
+                  itemCount: 12,
+                  itemBuilder: (context, index) {
+                    final monthVal = index + 1;
+                    final isSelected = _focusedMonth.month == monthVal && _focusedMonth.year == 2026;
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _focusedMonth = DateTime(2026, monthVal);
+                          _selectedDay = 1;
+                        });
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isSelected ? AppTheme.primary : Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isSelected ? AppTheme.primary : const Color(0xFFE7E5E4),
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          monthNames[index].substring(0, 3).toUpperCase(),
+                          style: GoogleFonts.manrope(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected ? Colors.white : AppTheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
   Widget _buildMonthNavigation() {
+    final prevMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
+    final nextMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1);
+    
+    final monthsShort = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    final monthNamesFull = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
+    final prevLabel = monthsShort[prevMonth.month - 1];
+    final nextLabel = monthsShort[nextMonth.month - 1];
+    final currentMonthLabel = '${monthNamesFull[_focusedMonth.month - 1]} ${_focusedMonth.year}';
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         GestureDetector(
-          onTap: _selectedMonthOffset > 0 ? _previousMonth : null,
-          child: Opacity(
-            opacity: _selectedMonthOffset > 0 ? 1.0 : 0.4,
-            child: Row(
-              children: [
-                const Icon(Icons.chevron_left, size: 20, color: AppTheme.primary),
-                const SizedBox(width: 4),
-                Text(
-                  _prevLabels[_selectedMonthOffset],
-                  style: GoogleFonts.manrope(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.outline,
-                    letterSpacing: 1.2,
-                  ),
+          onTap: _previousMonth,
+          child: Row(
+            children: [
+              const Icon(Icons.chevron_left, size: 20, color: AppTheme.primary),
+              const SizedBox(width: 4),
+              Text(
+                prevLabel,
+                style: GoogleFonts.manrope(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.outline,
+                  letterSpacing: 1.2,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-          decoration: BoxDecoration(
-            color: AppTheme.surfaceContainer,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: AppTheme.outlineVariant.withValues(alpha: 0.3),
+        GestureDetector(
+          onTap: _showMonthPicker,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: AppTheme.outlineVariant.withValues(alpha: 0.3),
+              ),
             ),
-          ),
-          child: Text(
-            _months[_selectedMonthOffset].toUpperCase(),
-            style: GoogleFonts.manrope(
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              color: AppTheme.primary,
-              letterSpacing: 1.5,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  currentMonthLabel.toUpperCase(),
+                  style: GoogleFonts.manrope(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.primary,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                const Icon(Icons.arrow_drop_down, size: 16, color: AppTheme.primary),
+              ],
             ),
           ),
         ),
         GestureDetector(
-          onTap: _selectedMonthOffset < 2 ? _nextMonth : null,
-          child: Opacity(
-            opacity: _selectedMonthOffset < 2 ? 1.0 : 0.4,
-            child: Row(
-              children: [
-                Text(
-                  _nextLabels[_selectedMonthOffset],
-                  style: GoogleFonts.manrope(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.outline,
-                    letterSpacing: 1.2,
-                  ),
+          onTap: _nextMonth,
+          child: Row(
+            children: [
+              Text(
+                nextLabel,
+                style: GoogleFonts.manrope(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.outline,
+                  letterSpacing: 1.2,
                 ),
-                const SizedBox(width: 4),
-                const Icon(Icons.chevron_right, size: 20, color: AppTheme.primary),
-              ],
-            ),
+              ),
+              const SizedBox(width: 4),
+              const Icon(Icons.chevron_right, size: 20, color: AppTheme.primary),
+            ],
           ),
         ),
       ],
@@ -418,34 +569,45 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Widget _buildDaysGrid(bool isApril) {
-    // Determine offset days (April 1st is Wednesday -> 2 offset days, Mon & Tue)
-    // 30 days in April, let's keep it simple
-    final totalDays = 30;
+    final totalDays = DateUtils.getDaysInMonth(_focusedMonth.year, _focusedMonth.month);
+    final firstDayOfMonth = DateTime(_focusedMonth.year, _focusedMonth.month, 1);
+    
+    // weekday is 1 (Monday) to 7 (Sunday)
+    final startWeekday = firstDayOfMonth.weekday;
+    final prefixDaysCount = startWeekday - 1; // days to show from previous month
+    
     final List<Widget> dayWidgets = [];
-
-    // Prior Month Overflow (e.g. 30, 31)
-    dayWidgets.add(_buildOverflowDay('30'));
-    dayWidgets.add(_buildOverflowDay('31'));
-
+    
+    // Previous month overflow days
+    final prevMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
+    final prevMonthTotalDays = DateUtils.getDaysInMonth(prevMonth.year, prevMonth.month);
+    for (int i = prefixDaysCount - 1; i >= 0; i--) {
+      final dayNum = prevMonthTotalDays - i;
+      dayWidgets.add(_buildOverflowDay('$dayNum'));
+    }
+    
+    // Current month days
     for (int day = 1; day <= totalDays; day++) {
-      final isSelected = isApril && _selectedDay == day;
-      final hasData = isApril && _aprilLogs.containsKey(day);
-
-      // Mild (1-3), Moderate (4-6), Severe (7-10) color codes matching legend
+      final isSelected = _selectedDay == day;
+      final hasData = _getLogForDay(day) != null;
+      
       Color? backgroundIntensity;
-      if (isApril && hasData) {
-        if (day == 7 || day == 12) {
-          // Mild (light purple)
-          backgroundIntensity = const Color(0xFFEDDDF5).withValues(alpha: 0.4);
-        } else if (day == 8 || day == 9 || day == 13) {
-          // Moderate (medium purple)
-          backgroundIntensity = const Color(0xFFEDDDF5).withValues(alpha: 0.8);
-        } else if (day == 10 || day == 11) {
-          // Severe (magenta / tertiary)
-          backgroundIntensity = const Color(0xFFF9B7A9).withValues(alpha: 0.6);
+      if (hasData) {
+        final logForDay = _getLogForDay(day);
+        if (logForDay != null) {
+          if (logForDay.symptoms.isNotEmpty) {
+            final firstSymptom = logForDay.symptoms.first.toLowerCase();
+            if (firstSymptom.contains('severe') || firstSymptom.contains('5/5') || firstSymptom.contains('4/5')) {
+              backgroundIntensity = const Color(0xFFF9B7A9).withValues(alpha: 0.6); // Reddish orange for severe
+            } else {
+              backgroundIntensity = const Color(0xFFEDDDF5).withValues(alpha: 0.6); // Purple for general logs
+            }
+          } else {
+            backgroundIntensity = const Color(0xFFEDDDF5).withValues(alpha: 0.4);
+          }
         }
       }
-
+      
       dayWidgets.add(
         _buildCalendarDay(
           day: day,
@@ -456,13 +618,22 @@ class _CalendarPageState extends State<CalendarPage> {
         ),
       );
     }
-
+    
+    // Next month overflow days to pad to a multiple of 7
+    final remaining = dayWidgets.length % 7;
+    if (remaining > 0) {
+      final suffixDaysCount = 7 - remaining;
+      for (int i = 1; i <= suffixDaysCount; i++) {
+        dayWidgets.add(_buildOverflowDay('$i'));
+      }
+    }
+    
     // Grid layout with 7 items per row
     final rowsCount = (dayWidgets.length / 7).ceil();
     return Column(
       children: List.generate(rowsCount, (rowIndex) {
         final start = rowIndex * 7;
-        final end = (start + 7 < dayWidgets.length) ? start + 7 : dayWidgets.length;
+        final end = start + 7;
         final rowWidgets = dayWidgets.sublist(start, end);
         return Row(
           children: rowWidgets.map((w) => Expanded(child: AspectRatio(aspectRatio: 1, child: w))).toList(),

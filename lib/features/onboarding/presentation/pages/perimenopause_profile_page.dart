@@ -18,6 +18,76 @@ class _PerimenopauseProfilePageState extends State<PerimenopauseProfilePage> {
   String? _medicationName;
   DateTime? _startDate;
 
+  void _showInfoDialog() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFFFEF8F6),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Perimenopause Profile Info',
+                  style: GoogleFonts.notoSerif(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1D1B1A),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Color(0xFF9B8B7E)),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Perimenopause is the transitional phase before menopause. Tracking your cycle irregularity length and hormone treatments helps Eunora tailor symptoms logging and prediction models for your specific journey.',
+              style: GoogleFonts.manrope(
+                fontSize: 14,
+                color: const Color(0xFF4D453F),
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  'Got it',
+                  style: GoogleFonts.manrope(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,10 +95,11 @@ class _PerimenopauseProfilePageState extends State<PerimenopauseProfilePage> {
       body: SafeArea(
         child: Column(
           children: [
-            const OnboardingHeader(
+            OnboardingHeader(
               currentStep: 1,
               title: 'Health Profile',
               subtitle: 'PERIMENOPAUSE',
+              onSkip: _showInfoDialog,
             ),
             Expanded(
               child: SingleChildScrollView(
@@ -143,29 +214,6 @@ class _PerimenopauseProfilePageState extends State<PerimenopauseProfilePage> {
             isSelected: _hormoneTreatment == 'yes',
             onTap: () => setState(() => _hormoneTreatment = 'yes'),
           ),
-          if (_hormoneTreatment == 'yes') ...[
-            const SizedBox(height: 8),
-            TextFormField(
-              onChanged: (val) => setState(() => _medicationName = val),
-              decoration: InputDecoration(
-                hintText: 'Start typing medication name...',
-                hintStyle: GoogleFonts.manrope(fontSize: 14, color: Colors.grey),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFFF2EDEA)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFFF2EDEA)),
-                ),
-                suffixIcon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
           ProfileRadioCard(
             title: "No - I'm managing naturally",
             isSelected: _hormoneTreatment == 'no',
@@ -280,7 +328,7 @@ class _PerimenopauseProfilePageState extends State<PerimenopauseProfilePage> {
     return Column(
       children: [
         ElevatedButton(
-          onPressed: isReady ? () => context.go('/medications') : null,
+          onPressed: isReady ? () => context.push('/medications') : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppTheme.primary,
             foregroundColor: Colors.white,
@@ -307,7 +355,7 @@ class _PerimenopauseProfilePageState extends State<PerimenopauseProfilePage> {
         ),
         const SizedBox(height: 16),
         TextButton(
-          onPressed: () => context.go('/medications'),
+          onPressed: () => context.push('/medications'),
           child: Text(
             'SKIP',
             style: GoogleFonts.manrope(

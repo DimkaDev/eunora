@@ -19,6 +19,76 @@ class _PostmenopauseProfilePageState extends State<PostmenopauseProfilePage> {
   final Set<String> _goals = {};
   DateTime? _nextAppointment;
 
+  void _showInfoDialog() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFFFEF8F6),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Postmenopause Info',
+                  style: GoogleFonts.notoSerif(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1D1B1A),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Color(0xFF9B8B7E)),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Postmenopause is the stage of life after menopause has occurred. Understanding how many years you are postmenopause and if you are using HRT helps Eunora monitor your longevity and bone health insights.',
+              style: GoogleFonts.manrope(
+                fontSize: 14,
+                color: const Color(0xFF4D453F),
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  'Got it',
+                  style: GoogleFonts.manrope(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,10 +96,11 @@ class _PostmenopauseProfilePageState extends State<PostmenopauseProfilePage> {
       body: SafeArea(
         child: Column(
           children: [
-            const OnboardingHeader(
+            OnboardingHeader(
               currentStep: 1,
               title: 'Health Profile',
               subtitle: 'POSTMENOPAUSE',
+              onSkip: _showInfoDialog,
             ),
             Expanded(
               child: SingleChildScrollView(
@@ -376,7 +447,7 @@ class _PostmenopauseProfilePageState extends State<PostmenopauseProfilePage> {
     return Column(
       children: [
         ElevatedButton(
-          onPressed: () => context.go('/medications'),
+          onPressed: () => context.push('/medications'),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppTheme.primary,
             foregroundColor: Colors.white,
@@ -396,7 +467,7 @@ class _PostmenopauseProfilePageState extends State<PostmenopauseProfilePage> {
         ),
         const SizedBox(height: 16),
         TextButton(
-          onPressed: () => context.go('/medications'),
+          onPressed: () => context.push('/medications'),
           child: Text(
             'Skip for now',
             style: GoogleFonts.manrope(

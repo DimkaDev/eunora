@@ -22,7 +22,16 @@ class YourMedicationsPage extends ConsumerWidget {
           SafeArea(
             child: Column(
               children: [
-                const OnboardingHeader(currentStep: 2), // Step 3 of 7
+                OnboardingHeader(
+                  currentStep: 2,
+                  onBack: () {
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.go('/menopause-stage');
+                    }
+                  },
+                ),
                 if (state.error != null) _buildErrorBanner(context, ref, state.error!),
                 Expanded(
                   child: SingleChildScrollView(

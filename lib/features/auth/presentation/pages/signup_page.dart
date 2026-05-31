@@ -123,7 +123,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
             SizedBox(
               width: double.infinity,
               child: Bounceable(
-                onTap: state.isLoading
+                onTap: (state.isLoading || state.isGoogleLoading)
                     ? null
                     : () async {
                         final success = await notifier.signUp();
@@ -133,7 +133,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                       },
                 child: IgnorePointer(
                   child: ElevatedButton(
-                    onPressed: state.isLoading ? null : () {},
+                    onPressed: (state.isLoading || state.isGoogleLoading) ? null : () {},
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF9B8B7E),
                       disabledBackgroundColor: const Color(0xFF9B8B7E).withOpacity(0.5),
@@ -183,10 +183,10 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
             SizedBox(
               width: double.infinity,
               child: Bounceable(
-                onTap: state.isLoading
+                onTap: (state.isLoading || state.isGoogleLoading)
                     ? null
                     : () async {
-                        notifier.setLoading(true);
+                        notifier.setGoogleLoading(true);
                         notifier.setGeneralError(null);
                         try {
                            final credentials = await ref.read(authServiceProvider).signInWithGoogle();
@@ -205,19 +205,19 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                                context.go('/menopause-stage');
                              }
                            } else {
-                             notifier.setLoading(false);
+                             notifier.setGoogleLoading(false);
                            }
                         } on FirebaseAuthException catch (e) {
-                          notifier.setLoading(false);
+                          notifier.setGoogleLoading(false);
                           notifier.setGeneralError(e.message ?? 'Google Sign-In failed.');
                         } catch (e) {
-                          notifier.setLoading(false);
+                          notifier.setGoogleLoading(false);
                           notifier.setGeneralError('Google Sign-In was cancelled or failed.');
                         }
                       },
                 child: IgnorePointer(
                   child: OutlinedButton(
-                    onPressed: state.isLoading ? null : () {},
+                    onPressed: (state.isLoading || state.isGoogleLoading) ? null : () {},
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Color(0xFF9B8B7E), width: 2),
                       backgroundColor: Colors.white,
@@ -228,33 +228,39 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                       ),
                       elevation: 0,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: const Color(0xFFD0C4BC)),
+                    child: state.isGoogleLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(color: Color(0xFF9B8B7E), strokeWidth: 2),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: const Color(0xFFD0C4BC)),
+                                ),
+                                child: Image.network(
+                                  'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/3840px-Google_%22G%22_logo.svg.png',
+                                  width: 18,
+                                  height: 18,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Continue with Google',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF4D453F),
+                                ),
+                              ),
+                            ],
                           ),
-                          child: Image.network(
-                            'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/3840px-Google_%22G%22_logo.svg.png',
-                            width: 18,
-                            height: 18,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Continue with Google',
-                          style: GoogleFonts.manrope(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF4D453F),
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
               ),

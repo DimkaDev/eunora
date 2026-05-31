@@ -20,6 +20,76 @@ class _SurgicalMenopauseProfilePageState extends State<SurgicalMenopauseProfileP
   final Set<String> _selectedSymptoms = {};
   double _overallFeeling = 7;
 
+  void _showInfoDialog() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFFFEF8F6),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Surgical Menopause Info',
+                  style: GoogleFonts.notoSerif(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1D1B1A),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Color(0xFF9B8B7E)),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Surgical menopause occurs after surgical removal of the ovaries. Because it triggers an immediate hormonal decline compared to natural transition, tracking procedure details and postoperative HRT helps Eunora customize symptom progression paths.',
+              style: GoogleFonts.manrope(
+                fontSize: 14,
+                color: const Color(0xFF4D453F),
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  'Got it',
+                  style: GoogleFonts.manrope(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,10 +97,11 @@ class _SurgicalMenopauseProfilePageState extends State<SurgicalMenopauseProfileP
       body: SafeArea(
         child: Column(
           children: [
-            const OnboardingHeader(
+            OnboardingHeader(
               currentStep: 1,
               title: 'Health Profile',
               subtitle: 'SURGICAL MENOPAUSE',
+              onSkip: _showInfoDialog,
             ),
             Expanded(
               child: SingleChildScrollView(
@@ -45,8 +116,6 @@ class _SurgicalMenopauseProfilePageState extends State<SurgicalMenopauseProfileP
                     _buildProcedureTypeSection(),
                     const SizedBox(height: 24),
                     _buildHRTSection(),
-                    const SizedBox(height: 24),
-                    _buildSymptomsSection(),
                     const SizedBox(height: 24),
                     _buildFeelingSection(),
                     const SizedBox(height: 24),
@@ -352,115 +421,6 @@ class _SurgicalMenopauseProfilePageState extends State<SurgicalMenopauseProfileP
     );
   }
 
-  Widget _buildSymptomsSection() {
-    final symptoms = [
-      {'name': 'Hot Flashes', 'icon': Icons.thermostat},
-      {'name': 'Night Sweats', 'icon': Icons.nights_stay},
-      {'name': 'Mood Swings', 'icon': Icons.mood_bad},
-      {'name': 'Sleep issues', 'icon': Icons.bedtime},
-      {'name': 'Brain Fog', 'icon': Icons.psychology},
-      {'name': 'Joint Pain', 'icon': Icons.accessibility},
-    ];
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'WHICH SYMPTOMS HIT HARDEST RIGHT NOW?',
-            style: GoogleFonts.manrope(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
-              color: const Color(0xFF1D1B1A),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Surgical menopause often causes rapid-onset symptoms. Select all that apply.',
-            style: GoogleFonts.manrope(
-              fontSize: 11,
-              color: Colors.grey,
-            ),
-          ),
-          const SizedBox(height: 20),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 1.5,
-            ),
-            itemCount: symptoms.length,
-            itemBuilder: (context, index) {
-              final s = symptoms[index];
-              final String name = s['name'] as String;
-              final isSelected = _selectedSymptoms.contains(name);
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    if (isSelected) {
-                      _selectedSymptoms.remove(name);
-                    } else {
-                      _selectedSymptoms.add(name);
-                    }
-                  });
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: isSelected ? const Color(0xFFFBF7F4) : const Color(0xFFFFFBFA),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isSelected ? AppTheme.primary : Colors.transparent,
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(s['icon'] as IconData, color: const Color(0xFF9B8B7E), size: 24),
-                      const SizedBox(height: 8),
-                      Text(
-                        name,
-                        style: GoogleFonts.manrope(
-                          fontSize: 12,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                          color: const Color(0xFF1D1B1A),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            decoration: InputDecoration(
-              hintText: 'Other symptoms...',
-              hintStyle: GoogleFonts.manrope(fontSize: 14, color: Colors.grey),
-              filled: true,
-              fillColor: const Color(0xFFF2EDEA).withOpacity(0.3),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(100),
-                borderSide: BorderSide.none,
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildFeelingSection() {
     return Container(
       width: double.infinity,
@@ -496,32 +456,45 @@ class _SurgicalMenopauseProfilePageState extends State<SurgicalMenopauseProfileP
           Row(
             children: [
               const Icon(Icons.sentiment_very_dissatisfied, color: Colors.amber, size: 32),
+              const SizedBox(width: 8),
               Expanded(
-                child: SliderTheme(
-                  data: SliderThemeData(
-                    activeTrackColor: Colors.transparent,
-                    inactiveTrackColor: Colors.transparent,
-                    thumbColor: const Color(0xFF4D453F),
-                    overlayColor: const Color(0xFF4D453F).withOpacity(0.1),
-                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                  ),
-                  child: Container(
-                    height: 8,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      gradient: const LinearGradient(
-                        colors: [Colors.red, Colors.yellow, Colors.green],
+                child: SizedBox(
+                  height: 48,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Gradient Background Track
+                      Container(
+                        height: 8,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4),
+                          gradient: const LinearGradient(
+                            colors: [Colors.red, Colors.yellow, Colors.green],
+                          ),
+                        ),
                       ),
-                    ),
-                    child: Slider(
-                      value: _overallFeeling,
-                      min: 1,
-                      max: 10,
-                      onChanged: (val) => setState(() => _overallFeeling = val),
-                    ),
+                      // Slider
+                      SliderTheme(
+                        data: SliderThemeData(
+                          activeTrackColor: Colors.transparent,
+                          inactiveTrackColor: Colors.transparent,
+                          thumbColor: const Color(0xFF4D453F),
+                          overlayColor: const Color(0xFF4D453F).withOpacity(0.1),
+                          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 18),
+                          overlayShape: const RoundSliderOverlayShape(overlayRadius: 28),
+                        ),
+                        child: Slider(
+                          value: _overallFeeling,
+                          min: 1,
+                          max: 10,
+                          onChanged: (val) => setState(() => _overallFeeling = val),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
+              const SizedBox(width: 8),
               const Icon(Icons.sentiment_very_satisfied, color: Colors.amber, size: 32),
             ],
           ),
@@ -561,7 +534,7 @@ class _SurgicalMenopauseProfilePageState extends State<SurgicalMenopauseProfileP
     return Column(
       children: [
         ElevatedButton(
-          onPressed: () => context.go('/medications'),
+          onPressed: () => context.push('/medications'),
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF67594E),
             foregroundColor: Colors.white,

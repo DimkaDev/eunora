@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/core/utils/animation_system.dart';
+import 'package:eunora/core/services/notification_service_provider.dart';
+import 'package:eunora/features/onboarding/domain/models/notification_settings.dart';
 import 'package:eunora/features/profile/presentation/widgets/notification_permission_dialog.dart';
 
-class NotificationPreferencesPage extends StatefulWidget {
+class NotificationPreferencesPage extends ConsumerStatefulWidget {
   const NotificationPreferencesPage({super.key});
 
   @override
-  State<NotificationPreferencesPage> createState() => _NotificationPreferencesPageState();
+  ConsumerState<NotificationPreferencesPage> createState() =>
+      _NotificationPreferencesPageState();
 }
 
-class _NotificationPreferencesPageState extends State<NotificationPreferencesPage> {
+class _NotificationPreferencesPageState
+    extends ConsumerState<NotificationPreferencesPage> {
   // Switch states
   bool _hrtReminder = true;
   bool _eveningLogReminder = true;
@@ -29,6 +34,30 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
 
   // Delivery type selection
   String _notificationType = 'Push notifications on device';
+
+  /// Sync current UI state to the notification scheduler.
+  Future<void> _applyToScheduler() async {
+    final notifService = ref.read(notificationServiceProvider);
+    final settings = _buildSettings();
+    await notifService.applySettings(settings);
+  }
+
+  NotificationSettings _buildSettings() {
+    return NotificationSettings(
+      hrtReminder: _hrtReminder,
+      eveningLogReminder: _eveningLogReminder,
+      weeklyDigest: _weeklyDigest,
+      changeAlerts: _changeAlerts,
+      healthTips: _healthTips,
+      quietHours: _quietHours,
+      hrtTimeHour: _hrtTime.hour,
+      hrtTimeMinute: _hrtTime.minute,
+      eveningLogTimeHour: _eveningLogTime.hour,
+      eveningLogTimeMinute: _eveningLogTime.minute,
+      healthTipsFrequency: _healthTipsFrequency,
+      notificationType: _notificationType,
+    );
+  }
 
   Future<void> _selectHrtTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
@@ -48,9 +77,8 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
       },
     );
     if (picked != null && picked != _hrtTime) {
-      setState(() {
-        _hrtTime = picked;
-      });
+      setState(() => _hrtTime = picked);
+      await _applyToScheduler();
     }
   }
 
@@ -72,56 +100,80 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
       },
     );
     if (picked != null && picked != _eveningLogTime) {
-      setState(() {
-        _eveningLogTime = picked;
-      });
+      setState(() => _eveningLogTime = picked);
+      await _applyToScheduler();
     }
   }
 
-  void _showTestNotification() {
-    // Show the custom permission dialog overlay first
-    showDialog(
+  Future<void> _onToggleChanged(VoidCallback stateChange) async {
+    setState(() => stateChange());
+    await _applyToScheduler();
+  }
+
+  Future<void> _showTestNotification() async {
+    final notifService = ref.read(notificationServiceProvider);
+
+    // First check/request permission via the custom dialog.
+    final granted = await showDialog<bool>(
       context: context,
       builder: (context) => const NotificationPermissionDialog(),
-    ).then((granted) {
-      if (granted == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppTheme.primary,
-            content: Row(
-              children: [
-                const Icon(Icons.notifications_active, color: Colors.white),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Eunora HRT Reminder',
-                        style: GoogleFonts.manrope(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+    );
+
+    if (granted != true) return;
+
+    // Request OS permission and fire a test notification.
+    final osGranted = await notifService.requestPermission();
+    if (!mounted) return;
+
+    if (osGranted) {
+      await notifService.showInsightNotification('Test notification');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppTheme.primary,
+          content: Row(
+            children: [
+              const Icon(Icons.notifications_active, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Eunora — Test Notification',
+                      style: GoogleFonts.manrope(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
-                      Text(
-                        'It is time to take your Estradiol dose.',
-                        style: GoogleFonts.manrope(
-                          fontSize: 12,
-                          color: Colors.white.withOpacity(0.9),
-                        ),
+                    ),
+                    Text(
+                      'Eunora has spotted a pattern in your recent data.',
+                      style: GoogleFonts.manrope(
+                        fontSize: 12,
+                        color: Colors.white.withOpacity(0.9),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            duration: const Duration(seconds: 4),
-            behavior: SnackBarBehavior.floating,
+              ),
+            ],
           ),
-        );
-      }
-    });
+          duration: const Duration(seconds: 4),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppTheme.error,
+          content: Text(
+            'Notification permission denied. Please enable it in Settings.',
+            style: GoogleFonts.manrope(color: Colors.white),
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -169,7 +221,7 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
                   title: 'Take Your HRT',
                   subtitle: 'Daily reminder to take your medication',
                   value: _hrtReminder,
-                  onChanged: (val) => setState(() => _hrtReminder = val),
+                  onChanged: (val) => _onToggleChanged(() => _hrtReminder = val),
                 ),
                 if (_hrtReminder) ...[
                   const SizedBox(height: 16),
@@ -177,7 +229,8 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
                     onTap: () => _selectHrtTime(context),
                     borderRadius: BorderRadius.circular(8),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
                         color: const Color(0xFFEDDDF5),
                         borderRadius: BorderRadius.circular(8),
@@ -214,7 +267,8 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
                   title: 'Evening Log Reminder',
                   subtitle: 'Daily reminder to log your symptoms',
                   value: _eveningLogReminder,
-                  onChanged: (val) => setState(() => _eveningLogReminder = val),
+                  onChanged: (val) =>
+                      _onToggleChanged(() => _eveningLogReminder = val),
                 ),
                 if (_eveningLogReminder) ...[
                   const SizedBox(height: 16),
@@ -222,7 +276,8 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
                     onTap: () => _selectEveningTime(context),
                     borderRadius: BorderRadius.circular(8),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
                         color: const Color(0xFFEDDDF5),
                         borderRadius: BorderRadius.circular(8),
@@ -257,9 +312,10 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
               children: [
                 _buildHeaderWithSwitch(
                   title: 'Weekly Digest',
-                  subtitle: 'Email summary of your week every Sunday',
+                  subtitle: 'Summary of your week every Sunday at 9am',
                   value: _weeklyDigest,
-                  onChanged: (val) => setState(() => _weeklyDigest = val),
+                  onChanged: (val) =>
+                      _onToggleChanged(() => _weeklyDigest = val),
                 ),
               ],
             ),
@@ -273,12 +329,14 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
                   title: 'Significant Change Alerts',
                   subtitle: 'Notify me when symptoms change significantly',
                   value: _changeAlerts,
-                  onChanged: (val) => setState(() => _changeAlerts = val),
+                  onChanged: (val) =>
+                      _onToggleChanged(() => _changeAlerts = val),
                 ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(Icons.info_outline, color: AppTheme.primary, size: 14),
+                    const Icon(Icons.info_outline,
+                        color: AppTheme.primary, size: 14),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
@@ -303,7 +361,8 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
                   title: 'Health Tips & Updates',
                   subtitle: 'Get regular educational resources',
                   value: _healthTips,
-                  onChanged: (val) => setState(() => _healthTips = val),
+                  onChanged: (val) =>
+                      _onToggleChanged(() => _healthTips = val),
                 ),
                 if (_healthTips) ...[
                   const SizedBox(height: 12),
@@ -322,14 +381,16 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
                       ),
                       GestureDetector(
                         onTap: () {
-                          // Change frequency state
                           setState(() {
                             _healthTipsFrequency =
-                                _healthTipsFrequency == 'Weekly' ? 'Daily' : 'Weekly';
+                                _healthTipsFrequency == 'Weekly'
+                                    ? 'Daily'
+                                    : 'Weekly';
                           });
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
                             color: AppTheme.surfaceContainer,
                             borderRadius: BorderRadius.circular(999),
@@ -346,7 +407,8 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
                                 ),
                               ),
                               const SizedBox(width: 4),
-                              const Icon(Icons.expand_more, size: 14, color: AppTheme.primary),
+                              const Icon(Icons.expand_more,
+                                  size: 14, color: AppTheme.primary),
                             ],
                           ),
                         ),
@@ -365,7 +427,8 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
                   title: 'Quiet Hours',
                   subtitle: 'Silence alerts during designated sleeping times',
                   value: _quietHours,
-                  onChanged: (val) => setState(() => _quietHours = val),
+                  onChanged: (val) =>
+                      _onToggleChanged(() => _quietHours = val),
                 ),
               ],
             ),
@@ -391,6 +454,10 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
               ],
             ),
             const SizedBox(height: 32),
+
+            // Active notification types info card
+            _buildInfoCard(),
+            const SizedBox(height: 24),
 
             // Test button area
             Column(
@@ -433,7 +500,64 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
     );
   }
 
-  Widget _buildSettingsContainer({required List<Widget> children, bool isBorderLeft = false}) {
+  Widget _buildInfoCard() {
+    final activeTypes = <String>[];
+    if (_hrtReminder) activeTypes.add('💊 HRT at ${_hrtTime.format(context)}');
+    if (_eveningLogReminder) {
+      activeTypes.add('📓 Daily log at ${_eveningLogTime.format(context)}');
+    }
+    if (_weeklyDigest) activeTypes.add('📊 Weekly digest (Sundays, 9am)');
+    if (_changeAlerts) activeTypes.add('⚠️ Significant change alerts');
+
+    if (activeTypes.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppTheme.primary.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppTheme.primary.withOpacity(0.15)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.notifications_active,
+                  color: AppTheme.primary, size: 16),
+              const SizedBox(width: 6),
+              Text(
+                'Active notifications',
+                style: GoogleFonts.manrope(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ...activeTypes.map(
+            (t) => Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                t,
+                style: GoogleFonts.manrope(
+                  fontSize: 11,
+                  color: AppTheme.onSurface,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettingsContainer(
+      {required List<Widget> children, bool isBorderLeft = false}) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -520,7 +644,8 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: isSelected ? AppTheme.primary : AppTheme.outlineVariant,
+                color:
+                    isSelected ? AppTheme.primary : AppTheme.outlineVariant,
                 width: isSelected ? 5 : 1,
               ),
               color: Colors.white,
@@ -533,7 +658,9 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
               style: GoogleFonts.manrope(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                color: isSelected ? AppTheme.onSurface : AppTheme.onSurfaceVariant,
+                color: isSelected
+                    ? AppTheme.onSurface
+                    : AppTheme.onSurfaceVariant,
               ),
             ),
           ),

@@ -402,42 +402,49 @@ class PrivacyPage extends ConsumerWidget {
     required Widget title,
     String? subtitle,
   }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        AnimatedCheckbox(
-          value: value,
-          onChanged: (val) => onChanged(val),
-          activeColor: AppTheme.primary,
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              DefaultTextStyle(
-                style: GoogleFonts.manrope(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: AppTheme.onSurface,
-                ),
-                child: title,
-              ),
-              if (subtitle != null) ...[
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: GoogleFonts.manrope(
-                    fontSize: 12,
-                    fontStyle: FontStyle.italic,
-                    color: const Color(0xFF4D453F),
-                  ),
-                ),
-              ],
-            ],
+    return GestureDetector(
+      onTap: () => onChanged(!value),
+      behavior: HitTestBehavior.opaque,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          IgnorePointer(
+            child: AnimatedCheckbox(
+              value: value,
+              onChanged: (val) => onChanged(val),
+              activeColor: AppTheme.primary,
+            ),
           ),
-        ),
-      ],
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 8),
+                DefaultTextStyle(
+                  style: GoogleFonts.manrope(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: AppTheme.onSurface,
+                  ),
+                  child: title,
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.manrope(
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                      color: const Color(0xFF4D453F),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

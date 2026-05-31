@@ -4,12 +4,15 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:eunora/firebase_options.dart';
 import 'package:eunora/core/routing/app_router.dart';
 import 'package:eunora/core/theme/app_theme.dart';
+import 'package:eunora/core/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  // Initialize local notification plugin and timezone database.
+  await NotificationService.instance.initialize();
   runApp(
     const ProviderScope(
       child: MyApp(),

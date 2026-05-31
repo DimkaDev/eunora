@@ -26,91 +26,143 @@ class _PassportPageState extends State<PassportPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFEF8F6), // bg-surface
-      body: Column(
-        children: [
-          _buildAppBar(),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildReadinessCard(),
-                  const SizedBox(height: 32),
-                  _buildReportPeriodSection(),
-                  const SizedBox(height: 32),
-                  _buildIncludeSections(),
-                  const SizedBox(height: 32),
-                  _buildPreviewSection(),
-                  const SizedBox(height: 32),
-                  _buildGenerateButtonSection(),
-                  const SizedBox(height: 32),
-                  _buildSpecialistInfoCard(),
-                ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 120),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Menopause Passport',
+                style: GoogleFonts.notoSerif(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primary,
+                ),
               ),
-            ),
+              const SizedBox(height: 4),
+              Text(
+                "Generate a PDF summary of your health data.",
+                style: GoogleFonts.manrope(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppTheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 24),
+              _buildReadinessCard(),
+              const SizedBox(height: 32),
+              _buildReportPeriodSection(),
+              const SizedBox(height: 32),
+              _buildIncludeSections(),
+              const SizedBox(height: 32),
+              _buildPreviewSection(),
+              const SizedBox(height: 32),
+              _buildGenerateButtonSection(),
+              const SizedBox(height: 32),
+              _buildSpecialistInfoCard(),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildAppBar() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFEF8F6).withOpacity(0.85),
-        border: const Border(
-          bottom: BorderSide(
-            color: Color(0xFFE7E1DF), // outline-variant / 15
-            width: 0.5,
+  void _showPreviousReportsBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFFF7F5F0),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
           ),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 48),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
-                Icons.menu,
-                color: AppTheme.primary,
-              ),
-              const SizedBox(width: 12),
               Text(
-                'Menopause Passport',
+                'Previous Passports',
                 style: GoogleFonts.notoSerif(
                   fontSize: 20,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.bold,
                   color: AppTheme.primary,
                 ),
               ),
+              const SizedBox(height: 8),
+              Text(
+                'Select a previously generated report to view or share.',
+                style: GoogleFonts.manrope(
+                  fontSize: 13,
+                  color: AppTheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 20),
+              _buildPreviousReportItem('Passport - March 2026', 'Generated on Apr 2, 2026'),
+              const Divider(color: Color(0xFFE7E1DF), height: 1),
+              _buildPreviousReportItem('Passport - February 2026', 'Generated on Mar 1, 2026'),
+              const Divider(color: Color(0xFFE7E1DF), height: 1),
+              _buildPreviousReportItem('Passport - January 2026', 'Generated on Feb 1, 2026'),
             ],
           ),
-          Row(
-            children: [
-              IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.history,
-                  color: AppTheme.primary,
-                ),
-              ),
-              const SizedBox(width: 16),
-              IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.account_circle_outlined,
-                  color: AppTheme.primary,
-                ),
-              ),
-            ],
+        );
+      },
+    );
+  }
+
+  Widget _buildPreviousReportItem(String title, String subtitle) {
+    return InkWell(
+      onTap: () {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Opening $title...',
+              style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: AppTheme.primary,
+            behavior: SnackBarBehavior.floating,
           ),
-        ],
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.manrope(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: GoogleFonts.manrope(
+                    fontSize: 12,
+                    color: AppTheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+            const Icon(
+              Icons.share_outlined,
+              color: AppTheme.primary,
+              size: 20,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -769,7 +821,7 @@ class _PassportPageState extends State<PassportPage> {
         ),
         const SizedBox(height: 4),
         TextButton(
-          onPressed: () {},
+          onPressed: _showPreviousReportsBottomSheet,
           style: TextButton.styleFrom(
             foregroundColor: AppTheme.primary,
             padding: EdgeInsets.zero,

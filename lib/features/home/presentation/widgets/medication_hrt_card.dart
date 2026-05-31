@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
+import 'package:eunora/features/onboarding/domain/models/medication.dart';
 
 class MedicationHrtCard extends StatelessWidget {
-  final bool estradiolTaken;
-  final bool progesteroneTaken;
-  final ValueChanged<bool> onEstradiolChanged;
-  final ValueChanged<bool> onProgesteroneChanged;
+  final List<Medication> medications;
+  final Map<String, bool> takenStatus;
+  final ValueChanged<Map<String, bool>> onTakenStatusChanged;
   final VoidCallback? onManageTap;
 
   const MedicationHrtCard({
     super.key,
-    required this.estradiolTaken,
-    required this.progesteroneTaken,
-    required this.onEstradiolChanged,
-    required this.onProgesteroneChanged,
+    required this.medications,
+    required this.takenStatus,
+    required this.onTakenStatusChanged,
     this.onManageTap,
   });
 
@@ -75,34 +74,66 @@ class MedicationHrtCard extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Medications List
-          Column(
-            children: [
-              // Estradiol Patch
-              _buildMedicationRow(
-                context: context,
-                icon: Icons.medication,
-                iconColor: const Color(0xFF655A6E),
-                name: 'Estradiol Patch',
-                schedule: 'Twice weekly • Today',
-                isTaken: estradiolTaken,
-                onChanged: onEstradiolChanged,
-                activeBadgeText: 'Applied',
+          if (medications.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
+                "No medications configured today.",
+                style: GoogleFonts.manrope(
+                  fontSize: 13,
+                  color: AppTheme.onSurface.withOpacity(0.6),
+                ),
               ),
-              const SizedBox(height: 12),
+            )
+          else
+            Column(
+              children: medications.asMap().entries.map((entry) {
+                final idx = entry.key;
+                final med = entry.value;
+                final isTaken = takenStatus[med.name] ?? false;
 
-              // Progesterone
-              _buildMedicationRow(
-                context: context,
-                icon: Icons.medication_liquid,
-                iconColor: AppTheme.primary,
-                name: 'Progesterone',
-                schedule: '100mg • Bedtime',
-                isTaken: progesteroneTaken,
-                onChanged: onProgesteroneChanged,
-                activeBadgeText: 'Taken',
-              ),
-            ],
-          ),
+                // Determine icon based on type
+                IconData icon = Icons.medication;
+                if (med.type == MedicationType.pill) {
+                  icon = Icons.medication;
+                } else if (med.type == MedicationType.gel || med.type == MedicationType.cream) {
+                  icon = Icons.medication_liquid;
+                }
+
+                // Alternating icon colors
+                final iconColor = idx % 2 == 0 ? const Color(0xFF655A6E) : AppTheme.primary;
+
+                // Badge text if taken
+                String activeBadgeText = 'Taken';
+                if (med.type == MedicationType.patch) {
+                  activeBadgeText = 'Applied';
+                }
+
+                // Check frequency to see if it's daily
+                final isDaily = med.frequency.toLowerCase().contains('daily') ||
+                                med.frequency.toLowerCase().contains('bedtime');
+                final pendingText = isDaily ? 'PENDING' : 'OPTIONAL';
+
+                return Padding(
+                  padding: EdgeInsets.only(bottom: idx == medications.length - 1 ? 0 : 12),
+                  child: _buildMedicationRow(
+                    context: context,
+                    icon: icon,
+                    iconColor: iconColor,
+                    name: med.name,
+                    schedule: med.doseAndFrequency,
+                    isTaken: isTaken,
+                    pendingText: pendingText,
+                    onChanged: (val) {
+                      final newStatus = Map<String, bool>.from(takenStatus);
+                      newStatus[med.name] = val;
+                      onTakenStatusChanged(newStatus);
+                    },
+                    activeBadgeText: activeBadgeText,
+                  ),
+                );
+              }).toList(),
+            ),
         ],
       ),
     );
@@ -115,6 +146,7 @@ class MedicationHrtCard extends StatelessWidget {
     required String name,
     required String schedule,
     required bool isTaken,
+    required String pendingText,
     required ValueChanged<bool> onChanged,
     required String activeBadgeText,
   }) {
@@ -201,7 +233,7 @@ class MedicationHrtCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  isTaken ? activeBadgeText.toUpperCase() : 'PENDING',
+                  isTaken ? activeBadgeText.toUpperCase() : pendingText,
                   style: GoogleFonts.manrope(
                     fontSize: 9,
                     fontWeight: FontWeight.w900,
@@ -214,7 +246,7 @@ class MedicationHrtCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
 
-              // Custom Switch mimicking Stitch web toggles exactly
+              // Custom Switch
               GestureDetector(
                 onTap: () => onChanged(!isTaken),
                 child: AnimatedContainer(

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/features/onboarding/presentation/widgets/onboarding_header.dart';
+import 'package:eunora/features/onboarding/presentation/widgets/profile_radio_card.dart';
 
 class PCOSProfilePage extends StatefulWidget {
   const PCOSProfilePage({super.key});
@@ -17,6 +18,80 @@ class _PCOSProfilePageState extends State<PCOSProfilePage> {
   bool? _seesSpecialist;
   bool? _tryingToConceive;
   final Set<String> _interests = {};
+  String? _hrtStatus;
+  String? _hrtType;
+
+  void _showInfoDialog() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFFFEF8F6),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    'PCOS & Hormonal Conditions Info',
+                    style: GoogleFonts.notoSerif(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1D1B1A),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Color(0xFF9B8B7E)),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Polycystic Ovary Syndrome (PCOS) and other hormonal conditions require customized metabolic and cycle support. Logging whether you are trying to conceive and your current hormone treatments helps Eunora tailor metabolic health trackers and ovulation guidelines.',
+              style: GoogleFonts.manrope(
+                fontSize: 14,
+                color: const Color(0xFF4D453F),
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  'Got it',
+                  style: GoogleFonts.manrope(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,10 +100,11 @@ class _PCOSProfilePageState extends State<PCOSProfilePage> {
       body: SafeArea(
         child: Column(
           children: [
-            const OnboardingHeader(
+            OnboardingHeader(
               currentStep: 1,
               title: 'Health Profile',
               subtitle: 'PCOS & HORMONE CONDITION',
+              onSkip: _showInfoDialog,
             ),
             Expanded(
               child: SingleChildScrollView(
@@ -43,6 +119,8 @@ class _PCOSProfilePageState extends State<PCOSProfilePage> {
                     _buildCyclesSection(),
                     const SizedBox(height: 24),
                     _buildSpecialistSection(),
+                    const SizedBox(height: 24),
+                    _buildHRTSection(),
                     const SizedBox(height: 24),
                     _buildConceiveSection(),
                     const SizedBox(height: 24),
@@ -359,9 +437,9 @@ class _PCOSProfilePageState extends State<PCOSProfilePage> {
           const SizedBox(height: 16),
           Row(
             children: [
-              Expanded(child: _buildToggleButton('Yes', _tryingToConceive == true, () => setState(() => _tryingToConceive = true), isWhite: true)),
+              Expanded(child: _buildToggleButton('Yes', _tryingToConceive == true, () => setState(() => _tryingToConceive = true), isGreen: true)),
               const SizedBox(width: 12),
-              Expanded(child: _buildToggleButton('No', _tryingToConceive == false, () => setState(() => _tryingToConceive = false), isWhite: true)),
+              Expanded(child: _buildToggleButton('No', _tryingToConceive == false, () => setState(() => _tryingToConceive = false), isGreen: true)),
             ],
           ),
         ],
@@ -369,16 +447,17 @@ class _PCOSProfilePageState extends State<PCOSProfilePage> {
     );
   }
 
-  Widget _buildToggleButton(String title, bool isSelected, VoidCallback onTap, {bool isPurple = false, bool isWhite = false}) {
-    Color activeColor = isPurple ? const Color(0xFFE8E0F0) : (isWhite ? Colors.white : const Color(0xFFF2EDEA));
+  Widget _buildToggleButton(String title, bool isSelected, VoidCallback onTap, {bool isPurple = false, bool isGreen = false}) {
+    Color activeColor = isPurple ? const Color(0xFFE8E0F0) : (isGreen ? const Color(0xFF2E7D32) : const Color(0xFFF2EDEA));
+    Color textColor = isSelected && isGreen ? Colors.white : const Color(0xFF1D1B1A);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: isSelected ? activeColor : (isWhite ? Colors.transparent : const Color(0xFFF2EDEA).withOpacity(0.5)),
+          color: isSelected ? activeColor : (isGreen ? Colors.white : const Color(0xFFF2EDEA).withOpacity(0.5)),
           borderRadius: BorderRadius.circular(100),
-          border: isWhite ? Border.all(color: Colors.white) : null,
+          border: isGreen ? Border.all(color: const Color(0xFF2E7D32).withOpacity(isSelected ? 1.0 : 0.2)) : null,
         ),
         child: Center(
           child: Text(
@@ -386,10 +465,51 @@ class _PCOSProfilePageState extends State<PCOSProfilePage> {
             style: GoogleFonts.manrope(
               fontSize: 14,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: const Color(0xFF1D1B1A),
+              color: textColor,
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildHRTSection() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFF2EDEA)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Are you currently on Hormone Replacement Therapy (HRT)?',
+            style: GoogleFonts.manrope(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF1D1B1A),
+            ),
+          ),
+          const SizedBox(height: 20),
+          ProfileRadioCard(
+            title: "Yes - I'm on HRT",
+            isSelected: _hrtStatus == 'yes',
+            onTap: () => setState(() => _hrtStatus = 'yes'),
+          ),
+          ProfileRadioCard(
+            title: "No - I'm not taking hormones",
+            isSelected: _hrtStatus == 'no',
+            onTap: () => setState(() => _hrtStatus = 'no'),
+          ),
+          ProfileRadioCard(
+            title: "I'm starting HRT soon",
+            isSelected: _hrtStatus == 'soon',
+            onTap: () => setState(() => _hrtStatus = 'soon'),
+          ),
+        ],
       ),
     );
   }
@@ -480,7 +600,7 @@ class _PCOSProfilePageState extends State<PCOSProfilePage> {
     return Column(
       children: [
         ElevatedButton(
-          onPressed: () => context.go('/medications'),
+          onPressed: () => context.push('/medications'),
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF9B8B7E),
             foregroundColor: Colors.white,
@@ -517,7 +637,7 @@ class _PCOSProfilePageState extends State<PCOSProfilePage> {
             ),
             const Text('|', style: TextStyle(color: Colors.grey)),
             TextButton(
-              onPressed: () => context.go('/medications'),
+              onPressed: () => context.push('/medications'),
               child: Text(
                 'SKIP THIS DETAILED SETUP',
                 style: GoogleFonts.manrope(

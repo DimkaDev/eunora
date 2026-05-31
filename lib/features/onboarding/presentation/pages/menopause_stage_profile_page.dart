@@ -17,6 +17,76 @@ class _MenopauseStageProfilePageState extends State<MenopauseStageProfilePage> {
   String? _hrtType;
   String? _lastPeriodDuration;
 
+  void _showInfoDialog() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFFFEF8F6),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Menopause Stage Info',
+                  style: GoogleFonts.notoSerif(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1D1B1A),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Color(0xFF9B8B7E)),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Menopause represents a permanent cessation of ovulation. Collecting details about your HRT treatment status (patch, tablet, gel, nasal spray) and timeframe since your last cycle helps Eunora structure your personal symptom relief recommendations.',
+              style: GoogleFonts.manrope(
+                fontSize: 14,
+                color: const Color(0xFF4D453F),
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  'Got it',
+                  style: GoogleFonts.manrope(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,10 +94,11 @@ class _MenopauseStageProfilePageState extends State<MenopauseStageProfilePage> {
       body: SafeArea(
         child: Column(
           children: [
-            const OnboardingHeader(
+            OnboardingHeader(
               currentStep: 1,
               title: 'Health Profile',
               subtitle: 'MENOPAUSE STAGE',
+              onSkip: _showInfoDialog,
             ),
             Expanded(
               child: SingleChildScrollView(
@@ -102,39 +173,6 @@ class _MenopauseStageProfilePageState extends State<MenopauseStageProfilePage> {
             isSelected: _hrtStatus == 'yes',
             onTap: () => setState(() => _hrtStatus = 'yes'),
           ),
-          if (_hrtStatus == 'yes') ...[
-            Container(
-              margin: const EdgeInsets.only(left: 12, bottom: 12),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFBF7FF),
-                borderRadius: BorderRadius.circular(16),
-                border: const Border(
-                  left: BorderSide(color: Color(0xFF6C6074), width: 4),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'SELECT HRT TYPE',
-                    style: GoogleFonts.manrope(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
-                      color: const Color(0xFF6C6074),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildSubRadioOption('Patch (transdermal)', 'patch'),
-                  _buildSubRadioOption('Tablet', 'tablet'),
-                  _buildSubRadioOption('Gel (topical)', 'gel'),
-                  _buildSubRadioOption('Spray/Nasal', 'spray'),
-                  _buildSubRadioOption('Not sure', 'unsure'),
-                ],
-              ),
-            ),
-          ],
           ProfileRadioCard(
             title: "No - I'm not taking hormones",
             isSelected: _hrtStatus == 'no',
@@ -146,51 +184,6 @@ class _MenopauseStageProfilePageState extends State<MenopauseStageProfilePage> {
             onTap: () => setState(() => _hrtStatus = 'soon'),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSubRadioOption(String title, String value) {
-    final bool isSelected = _hrtType == value;
-    return GestureDetector(
-      onTap: () => setState(() => _hrtType = value),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Row(
-          children: [
-            Container(
-              width: 18,
-              height: 18,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected ? const Color(0xFF6C6074) : const Color(0xFFD0C4BC),
-                ),
-              ),
-              child: isSelected
-                  ? Center(
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF6C6074),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              title,
-              style: GoogleFonts.manrope(
-                fontSize: 14,
-                color: const Color(0xFF1D1B1A),
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -256,7 +249,7 @@ class _MenopauseStageProfilePageState extends State<MenopauseStageProfilePage> {
     return Column(
       children: [
         ElevatedButton(
-          onPressed: (_hrtStatus != null && _lastPeriodDuration != null) ? () => context.go('/medications') : null,
+          onPressed: (_hrtStatus != null && _lastPeriodDuration != null) ? () => context.push('/medications') : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppTheme.primary,
             foregroundColor: Colors.white,
@@ -276,7 +269,7 @@ class _MenopauseStageProfilePageState extends State<MenopauseStageProfilePage> {
         ),
         const SizedBox(height: 16),
         TextButton(
-          onPressed: () => context.go('/medications'),
+          onPressed: () => context.push('/medications'),
           child: Text(
             'SKIP FOR NOW',
             style: GoogleFonts.manrope(

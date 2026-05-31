@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/theme/app_theme.dart';
 import 'package:eunora/core/utils/animation_system.dart';
 import '../providers/other_medications_provider.dart';
 import '../../domain/models/other_medication.dart';
@@ -22,7 +23,7 @@ class OtherMedicationsPage extends ConsumerWidget {
           SafeArea(
             child: Column(
               children: [
-                const OnboardingHeader(currentStep: 5), // Step 6 of 11
+                const OnboardingHeader(currentStep: 4),
                 Expanded(
                   child: CustomScrollView(
                     slivers: [
@@ -35,7 +36,20 @@ class OtherMedicationsPage extends ConsumerWidget {
                             const SizedBox(height: 40),
                             _buildMainToggle(notifier, state.isTakingAnythingElse),
                             const SizedBox(height: 32),
-                            if (state.isTakingAnythingElse) _buildCurrentListCard(context, state.medications, notifier),
+                            if (state.isTakingAnythingElse) ...[
+                              _buildCurrentListHeader(),
+                              const SizedBox(height: 16),
+                              if (state.medications.isEmpty)
+                                _buildEmptyState(context)
+                              else
+                                _buildMedicationList(context, state.medications, notifier),
+                              const SizedBox(height: 24),
+                              _buildAddButton(context),
+                              const SizedBox(height: 16),
+                              _buildQuickAddSection(context, notifier),
+                              const SizedBox(height: 16),
+                              _buildNoOtherMedsLink(notifier),
+                            ],
                             const SizedBox(height: 48),
                             _buildWhyItMattersCard(),
                             const SizedBox(height: 160), // Footer space
@@ -128,81 +142,48 @@ class OtherMedicationsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildCurrentListCard(BuildContext context, List<OtherMedication> medications, OtherMedicationsNotifier notifier) {
+  Widget _buildCurrentListHeader() {
+    return const Text(
+      'YOUR CURRENT LIST',
+      style: TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF1D1B1A),
+        letterSpacing: 0.5,
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(32),
-        border: Border.all(color: const Color(0xFFD0C4BC).withOpacity(0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: Colors.white.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: const Color(0xFFE7E5E4),
+          width: 2,
+          style: BorderStyle.solid,
+        ),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'YOUR CURRENT LIST',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF7F756E),
-              letterSpacing: 1.5,
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5F5F4),
+              shape: BoxShape.circle,
             ),
+            child: const Icon(Icons.medication, color: Color(0xFFD6D3D1), size: 30),
           ),
-          const SizedBox(height: 24),
-          if (medications.isEmpty)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 24),
-                child: Text(
-                  'No items added',
-                  style: TextStyle(color: Color(0xFF7F756E), fontStyle: FontStyle.italic),
-                ),
-              ),
-            )
-          else
-            ...medications.asMap().entries.map((entry) {
-              final index = entry.key;
-              final med = entry.value;
-              return Padding(
-                padding: EdgeInsets.only(bottom: index == medications.length - 1 ? 0 : 12),
-                child: OtherMedicationListItem(
-                  medication: med,
-                  onDelete: () => notifier.removeMedication(med.id),
-                  onEdit: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (context) => AddOtherMedicationModal(medication: med),
-                    );
-                  },
-                ),
-              );
-            }),
-          
-          const SizedBox(height: 32),
-          _buildAddButton(context),
-          
-          const SizedBox(height: 32),
-          Center(
-            child: TextButton(
-              onPressed: () => notifier.toggleIsTakingAnythingElse(false),
-              child: const Text(
-                "I'm not taking anything else",
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF7F756E),
-                  decoration: TextDecoration.underline,
-                  decorationColor: Color(0xFF7F756E),
-                ),
-              ),
+          const SizedBox(height: 12),
+          const Text(
+            'No medications added yet.',
+            style: TextStyle(
+              color: Color(0xFFA8A29E),
+              fontSize: 13,
             ),
           ),
         ],
@@ -210,9 +191,32 @@ class OtherMedicationsPage extends ConsumerWidget {
     );
   }
 
+  Widget _buildMedicationList(BuildContext context, List<OtherMedication> medications, OtherMedicationsNotifier notifier) {
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: medications.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final med = medications[index];
+        return OtherMedicationListItem(
+          medication: med,
+          onDelete: () => notifier.removeMedication(med.id),
+          onEdit: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (context) => AddOtherMedicationModal(medication: med),
+            );
+          },
+        );
+      },
+    );
+  }
 
   Widget _buildAddButton(BuildContext context) {
-    return Bounceable(
+    return InkWell(
       onTap: () {
         showModalBottomSheet(
           context: context,
@@ -225,27 +229,117 @@ class OtherMedicationsPage extends ConsumerWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 20),
         decoration: BoxDecoration(
-          border: Border.all(color: const Color(0xFFD0C4BC).withOpacity(0.5), style: BorderStyle.solid), // Dashed would be better
-          borderRadius: BorderRadius.circular(16),
-          color: const Color(0xFFF8F2F0).withOpacity(0.5),
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: const Color(0xFF67594E).withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.add, color: Color(0xFF67594E)),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Add Medication or Supplement',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF67594E)),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: AppTheme.primary.withOpacity(0.2), width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 5,
+              offset: const Offset(0, 2),
             ),
           ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.add_circle, color: AppTheme.primary, size: 24),
+            const SizedBox(width: 8),
+            Text(
+              'Add Medication or Supplement',
+              style: TextStyle(
+                color: AppTheme.primary,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickAddSection(BuildContext context, OtherMedicationsNotifier notifier) {
+    final commonMeds = ['Vitamin D', 'Calcium', 'Magnesium', 'Ibuprofen', 'Antidepressant'];
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE8E0F0).withOpacity(0.6),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFE8E0F0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'QUICK START COMMON CHOICES',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF6C6074),
+              letterSpacing: 1.0,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: commonMeds.map((name) => _buildQuickAddChip(context, name, notifier)).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickAddChip(BuildContext context, String name, OtherMedicationsNotifier notifier) {
+    return InkWell(
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => AddOtherMedicationModal(initialName: name),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(999),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Text(
+          name,
+          style: TextStyle(
+            color: AppTheme.primary,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoOtherMedsLink(OtherMedicationsNotifier notifier) {
+    return Center(
+      child: TextButton(
+        onPressed: () => notifier.toggleIsTakingAnythingElse(false),
+        child: const Text(
+          "I'm not taking anything else",
+          style: TextStyle(
+            fontSize: 12,
+            color: Color(0xFF7F756E),
+            decoration: TextDecoration.underline,
+            decorationColor: Color(0xFF7F756E),
+          ),
         ),
       ),
     );
@@ -354,8 +448,9 @@ class OtherMedicationsPage extends ConsumerWidget {
 
 class AddOtherMedicationModal extends ConsumerStatefulWidget {
   final OtherMedication? medication;
+  final String? initialName;
 
-  const AddOtherMedicationModal({super.key, this.medication});
+  const AddOtherMedicationModal({super.key, this.medication, this.initialName});
 
   @override
   ConsumerState<AddOtherMedicationModal> createState() => _AddOtherMedicationModalState();
@@ -375,11 +470,21 @@ class _AddOtherMedicationModalState extends ConsumerState<AddOtherMedicationModa
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.medication?.name);
+    _nameController = TextEditingController(text: widget.medication?.name ?? widget.initialName);
     _doseController = TextEditingController(text: widget.medication?.dose);
-    _selectedCategory = widget.medication?.category;
+    _selectedCategory = widget.medication?.category ?? _getDefaultCategory(widget.initialName);
     _selectedFrequency = widget.medication?.frequency ?? 'Daily';
     _hasReminder = widget.medication?.hasReminder ?? false;
+  }
+
+  String? _getDefaultCategory(String? name) {
+    if (name == null) return null;
+    final lowerName = name.toLowerCase();
+    if (lowerName.contains('vitamin')) return 'Vitamins';
+    if (lowerName.contains('calcium') || lowerName.contains('magnesium')) return 'Minerals';
+    if (lowerName.contains('herbal') || lowerName.contains('herb')) return 'Herbal';
+    if (lowerName.contains('ibuprofen') || lowerName.contains('antidepressant')) return 'Other';
+    return null;
   }
 
   @override

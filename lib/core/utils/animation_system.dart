@@ -478,37 +478,41 @@ class _AnimatedCheckboxState extends State<AnimatedCheckbox> with SingleTickerPr
       onTap: () {
         widget.onChanged(!widget.value);
       },
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _scaleAnimation.value,
-            child: child,
-          );
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          width: widget.size,
-          height: widget.size,
-          decoration: BoxDecoration(
-            color: widget.value ? activeBg : inactiveBg,
-            border: Border.all(
-              color: borderCol,
-              width: widget.value ? 0 : 2,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _scaleAnimation.value,
+              child: child,
+            );
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            width: widget.size,
+            height: widget.size,
+            decoration: BoxDecoration(
+              color: widget.value ? activeBg : inactiveBg,
+              border: Border.all(
+                color: borderCol,
+                width: widget.value ? 0 : 2,
+              ),
+              borderRadius: BorderRadius.circular(6),
             ),
-            borderRadius: BorderRadius.circular(6),
+            alignment: Alignment.center,
+            child: widget.value
+                ? ScaleTransition(
+                    scale: _checkScaleAnimation,
+                    child: Icon(
+                      Icons.check,
+                      color: widget.checkColor ?? Colors.white,
+                      size: widget.size * 0.72,
+                    ),
+                  )
+                : null,
           ),
-          alignment: Alignment.center,
-          child: widget.value
-              ? ScaleTransition(
-                  scale: _checkScaleAnimation,
-                  child: Icon(
-                    Icons.check,
-                    color: widget.checkColor ?? Colors.white,
-                    size: widget.size * 0.72,
-                  ),
-                )
-              : null,
         ),
       ),
     );

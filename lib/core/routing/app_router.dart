@@ -38,6 +38,7 @@ import 'package:eunora/features/profile/presentation/pages/profile_page.dart';
 import 'package:eunora/features/profile/presentation/pages/help_center_page.dart';
 import 'package:eunora/features/profile/presentation/pages/notification_preferences_page.dart';
 import 'package:eunora/features/profile/presentation/pages/premium_upgrade_page.dart';
+import 'package:eunora/features/home/presentation/pages/notification_center_page.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -331,6 +332,14 @@ final GoRouter appRouter = GoRouter(
         context: context,
         state: state,
         child: const NotificationPreferencesPage(),
+      ),
+    ),
+    GoRoute(
+      path: '/notification-center',
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const NotificationCenterPage(),
       ),
     ),
     GoRoute(

@@ -44,7 +44,7 @@ class _ContraceptionPageState extends ConsumerState<ContraceptionPage> {
           SafeArea(
             child: Column(
               children: [
-                const OnboardingHeader(currentStep: 7), // Step 8 of 11 (0-indexed 7)
+                const OnboardingHeader(currentStep: 6),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),

@@ -42,7 +42,7 @@ class _HealthConditionsPageState extends ConsumerState<HealthConditionsPage> {
           SafeArea(
             child: Column(
               children: [
-                const OnboardingHeader(currentStep: 6), // Step 7 of 11 (0-indexed 6)
+                const OnboardingHeader(currentStep: 5),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),

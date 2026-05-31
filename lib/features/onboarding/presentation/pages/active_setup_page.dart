@@ -4,6 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/onboarding_header.dart';
+import 'package:eunora/core/services/firestore_service.dart';
+import 'package:eunora/features/onboarding/domain/models/user_profile.dart';
+import 'package:eunora/features/onboarding/domain/models/notification_settings.dart';
+import 'package:eunora/features/onboarding/presentation/providers/menopause_stage_provider.dart';
+import 'package:eunora/features/onboarding/presentation/providers/symptoms_provider.dart';
+import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
+import 'package:eunora/features/onboarding/presentation/providers/other_medications_provider.dart';
 
 class ActiveSetupPage extends ConsumerStatefulWidget {
   const ActiveSetupPage({super.key});
@@ -25,7 +32,7 @@ class _ActiveSetupPageState extends ConsumerState<ActiveSetupPage> {
           SafeArea(
             child: Column(
               children: [
-                const OnboardingHeader(currentStep: 10), // Step 11 of 11
+                const OnboardingHeader(currentStep: 9),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
@@ -339,6 +346,40 @@ class _ActiveSetupPageState extends ConsumerState<ActiveSetupPage> {
                 if (user != null) {
                   final prefs = await SharedPreferences.getInstance();
                   await prefs.setBool('onboarding_completed_${user.uid}', true);
+
+                  // Retrieve onboarding data from providers
+                  final stageState = ref.read(menopauseStageProvider);
+                  final selectedStage = stageState.selectedStage ?? MenopauseStage.irregular;
+
+                  final symptomsState = ref.read(symptomsProvider);
+                  final activeMeds = ref.read(medicationsProvider).medications;
+                  final otherMeds = ref.read(otherMedicationsProvider).medications;
+
+                  final profile = UserProfile(
+                    uid: user.uid,
+                    email: user.email ?? '',
+                    age: 50, // default age
+                    menopauseStage: selectedStage,
+                    yearsInStage: '1',
+                    selectedStageSymptoms: symptomsState.frequentSymptomIds,
+                    medications: activeMeds,
+                    otherMedications: otherMeds,
+                    notificationSettings: NotificationSettings(
+                      hrtTimeHour: _hrtTime.hour,
+                      hrtTimeMinute: _hrtTime.minute,
+                      eveningLogTimeHour: _logTime.hour,
+                      eveningLogTimeMinute: _logTime.minute,
+                    ),
+                    isOnboardingCompleted: true,
+                    createdAt: DateTime.now(),
+                    updatedAt: DateTime.now(),
+                  );
+
+                  try {
+                    await ref.read(firestoreServiceProvider).saveUserProfile(profile);
+                  } catch (e) {
+                    debugPrint("Error saving user profile to firestore: $e");
+                  }
                 }
                 if (context.mounted) {
                   context.go('/home');

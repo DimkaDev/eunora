@@ -14,7 +14,7 @@ class OnboardingHeader extends StatelessWidget {
   const OnboardingHeader({
     super.key,
     required this.currentStep,
-    this.totalSteps = 11,
+    this.totalSteps = 10,
     this.title,
     this.subtitle,
     this.onBack,

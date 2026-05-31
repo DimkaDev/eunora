@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:math';
 import 'package:google_fonts/google_fonts.dart';
@@ -20,23 +21,26 @@ import 'package:eunora/features/home/presentation/pages/analytics_page.dart';
 import 'package:eunora/features/home/presentation/pages/passport_page.dart';
 import 'package:eunora/features/home/presentation/pages/hrt_tracker_page.dart';
 import 'package:eunora/core/utils/animation_system.dart';
+import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
+import 'package:eunora/features/onboarding/domain/models/medication.dart';
+import 'package:eunora/features/home/presentation/widgets/calendar_hrt_edit_sheet.dart';
 
 
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends ConsumerState<HomePage> {
   int _selectedIndex = 0;
   late final InsightType _insightType;
 
   // Daily Logging States
-  bool _estradiolTaken = false;
-  bool _progesteroneTaken = false;
+  final Map<String, bool> _takenStatus = {};
+  final Map<String, String> _takenTime = {};
   final List<Map<String, String>> _loggedSymptoms = [];
   final List<Map<String, dynamic>> _loggedTriggers = [];
 
@@ -46,12 +50,35 @@ class _HomePageState extends State<HomePage> {
     // Choose a random InsightType once during load/initialization
     const types = InsightType.values;
     _insightType = types[Random().nextInt(types.length)];
+
+    // Initialize with standard logs for default mock medications
+    _takenStatus['Estradiol Patch'] = false;
+    _takenTime['Estradiol Patch'] = '08:30';
+    _takenStatus['Progesterone'] = false;
+    _takenTime['Progesterone'] = '21:00';
   }
 
-  double _getLoggingProgress() {
+  double _getLoggingProgress(List<Medication> medications) {
     double progress = 0.0;
-    if (_estradiolTaken) progress += 0.2;
-    if (_progesteroneTaken) progress += 0.2;
+
+    // Check mandatory medications (daily or bedtime)
+    final mandatoryMeds = medications.where((med) {
+      final freq = med.frequency.toLowerCase();
+      return freq.contains('daily') || freq.contains('bedtime');
+    }).toList();
+
+    if (mandatoryMeds.isEmpty) {
+      progress += 0.4;
+    } else {
+      int takenCount = 0;
+      for (final med in mandatoryMeds) {
+        if (_takenStatus[med.name] ?? false) {
+          takenCount++;
+        }
+      }
+      progress += (0.4 * takenCount) / mandatoryMeds.length;
+    }
+
     if (_loggedSymptoms.isNotEmpty) progress += 0.3;
     if (_loggedTriggers.isNotEmpty) progress += 0.3;
     return progress;
@@ -132,6 +159,64 @@ class _HomePageState extends State<HomePage> {
   }
 
 
+  void _showHrtLoggingSheet(List<Medication> medications) {
+    final hrtList = medications.map((med) {
+      final isTaken = _takenStatus[med.name] ?? false;
+      final time = _takenTime[med.name] ?? '08:00';
+      final appType = med.type.displayName;
+      
+      return {
+        'name': med.name,
+        'details': '${med.dose.toStringAsFixed(0)} ${med.unit} · $appType',
+        'status': isTaken ? 'Taken $time' : 'Not taken',
+        'isTaken': isTaken.toString(),
+      };
+    }).toList();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.75,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (_, scrollController) => CalendarHrtEditSheet(
+          initialHrt: hrtList,
+          onSave: (updatedList) {
+            setState(() {
+              for (final updated in updatedList) {
+                final name = updated['name'] ?? '';
+                final isTaken = updated['isTaken'] == 'true';
+                final status = updated['status'] ?? '';
+                
+                String time = '08:00';
+                final match = RegExp(r'(\d{1,2}:\d{2})').firstMatch(status);
+                if (match != null) {
+                  time = match.group(1) ?? '08:00';
+                }
+
+                _takenStatus[name] = isTaken;
+                _takenTime[name] = time;
+              }
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Doses logged successfully!',
+                  style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
+                ),
+                backgroundColor: AppTheme.primary,
+                behavior: SnackBarBehavior.floating,
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   void _handleStartOrResumeLogging() async {
     final result = await context.push<Map<String, dynamic>>('/daily-logging');
     if (result != null) {
@@ -148,13 +233,17 @@ class _HomePageState extends State<HomePage> {
             (result['triggers'] as List).map((e) => Map<String, dynamic>.from(e as Map)),
           );
         }
-        _estradiolTaken = result['estradiolTaken'] as bool? ?? false;
-        _progesteroneTaken = result['progesteroneTaken'] as bool? ?? false;
+        final est = result['estradiolTaken'] as bool? ?? false;
+        final prog = result['progesteroneTaken'] as bool? ?? false;
+        _takenStatus['Estradiol Patch'] = est;
+        _takenStatus['Estradiol'] = est;
+        _takenStatus['Progesterone'] = prog;
+        _takenStatus['Utrogestan'] = prog;
       });
     }
   }
 
-  Widget _buildHomeDashboard(double progress) {
+  Widget _buildHomeDashboard(double progress, List<Medication> medications) {
     return Column(
       children: [
         const DashboardHeader(
@@ -179,11 +268,15 @@ class _HomePageState extends State<HomePage> {
                 FadeInEntrance(
                   delay: const Duration(milliseconds: 100),
                   child: MedicationHrtCard(
-                    estradiolTaken: _estradiolTaken,
-                    progesteroneTaken: _progesteroneTaken,
-                    onEstradiolChanged: (val) => setState(() => _estradiolTaken = val),
-                    onProgesteroneChanged: (val) => setState(() => _progesteroneTaken = val),
-                    onManageTap: () => setState(() => _selectedIndex = 4),
+                    medications: medications,
+                    takenStatus: _takenStatus,
+                    onTakenStatusChanged: (newStatus) {
+                      setState(() {
+                        _takenStatus.clear();
+                        _takenStatus.addAll(newStatus);
+                      });
+                    },
+                    onManageTap: () => _showHrtLoggingSheet(medications),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -228,10 +321,10 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildSelectedTab(double progress) {
+  Widget _buildSelectedTab(double progress, List<Medication> medications) {
     switch (_selectedIndex) {
       case 0:
-        return _buildHomeDashboard(progress);
+        return _buildHomeDashboard(progress, medications);
       case 1:
         return const CalendarPage();
       case 2:
@@ -241,13 +334,39 @@ class _HomePageState extends State<HomePage> {
       case 4:
         return const HrtTrackerPage();
       default:
-        return _buildHomeDashboard(progress);
+        return _buildHomeDashboard(progress, medications);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final progress = _getLoggingProgress();
+    final medicationsState = ref.watch(medicationsProvider);
+    final medications = medicationsState.medications;
+
+    // Auto-populate default medications if completely empty
+    if (medications.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (ref.read(medicationsProvider).medications.isEmpty) {
+          final refNotifier = ref.read(medicationsProvider.notifier);
+          refNotifier.addMedication(Medication(
+            name: 'Estradiol Patch',
+            type: MedicationType.patch,
+            dose: 50,
+            unit: 'mcg',
+            frequency: 'Twice weekly',
+          ));
+          refNotifier.addMedication(Medication(
+            name: 'Progesterone',
+            type: MedicationType.pill,
+            dose: 100,
+            unit: 'mg',
+            frequency: 'Bedtime',
+          ));
+        }
+      });
+    }
+
+    final progress = _getLoggingProgress(medications);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7F5F0),
@@ -269,7 +388,7 @@ class _HomePageState extends State<HomePage> {
               },
               child: KeyedSubtree(
                 key: ValueKey<int>(_selectedIndex),
-                child: _buildSelectedTab(progress),
+                child: _buildSelectedTab(progress, medications),
               ),
             ),
             Positioned(

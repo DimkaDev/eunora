@@ -66,5 +66,29 @@ class Medication {
     );
   }
 
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'type': type.name,
+      'dose': dose,
+      'unit': unit,
+      'frequency': frequency,
+      'notes': notes,
+    };
+  }
+
+  factory Medication.fromMap(Map<String, dynamic> map) {
+    return Medication(
+      id: map['id'] as String?,
+      name: map['name'] as String? ?? '',
+      type: MedicationType.values.byName(map['type'] as String? ?? 'other'),
+      dose: (map['dose'] as num? ?? 0.0).toDouble(),
+      unit: map['unit'] as String? ?? '',
+      frequency: map['frequency'] as String? ?? '',
+      notes: map['notes'] as String?,
+    );
+  }
+
   String get doseAndFrequency => '${dose.toStringAsFixed(dose == dose.toInt() ? 0 : 2)}$unit • $frequency';
 }

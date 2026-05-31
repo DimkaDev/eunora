@@ -26,7 +26,7 @@ class _LifestyleHabitsPageState extends ConsumerState<LifestyleHabitsPage> {
           SafeArea(
             child: Column(
               children: [
-                const OnboardingHeader(currentStep: 9), // Step 10 of 11
+                const OnboardingHeader(currentStep: 8),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),

@@ -29,7 +29,7 @@ class FrequentSymptomsPage extends ConsumerWidget {
           SafeArea(
             child: Column(
               children: [
-                const OnboardingHeader(currentStep: 4),
+                const OnboardingHeader(currentStep: 3),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(

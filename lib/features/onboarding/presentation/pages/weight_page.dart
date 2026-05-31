@@ -23,7 +23,7 @@ class _WeightPageState extends ConsumerState<WeightPage> {
           SafeArea(
             child: Column(
               children: [
-                const OnboardingHeader(currentStep: 8), // Step 9 of 11
+                const OnboardingHeader(currentStep: 7),
                 Expanded(
                   child: Column(
                     children: [

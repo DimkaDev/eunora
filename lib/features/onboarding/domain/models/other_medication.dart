@@ -33,4 +33,26 @@ class OtherMedication {
       hasReminder: hasReminder ?? this.hasReminder,
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'dose': dose,
+      'category': category,
+      'frequency': frequency,
+      'hasReminder': hasReminder,
+    };
+  }
+
+  factory OtherMedication.fromMap(Map<String, dynamic> map) {
+    return OtherMedication(
+      id: map['id'] as String?,
+      name: map['name'] as String? ?? '',
+      dose: map['dose'] as String?,
+      category: map['category'] as String?,
+      frequency: map['frequency'] as String?,
+      hasReminder: map['hasReminder'] as bool? ?? false,
+    );
+  }
 }

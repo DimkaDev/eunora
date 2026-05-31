@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:eunora/core/theme/app_theme.dart';
+import 'package:eunora/core/services/notification_history_provider.dart';
 
-class DashboardHeader extends StatelessWidget {
+class DashboardHeader extends ConsumerWidget {
   final String userName;
   final String date;
   final String cycleInfo;
@@ -18,14 +20,17 @@ class DashboardHeader extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final notifications = ref.watch(notificationHistoryProvider);
+    final hasUnread = notifications.any((n) => !n.isRead);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
         color: const Color(0xFFF7F5F0).withOpacity(0.8),
         border: Border(
           bottom: BorderSide(
-            color: const Color(0xFFE7E5E4)!.withOpacity(0.5),
+            color: const Color(0xFFE7E5E4).withOpacity(0.5),
             width: 1,
           ),
         ),
@@ -61,8 +66,8 @@ class DashboardHeader extends StatelessWidget {
                   Container(
                     width: 4,
                     height: 4,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFD6D3D1),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFD6D3D1),
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -81,32 +86,32 @@ class DashboardHeader extends StatelessWidget {
           ),
           Row(
             children: [
-              IconButton(
-                icon: const Icon(Icons.notifications_none, color: AppTheme.primary),
-                onPressed: () => context.push('/notification-preferences'),
-              ),
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: () => context.push('/profile'),
-                child: Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                    image: DecorationImage(
-                      image: NetworkImage(profileImageUrl),
-                      fit: BoxFit.cover,
-                    ),
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications_none, color: AppTheme.primary),
+                    onPressed: () => context.push('/notification-center'),
                   ),
-                ),
+                  if (hasUnread)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: AppTheme.primary,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(width: 4),
+              IconButton(
+                icon: const Icon(Icons.settings, color: AppTheme.primary),
+                onPressed: () => context.push('/profile'),
               ),
             ],
           ),

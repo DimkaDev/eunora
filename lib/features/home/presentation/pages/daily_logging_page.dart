@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/features/onboarding/presentation/widgets/onboarding_header.dart';
 import 'package:eunora/core/utils/animation_system.dart';
+import 'package:eunora/core/services/firestore_service.dart';
+import 'package:eunora/features/home/domain/entities/daily_log.dart';
+import 'package:eunora/features/onboarding/domain/models/symptom.dart';
 
-class DailyLoggingPage extends StatefulWidget {
+class DailyLoggingPage extends ConsumerStatefulWidget {
   const DailyLoggingPage({super.key});
 
   @override
-  State<DailyLoggingPage> createState() => _DailyLoggingPageState();
+  ConsumerState<DailyLoggingPage> createState() => _DailyLoggingPageState();
 }
 
-class _DailyLoggingPageState extends State<DailyLoggingPage> {
+class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   int _currentStep = 0; // 0 to 5 (Step 1 to Step 6)
 
   // Step 1: Symptoms Selection
@@ -780,7 +785,7 @@ class _DailyLoggingPageState extends State<DailyLoggingPage> {
     );
   }
 
-  void _finishLoggingAndSync() {
+  void _finishLoggingAndSync() async {
     // Generate results
     final List<Map<String, String>> symptomsResult = [];
     for (final id in _selectedSymptomIds) {
@@ -814,6 +819,89 @@ class _DailyLoggingPageState extends State<DailyLoggingPage> {
                             ? Icons.thermostat
                             : Icons.restaurant,
       });
+    }
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final date = DateTime.now();
+      final dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+
+      final List<LoggedSymptom> loggedSymptoms = [];
+      for (final id in _selectedSymptomIds) {
+        final name = _getSymptomName(id);
+        final severityStr = _symptomSeverities[id] ?? 'Mild';
+
+        loggedSymptoms.add(
+          LoggedSymptom(
+            symptom: Symptom(
+              id: id,
+              name: name,
+              iconName: id == 's_hot_flashes'
+                  ? 'thermostat'
+                  : id == 's_mood'
+                      ? 'mood'
+                      : id == 's_sleep'
+                          ? 'dark_mode'
+                          : id == 's_dryness'
+                              ? 'opacity'
+                              : 'accessibility_new',
+              category: 'General',
+            ),
+            severity: severityStr,
+          ),
+        );
+      }
+
+      final List<String> triggerNames = [];
+      for (final id in _selectedTriggerIds) {
+        if (id == 't_caffeine') {
+          triggerNames.add('Caffeine: $_caffeineCups cups');
+        } else if (id == 't_alcohol') {
+          triggerNames.add('Alcohol: $_alcoholGlasses glasses');
+        } else if (id == 't_stress') {
+          triggerNames.add('Stress: $_stressLevel');
+        } else if (id == 't_foods') {
+          triggerNames.add(_foodsTriggered ? 'Foods: $_foodsNotes' : 'Foods');
+        } else {
+          triggerNames.add(id.replaceAll('t_', '').toUpperCase());
+        }
+      }
+
+      final dailyLog = DailyLog(
+        id: dateStr,
+        userId: user.uid,
+        date: date,
+        symptoms: loggedSymptoms,
+        triggers: triggerNames,
+        caffeineCups: _caffeineCups,
+        alcoholGlasses: _alcoholGlasses,
+        stressLevel: _stressLevel,
+        foodsTriggered: _foodsTriggered,
+        foodsNotes: _foodsNotes,
+        customTriggerCounters: _customTriggerCounters,
+        customTriggerTexts: _customTriggerTexts,
+        estradiolChecked: _estradiolChecked,
+        estradiolDose: _estradiolDose,
+        estradiolUnit: _estradiolUnit,
+        estradiolTime: _estradiolTime,
+        progesteroneChecked: _progesteroneChecked,
+        progesteroneDose: _progesteroneDose,
+        progesteroneUnit: _progesteroneUnit,
+        progesteroneTime: _progesteroneTime,
+        vitaminDChecked: _vitaminDChecked,
+        magnesiumChecked: _magnesiumChecked,
+        sleepDuration: _sleepDuration,
+        hydrationCups: _hydrationCups,
+        weight: null,
+        additionalNotes: _additionalNotes,
+        createdAt: DateTime.now(),
+      );
+
+      try {
+        await ref.read(firestoreServiceProvider).saveDailyLog(user.uid, dailyLog);
+      } catch (e) {
+        debugPrint("Error saving daily log to firestore: $e");
+      }
     }
 
     final result = {

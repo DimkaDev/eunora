@@ -4,6 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:eunora/features/onboarding/presentation/providers/menopause_stage_provider.dart';
+import 'package:eunora/features/onboarding/presentation/widgets/profile_radio_card.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -26,69 +29,49 @@ class _ProfilePageState extends State<ProfilePage> {
   int _age = 51;
   String _yearsInStage = '~2 years';
 
-  void _showUpdateJourneyDialog() {
-    final stageController = TextEditingController(text: _stage);
-    final ageController = TextEditingController(text: _age.toString());
-    final yearsController = TextEditingController(text: _yearsInStage);
+  @override
+  void initState() {
+    super.initState();
+    _loadJourneyData();
+  }
 
-    showDialog(
+  Future<void> _loadJourneyData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final user = FirebaseAuth.instance.currentUser;
+    final uid = user?.uid ?? 'anon';
+    setState(() {
+      _stage = prefs.getString('journey_stage_$uid') ?? 'Early Menopause';
+      _age = prefs.getInt('journey_age_$uid') ?? 51;
+      _yearsInStage = prefs.getString('journey_years_in_stage_$uid') ?? '~2 years';
+    });
+  }
+
+  Future<void> _saveJourneyData(String stage, int age, String yearsInStage) async {
+    final prefs = await SharedPreferences.getInstance();
+    final user = FirebaseAuth.instance.currentUser;
+    final uid = user?.uid ?? 'anon';
+    await prefs.setString('journey_stage_$uid', stage);
+    await prefs.setInt('journey_age_$uid', age);
+    await prefs.setString('journey_years_in_stage_$uid', yearsInStage);
+    setState(() {
+      _stage = stage;
+      _age = age;
+      _yearsInStage = yearsInStage;
+    });
+  }
+
+  void _showUpdateSituationWizard() {
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.surfaceContainerLowest,
-        title: Text(
-          'Update Journey',
-          style: GoogleFonts.notoSerif(
-            color: AppTheme.primary,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: stageController,
-                decoration: const InputDecoration(labelText: 'Stage'),
-              ),
-              TextField(
-                controller: ageController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Age'),
-              ),
-              TextField(
-                controller: yearsController,
-                decoration: const InputDecoration(labelText: 'Years in Stage'),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.manrope(color: AppTheme.outline),
-            ),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primary,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () {
-              setState(() {
-                _stage = stageController.text;
-                _age = int.tryParse(ageController.text) ?? _age;
-                _yearsInStage = yearsController.text;
-              });
-              Navigator.pop(context);
-            },
-            child: Text(
-              'Save',
-              style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => UpdateSituationWizard(
+        currentStage: _stage,
+        currentAge: _age,
+        currentYearsInStage: _yearsInStage,
+        onSave: (stage, age, yearsInStage) {
+          _saveJourneyData(stage, age, yearsInStage);
+        },
       ),
     );
   }
@@ -555,7 +538,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
                 TextButton(
-                  onPressed: _showUpdateJourneyDialog,
+                  onPressed: _showUpdateSituationWizard,
                   child: Text(
                     'Update',
                     style: GoogleFonts.manrope(
@@ -588,6 +571,113 @@ class _ProfilePageState extends State<ProfilePage> {
                   _buildJourneyRow('Age', _age.toString()),
                   const Divider(height: 1, color: AppTheme.surfaceContainerLow, indent: 24, endIndent: 24),
                   _buildJourneyRow('Years in Stage', _yearsInStage),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+
+            // Section 2.5: Hormonal Situation Section
+            Text(
+              'Hormonal Situation',
+              style: GoogleFonts.notoSerif(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppTheme.surfaceContainerLowest,
+                borderRadius: BorderRadius.circular(32),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.onSurface.withOpacity(0.04),
+                    blurRadius: 24,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEDDDF5),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Icon(
+                          Icons.spa_outlined,
+                          color: AppTheme.primary,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Current Stage',
+                              style: GoogleFonts.manrope(
+                                fontSize: 13,
+                                color: AppTheme.onSurfaceVariant,
+                              ),
+                            ),
+                            Text(
+                              _stage,
+                              style: GoogleFonts.manrope(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Timeframe',
+                              style: GoogleFonts.manrope(
+                                fontSize: 13,
+                                color: AppTheme.onSurfaceVariant,
+                              ),
+                            ),
+                            Text(
+                              _yearsInStage,
+                              style: GoogleFonts.manrope(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.onSurface,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primary,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size.fromHeight(56),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(9999),
+                      ),
+                      elevation: 2,
+                      shadowColor: AppTheme.primary.withOpacity(0.1),
+                    ),
+                    onPressed: _showUpdateSituationWizard,
+                    child: Text(
+                      'Update Situation Profile',
+                      style: GoogleFonts.manrope(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -1148,4 +1238,535 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
+}
+
+class UpdateSituationWizard extends StatefulWidget {
+  final String currentStage;
+  final int currentAge;
+  final String currentYearsInStage;
+  final Function(String stage, int age, String yearsInStage) onSave;
+
+  const UpdateSituationWizard({
+    super.key,
+    required this.currentStage,
+    required this.currentAge,
+    required this.currentYearsInStage,
+    required this.onSave,
+  });
+
+  @override
+  State<UpdateSituationWizard> createState() => _UpdateSituationWizardState();
+}
+
+class _UpdateSituationWizardState extends State<UpdateSituationWizard> {
+  int _step = 0; // 0: Select Stage, 1: Enter Details
+  MenopauseStage? _selectedStage;
+
+  // Form states
+  String? _q1Value; // Irregular duration, Last period duration, etc.
+  late final TextEditingController _ageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _ageController = TextEditingController(text: widget.currentAge.toString());
+    _selectedStage = _mapStageStringToEnum(widget.currentStage);
+  }
+
+  @override
+  void dispose() {
+    _ageController.dispose();
+    super.dispose();
+  }
+
+  MenopauseStage? _mapStageStringToEnum(String stage) {
+    final lowerStage = stage.toLowerCase();
+    if (lowerStage.contains('irregular') || lowerStage.contains('peri')) {
+      return MenopauseStage.irregular;
+    } else if (lowerStage.contains('12 months') || (lowerStage.contains('menopause') && !lowerStage.contains('post') && !lowerStage.contains('surgical'))) {
+      return MenopauseStage.noPeriod12Months;
+    } else if (lowerStage.contains('post')) {
+      return MenopauseStage.postmenopause;
+    } else if (lowerStage.contains('surgical')) {
+      return MenopauseStage.surgical;
+    } else if (lowerStage.contains('pcos')) {
+      return MenopauseStage.pcos;
+    }
+    return MenopauseStage.irregular; // default
+  }
+
+  String _mapStageEnumToString(MenopauseStage stage) {
+    switch (stage) {
+      case MenopauseStage.irregular:
+        return 'Perimenopause';
+      case MenopauseStage.noPeriod12Months:
+        return 'Menopause';
+      case MenopauseStage.postmenopause:
+        return 'Postmenopause';
+      case MenopauseStage.surgical:
+        return 'Surgical Menopause';
+      case MenopauseStage.pcos:
+        return 'PCOS & Hormonal';
+    }
+  }
+
+  String _mapQ1ValueToDisplay(MenopauseStage stage, String? q1Val) {
+    if (q1Val == null) return 'Not specified';
+    switch (stage) {
+      case MenopauseStage.irregular:
+        switch (q1Val) {
+          case 'less_than_6': return 'Less than 6 months';
+          case '6_to_12': return '6 months to 1 year';
+          case 'over_1_year': return 'Over 1 year';
+          default: return 'Not sure';
+        }
+      case MenopauseStage.noPeriod12Months:
+        switch (q1Val) {
+          case '1_year': return 'Around 1 year ago';
+          case '1_2_years': return '1-2 years ago';
+          case '2_5_years': return '2-5 years ago';
+          default: return 'More than 5 years ago';
+        }
+      case MenopauseStage.postmenopause:
+        switch (q1Val) {
+          case 'less_2': return 'Less than 2 years';
+          case '2_5': return '2-5 years';
+          case 'over_5': return 'More than 5 years';
+          default: return 'Not sure';
+        }
+      case MenopauseStage.surgical:
+        switch (q1Val) {
+          case 'less_6m': return 'Within the last 6 months';
+          case '6m_2y': return '6 months to 2 years ago';
+          default: return 'More than 2 years ago';
+        }
+      case MenopauseStage.pcos:
+        switch (q1Val) {
+          case 'recent': return 'Recently diagnosed';
+          case '1_5y': return '1-5 years';
+          default: return 'More than 5 years';
+        }
+    }
+  }
+
+  void _save() {
+    final stageName = _mapStageEnumToString(_selectedStage!);
+    final age = int.tryParse(_ageController.text.trim()) ?? widget.currentAge;
+    final yearsInStage = _mapQ1ValueToDisplay(_selectedStage!, _q1Value);
+
+    widget.onSave(stageName, age, yearsInStage);
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Hormonal situation updated successfully!'),
+        backgroundColor: AppTheme.primary,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.9,
+      decoration: const BoxDecoration(
+        color: Color(0xFFFEF8F6),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: 12),
+          Container(
+            width: 48,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 8, 16, 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    if (_step > 0)
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Color(0xFF67594E)),
+                        onPressed: () => setState(() => _step = 0),
+                        style: IconButton.styleFrom(
+                          backgroundColor: const Color(0xFFF2EDE9),
+                          padding: const EdgeInsets.all(8),
+                        ),
+                      ),
+                    if (_step > 0) const SizedBox(width: 8),
+                    Text(
+                      _step == 0 ? 'Update Stage' : 'Stage Details',
+                      style: GoogleFonts.notoSerif(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF67594E),
+                      ),
+                    ),
+                  ],
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Color(0xFF67594E)),
+                  onPressed: () => Navigator.pop(context),
+                  style: IconButton.styleFrom(
+                    backgroundColor: const Color(0xFFF2EDE9),
+                    padding: const EdgeInsets.all(8),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1, color: Color(0xFFF2EDE9)),
+          
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: _step == 0 ? _buildStep0() : _buildStep1(),
+            ),
+          ),
+          
+          Container(
+            padding: EdgeInsets.fromLTRB(24, 16, 24, 40 + MediaQuery.of(context).viewInsets.bottom),
+            decoration: const BoxDecoration(
+              color: Color(0xFFFEF8F6),
+              border: Border(top: BorderSide(color: Color(0xFFF2EDE9))),
+            ),
+            child: _step == 0
+                ? ElevatedButton(
+                    onPressed: _selectedStage != null ? () => setState(() => _step = 1) : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF817266),
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 56),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'CONTINUE',
+                      style: GoogleFonts.manrope(fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                    ),
+                  )
+                : Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => setState(() => _step = 0),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Color(0xFF817266), width: 1.5),
+                            minimumSize: const Size(0, 56),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                          ),
+                          child: Text(
+                            'BACK',
+                            style: GoogleFonts.manrope(fontWeight: FontWeight.bold, color: const Color(0xFF817266), letterSpacing: 1.5),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _q1Value != null ? _save : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF817266),
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size(0, 56),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            'SAVE CHANGES',
+                            style: GoogleFonts.manrope(fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStep0() {
+    final stages = [
+      _StageItem(
+        stage: MenopauseStage.irregular,
+        title: 'Irregular periods',
+        subtitle: 'My periods have become irregular (Perimenopause)',
+        icon: Icons.autorenew,
+      ),
+      _StageItem(
+        stage: MenopauseStage.noPeriod12Months,
+        title: 'No period for 12+ months',
+        subtitle: 'The clinical marker of menopause transition',
+        icon: Icons.pause_circle_outline,
+      ),
+      _StageItem(
+        stage: MenopauseStage.postmenopause,
+        title: 'Postmenopause',
+        subtitle: 'Long-term physiological stabilization achieved',
+        icon: Icons.check_circle_outline,
+      ),
+      _StageItem(
+        stage: MenopauseStage.surgical,
+        title: 'Surgical menopause',
+        subtitle: 'Non-linear transition due to surgical intervention',
+        icon: Icons.medical_services_outlined,
+      ),
+      _StageItem(
+        stage: MenopauseStage.pcos,
+        title: 'PCOS & Hormonal Condition',
+        subtitle: 'Special PCOS or other complex hormonal condition',
+        icon: Icons.hub_outlined,
+      ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Select your current stage',
+          style: GoogleFonts.manrope(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF1D1B1A).withOpacity(0.8),
+          ),
+        ),
+        const SizedBox(height: 16),
+        ...stages.map((item) {
+          final isSelected = _selectedStage == item.stage;
+          return ProfileRadioCard(
+            title: item.title,
+            subtitle: item.subtitle,
+            isSelected: isSelected,
+            onTap: () => setState(() => _selectedStage = item.stage),
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildStep1() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildQuestionsForStage(_selectedStage!),
+        const SizedBox(height: 32),
+        const Divider(color: Color(0xFFF2EDE9)),
+        const SizedBox(height: 24),
+        Text(
+          'Confirm your Age',
+          style: GoogleFonts.manrope(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF1D1B1A),
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _ageController,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            hintText: 'e.g. 51',
+            hintStyle: TextStyle(color: const Color(0xFF4D453F).withOpacity(0.4)),
+            filled: true,
+            fillColor: const Color(0xFFF2EDE9),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          ),
+        ),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+
+  Widget _buildQuestionsForStage(MenopauseStage stage) {
+    switch (stage) {
+      case MenopauseStage.irregular:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'How long have your periods been irregular?',
+              style: GoogleFonts.manrope(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF1D1B1A),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ProfileRadioCard(
+              title: 'Less than 6 months',
+              isSelected: _q1Value == 'less_than_6',
+              onTap: () => setState(() => _q1Value = 'less_than_6'),
+            ),
+            ProfileRadioCard(
+              title: '6 months to 1 year',
+              isSelected: _q1Value == '6_to_12',
+              onTap: () => setState(() => _q1Value = '6_to_12'),
+            ),
+            ProfileRadioCard(
+              title: 'Over 1 year',
+              isSelected: _q1Value == 'over_1_year',
+              onTap: () => setState(() => _q1Value = 'over_1_year'),
+            ),
+            ProfileRadioCard(
+              title: "I'm not sure",
+              isSelected: _q1Value == 'unsure',
+              onTap: () => setState(() => _q1Value = 'unsure'),
+            ),
+          ],
+        );
+      case MenopauseStage.noPeriod12Months:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'How long ago was your last period?',
+              style: GoogleFonts.manrope(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF1D1B1A),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ProfileRadioCard(
+              title: 'Around 1 year ago',
+              isSelected: _q1Value == '1_year',
+              onTap: () => setState(() => _q1Value = '1_year'),
+            ),
+            ProfileRadioCard(
+              title: '1-2 years ago',
+              isSelected: _q1Value == '1_2_years',
+              onTap: () => setState(() => _q1Value = '1_2_years'),
+            ),
+            ProfileRadioCard(
+              title: '2-5 years ago',
+              isSelected: _q1Value == '2_5_years',
+              onTap: () => setState(() => _q1Value = '2_5_years'),
+            ),
+            ProfileRadioCard(
+              title: 'More than 5 years ago',
+              isSelected: _q1Value == 'over_5_years',
+              onTap: () => setState(() => _q1Value = 'over_5_years'),
+            ),
+          ],
+        );
+      case MenopauseStage.postmenopause:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'How long have you been in postmenopause?',
+              style: GoogleFonts.manrope(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF1D1B1A),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ProfileRadioCard(
+              title: 'Less than 2 years',
+              isSelected: _q1Value == 'less_2',
+              onTap: () => setState(() => _q1Value = 'less_2'),
+            ),
+            ProfileRadioCard(
+              title: '2-5 years',
+              isSelected: _q1Value == '2_5',
+              onTap: () => setState(() => _q1Value = '2_5'),
+            ),
+            ProfileRadioCard(
+              title: 'More than 5 years',
+              isSelected: _q1Value == 'over_5',
+              onTap: () => setState(() => _q1Value = 'over_5'),
+            ),
+            ProfileRadioCard(
+              title: "I'm not sure",
+              isSelected: _q1Value == 'unsure',
+              onTap: () => setState(() => _q1Value = 'unsure'),
+            ),
+          ],
+        );
+      case MenopauseStage.surgical:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'When did you have surgery?',
+              style: GoogleFonts.manrope(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF1D1B1A),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ProfileRadioCard(
+              title: 'Within the last 6 months',
+              isSelected: _q1Value == 'less_6m',
+              onTap: () => setState(() => _q1Value = 'less_6m'),
+            ),
+            ProfileRadioCard(
+              title: '6 months to 2 years ago',
+              isSelected: _q1Value == '6m_2y',
+              onTap: () => setState(() => _q1Value = '6m_2y'),
+            ),
+            ProfileRadioCard(
+              title: 'More than 2 years ago',
+              isSelected: _q1Value == 'over_2y',
+              onTap: () => setState(() => _q1Value = 'over_2y'),
+            ),
+          ],
+        );
+      case MenopauseStage.pcos:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'How long have you had this condition?',
+              style: GoogleFonts.manrope(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF1D1B1A),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ProfileRadioCard(
+              title: 'Recently diagnosed',
+              isSelected: _q1Value == 'recent',
+              onTap: () => setState(() => _q1Value = 'recent'),
+            ),
+            ProfileRadioCard(
+              title: '1-5 years',
+              isSelected: _q1Value == '1_5y',
+              onTap: () => setState(() => _q1Value = '1_5y'),
+            ),
+            ProfileRadioCard(
+              title: 'More than 5 years',
+              isSelected: _q1Value == 'over_5y',
+              onTap: () => setState(() => _q1Value = 'over_5y'),
+            ),
+          ],
+        );
+    }
+  }
+}
+
+class _StageItem {
+  final MenopauseStage stage;
+  final String title;
+  final String subtitle;
+  final IconData icon;
+
+  _StageItem({
+    required this.stage,
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+  });
 }

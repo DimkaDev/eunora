@@ -25,6 +25,26 @@ class Symptom {
     );
   }
 
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'iconName': iconName,
+      'category': category,
+      'isCustom': isCustom,
+    };
+  }
+
+  factory Symptom.fromMap(Map<String, dynamic> map) {
+    return Symptom(
+      id: map['id'] as String? ?? '',
+      name: map['name'] as String? ?? '',
+      iconName: map['iconName'] as String? ?? '',
+      category: map['category'] as String?,
+      isCustom: map['isCustom'] as bool? ?? false,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -38,20 +58,48 @@ class LoggedSymptom {
   final String id;
   final Symptom symptom;
   final int? intensity; // 0-10, nullable if not yet set
+  final String? severity; // 'Mild', 'Moderate', 'Severe'
+  final int? durationMinutes; // minutes
 
   LoggedSymptom({
     String? id,
     required this.symptom,
     this.intensity,
+    this.severity,
+    this.durationMinutes,
   }) : id = id ?? const Uuid().v4();
 
   LoggedSymptom copyWith({
     int? intensity,
+    String? severity,
+    int? durationMinutes,
   }) {
     return LoggedSymptom(
       id: id,
       symptom: symptom,
       intensity: intensity ?? this.intensity,
+      severity: severity ?? this.severity,
+      durationMinutes: durationMinutes ?? this.durationMinutes,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'symptom': symptom.toMap(),
+      'intensity': intensity,
+      'severity': severity,
+      'durationMinutes': durationMinutes,
+    };
+  }
+
+  factory LoggedSymptom.fromMap(Map<String, dynamic> map) {
+    return LoggedSymptom(
+      id: map['id'] as String?,
+      symptom: Symptom.fromMap(Map<String, dynamic>.from(map['symptom'] as Map)),
+      intensity: map['intensity'] as int?,
+      severity: map['severity'] as String?,
+      durationMinutes: map['durationMinutes'] as int?,
     );
   }
 
@@ -65,3 +113,4 @@ class LoggedSymptom {
   @override
   int get hashCode => id.hashCode;
 }
+

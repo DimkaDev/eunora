@@ -12,6 +12,7 @@ class SignUpState {
   final String? generalError;
   final bool showErrors;
   final bool isLoading;
+  final bool isGoogleLoading;
 
   SignUpState({
     this.email = '',
@@ -23,6 +24,7 @@ class SignUpState {
     this.generalError,
     this.showErrors = false,
     this.isLoading = false,
+    this.isGoogleLoading = false,
   });
 
   bool get isEmailValid => RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
@@ -44,6 +46,7 @@ class SignUpState {
     String? generalError,
     bool? showErrors,
     bool? isLoading,
+    bool? isGoogleLoading,
   }) {
     return SignUpState(
       email: email ?? this.email,
@@ -55,6 +58,7 @@ class SignUpState {
       generalError: generalError,
       showErrors: showErrors ?? this.showErrors,
       isLoading: isLoading ?? this.isLoading,
+      isGoogleLoading: isGoogleLoading ?? this.isGoogleLoading,
     );
   }
 }
@@ -106,6 +110,10 @@ class SignUpController extends StateNotifier<SignUpState> {
 
   void setLoading(bool loading) {
     state = state.copyWith(isLoading: loading);
+  }
+
+  void setGoogleLoading(bool loading) {
+    state = state.copyWith(isGoogleLoading: loading);
   }
 
   void setGeneralError(String? error) {
