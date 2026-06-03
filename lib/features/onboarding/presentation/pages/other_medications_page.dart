@@ -24,9 +24,10 @@ class OtherMedicationsPage extends ConsumerWidget {
           SafeArea(
             child: Column(
               children: [
-                const OnboardingHeader(
+                OnboardingHeader(
                   currentStep: 4,
                   subtitle: 'OTHER MEDICATIONS',
+                  onSkip: () => _showInfoDialog(context),
                 ),
                 Expanded(
                   child: CustomScrollView(
@@ -468,6 +469,135 @@ class OtherMedicationsPage extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showInfoDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFFFEF8F6),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Supplements & Medications',
+                  style: GoogleFonts.notoSerif(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1D1B1A),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Color(0xFF9B8B7E)),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Vitamins, minerals, and herbal supplements play a significant role in your overall wellbeing during menopause.',
+              style: GoogleFonts.manrope(
+                fontSize: 14,
+                color: const Color(0xFF4D453F),
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 24),
+            _buildInfoRow(
+              icon: Icons.spa,
+              title: 'Wellness Supplements',
+              desc: 'Calcium, Vitamin D, and Magnesium are often used to support bone health and muscle relaxation.',
+            ),
+            const SizedBox(height: 16),
+            _buildInfoRow(
+              icon: Icons.loop,
+              title: 'Potential Interactions',
+              desc: 'Some over-the-counter supplements can interact with hormonal treatments. Keeping a unified log helps ensure your safety.',
+            ),
+            const SizedBox(height: 16),
+            _buildInfoRow(
+              icon: Icons.calendar_today,
+              title: 'Daily Reminders',
+              desc: 'Setting reminders ensures consistent intake, maximizing the effectiveness of your wellness regimen.',
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  'Got it',
+                  style: GoogleFonts.manrope(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow({required IconData icon, required String title, required String desc}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppTheme.primary.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: AppTheme.primary, size: 20),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: GoogleFonts.manrope(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: const Color(0xFF1D1B1A),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                desc,
+                style: GoogleFonts.manrope(
+                  fontSize: 12,
+                  color: const Color(0xFF4D453F),
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

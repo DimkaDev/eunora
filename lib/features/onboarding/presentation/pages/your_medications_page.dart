@@ -7,6 +7,7 @@ import '../widgets/onboarding_header.dart';
 import '../widgets/medication_list_item.dart';
 import '../providers/medications_provider.dart';
 import '../../domain/models/medication.dart';
+import '../widgets/add_medication_modal.dart';
 
 class YourMedicationsPage extends ConsumerWidget {
   const YourMedicationsPage({super.key});
@@ -33,6 +34,7 @@ class YourMedicationsPage extends ConsumerWidget {
                       context.go('/menopause-stage');
                     }
                   },
+                  onSkip: () => _showInfoDialog(context),
                 ),
                 if (state.error != null) _buildErrorBanner(context, ref, state.error!),
                 Expanded(
@@ -193,8 +195,12 @@ class YourMedicationsPage extends ConsumerWidget {
           medication: medication,
           onDelete: () => notifier.removeMedication(medication.id),
           onEdit: () {
-            // TODO: Open edit page
-            context.push('/add-medication', extra: medication);
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (context) => AddMedicationModal(initialData: medication),
+            );
           },
         );
       },
@@ -203,7 +209,14 @@ class YourMedicationsPage extends ConsumerWidget {
 
   Widget _buildAddButton(BuildContext context) {
     return InkWell(
-      onTap: () => context.push('/add-medication'),
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => const AddMedicationModal(),
+        );
+      },
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 20),
@@ -275,8 +288,12 @@ class YourMedicationsPage extends ConsumerWidget {
   Widget _buildQuickAddChip(BuildContext context, String name, Medications notifier) {
     return InkWell(
       onTap: () {
-        // Open add page with prefilled name
-        context.push('/add-medication', extra: name);
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => AddMedicationModal(initialData: name),
+        );
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -388,6 +405,135 @@ class YourMedicationsPage extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showInfoDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFFFEF8F6),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'HRT & Medications Info',
+                  style: GoogleFonts.notoSerif(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1D1B1A),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Color(0xFF9B8B7E)),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Tracking your medications and hormone replacement therapy (HRT) is crucial for identifying patterns and managing your menopause symptoms safely.',
+              style: GoogleFonts.manrope(
+                fontSize: 14,
+                color: const Color(0xFF4D453F),
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 24),
+            _buildInfoRow(
+              icon: Icons.science,
+              title: 'Hormone Replacement Therapy (HRT)',
+              desc: 'Includes estrogen (patches, gels, pills), progesterone, or combination therapy prescribed to relieve symptoms.',
+            ),
+            const SizedBox(height: 16),
+            _buildInfoRow(
+              icon: Icons.health_and_safety,
+              title: 'Why We Track',
+              desc: 'Different types, doses, and delivery methods have varied absorption rates and impacts on your body.',
+            ),
+            const SizedBox(height: 16),
+            _buildInfoRow(
+              icon: Icons.warning_amber_rounded,
+              title: 'Safety First',
+              desc: 'We always recommend reviewing your medication routine and symptoms with your healthcare provider.',
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  'Got it',
+                  style: GoogleFonts.manrope(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow({required IconData icon, required String title, required String desc}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppTheme.primary.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: AppTheme.primary, size: 20),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: GoogleFonts.manrope(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: const Color(0xFF1D1B1A),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                desc,
+                style: GoogleFonts.manrope(
+                  fontSize: 12,
+                  color: const Color(0xFF4D453F),
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

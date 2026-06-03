@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:eunora/core/theme/app_theme.dart';
 import '../widgets/onboarding_header.dart';
 
 class LifestyleHabitsPage extends ConsumerStatefulWidget {
@@ -27,9 +28,10 @@ class _LifestyleHabitsPageState extends ConsumerState<LifestyleHabitsPage> {
           SafeArea(
             child: Column(
               children: [
-                const OnboardingHeader(
+                OnboardingHeader(
                   currentStep: 8,
                   subtitle: 'LIFESTYLE',
+                  onSkip: () => _showInfoDialog(context),
                 ),
                 Expanded(
                   child: SingleChildScrollView(
@@ -389,6 +391,135 @@ class _LifestyleHabitsPageState extends ConsumerState<LifestyleHabitsPage> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showInfoDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFFFEF8F6),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Lifestyle Habits Info',
+                  style: GoogleFonts.notoSerif(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1D1B1A),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Color(0xFF9B8B7E)),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Daily routines have a profound impact on how you experience and manage menopause symptoms.',
+              style: GoogleFonts.manrope(
+                fontSize: 14,
+                color: const Color(0xFF4D453F),
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 24),
+            _buildInfoRow(
+              icon: Icons.restaurant,
+              title: 'Nutrition & Diet',
+              desc: 'Balanced meals rich in calcium and low in triggers (like sugar or alcohol) help stabilize energy and mood.',
+            ),
+            const SizedBox(height: 16),
+            _buildInfoRow(
+              icon: Icons.bedtime,
+              title: 'Sleep Hygiene',
+              desc: 'Quality sleep supports hormone balance, cognitive clarity, and symptom recovery.',
+            ),
+            const SizedBox(height: 16),
+            _buildInfoRow(
+              icon: Icons.fitness_center,
+              title: 'Physical Activity',
+              desc: 'Strength training and cardio help maintain bone density, improve sleep, and regulate mood.',
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  'Got it',
+                  style: GoogleFonts.manrope(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow({required IconData icon, required String title, required String desc}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppTheme.primary.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: AppTheme.primary, size: 20),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: GoogleFonts.manrope(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: const Color(0xFF1D1B1A),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                desc,
+                style: GoogleFonts.manrope(
+                  fontSize: 12,
+                  color: const Color(0xFF4D453F),
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

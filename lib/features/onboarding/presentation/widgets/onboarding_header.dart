@@ -10,6 +10,7 @@ class OnboardingHeader extends StatelessWidget {
   final VoidCallback? onBack;
   final VoidCallback? onSkip;
   final bool showStepPill;
+  final bool showBackButton;
 
   const OnboardingHeader({
     super.key,
@@ -20,6 +21,7 @@ class OnboardingHeader extends StatelessWidget {
     this.onBack,
     this.onSkip,
     this.showStepPill = false,
+    this.showBackButton = true,
   });
 
   @override
@@ -34,10 +36,13 @@ class OnboardingHeader extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Color(0xFF9B8B7E), size: 24),
-                    onPressed: onBack ?? () => context.pop(),
-                  ),
+                  if (showBackButton)
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Color(0xFF9B8B7E), size: 24),
+                      onPressed: onBack ?? () => context.pop(),
+                    )
+                  else
+                    const SizedBox(width: 48),
                   Expanded(
                     child: Column(
                       children: [

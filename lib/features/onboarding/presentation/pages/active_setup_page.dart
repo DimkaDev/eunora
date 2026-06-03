@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../widgets/onboarding_header.dart';
 import 'package:eunora/core/services/firestore_service.dart';
 import 'package:eunora/features/onboarding/domain/models/user_profile.dart';
@@ -32,7 +34,10 @@ class _ActiveSetupPageState extends ConsumerState<ActiveSetupPage> {
           SafeArea(
             child: Column(
               children: [
-                const OnboardingHeader(currentStep: 9),
+                OnboardingHeader(
+                  currentStep: 9,
+                  onSkip: () => _showInfoDialog(context),
+                ),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
@@ -450,5 +455,134 @@ class _ActiveSetupPageState extends ConsumerState<ActiveSetupPage> {
     final totalMinutes = time.hour * 60 + time.minute + minutes;
     final normalizedMinutes = (totalMinutes + 24 * 60) % (24 * 60);
     return TimeOfDay(hour: normalizedMinutes ~/ 60, minute: normalizedMinutes % 60);
+  }
+
+  void _showInfoDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFFFEF8F6),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Daily Tracking setup',
+                  style: GoogleFonts.notoSerif(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1D1B1A),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Color(0xFF9B8B7E)),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'You are setting up notification schedules to consistently track and improve your wellness journey.',
+              style: GoogleFonts.manrope(
+                fontSize: 14,
+                color: const Color(0xFF4D453F),
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 24),
+            _buildInfoRow(
+              icon: Icons.notifications,
+              title: 'Gentle Reminders',
+              desc: 'Reminders help you build a daily check-in habit without feeling overwhelmed.',
+            ),
+            const SizedBox(height: 16),
+            _buildInfoRow(
+              icon: Icons.query_stats,
+              title: 'Data-Driven Insights',
+              desc: 'Consistent logs allow Eunora\'s AI to deliver high-quality, personalized health reports.',
+            ),
+            const SizedBox(height: 16),
+            _buildInfoRow(
+              icon: Icons.done_all,
+              title: 'Almost Finished',
+              desc: 'Setting up these preferences completes your onboarding health profile.',
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  'Got it',
+                  style: GoogleFonts.manrope(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow({required IconData icon, required String title, required String desc}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppTheme.primary.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: AppTheme.primary, size: 20),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: GoogleFonts.manrope(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: const Color(0xFF1D1B1A),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                desc,
+                style: GoogleFonts.manrope(
+                  fontSize: 12,
+                  color: const Color(0xFF4D453F),
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }

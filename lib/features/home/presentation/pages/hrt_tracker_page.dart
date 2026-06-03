@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:go_router/go_router.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
 import 'package:eunora/features/onboarding/domain/models/medication.dart';
 import 'package:eunora/features/home/presentation/widgets/calendar_hrt_edit_sheet.dart';
+import 'package:eunora/features/onboarding/presentation/widgets/add_medication_modal.dart';
 
 class HrtTrackerPage extends ConsumerStatefulWidget {
   const HrtTrackerPage({super.key});
@@ -317,7 +317,14 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
               
               // Manual configuration option
               TextButton(
-                onPressed: () => context.push('/add-medication'),
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => const AddMedicationModal(),
+                  );
+                },
                 child: Text(
                   'Configure manually',
                   style: GoogleFonts.manrope(

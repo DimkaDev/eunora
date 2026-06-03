@@ -22,7 +22,7 @@ import 'package:eunora/features/onboarding/presentation/pages/postmenopause_prof
 import 'package:eunora/features/onboarding/presentation/pages/surgical_menopause_profile_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/pcos_profile_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/your_medications_page.dart';
-import 'package:eunora/features/onboarding/presentation/pages/add_medication_page.dart';
+
 import 'package:eunora/features/onboarding/presentation/pages/frequent_symptoms_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/symptom_library_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/other_medications_page.dart';
@@ -214,14 +214,7 @@ final GoRouter appRouter = GoRouter(
         child: const YourMedicationsPage(),
       ),
     ),
-    GoRoute(
-      path: '/add-medication',
-      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
-        context: context,
-        state: state,
-        child: AddMedicationPage(initialData: state.extra),
-      ),
-    ),
+
     GoRoute(
       path: '/symptom-logging',
       pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(

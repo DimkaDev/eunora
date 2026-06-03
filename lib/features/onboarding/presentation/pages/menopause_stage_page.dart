@@ -259,6 +259,7 @@ class _MenopauseStagePageState extends ConsumerState<MenopauseStagePage> {
       currentStep: 0,
       subtitle: 'MENOPAUSE STAGE',
       onSkip: _showInfoDialog,
+      showBackButton: false,
     );
   }
 
