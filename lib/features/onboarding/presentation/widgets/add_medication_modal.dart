@@ -27,12 +27,13 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
   bool _showDropdown = false;
   final List<String> _commonHRT = ['Estradiol', 'Estradot', 'Estrogen Gel', 'Utrogestan', 'Femoston'];
   List<String> _filteredMeds = [];
+  bool _isCustomDose = false;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController();
-    _doseController = TextEditingController(text: '50');
+    _doseController = TextEditingController(text: '1');
     _notesController = TextEditingController();
 
     if (widget.initialData is Medication) {
@@ -43,6 +44,12 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
       _selectedType = med.type;
       _selectedUnit = med.unit;
       _selectedFrequency = med.frequency;
+
+      final presets = _getDosePresets(med.type);
+      final formattedDose = med.dose.toStringAsFixed(med.dose == med.dose.toInt() ? 0 : 2);
+      if (!presets.contains(formattedDose)) {
+        _isCustomDose = true;
+      }
     } else if (widget.initialData is String) {
       _nameController.text = widget.initialData as String;
     }
@@ -75,6 +82,19 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
     super.dispose();
   }
 
+  List<String> _getDosePresets(MedicationType type) {
+    switch (type) {
+      case MedicationType.pill:
+        return ['0.5', '1', '2', '5'];
+      case MedicationType.patch:
+        return ['25', '50', '75', '100'];
+      case MedicationType.gel:
+        return ['1', '2', '3', '4'];
+      default:
+        return ['1', '2', '5', '10'];
+    }
+  }
+
   void _save() {
     if (_formKey.currentState!.validate()) {
       final medication = Medication(
@@ -99,6 +119,8 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
 
   @override
   Widget build(BuildContext context) {
+    final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.9,
       decoration: const BoxDecoration(
@@ -165,36 +187,47 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
                     _buildSectionHeader('How do you take it?'),
                     const SizedBox(height: 12),
                     _buildTypeSelection(),
+                    
+                    if (_selectedType == MedicationType.other) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF67594E).withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFF67594E).withOpacity(0.2)),
+                        ),
+                        child: const Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.info_outline, color: Color(0xFF67594E), size: 20),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Other administration methods could include subcutaneous injections, nasal sprays, vaginal creams, rings, or intrauterine devices (IUDs). Please specify details in the Notes section below.',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF4D453F),
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 24),
                     
-                    // Dose & Frequency
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 1,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildSectionHeader('Dose'),
-                              const SizedBox(height: 8),
-                              _buildDoseInput(),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          flex: 1,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildSectionHeader('Frequency'),
-                              const SizedBox(height: 8),
-                              _buildFrequencyDropdown(),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                    // Dosage
+                    _buildSectionHeader('Dose'),
+                    const SizedBox(height: 8),
+                    _buildDoseSelector(),
+                    const SizedBox(height: 24),
+
+                    // Frequency
+                    _buildSectionHeader('Frequency'),
+                    const SizedBox(height: 8),
+                    _buildFrequencySelector(),
                     const SizedBox(height: 24),
                     
                     // Notes Input
@@ -214,50 +247,62 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
                     ),
                     const SizedBox(height: 8),
                     _buildNotesInput(),
-                    const SizedBox(height: 120), // Bottom padding
+                    const SizedBox(height: 32),
+                    
+                    if (isKeyboardOpen) ...[
+                      _buildFooterButtonsContent(),
+                      const SizedBox(height: 24),
+                    ] else ...[
+                      const SizedBox(height: 120), // Bottom padding
+                    ],
                   ],
                 ),
               ),
             ),
           ),
 
-          // Footer Actions
-          Container(
-            padding: EdgeInsets.fromLTRB(24, 16, 24, 40 + MediaQuery.of(context).viewInsets.bottom),
-            decoration: const BoxDecoration(
-              color: Color(0xFFFEF8F6),
-              border: Border(top: BorderSide(color: Color(0xFFF2EDE9))),
+          // Sticky Footer Actions (hidden if keyboard is open to prevent occlusion)
+          if (!isKeyboardOpen)
+            Container(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
+              decoration: const BoxDecoration(
+                color: Color(0xFFFEF8F6),
+                border: Border(top: BorderSide(color: Color(0xFFF2EDE9))),
+              ),
+              child: _buildFooterButtonsContent(),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ElevatedButton(
-                  onPressed: _save,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF817266),
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(double.infinity, 56),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    widget.initialData is Medication ? 'SAVE CHANGES' : 'CONFIRM & ADD',
-                    style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextButton(
-                  onPressed: () => context.pop(),
-                  child: const Text(
-                    'CANCEL',
-                    style: TextStyle(color: Color(0xFF67594E), fontWeight: FontWeight.bold, letterSpacing: 1.5),
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
+    );
+  }
+
+  Widget _buildFooterButtonsContent() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ElevatedButton(
+          onPressed: _save,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF817266),
+            foregroundColor: Colors.white,
+            minimumSize: const Size(double.infinity, 56),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            elevation: 0,
+          ),
+          child: Text(
+            widget.initialData is Medication ? 'SAVE CHANGES' : 'CONFIRM & ADD',
+            style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5),
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextButton(
+          onPressed: () => context.pop(),
+          child: const Text(
+            'CANCEL',
+            style: TextStyle(color: Color(0xFF67594E), fontWeight: FontWeight.bold, letterSpacing: 1.5),
+          ),
+        ),
+      ],
     );
   }
 
@@ -358,14 +403,33 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
   Widget _buildTypeTile(MedicationType type) {
     final isSelected = _selectedType == type;
     return InkWell(
-      onTap: () => setState(() => _selectedType = type),
+      onTap: () {
+        setState(() {
+          _selectedType = type;
+          if (type == MedicationType.gel) {
+            _selectedUnit = 'pumps';
+            _doseController.text = '1';
+          } else if (type == MedicationType.patch) {
+            _selectedUnit = 'mcg';
+            _doseController.text = '50';
+          } else if (type == MedicationType.pill) {
+            _selectedUnit = 'mg';
+            _doseController.text = '1';
+          } else {
+            _selectedUnit = 'mg';
+            _doseController.text = '1';
+          }
+          _isCustomDose = false;
+        });
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primary.withOpacity(0.05) : const Color(0xFFFAF9F6),
+          color: isSelected ? AppTheme.primary.withOpacity(0.05) : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppTheme.primary : const Color(0xFFF5F5F4),
+            color: isSelected ? AppTheme.primary : const Color(0xFFD0C4BC),
+            width: isSelected ? 2 : 1,
           ),
         ),
         child: Row(
@@ -381,7 +445,7 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                color: isSelected ? AppTheme.primary : const Color(0xFF44403C),
+                color: isSelected ? AppTheme.primary : const Color(0xFF4D453F),
               ),
             ),
           ],
@@ -399,7 +463,119 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
     }
   }
 
-  Widget _buildDoseInput() {
+  Widget _buildDoseSelector() {
+    final presets = _getDosePresets(_selectedType);
+    final currentDoseStr = _doseController.text;
+    final showUnitSelector = _selectedType == MedicationType.other;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            ...presets.map((preset) {
+              final isSelected = !_isCustomDose && currentDoseStr == preset;
+              return ChoiceChip(
+                label: Text('$preset $_selectedUnit'),
+                selected: isSelected,
+                onSelected: (selected) {
+                  if (selected) {
+                    setState(() {
+                      _isCustomDose = false;
+                      _doseController.text = preset;
+                    });
+                  }
+                },
+                selectedColor: const Color(0xFF67594E),
+                backgroundColor: Colors.white,
+                labelStyle: TextStyle(
+                  color: isSelected ? Colors.white : const Color(0xFF4D453F),
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: isSelected ? const Color(0xFF67594E) : const Color(0xFFD0C4BC),
+                  ),
+                ),
+                showCheckmark: false,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              );
+            }),
+            ChoiceChip(
+              label: const Text('Custom'),
+              selected: _isCustomDose,
+              onSelected: (selected) {
+                if (selected) {
+                  setState(() {
+                    _isCustomDose = true;
+                  });
+                }
+              },
+              selectedColor: const Color(0xFF67594E),
+              backgroundColor: Colors.white,
+              labelStyle: TextStyle(
+                color: _isCustomDose ? Colors.white : const Color(0xFF4D453F),
+                fontSize: 13,
+                fontWeight: _isCustomDose ? FontWeight.bold : FontWeight.w500,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: _isCustomDose ? const Color(0xFF67594E) : const Color(0xFFD0C4BC),
+                ),
+              ),
+              showCheckmark: false,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (_isCustomDose) ...[
+          _buildDoseInputRow(showUnitSelector: showUnitSelector),
+        ] else ...[
+          if (showUnitSelector) _buildUnitSelectorOnly(),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildUnitSelectorOnly() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF2EDE9),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('Unit: ', style: TextStyle(fontSize: 13, color: Color(0xFF4D453F))),
+          DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _selectedUnit,
+              onChanged: (val) {
+                if (val != null) {
+                  setState(() => _selectedUnit = val);
+                }
+              },
+              items: ['mg', 'mcg', 'pumps', 'applicator']
+                  .map((u) => DropdownMenuItem(
+                        value: u,
+                        child: Text(u, style: const TextStyle(fontSize: 13)),
+                      ))
+                  .toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDoseInputRow({required bool showUnitSelector}) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF2EDE9),
@@ -416,49 +592,78 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
               decoration: const InputDecoration(
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                hintText: 'Enter dose',
               ),
               validator: (value) => value == null || value.isEmpty ? '?' : null,
             ),
           ),
-          Container(
-            width: 1,
-            height: 24,
-            color: const Color(0xFFD6D3D1),
-          ),
-          DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: _selectedUnit,
-              onChanged: (val) => setState(() => _selectedUnit = val!),
-              items: ['mg', 'mcg', 'pumps', 'applicator']
-                  .map((u) => DropdownMenuItem(value: u, child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Text(u, style: const TextStyle(fontSize: 13)),
-                  )))
-                  .toList(),
+          if (showUnitSelector) ...[
+            Container(
+              width: 1,
+              height: 24,
+              color: const Color(0xFFD6D3D1),
             ),
-          ),
+            DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _selectedUnit,
+                onChanged: (val) {
+                  if (val != null) {
+                    setState(() => _selectedUnit = val);
+                  }
+                },
+                items: ['mg', 'mcg', 'pumps', 'applicator']
+                    .map((u) => DropdownMenuItem(value: u, child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(u, style: const TextStyle(fontSize: 13)),
+                    )))
+                    .toList(),
+              ),
+            ),
+          ] else
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                _selectedUnit,
+                style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF4D453F)),
+              ),
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildFrequencyDropdown() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF2EDE9),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          isExpanded: true,
-          value: _selectedFrequency,
-          onChanged: (val) => setState(() => _selectedFrequency = val!),
-          items: ['Daily', 'Twice weekly', 'Weekly', 'As needed']
-              .map((f) => DropdownMenuItem(value: f, child: Text(f, style: const TextStyle(fontSize: 13))))
-              .toList(),
-        ),
-      ),
+  Widget _buildFrequencySelector() {
+    final frequencies = ['Daily', 'Twice weekly', 'Weekly', 'As needed'];
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: frequencies.map((freq) {
+        final isSelected = _selectedFrequency == freq;
+        return ChoiceChip(
+          label: Text(freq),
+          selected: isSelected,
+          onSelected: (selected) {
+            if (selected) {
+              setState(() => _selectedFrequency = freq);
+            }
+          },
+          selectedColor: const Color(0xFF67594E),
+          backgroundColor: Colors.white,
+          labelStyle: TextStyle(
+            color: isSelected ? Colors.white : const Color(0xFF4D453F),
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+              color: isSelected ? const Color(0xFF67594E) : const Color(0xFFD0C4BC),
+            ),
+          ),
+          showCheckmark: false,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        );
+      }).toList(),
     );
   }
 

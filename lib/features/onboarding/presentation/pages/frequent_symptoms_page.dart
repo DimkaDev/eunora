@@ -139,41 +139,8 @@ class FrequentSymptomsPage extends ConsumerWidget {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    Color iconColor;
-    Color iconBgColor;
-
-    // Icon color mapping logic
-    switch (symptom.name.toLowerCase()) {
-      case 'hot flashes':
-        iconColor = const Color(0xFFD4A5A5);
-        break;
-      case 'mood':
-        iconColor = const Color(0xFFA7C5D8);
-        break;
-      case 'sleep':
-        iconColor = const Color(0xFFB8A7C5);
-        break;
-      case 'dryness':
-        iconColor = const Color(0xFF8EB8B5);
-        break;
-      case 'joint pain':
-        iconColor = const Color(0xFFA9B388);
-        break;
-      default:
-        if (symptom.category == 'Emotional & Cognitive') {
-          iconColor = const Color(0xFFA7C5D8);
-        } else if (symptom.category == 'Physical Wellbeing') {
-          iconColor = const Color(0xFFA9B388);
-        } else if (symptom.category == 'Vasomotor Symptoms') {
-          iconColor = const Color(0xFFD4A5A5);
-        } else if (symptom.category == 'Sleep & Energy') {
-          iconColor = const Color(0xFFB8A7C5);
-        } else {
-          iconColor = const Color(0xFF9B8B7E);
-        }
-    }
-
-    iconBgColor = iconColor.withOpacity(0.1);
+    final Color iconColor = symptom.getIconColor();
+    final Color iconBgColor = iconColor.withOpacity(0.1);
 
     return GestureDetector(
       onTap: onTap,
@@ -205,7 +172,7 @@ class FrequentSymptomsPage extends ConsumerWidget {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                _getIconData(symptom.iconName),
+                symptom.getIconData(),
                 color: iconColor,
                 size: 36,
               ),
@@ -338,49 +305,6 @@ class FrequentSymptomsPage extends ConsumerWidget {
         ],
       ),
     );
-  }
-
-  IconData _getIconData(String name) {
-    switch (name) {
-      case 'thermostat':
-        return Icons.thermostat;
-      case 'mood':
-        return Icons.mood;
-      case 'dark_mode':
-        return Icons.dark_mode;
-      case 'opacity':
-        return Icons.opacity;
-      case 'accessibility_new':
-        return Icons.accessibility_new;
-      case 'bedtime':
-        return Icons.bedtime;
-      case 'ac_unit':
-        return Icons.ac_unit;
-      case 'psychology':
-        return Icons.psychology;
-      case 'sentiment_dissatisfied':
-        return Icons.sentiment_dissatisfied;
-      case 'reorder':
-        return Icons.reorder;
-      case 'cloud':
-        return Icons.cloud;
-      case 'settings_backup_restore':
-        return Icons.settings_backup_restore;
-      case 'battery_low':
-        return Icons.battery_0_bar;
-      case 'favorite':
-        return Icons.favorite;
-      case 'dry_cleaning':
-        return Icons.dry_cleaning;
-      case 'bed':
-        return Icons.bed;
-      case 'alarm_on':
-        return Icons.alarm_on;
-      case 'bolt':
-        return Icons.bolt;
-      default:
-        return Icons.medical_services;
-    }
   }
 
   void _showInfoDialog(BuildContext context) {

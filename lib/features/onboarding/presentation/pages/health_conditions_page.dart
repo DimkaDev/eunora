@@ -201,44 +201,86 @@ class _HealthConditionsPageState extends ConsumerState<HealthConditionsPage> {
 
   Widget _buildConditionCard(String id, String title, String subtitle, IconData icon) {
     final isSelected = _selectedConditions.contains(id);
+    Color iconColor;
+    switch (id) {
+      case 'heart_bp':
+      case 'blood_clots':
+      case 'breast_cancer':
+        iconColor = const Color(0xFFD4A5A5);
+        break;
+      case 'diabetes':
+      case 'autoimmune':
+        iconColor = const Color(0xFFA9B388);
+        break;
+      case 'thyroid':
+      case 'liver_disease':
+        iconColor = const Color(0xFF8EB8B5);
+        break;
+      case 'endometriosis':
+      case 'uterine_fibroids':
+        iconColor = const Color(0xFFB8A7C5);
+        break;
+      case 'migraine_aura':
+      case 'depression':
+      case 'anxiety':
+        iconColor = const Color(0xFFA7C5D8);
+        break;
+      default:
+        iconColor = const Color(0xFF9B8B7E);
+    }
+
     return Bounceable(
       onTap: () => _toggleCondition(id),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFF8F2F0) : Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          color: isSelected ? Colors.white : const Color(0xFFFFFFFF),
+          borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isSelected ? const Color(0xFF67594E) : const Color(0xFFF8F2F0),
-            width: 2,
+            color: isSelected ? const Color(0xFF9B8B7E) : Colors.transparent,
+            width: isSelected ? 2 : 0,
           ),
-          boxShadow: isSelected ? null : [const BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 1))],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(isSelected ? 0.08 : 0.03),
+              blurRadius: isSelected ? 15 : 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Stack(
           children: [
             if (isSelected)
-              const Positioned(
-                top: 8,
-                right: 8,
-                child: Icon(Icons.check_circle, color: Color(0xFF67594E), size: 16),
+              Positioned(
+                top: 10,
+                right: 10,
+                child: Icon(Icons.check_circle, color: iconColor, size: 16),
               ),
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    icon,
-                    color: isSelected ? const Color(0xFF67594E) : const Color(0xFF7F756E).withOpacity(0.5),
-                    size: 28,
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: isSelected ? iconColor.withOpacity(0.2) : iconColor.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      icon,
+                      color: iconColor,
+                      size: 24,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     title,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFF1D1B1A),
+                      color: isSelected ? const Color(0xFF1D1B1A) : const Color(0xFF9B8B7E),
                     ),
                   ),
                   if (subtitle.isNotEmpty)
@@ -246,7 +288,7 @@ class _HealthConditionsPageState extends ConsumerState<HealthConditionsPage> {
                       subtitle.toUpperCase(),
                       style: TextStyle(
                         fontSize: 9,
-                        color: const Color(0xFF4D453F).withOpacity(0.7),
+                        color: isSelected ? const Color(0xFF4D453F) : const Color(0xFF9B8B7E).withOpacity(0.7),
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -411,7 +453,7 @@ class _HealthConditionsPageState extends ConsumerState<HealthConditionsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(Icons.info_outline, color: Color(0xFF67594E), size: 20),
-          const SizedBox(width: 16),
+          SizedBox(width: 16),
           Expanded(
             child: Text(
               'These conditions don\'t disqualify you from using Eunora. They help us provide safe guidance and encourage conversation with your care provider.',

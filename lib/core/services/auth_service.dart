@@ -5,10 +5,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  Future<void>? _googleSignInInitFuture;
 
   AuthService() {
     if (!kIsWeb) {
-      GoogleSignIn.instance.initialize();
+      _googleSignInInitFuture = GoogleSignIn.instance.initialize();
+    }
+  }
+
+  Future<void> _ensureGoogleSignInInitialized() async {
+    if (_googleSignInInitFuture != null) {
+      await _googleSignInInitFuture;
     }
   }
 
@@ -41,6 +48,7 @@ class AuthService {
         GoogleAuthProvider authProvider = GoogleAuthProvider();
         return await _auth.signInWithPopup(authProvider);
       } else {
+        await _ensureGoogleSignInInitialized();
         final GoogleSignInAccount? googleUser = await GoogleSignIn.instance.authenticate();
         if (googleUser == null) return null; // Cancelled
 
@@ -67,6 +75,7 @@ class AuthService {
   Future<void> signOut() async {
     try {
       if (!kIsWeb) {
+        await _ensureGoogleSignInInitialized();
         await GoogleSignIn.instance.signOut();
       }
       await _auth.signOut();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:eunora/core/utils/animation_system.dart';
 import '../providers/symptoms_provider.dart';
 import '../../domain/models/symptom.dart';
 import '../widgets/add_custom_symptom_modal.dart';
@@ -18,13 +19,11 @@ class _SymptomLibraryPageState extends ConsumerState<SymptomLibraryPage> {
   @override
   Widget build(BuildContext context) {
     final library = ref.watch(symptomLibraryProvider);
-    final symptomsState = ref.watch(symptomsProvider);
     final notifier = ref.read(symptomsProvider.notifier);
     
     // Group symptoms by category
     final groupedSymptoms = <String, List<Symptom>>{};
     for (var symptom in library) {
-      if (symptom.category == 'Common') continue; // Skip the "Common" mapping category
       final category = symptom.category ?? 'Other';
       groupedSymptoms.putIfAbsent(category, () => []).add(symptom);
     }
@@ -51,14 +50,6 @@ class _SymptomLibraryPageState extends ConsumerState<SymptomLibraryPage> {
             color: Color(0xFF67594E),
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: Color(0xFF67594E)),
-            onPressed: () {
-              // Toggle search focus or show search bar
-            },
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 24, 16, 100),
@@ -72,6 +63,26 @@ class _SymptomLibraryPageState extends ConsumerState<SymptomLibraryPage> {
               return _buildCategorySection(context, entry.key, entry.value, notifier);
             }),
           ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          color: const Color(0xFFFEF8F6),
+          padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+          child: ElevatedButton(
+            onPressed: () => context.pop(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF67594E),
+              foregroundColor: Colors.white,
+              minimumSize: const Size(double.infinity, 56),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              elevation: 0,
+            ),
+            child: const Text(
+              'CONFIRM',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+            ),
+          ),
         ),
       ),
     );
@@ -96,6 +107,8 @@ class _SymptomLibraryPageState extends ConsumerState<SymptomLibraryPage> {
       ),
     );
   }
+
+
 
   Widget _buildAddCustomSymptomButton(BuildContext context) {
     return GestureDetector(
@@ -123,23 +136,23 @@ class _SymptomLibraryPageState extends ConsumerState<SymptomLibraryPage> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF9D675C).withOpacity(0.1), // tertiary-container / 10
+                    color: const Color(0xFF67594E).withOpacity(0.1), // primary container / 10
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.add, color: Color(0xFF814F45)), // tertiary
+                  child: const Icon(Icons.add, color: Color(0xFF67594E)), // primary
                 ),
                 const SizedBox(width: 16),
                 const Text(
-                  '+ Add your own symptom',
+                  'Add your own symptom',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF814F45),
+                    color: Color(0xFF67594E),
                     fontSize: 14,
                   ),
                 ),
               ],
             ),
-            const Icon(Icons.chevron_right, color: Color(0xFF814F45)),
+            const Icon(Icons.chevron_right, color: Color(0xFF67594E)),
           ],
         ),
       ),
@@ -176,7 +189,7 @@ class _SymptomLibraryPageState extends ConsumerState<SymptomLibraryPage> {
           crossAxisCount: 3,
           mainAxisSpacing: 12,
           crossAxisSpacing: 12,
-          childAspectRatio: 1.0,
+          childAspectRatio: 0.75,
           children: filtered.map((s) {
             final isFrequent = notifier.isFrequent(s.id);
             return _buildLibrarySymptomCard(context, s, isFrequent, () => notifier.toggleFrequent(s.id));
@@ -188,117 +201,59 @@ class _SymptomLibraryPageState extends ConsumerState<SymptomLibraryPage> {
   }
 
   Widget _buildLibrarySymptomCard(BuildContext context, Symptom symptom, bool isSelected, VoidCallback onTap) {
-    // Style variables
-    Color bgColor = const Color(0xFFFFFFFF);
-    Color borderColor = const Color(0xFFD0C4BC);
-    Color iconBgColor = const Color(0xFFE7E1DF); // surface-variant default
-    Color iconColor = const Color(0xFF4D453F); // on-surface-variant default
-    Color textColor = const Color(0xFF1D1B1A); // on-surface
-    FontWeight textWeight = FontWeight.w600;
+    final Color iconColor = symptom.getIconColor();
+    final Color iconBgColor = iconColor.withOpacity(0.1);
 
-    if (isSelected) {
-      bgColor = const Color(0xFFF2DFD0); // primary-fixed
-      borderColor = const Color(0xFF67594E).withOpacity(0.2); // primary / 20
-      iconBgColor = const Color(0xFF67594E).withOpacity(0.1);
-      iconColor = const Color(0xFF67594E);
-      textColor = const Color(0xFF67594E);
-      textWeight = FontWeight.bold;
-    } else {
-      // Determine colors based on category to match design subtly
-      switch (symptom.category) {
-        case 'Vasomotor Symptoms':
-        case 'Emotional & Cognitive':
-          if (symptom.name == 'Night sweats' || symptom.name == 'Mood swings') {
-            iconBgColor = const Color(0xFFEDDDF5); // secondary-container
-            iconColor = const Color(0xFF655A6E); // secondary
-          } else if (symptom.name == 'Anxiety' || symptom.name == 'Memory lapses') {
-            iconBgColor = const Color(0xFF9D675C).withOpacity(0.2); // tertiary-container
-            iconColor = const Color(0xFF814F45); // tertiary
-          }
-          break;
-        case 'Physical Wellbeing':
-          if (symptom.name == 'Joint pain' || symptom.name == 'Dry skin') {
-            iconBgColor = const Color(0xFFEDDDF5);
-            iconColor = const Color(0xFF655A6E);
-          } else if (symptom.name == 'Heart palpitation') {
-            iconBgColor = const Color(0xFF9D675C).withOpacity(0.2);
-            iconColor = const Color(0xFF814F45);
-          }
-          break;
-        case 'Sleep & Energy':
-          if (symptom.name == 'Low energy') {
-            iconBgColor = const Color(0xFFEDDDF5);
-            iconColor = const Color(0xFF655A6E);
-          } else if (symptom.name == 'Waking night') {
-            iconBgColor = const Color(0xFF9D675C).withOpacity(0.2);
-            iconColor = const Color(0xFF814F45);
-          }
-          break;
-      }
-    }
-
-    return GestureDetector(
+    return Bounceable(
       onTap: onTap,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: borderColor),
+          color: isSelected ? Colors.white : const Color(0xFFFFFFFF),
+          borderRadius: BorderRadius.circular(40),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF9B8B7E) : Colors.transparent,
+            width: isSelected ? 2 : 0,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(isSelected ? 0.08 : 0.03),
+              blurRadius: isSelected ? 15 : 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        child: Stack(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (isSelected)
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Icon(Icons.check_circle, color: const Color(0xFF67594E), size: 18),
-              )
-            else
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  width: 16,
-                  height: 16,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: borderColor),
-                  ),
-                ),
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: isSelected ? iconColor.withOpacity(0.2) : iconBgColor,
+                shape: BoxShape.circle,
               ),
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: iconBgColor,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        _getIconData(symptom.iconName),
-                        color: iconColor,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      symptom.name,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: textWeight,
-                        color: textColor,
-                        height: 1.1,
-                      ),
-                    ),
-                  ],
+              child: Icon(
+                symptom.getIconData(),
+                color: iconColor,
+                size: 36,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text(
+                symptom.name,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: isSelected
+                      ? const Color(0xFF1D1B1A)
+                      : const Color(0xFF9B8B7E),
+                  height: 1.1,
                 ),
               ),
             ),
@@ -306,27 +261,5 @@ class _SymptomLibraryPageState extends ConsumerState<SymptomLibraryPage> {
         ),
       ),
     );
-  }
-
-  IconData _getIconData(String name) {
-    switch (name) {
-      case 'thermostat': return Icons.thermostat;
-      case 'bedtime': return Icons.bedtime;
-      case 'ac_unit': return Icons.ac_unit;
-      case 'psychology': return Icons.psychology;
-      case 'sentiment_dissatisfied': return Icons.sentiment_dissatisfied;
-      case 'reorder': return Icons.reorder;
-      case 'cloud': return Icons.cloud;
-      case 'settings_backup_restore': return Icons.settings_backup_restore;
-      case 'accessibility_new': return Icons.accessibility_new;
-      case 'skull': return Icons.sentiment_neutral; // Approximation
-      case 'battery_low': return Icons.battery_0_bar;
-      case 'favorite': return Icons.favorite;
-      case 'dry_cleaning': return Icons.dry_cleaning;
-      case 'bed': return Icons.bed;
-      case 'alarm_on': return Icons.alarm_on;
-      case 'bolt': return Icons.bolt;
-      default: return Icons.medical_services;
-    }
   }
 }

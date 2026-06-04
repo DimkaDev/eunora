@@ -25,6 +25,7 @@ import 'package:eunora/features/onboarding/presentation/pages/your_medications_p
 
 import 'package:eunora/features/onboarding/presentation/pages/frequent_symptoms_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/symptom_library_page.dart';
+import 'package:eunora/features/onboarding/presentation/pages/trigger_library_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/other_medications_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/health_conditions_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/contraception_page.dart';
@@ -229,6 +230,14 @@ final GoRouter appRouter = GoRouter(
         context: context,
         state: state,
         child: const SymptomLibraryPage(),
+      ),
+    ),
+    GoRoute(
+      path: '/trigger-library',
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const TriggerLibraryPage(),
       ),
     ),
     GoRoute(

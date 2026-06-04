@@ -17,8 +17,13 @@ class SignInPage extends ConsumerStatefulWidget {
 class _SignInPageState extends ConsumerState<SignInPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLoading = false;
-  String? _errorText;
+  
+  bool _isEmailLoading = false;
+  bool _isGoogleLoading = false;
+  
+  String? _emailErrorText;
+  String? _googleErrorText;
+  
   bool _obscurePassword = true;
 
   @override
@@ -30,8 +35,8 @@ class _SignInPageState extends ConsumerState<SignInPage> {
 
   void _handleSignIn() async {
     setState(() {
-      _isLoading = true;
-      _errorText = null;
+      _isEmailLoading = true;
+      _emailErrorText = null;
     });
 
     try {
@@ -58,15 +63,15 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     } on FirebaseAuthException catch (e) {
       if (mounted) {
         setState(() {
-          _isLoading = false;
-          _errorText = e.message ?? 'Invalid email or password. Please try again.';
+          _isEmailLoading = false;
+          _emailErrorText = e.message ?? 'Invalid email or password. Please try again.';
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _isLoading = false;
-          _errorText = 'An unexpected error occurred. Please try again.';
+          _isEmailLoading = false;
+          _emailErrorText = 'An unexpected error occurred. Please try again.';
         });
       }
     }
@@ -148,7 +153,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   }
 
   Widget _buildFormCard() {
-    final bool hasError = _errorText != null;
+    final bool hasError = _emailErrorText != null;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -181,7 +186,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
             hint: 'you@email.com',
             icon: Icons.mail_outline,
             hasError: hasError,
-            enabled: !_isLoading,
+            enabled: !_isEmailLoading && !_isGoogleLoading,
           ),
           const SizedBox(height: 16),
           
@@ -198,7 +203,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                 ),
               ),
               GestureDetector(
-                onTap: _isLoading ? null : () => context.push('/forgot-password'),
+                onTap: _isEmailLoading || _isGoogleLoading ? null : () => context.push('/forgot-password'),
                 child: Text(
                   'Forgot?',
                   style: GoogleFonts.manrope(
@@ -217,7 +222,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
             icon: Icons.lock_outline,
             obscureText: _obscurePassword,
             hasError: hasError,
-            enabled: !_isLoading,
+            enabled: !_isEmailLoading && !_isGoogleLoading,
             suffixIcon: IconButton(
               icon: Icon(
                 _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
@@ -236,7 +241,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    _errorText!,
+                    _emailErrorText!,
                     style: GoogleFonts.manrope(
                       fontSize: 12,
                       color: const Color(0xFFBA1A1A),
@@ -312,16 +317,16 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         ],
       ),
       child: Bounceable(
-        onTap: _isLoading ? null : _handleSignIn,
+        onTap: _isEmailLoading || _isGoogleLoading ? null : _handleSignIn,
         child: IgnorePointer(
           child: ElevatedButton(
-            onPressed: _isLoading ? null : () {},
+            onPressed: _isEmailLoading || _isGoogleLoading ? null : () {},
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.transparent,
               shadowColor: Colors.transparent,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: _isLoading
+            child: _isEmailLoading
                 ? const SizedBox(
                     width: 20,
                     height: 20,
@@ -373,11 +378,33 @@ class _SignInPageState extends ConsumerState<SignInPage> {
             Expanded(child: _buildSocialButton('Google', null, isGoogle: true)),
           ],
         ),
+        if (_googleErrorText != null) ...[
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 16, color: Color(0xFFBA1A1A)),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  _googleErrorText!,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.manrope(
+                    fontSize: 12,
+                    color: const Color(0xFFBA1A1A),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
 
   Widget _buildSocialButton(String label, IconData? icon, {bool isGoogle = false}) {
+    final bool isThisLoading = isGoogle && _isGoogleLoading;
     return Container(
       height: 48,
       decoration: BoxDecoration(
@@ -386,13 +413,13 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         border: Border.all(color: const Color(0xFFD0C4BC).withOpacity(0.3)),
       ),
       child: Bounceable(
-        onTap: _isLoading
+        onTap: _isEmailLoading || _isGoogleLoading
             ? null
             : () async {
                 if (isGoogle) {
                   setState(() {
-                    _isLoading = true;
-                    _errorText = null;
+                    _isGoogleLoading = true;
+                    _googleErrorText = null;
                   });
                   try {
                     final credentials = await ref.read(authServiceProvider).signInWithGoogle();
@@ -412,21 +439,21 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                       }
                     } else {
                       if (mounted) {
-                        setState(() => _isLoading = false);
+                        setState(() => _isGoogleLoading = false);
                       }
                     }
                   } on FirebaseAuthException catch (e) {
                     if (mounted) {
                       setState(() {
-                        _isLoading = false;
-                        _errorText = e.message ?? 'Google Sign-In failed.';
+                        _isGoogleLoading = false;
+                        _googleErrorText = e.message ?? 'Google Sign-In failed.';
                       });
                     }
                   } catch (e) {
                     if (mounted) {
                       setState(() {
-                        _isLoading = false;
-                        _errorText = 'Google Sign-In was cancelled or failed.';
+                        _isGoogleLoading = false;
+                        _googleErrorText = 'Google Sign-In was cancelled or failed.';
                       });
                     }
                   }
@@ -436,25 +463,36 @@ class _SignInPageState extends ConsumerState<SignInPage> {
               },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (isGoogle)
-              Image.network(
-                'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/3840px-Google_%22G%22_logo.svg.png',
-                width: 18,
-                height: 18,
-              )
-            else
-              Icon(icon, size: 18, color: const Color(0xFF1D1B1A)),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: GoogleFonts.manrope(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF1D1B1A),
-              ),
-            ),
-          ],
+          children: isThisLoading
+              ? [
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF67594E)),
+                    ),
+                  )
+                ]
+              : [
+                  if (isGoogle)
+                    Image.network(
+                      'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/3840px-Google_%22G%22_logo.svg.png',
+                      width: 18,
+                      height: 18,
+                    )
+                  else
+                    Icon(icon, size: 18, color: const Color(0xFF1D1B1A)),
+                  const SizedBox(width: 8),
+                  Text(
+                    label,
+                    style: GoogleFonts.manrope(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1D1B1A),
+                    ),
+                  ),
+                ],
         ),
       ),
     );

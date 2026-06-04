@@ -17,7 +17,9 @@ class _ContraceptionPageState extends ConsumerState<ContraceptionPage> {
   bool? _isUsingContraception;
   String _selectedType = 'Progestin-only pill';
   final TextEditingController _brandController = TextEditingController(text: 'Cerazette');
-  final TextEditingController _doseController = TextEditingController();
+  final TextEditingController _doseQuantityController = TextEditingController();
+  final TextEditingController _doseUnitController = TextEditingController(text: 'mcg');
+  String _selectedContraceptionUnit = 'mcg';
 
   final List<String> _types = [
     'Combination pill',
@@ -31,9 +33,16 @@ class _ContraceptionPageState extends ConsumerState<ContraceptionPage> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _selectedContraceptionUnit = _doseUnitController.text.isEmpty ? 'mcg' : _doseUnitController.text;
+  }
+
+  @override
   void dispose() {
     _brandController.dispose();
-    _doseController.dispose();
+    _doseQuantityController.dispose();
+    _doseUnitController.dispose();
     super.dispose();
   }
 
@@ -41,41 +50,38 @@ class _ContraceptionPageState extends ConsumerState<ContraceptionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFEF8F6), // background
-      body: Stack(
-        children: [
-          SafeArea(
-            child: Column(
-              children: [
-                OnboardingHeader(
-                  currentStep: 6,
-                  subtitle: 'CONTRACEPTION',
-                  onSkip: () => _showInfoDialog(context),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildHeader(),
-                        const SizedBox(height: 32),
-                        _buildQuestion(),
-                        if (_isUsingContraception == true) ...[
-                          const SizedBox(height: 32),
-                          _buildDetailsSection(),
-                        ],
-                        const SizedBox(height: 48),
-                        _buildInfoText(),
-                        const SizedBox(height: 120), // Footer space
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            OnboardingHeader(
+              currentStep: 6,
+              subtitle: 'CONTRACEPTION',
+              onSkip: () => _showInfoDialog(context),
             ),
-          ),
-          _buildStickyFooter(context),
-        ],
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeader(),
+                    const SizedBox(height: 32),
+                    _buildQuestion(),
+                    if (_isUsingContraception == true) ...[
+                      const SizedBox(height: 32),
+                      _buildDetailsSection(),
+                    ],
+                    const SizedBox(height: 48),
+                    _buildInfoText(),
+                    const SizedBox(height: 48),
+                    _buildFooterButtons(context),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -235,8 +241,60 @@ class _ContraceptionPageState extends ConsumerState<ContraceptionPage> {
         const SizedBox(height: 32),
         _buildStepLabel('3', 'DOSE', optional: true),
         const SizedBox(height: 16),
-        _buildTextField(_doseController, 'e.g., 30 mcg ethinyl estradiol'),
+        Row(
+          children: [
+            Expanded(
+              flex: 1,
+              child: _buildTextField(_doseQuantityController, 'Quantity (e.g., 30)'),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              flex: 1,
+              child: _buildDropdownField(
+                value: _selectedContraceptionUnit,
+                items: const ['mcg', 'mg', 'tablets', 'injections', 'implants'],
+                onChanged: (val) {
+                  if (val != null) {
+                    setState(() {
+                      _selectedContraceptionUnit = val;
+                      _doseUnitController.text = val;
+                    });
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
       ],
+    );
+  }
+
+  Widget _buildDropdownField({
+    required String value,
+    required List<String> items,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF7F756E).withOpacity(0.1)),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          onChanged: onChanged,
+          isExpanded: true,
+          style: const TextStyle(fontSize: 18, fontFamily: 'Manrope', color: Color(0xFF1D1B1A)),
+          items: items
+              .map((u) => DropdownMenuItem(
+                    value: u,
+                    child: Text(u),
+                  ))
+              .toList(),
+        ),
+      ),
     );
   }
 
@@ -327,65 +385,38 @@ class _ContraceptionPageState extends ConsumerState<ContraceptionPage> {
     );
   }
 
-  Widget _buildStickyFooter(BuildContext context) {
-    return Positioned(
-      bottom: 0,
-      left: 0,
-      right: 0,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            height: 10,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  const Color(0xFFFEF8F6).withOpacity(0),
-                  const Color(0xFFFEF8F6),
-                ],
-              ),
+  Widget _buildFooterButtons(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ElevatedButton(
+          onPressed: () => context.push('/weight'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF67594E),
+            foregroundColor: Colors.white,
+            minimumSize: const Size(double.infinity, 56),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            elevation: 0,
+          ),
+          child: const Text(
+            'CONTINUE',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextButton(
+          onPressed: () => context.push('/weight'),
+          child: Text(
+            'SKIP THIS STEP',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF4D453F).withOpacity(0.6),
+              letterSpacing: 1,
             ),
           ),
-          Container(
-            color: const Color(0xFFFEF8F6),
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ElevatedButton(
-                  onPressed: () => context.push('/weight'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF67594E),
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(double.infinity, 56),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    'CONTINUE',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.2),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextButton(
-                  onPressed: () => context.push('/weight'),
-                  child: Text(
-                    'SKIP THIS STEP',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF4D453F).withOpacity(0.6),
-                      letterSpacing: 1,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

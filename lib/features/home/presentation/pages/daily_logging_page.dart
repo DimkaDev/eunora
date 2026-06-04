@@ -9,6 +9,9 @@ import 'package:eunora/core/utils/animation_system.dart';
 import 'package:eunora/core/services/firestore_service.dart';
 import 'package:eunora/features/home/domain/entities/daily_log.dart';
 import 'package:eunora/features/onboarding/domain/models/symptom.dart';
+import 'package:eunora/features/onboarding/presentation/providers/symptoms_provider.dart';
+import 'package:eunora/features/onboarding/domain/models/trigger.dart';
+import 'package:eunora/features/onboarding/presentation/providers/triggers_provider.dart';
 
 class DailyLoggingPage extends ConsumerStatefulWidget {
   const DailyLoggingPage({super.key});
@@ -143,31 +146,39 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   };
 
   String _getSymptomName(String id) {
-    if (_symptomTemplates.containsKey(id)) {
-      return _symptomTemplates[id]!['name'];
-    }
-    return id.replaceAll('s_', '').replaceAll('_', ' ');
+    final library = ref.read(symptomLibraryProvider);
+    final symptom = library.firstWhere(
+      (s) => s.id == id,
+      orElse: () => Symptom(id: id, name: id.replaceAll('s_', '').replaceAll('_', ' '), iconName: 'medical_services'),
+    );
+    return symptom.name;
   }
 
   IconData _getSymptomIcon(String id) {
-    if (_symptomTemplates.containsKey(id)) {
-      return _symptomTemplates[id]!['icon'];
-    }
-    return Icons.medical_services;
+    final library = ref.read(symptomLibraryProvider);
+    final symptom = library.firstWhere(
+      (s) => s.id == id,
+      orElse: () => Symptom(id: id, name: id.replaceAll('s_', '').replaceAll('_', ' '), iconName: 'medical_services'),
+    );
+    return symptom.getIconData();
   }
 
   Color _getSymptomColor(String id) {
-    if (_symptomTemplates.containsKey(id)) {
-      return _symptomTemplates[id]!['color'];
-    }
-    return const Color(0xFF9B8B7E);
+    final library = ref.read(symptomLibraryProvider);
+    final symptom = library.firstWhere(
+      (s) => s.id == id,
+      orElse: () => Symptom(id: id, name: id.replaceAll('s_', '').replaceAll('_', ' '), iconName: 'medical_services'),
+    );
+    return symptom.getIconColor();
   }
 
   Color _getSymptomBg(String id) {
-    if (_symptomTemplates.containsKey(id)) {
-      return _symptomTemplates[id]!['bg'];
-    }
-    return const Color(0xFFFAF9F6);
+    final library = ref.read(symptomLibraryProvider);
+    final symptom = library.firstWhere(
+      (s) => s.id == id,
+      orElse: () => Symptom(id: id, name: id.replaceAll('s_', '').replaceAll('_', ' '), iconName: 'medical_services'),
+    );
+    return symptom.getIconColor().withOpacity(0.1);
   }
 
   void _nextStep() {
@@ -796,6 +807,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
     }
 
     final List<Map<String, dynamic>> triggersResult = [];
+    final triggerLib = ref.read(triggerLibraryProvider);
     for (final id in _selectedTriggerIds) {
       dynamic val = '';
       if (id == 't_caffeine') val = '$_caffeineCups cups';
@@ -804,20 +816,15 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
       else if (id == 't_foods') val = _foodsTriggered ? 'Foods: $_foodsNotes' : 'None';
       else val = _customTriggerCounters[id]?.toString() ?? _customTriggerTexts[id] ?? 'Logged';
 
+      final trigger = triggerLib.firstWhere(
+        (t) => t.id == id,
+        orElse: () => TriggerOption(id: id, name: id.replaceAll('t_', '').toUpperCase(), description: '', iconName: 'spa', category: 'Other'),
+      );
+
       triggersResult.add({
-        'name': id.replaceAll('t_', '').toUpperCase(),
+        'name': trigger.name.toUpperCase(),
         'value': val,
-        'icon': id == 't_caffeine'
-            ? Icons.coffee
-            : id == 't_alcohol'
-                ? Icons.local_bar
-                : id == 't_stress'
-                    ? Icons.psychology
-                    : id == 't_exercise'
-                        ? Icons.fitness_center
-                        : id == 't_weather'
-                            ? Icons.thermostat
-                            : Icons.restaurant,
+        'icon': trigger.getIconData(),
       });
     }
 
@@ -988,14 +995,20 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
 
   // --- STEP 1: Symptom Selection Grid ---
   Widget _buildStep1SymptomsGrid() {
-    final allSymptoms = [
-      's_hot_flashes',
-      's_mood',
-      's_sleep',
-      's_dryness',
-      's_joint_pain',
-      ..._customSymptoms,
-    ];
+    final state = ref.watch(symptomsProvider);
+    final library = ref.watch(symptomLibraryProvider);
+
+    // Get symptoms currently marked as "Frequent" (even if deselected)
+    final frequentSymptoms = state.frequentSymptomIds.map((id) {
+      return library.firstWhere(
+        (s) => s.id == id,
+        orElse: () => Symptom(
+          id: id,
+          name: id.replaceAll('s_', '').replaceAll('_', ' '),
+          iconName: 'medical_services',
+        ),
+      );
+    }).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1006,7 +1019,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
           style: GoogleFonts.notoSerif(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: const Color(0xFF3A3A3A),
+            color: const Color(0xFF1D1B1A),
             height: 1.2,
           ),
         ),
@@ -1014,8 +1027,8 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
         Text(
           'Select any symptoms that have been bothering you today. We\'re here to listen.',
           style: GoogleFonts.manrope(
-            fontSize: 14,
-            color: const Color(0xFF9B8B7E),
+            fontSize: 16,
+            color: const Color(0xFF1D1B1A).withOpacity(0.6),
             height: 1.5,
           ),
         ),
@@ -1029,34 +1042,46 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
             crossAxisSpacing: 16,
             childAspectRatio: 1.1,
           ),
-          itemCount: allSymptoms.length + 1,
+          itemCount: frequentSymptoms.length + 1,
           itemBuilder: (context, index) {
-            if (index == allSymptoms.length) {
-              // Add Custom Other Button
+            if (index == frequentSymptoms.length) {
+              // Add Custom Other Button (opens library page)
               return Bounceable(
-                onTap: _addCustomSymptom,
+                onTap: () => context.push('/symptom-library'),
                 child: Container(
                   decoration: BoxDecoration(
                     color: const Color(0xFFFAF9F6),
-                    borderRadius: BorderRadius.circular(28),
-                    border: Border.all(color: const Color(0xFFD0C4BC).withOpacity(0.5), style: BorderStyle.solid),
+                    borderRadius: BorderRadius.circular(40),
+                    border: Border.all(
+                      color: const Color(0xFF9B8B7E).withOpacity(0.2),
+                      width: 2,
+                      style: BorderStyle.solid,
+                    ),
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        width: 48,
-                        height: 48,
+                        width: 64,
+                        height: 64,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF9B8B7E).withOpacity(0.08),
+                          color: const Color(0xFF9B8B7E).withOpacity(0.05),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.add, color: Color(0xFF9B8B7E), size: 28),
+                        child: Icon(
+                          Icons.add,
+                          color: const Color(0xFF9B8B7E).withOpacity(0.4),
+                          size: 32,
+                        ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                       Text(
                         'Other',
-                        style: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFF9B8B7E)),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF9B8B7E).withOpacity(0.6),
+                        ),
                       ),
                     ],
                   ),
@@ -1064,12 +1089,12 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
               );
             }
 
-            final symId = allSymptoms[index];
+            final symptom = frequentSymptoms[index];
+            final symId = symptom.id;
             final isSelected = _selectedSymptomIds.contains(symId);
-            final symName = _getSymptomName(symId);
-            final symIcon = _getSymptomIcon(symId);
-            final symColor = _getSymptomColor(symId);
-            final symBg = _getSymptomBg(symId);
+            final symName = symptom.name;
+            final iconColor = symptom.getIconColor();
+            final iconBgColor = iconColor.withOpacity(0.1);
 
             return Bounceable(
               onTap: () {
@@ -1084,39 +1109,52 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 decoration: BoxDecoration(
-                  color: isSelected ? Colors.white : const Color(0xFFFFFFFF).withOpacity(0.6),
-                  borderRadius: BorderRadius.circular(28),
+                  color: isSelected ? Colors.white : const Color(0xFFFFFFFF),
+                  borderRadius: BorderRadius.circular(40),
                   border: Border.all(
-                    color: isSelected ? symColor.withOpacity(0.4) : Colors.transparent,
-                    width: 2,
+                    color: isSelected ? const Color(0xFF9B8B7E) : Colors.transparent,
+                    width: isSelected ? 2 : 0,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      blurRadius: 12,
+                      color: Colors.black.withOpacity(isSelected ? 0.08 : 0.03),
+                      blurRadius: isSelected ? 15 : 10,
                       offset: const Offset(0, 4),
-                    )
+                    ),
                   ],
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      width: 56,
-                      height: 56,
+                      width: 64,
+                      height: 64,
                       decoration: BoxDecoration(
-                        color: isSelected ? symColor.withOpacity(0.2) : symColor.withOpacity(0.1),
+                        color: isSelected ? iconColor.withOpacity(0.2) : iconBgColor,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(symIcon, color: symColor, size: 28),
+                      child: Icon(
+                        symptom.getIconData(),
+                        color: iconColor,
+                        size: 36,
+                      ),
                     ),
                     const SizedBox(height: 12),
-                    Text(
-                      symName,
-                      style: GoogleFonts.manrope(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF9B8B7E),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        symName,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected
+                              ? const Color(0xFF1D1B1A)
+                              : const Color(0xFF9B8B7E),
+                          height: 1.1,
+                        ),
                       ),
                     ),
                   ],
@@ -1501,15 +1539,22 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
 
   // --- STEP 3: Trigger Selection Grid ---
   Widget _buildStep3TriggersGrid() {
-    final allTriggers = [
-      't_caffeine',
-      't_alcohol',
-      't_stress',
-      't_exercise',
-      't_weather',
-      't_foods',
-      ..._customTriggers,
-    ];
+    final state = ref.watch(triggersProvider);
+    final library = ref.watch(triggerLibraryProvider);
+
+    // Get active triggers currently marked as tracked
+    final activeTriggers = state.activeTriggerIds.map((id) {
+      return library.firstWhere(
+        (t) => t.id == id,
+        orElse: () => TriggerOption(
+          id: id,
+          name: id.replaceAll('t_', '').toUpperCase(),
+          description: 'Influence on daily routines',
+          iconName: 'spa',
+          category: 'Other',
+        ),
+      );
+    }).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1533,19 +1578,13 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
           ),
         ),
         const SizedBox(height: 32),
-        ...allTriggers.map((trigId) {
+        ...activeTriggers.map((trigger) {
+          final trigId = trigger.id;
           final isSelected = _selectedTriggerIds.contains(trigId);
-          String name = trigId.replaceAll('t_', '').toUpperCase();
-          String desc = 'Influence on daily routines';
-          IconData icon = Icons.spa;
-          Color bg = const Color(0xFFEDE8F4);
-
-          if (_triggerTemplates.containsKey(trigId)) {
-            name = _triggerTemplates[trigId]!['name'];
-            desc = _triggerTemplates[trigId]!['desc'];
-            icon = _triggerTemplates[trigId]!['icon'];
-            bg = _triggerTemplates[trigId]!['bg'];
-          }
+          final name = trigger.name;
+          final desc = trigger.description;
+          final icon = trigger.getIconData();
+          final bg = trigger.getIconColor().withOpacity(0.1);
 
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
@@ -1636,7 +1675,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
           width: double.infinity,
           height: 60,
           child: OutlinedButton(
-            onPressed: _addCustomTrigger,
+            onPressed: () => context.push('/trigger-library'),
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Color(0xFFD0C4BC)),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

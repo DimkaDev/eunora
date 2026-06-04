@@ -109,10 +109,13 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       _textController.forward();
     });
 
-    // Navigate to correct destination after delay
-    Future.delayed(const Duration(milliseconds: 3000), () async {
+    // Navigate to correct destination as soon as auth state is initialized and animations finish
+    Future.wait([
+      Future.delayed(const Duration(milliseconds: 1800)),
+      FirebaseAuth.instance.authStateChanges().first,
+    ]).then((results) async {
       if (!mounted) return;
-      final user = FirebaseAuth.instance.currentUser;
+      final user = results[1] as User?;
       if (user != null) {
         final prefs = await SharedPreferences.getInstance();
         if (!mounted) return;
