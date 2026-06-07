@@ -101,7 +101,7 @@ class DashboardHeader extends ConsumerWidget {
                         width: 8,
                         height: 8,
                         decoration: const BoxDecoration(
-                          color: AppTheme.primary,
+                          color: AppTheme.error,
                           shape: BoxShape.circle,
                         ),
                       ),

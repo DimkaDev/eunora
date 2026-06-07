@@ -104,9 +104,9 @@ class FadeInEntrance extends StatefulWidget {
   const FadeInEntrance({
     super.key,
     required this.child,
-    this.duration = const Duration(milliseconds: 600),
+    this.duration = const Duration(milliseconds: 250),
     this.delay = Duration.zero,
-    this.offset = const Offset(0, 16),
+    this.offset = const Offset(0, 8),
   });
 
   @override

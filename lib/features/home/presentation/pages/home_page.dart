@@ -266,7 +266,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ),
                 const SizedBox(height: 24),
                 FadeInEntrance(
-                  delay: const Duration(milliseconds: 100),
+                  delay: const Duration(milliseconds: 30),
                   child: MedicationHrtCard(
                     medications: medications,
                     takenStatus: _takenStatus,
@@ -281,7 +281,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ),
                 const SizedBox(height: 24),
                 FadeInEntrance(
-                  delay: const Duration(milliseconds: 150),
+                  delay: const Duration(milliseconds: 60),
                   child: TodaySymptomsCard(
                     loggedSymptoms: _loggedSymptoms,
                     onAddSymptom: _showAddSymptomSheet,
@@ -290,7 +290,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ),
                 const SizedBox(height: 24),
                 FadeInEntrance(
-                  delay: const Duration(milliseconds: 200),
+                  delay: const Duration(milliseconds: 90),
                   child: DailyTriggersCard(
                     loggedTriggers: _loggedTriggers,
                     onAddTrigger: _showAddTriggerSheet,
@@ -299,17 +299,17 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ),
                 const SizedBox(height: 24),
                 FadeInEntrance(
-                  delay: const Duration(milliseconds: 250),
+                  delay: const Duration(milliseconds: 120),
                   child: InsightCard(type: _insightType),
                 ),
                 const SizedBox(height: 24),
                 FadeInEntrance(
-                  delay: const Duration(milliseconds: 300),
+                  delay: const Duration(milliseconds: 150),
                   child: const WeeklyPatternsCard(),
                 ),
                 const SizedBox(height: 24),
                 FadeInEntrance(
-                  delay: const Duration(milliseconds: 350),
+                  delay: const Duration(milliseconds: 180),
                   child: const InsightTeaserCard(),
                 ),
                 const SizedBox(height: 32),
@@ -374,16 +374,13 @@ class _HomePageState extends ConsumerState<HomePage> {
         child: Stack(
           children: [
             AnimatedSwitcher(
-              duration: const Duration(milliseconds: 320),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
+              duration: const Duration(milliseconds: 150),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
               transitionBuilder: (Widget child, Animation<double> animation) {
                 return FadeTransition(
                   opacity: animation,
-                  child: ScaleTransition(
-                    scale: Tween<double>(begin: 0.98, end: 1.0).animate(animation),
-                    child: child,
-                  ),
+                  child: child,
                 );
               },
               child: KeyedSubtree(

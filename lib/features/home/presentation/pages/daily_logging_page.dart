@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
@@ -11,6 +12,7 @@ import 'package:eunora/features/home/domain/entities/daily_log.dart';
 import 'package:eunora/features/onboarding/domain/models/symptom.dart';
 import 'package:eunora/features/onboarding/presentation/providers/symptoms_provider.dart';
 import 'package:eunora/features/onboarding/domain/models/trigger.dart';
+import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
 import 'package:eunora/features/onboarding/presentation/providers/triggers_provider.dart';
 
 class DailyLoggingPage extends ConsumerStatefulWidget {
@@ -70,6 +72,30 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   double _sleepDuration = 7.5;
   int _hydrationCups = 8;
   String _additionalNotes = '';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final meds = ref.read(medicationsProvider).medications;
+      for (final med in meds) {
+        final name = med.name.toLowerCase();
+        if (name.contains('estradiol') || name.contains('estrogen') || name.contains('estradot')) {
+          setState(() {
+            _estradiolChecked = true;
+            _estradiolDose = med.dose;
+            _estradiolUnit = med.unit;
+          });
+        } else if (name.contains('progesterone') || name.contains('utrogestan')) {
+          setState(() {
+            _progesteroneChecked = true;
+            _progesteroneDose = med.dose;
+            _progesteroneUnit = med.unit;
+          });
+        }
+      }
+    });
+  }
 
   // All symptoms template definitions for colors and icons
   final Map<String, Map<String, dynamic>> _symptomTemplates = {
@@ -352,17 +378,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
                           ),
                         ],
                       ),
-                      TextButton(
-                        onPressed: () => _saveMedicationEdit(medKey, dose, unit, time),
-                        child: Text(
-                          'Save',
-                          style: GoogleFonts.manrope(
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.primary,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
+                      const SizedBox(width: 48),
                     ],
                   ),
                   const SizedBox(height: 24),
@@ -796,6 +812,104 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
     );
   }
 
+  void _showInfoBottomSheet(BuildContext context, int step) {
+    String title = '';
+    String content = '';
+    
+    switch (step) {
+      case 0:
+        title = 'Step 1 – Symptoms Logging';
+        content = 'Select any symptoms that you are experiencing today. Tracking your symptoms daily helps identify hormonal fluctuations, patterns, and trends over time. Regular logging allows Eunora to offer personalized recommendations tailored to your unique journey.';
+        break;
+      case 1:
+        title = 'Step 2 – Rate Intensity';
+        content = 'Assign intensity levels to your selected symptoms to track their severity:\n\n• Mild: Noticeable but doesn\'t interfere with daily activities.\n• Moderate: Interferes with some daily activities.\n• Severe: Significantly disrupts your day.\n\nFor hot flashes or night sweats, you can also specify the duration in minutes to monitor their length.';
+        break;
+      case 2:
+        title = 'Step 3 – Log Your Triggers';
+        content = 'Select any potential triggers you encountered today. Triggers like caffeine, alcohol, stress, specific foods, and lifestyle factors can directly influence the frequency and severity of your symptoms.';
+        break;
+      case 3:
+        title = 'Step 4 – Journal Influences';
+        content = 'Provide details about your selected triggers. You can specify amounts (e.g., cups of coffee, glasses of alcohol), rate your stress levels, or write down notes about foods to better understand how these influences affect your body.';
+        break;
+      case 4:
+        title = 'Step 5 – Review / Daily Data Entry';
+        content = 'Log your daily medication (Hormone Replacement Therapy), sleep duration, and water intake. Recording these consistency habits helps visualize how HRT dosage, quality rest, and hydration correlate with your overall symptom patterns.';
+        break;
+      default:
+        title = 'Help';
+        content = 'Eunora daily logging assists in tracking your wellness patterns.';
+    }
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFFFEF8F6),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 48,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD0C4BC).withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                ),
+              ),
+              Text(
+                title,
+                style: GoogleFonts.notoSerif(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                content,
+                style: GoogleFonts.manrope(
+                  fontSize: 14,
+                  height: 1.6,
+                  color: AppTheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                  ),
+                  child: Text(
+                    'Got it',
+                    style: GoogleFonts.manrope(fontWeight: FontWeight.bold, fontSize: 15),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _finishLoggingAndSync() async {
     // Generate results
     final List<Map<String, String>> symptomsResult = [];
@@ -923,6 +1037,14 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Reactive Symptom Synchronization
+    final symptomsState = ref.watch(symptomsProvider);
+    _selectedSymptomIds.retainAll(symptomsState.frequentSymptomIds);
+
+    // Reactive Trigger Synchronization
+    final triggersState = ref.watch(triggersProvider);
+    _selectedTriggerIds.retainAll(triggersState.activeTriggerIds);
+
     if (_currentStep == 5) {
       return _buildSuccessScreen();
     }
@@ -937,8 +1059,9 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
               totalSteps: 5,
               title: _getStepTitle(),
               showStepPill: true,
+              showBackButton: _currentStep != 0,
               onBack: _currentStep == 0 ? () => context.pop() : _prevStep,
-              onSkip: () => context.go('/home'),
+              onSkip: () => _showInfoBottomSheet(context, _currentStep),
             ),
             Expanded(
               child: DirectionalAnimatedSwitcher(
@@ -1303,7 +1426,13 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
                 Container(
                   height: 56,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF7F5F0),
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFFE2F5E2), // Soft Green (Mild)
+                        Color(0xFFFFF1D0), // Soft Yellow/Orange (Moderate)
+                        Color(0xFFFFE0E0), // Soft Red (Severe)
+                      ],
+                    ),
                     borderRadius: BorderRadius.circular(100),
                   ),
                   child: Stack(
@@ -1989,44 +2118,124 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
             ],
           ),
           const SizedBox(height: 20),
-          Row(
-            children: [
-              _buildStressLevelButton('Calm'),
-              const SizedBox(width: 8),
-              _buildStressLevelButton('Moderate'),
-              const SizedBox(width: 8),
-              _buildStressLevelButton('High'),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStressLevelButton(String level) {
-    final isSelected = _stressLevel == level;
-    return Expanded(
-      child: InkWell(
-        onTap: () => setState(() => _stressLevel = level),
-        borderRadius: BorderRadius.circular(30),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFFEDDDF5) : const Color(0xFFF7F5F0),
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: isSelected ? const Color(0xFFD0C1D8) : Colors.transparent),
-          ),
-          child: Center(
-            child: Text(
-              level,
-              style: GoogleFonts.manrope(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: isSelected ? const Color(0xFF6C6074) : AppTheme.onSurfaceVariant,
+          Container(
+            height: 56,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [
+                  Color(0xFFE2F5E2), // Soft Green (Calm)
+                  Color(0xFFFFF1D0), // Soft Yellow/Orange (Moderate)
+                  Color(0xFFFFE0E0), // Soft Red (High)
+                ],
               ),
+              borderRadius: BorderRadius.circular(100),
+            ),
+            child: Stack(
+              children: [
+                // White sliding thumb selector
+                AnimatedAlign(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeInOut,
+                  alignment: _stressLevel == 'Calm'
+                      ? Alignment.centerLeft
+                      : _stressLevel == 'Moderate'
+                          ? Alignment.center
+                          : Alignment.centerRight,
+                  child: Container(
+                    width: MediaQuery.of(context).size.width * 0.26,
+                    height: 48,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(100),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+                // Three Buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _stressLevel = 'Calm'),
+                        behavior: HitTestBehavior.opaque,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('😊', style: TextStyle(fontSize: 18)),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Calm',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  color: _stressLevel == 'Calm' ? AppTheme.primary : const Color(0xFF8A817C),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _stressLevel = 'Moderate'),
+                        behavior: HitTestBehavior.opaque,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('😐', style: TextStyle(fontSize: 18)),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Moderate',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  color: _stressLevel == 'Moderate' ? AppTheme.primary : const Color(0xFF8A817C),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _stressLevel = 'High'),
+                        behavior: HitTestBehavior.opaque,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('😟', style: TextStyle(fontSize: 18)),
+                              const SizedBox(height: 2),
+                              Text(
+                                'High',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  color: _stressLevel == 'High' ? AppTheme.primary : const Color(0xFF8A817C),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -2176,7 +2385,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
       children: [
         const SizedBox(height: 8),
         Text(
-          'Confirm & Log',
+          'Log HRT, Sleep & Hydration',
           style: GoogleFonts.notoSerif(
             fontSize: 26,
             fontWeight: FontWeight.bold,
@@ -2185,7 +2394,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
         ),
         const SizedBox(height: 6),
         Text(
-          'Quickly review your typical routine and log for today.',
+          'Record your hormone replacement therapy, sleep duration, and water intake for today.',
           style: GoogleFonts.manrope(
             fontSize: 13,
             color: AppTheme.outline,
@@ -2210,21 +2419,23 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
             children: [
               _buildMedRow(
                 title: 'Estradiol Patch',
-                subtitle: '${_estradiolDose.toStringAsFixed(2).replaceAll(RegExp(r'\.00$'), '')} $_estradiolUnit • Morning',
+                subtitle: '${_estradiolDose.toStringAsFixed(2).replaceAll(RegExp(r'\.00$'), '')} $_estradiolUnit • $_estradiolTime',
                 icon: Icons.medication,
                 checked: _estradiolChecked,
                 onCheckedChange: (val) => setState(() => _estradiolChecked = val!),
-                onTap: () => _openMedicationModal('estradiol'),
+                onTap: () => setState(() => _estradiolChecked = !_estradiolChecked),
               ),
+              if (_estradiolChecked) _buildInlineMedicationDetails('estradiol'),
               const Divider(color: Color(0xFFF2EDEA), height: 1),
               _buildMedRow(
                 title: 'Progesterone',
-                subtitle: '${_progesteroneDose.toStringAsFixed(0)} $_progesteroneUnit • Evening',
+                subtitle: '${_progesteroneDose.toStringAsFixed(0)} $_progesteroneUnit • $_progesteroneTime',
                 icon: Icons.medication,
                 checked: _progesteroneChecked,
                 onCheckedChange: (val) => setState(() => _progesteroneChecked = val!),
-                onTap: () => _openMedicationModal('progesterone'),
+                onTap: () => setState(() => _progesteroneChecked = !_progesteroneChecked),
               ),
+              if (_progesteroneChecked) _buildInlineMedicationDetails('progesterone'),
             ],
           ),
         ),
@@ -2357,6 +2568,308 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
         ),
         const SizedBox(height: 32),
       ],
+    );
+  }
+
+  List<double> _getAvailableDoses(String unit) {
+    final u = unit.toLowerCase();
+    if (u == 'mcg') {
+      return [12.5, 25.0, 37.5, 50.0, 62.5, 75.0, 87.5, 100.0, 112.5, 125.0, 150.0, 175.0, 200.0, 250.0];
+    } else if (u == 'mg') {
+      return [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 10.0, 20.0, 50.0, 100.0, 150.0, 200.0, 300.0, 400.0];
+    } else {
+      return List.generate(10, (i) => (i + 1).toDouble());
+    }
+  }
+
+  void _openDosePicker({
+    required String unit,
+    required double currentDose,
+    required ValueChanged<double> onDoseChanged,
+  }) {
+    final doses = _getAvailableDoses(unit);
+    int initialIndex = doses.indexWhere((d) => (d - currentDose).abs() < 0.01);
+    if (initialIndex == -1) initialIndex = 0;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFFFEF8F6),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 48,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD0C4BC).withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(100),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      'Cancel',
+                      style: GoogleFonts.manrope(fontWeight: FontWeight.bold, color: const Color(0xFF8A817C)),
+                    ),
+                  ),
+                  Text(
+                    'Select Dose',
+                    style: GoogleFonts.notoSerif(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primary,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      'Done',
+                      style: GoogleFonts.manrope(fontWeight: FontWeight.bold, color: AppTheme.primary),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 200,
+                child: CupertinoPicker(
+                  scrollController: FixedExtentScrollController(initialItem: initialIndex),
+                  itemExtent: 44,
+                  onSelectedItemChanged: (index) {
+                    onDoseChanged(doses[index]);
+                  },
+                  children: doses.map((d) {
+                    return Center(
+                      child: Text(
+                        d.toStringAsFixed(d == d.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), ''),
+                        style: GoogleFonts.manrope(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.onSurface,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildInlineMedicationDetails(String medKey) {
+    bool isEstradiol = medKey == 'estradiol';
+    double dose = isEstradiol ? _estradiolDose : _progesteroneDose;
+    String unit = isEstradiol ? _estradiolUnit : _progesteroneUnit;
+    String time = isEstradiol ? _estradiolTime : _progesteroneTime;
+    
+    // Dynamic unit options
+    List<String> unitOptions = ['mg', 'mcg'];
+    if (!unitOptions.contains(unit)) {
+      unitOptions.add(unit);
+    }
+    final onboardingMeds = ref.read(medicationsProvider).medications;
+    for (var m in onboardingMeds) {
+      if (!unitOptions.contains(m.unit)) {
+        unitOptions.add(m.unit);
+      }
+    }
+    
+    return Container(
+      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF7F5F0).withOpacity(0.5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFD0C4BC).withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              // Dose selection field
+              Expanded(
+                flex: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'DOSE',
+                      style: GoogleFonts.manrope(fontSize: 8, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C), letterSpacing: 1),
+                    ),
+                    const SizedBox(height: 6),
+                    GestureDetector(
+                      onTap: () => _openDosePicker(
+                        unit: unit,
+                        currentDose: dose,
+                        onDoseChanged: (newDose) {
+                          setState(() {
+                            if (isEstradiol) {
+                              _estradiolDose = newDose;
+                            } else {
+                              _progesteroneDose = newDose;
+                            }
+                          });
+                        },
+                      ),
+                      child: Container(
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xFFD0C4BC).withOpacity(0.4)),
+                        ),
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Text(
+                          dose.toStringAsFixed(dose == dose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), ''),
+                          style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.onSurface),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Unit selection field
+              Expanded(
+                flex: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'UNIT',
+                      style: GoogleFonts.manrope(fontSize: 8, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C), letterSpacing: 1),
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEDE7E5).withOpacity(0.6),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.all(2),
+                      child: Row(
+                        children: unitOptions.map((opt) {
+                          final isSelected = unit == opt;
+                          return Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  if (isEstradiol) {
+                                    _estradiolUnit = opt;
+                                  } else {
+                                    _progesteroneUnit = opt;
+                                  }
+                                });
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: isSelected ? Colors.white : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(6),
+                                  boxShadow: isSelected
+                                      ? [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.05),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 1),
+                                          )
+                                        ]
+                                      : null,
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  opt,
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: isSelected ? AppTheme.primary : const Color(0xFF9B8B7E),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Time selection field
+              Expanded(
+                flex: 4,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'TIME',
+                      style: GoogleFonts.manrope(fontSize: 8, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C), letterSpacing: 1),
+                    ),
+                    const SizedBox(height: 6),
+                    GestureDetector(
+                      onTap: () async {
+                        final timeOfDay = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay.now(),
+                        );
+                        if (timeOfDay != null) {
+                          setState(() {
+                            if (isEstradiol) {
+                              _estradiolTime = timeOfDay.format(context);
+                            } else {
+                              _progesteroneTime = timeOfDay.format(context);
+                            }
+                          });
+                        }
+                      },
+                      child: Container(
+                        height: 40,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xFFD0C4BC).withOpacity(0.4)),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.schedule, size: 14, color: AppTheme.primary),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                time,
+                                style: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.onSurface),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
