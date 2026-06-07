@@ -2492,7 +2492,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.brightness_3, color: AppTheme.primary, size: 18),
+                      const Icon(Icons.brightness_3, color: Color(0xFF8B5CF6), size: 18),
                       const SizedBox(width: 8),
                       Text('Sleep Duration', style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.primary, letterSpacing: 1)),
                     ],
@@ -2520,7 +2520,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.water_drop, color: AppTheme.primary, size: 18),
+                      const Icon(Icons.water_drop, color: Color(0xFF0EA5E9), size: 18),
                       const SizedBox(width: 8),
                       Text('Hydration', style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.primary, letterSpacing: 1)),
                     ],
@@ -2977,16 +2977,9 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          _currentStep == 4 ? 'Save Log' : 'Continue',
-                          style: GoogleFonts.manrope(fontWeight: FontWeight.bold, fontSize: 14),
-                        ),
-                        const SizedBox(width: 8),
-                        const Icon(Icons.arrow_forward, size: 16),
-                      ],
+                    child: Text(
+                      _currentStep == 4 ? 'Save Log' : 'Continue',
+                      style: GoogleFonts.manrope(fontWeight: FontWeight.bold, fontSize: 14),
                     ),
                   ),
                 ),
