@@ -7,6 +7,7 @@ import 'package:eunora/core/utils/animation_system.dart';
 import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
 import 'package:eunora/features/onboarding/presentation/widgets/add_medication_modal.dart';
 import 'package:eunora/features/onboarding/presentation/pages/other_medications_page.dart';
+import 'package:eunora/features/home/presentation/widgets/dose_change_alert.dart';
 
 class DailyEntryStep extends ConsumerStatefulWidget {
   final bool estradiolChecked;
@@ -72,6 +73,48 @@ class DailyEntryStep extends ConsumerStatefulWidget {
 }
 
 class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
+  int? _expandedIndex;
+  DateTime? _estradiolLastTaken = DateTime.now().subtract(const Duration(days: 2));
+  DateTime? _progesteroneLastTaken = DateTime.now().subtract(const Duration(days: 1));
+
+  double? _initialEstradiolDose;
+  double? _initialProgesteroneDose;
+
+  @override
+  void initState() {
+    super.initState();
+    _initialEstradiolDose = widget.estradiolDose;
+    _initialProgesteroneDose = widget.progesteroneDose;
+  }
+
+  String _formatDate(DateTime dt) {
+    return "${dt.day} ${_getMonthName(dt.month)}";
+  }
+
+  String _formatDateTime(DateTime dt, BuildContext context) {
+    final dateStr = "${dt.day} ${_getMonthName(dt.month)}";
+    if (context.mounted) {
+      final timeStr = TimeOfDay(hour: dt.hour, minute: dt.minute).format(context);
+      return "$dateStr, $timeStr";
+    }
+    return dateStr;
+  }
+
+  String _getMonthName(int m) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months[m - 1];
+  }
+
+  String _daysAgo(DateTime dt) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final thatDay = DateTime(dt.year, dt.month, dt.day);
+    final diff = today.difference(thatDay).inDays;
+    if (diff <= 0) return 'today';
+    if (diff == 1) return 'yesterday';
+    return '$diff days ago';
+  }
+
   List<double> _getAvailableDoses(String unit) {
     final u = unit.toLowerCase();
     if (u == 'mcg') {
@@ -84,13 +127,17 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
   }
 
   void _openDosePicker({
+    required String medName,
     required String unit,
+    required double initialDose,
     required double currentDose,
     required ValueChanged<double> onDoseChanged,
   }) {
     final doses = _getAvailableDoses(unit);
     int initialIndex = doses.indexWhere((d) => (d - currentDose).abs() < 0.01);
     if (initialIndex == -1) initialIndex = 0;
+
+    double tempDose = doses[initialIndex];
 
     showModalBottomSheet(
       context: context,
@@ -134,7 +181,33 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                   ),
                   TextButton(
                     onPressed: () {
-                      Navigator.pop(context);
+                      if ((tempDose - initialDose).abs() > 0.01) {
+                        showDialog(
+                          context: this.context,
+                          barrierDismissible: false,
+                          barrierColor: const Color(0xFF1D1B1A).withOpacity(0.4),
+                          builder: (dialogContext) {
+                            return DoseChangeAlert(
+                              change: {
+                                'name': medName,
+                                'oldDose': '${initialDose.toStringAsFixed(initialDose == initialDose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $unit',
+                                'newDose': '${tempDose.toStringAsFixed(tempDose == tempDose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $unit',
+                              },
+                              onConfirm: () {
+                                Navigator.pop(dialogContext);
+                                onDoseChanged(tempDose);
+                                Navigator.pop(context);
+                              },
+                              onCancel: () {
+                                Navigator.pop(dialogContext);
+                              },
+                            );
+                          },
+                        );
+                      } else {
+                        onDoseChanged(tempDose);
+                        Navigator.pop(context);
+                      }
                     },
                     child: Text(
                       'Done',
@@ -150,7 +223,7 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                   scrollController: FixedExtentScrollController(initialItem: initialIndex),
                   itemExtent: 44,
                   onSelectedItemChanged: (index) {
-                    onDoseChanged(doses[index]);
+                    tempDose = doses[index];
                   },
                   children: doses.map((d) {
                     return Center(
@@ -173,12 +246,113 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
     );
   }
 
+  void _openTimeSelector({
+    required BuildContext context,
+    required String currentTime,
+    required ValueChanged<String> onTimeChanged,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFFFEF8F6),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Container(
+                  width: 48,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD0C4BC).withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                ),
+              ),
+              Text(
+                'Select Time',
+                style: GoogleFonts.notoSerif(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primary,
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    final now = TimeOfDay.now();
+                    final formatted = now.format(context);
+                    onTimeChanged(formatted);
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.flash_on, color: Colors.white, size: 18),
+                  label: Text(
+                    'Set to Now (${TimeOfDay.now().format(context)})',
+                    style: GoogleFonts.manrope(fontWeight: FontWeight.bold, fontSize: 15),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    final picked = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.now(),
+                    );
+                    if (picked != null) {
+                      if (context.mounted) {
+                        onTimeChanged(picked.format(context));
+                      }
+                    }
+                  },
+                  icon: const Icon(Icons.schedule, color: AppTheme.primary, size: 18),
+                  label: Text(
+                    'Choose Custom Time...',
+                    style: GoogleFonts.manrope(fontWeight: FontWeight.bold, fontSize: 15, color: AppTheme.primary),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: AppTheme.primary.withOpacity(0.5), width: 1.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildInlineMedicationDetails(String medKey) {
     bool isEstradiol = medKey == 'estradiol';
+    bool checked = isEstradiol ? widget.estradiolChecked : widget.progesteroneChecked;
     double dose = isEstradiol ? widget.estradiolDose : widget.progesteroneDose;
     String unit = isEstradiol ? widget.estradiolUnit : widget.progesteroneUnit;
     String time = isEstradiol ? widget.estradiolTime : widget.progesteroneTime;
-    
+    DateTime? lastTaken = isEstradiol ? _estradiolLastTaken : _progesteroneLastTaken;
+
     // Dynamic unit options
     List<String> unitOptions = ['mg', 'mcg'];
     if (!unitOptions.contains(unit)) {
@@ -190,7 +364,7 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
         unitOptions.add(m.unit);
       }
     }
-    
+
     return Container(
       margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -203,167 +377,254 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Dose selection field
-              Expanded(
-                flex: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'DOSE',
-                      style: GoogleFonts.manrope(fontSize: 8, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C), letterSpacing: 1),
-                    ),
-                    const SizedBox(height: 6),
-                    GestureDetector(
-                      onTap: () => _openDosePicker(
-                        unit: unit,
-                        currentDose: dose,
-                        onDoseChanged: (newDose) {
-                          if (isEstradiol) {
-                            widget.onEstradiolDoseChanged(newDose);
-                          } else {
-                            widget.onProgesteroneDoseChanged(newDose);
-                          }
-                        },
-                      ),
-                      child: Container(
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFFD0C4BC).withOpacity(0.4)),
-                        ),
-                        alignment: Alignment.center,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Text(
-                          dose.toStringAsFixed(dose == dose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), ''),
-                          style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.onSurface),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+              Text(
+                'Taken today?',
+                style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.onSurface),
               ),
-              const SizedBox(width: 12),
-              // Unit selection field
-              Expanded(
-                flex: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'UNIT',
-                      style: GoogleFonts.manrope(fontSize: 8, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C), letterSpacing: 1),
-                    ),
-                    const SizedBox(height: 6),
-                    Container(
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEDE7E5).withOpacity(0.6),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.all(2),
-                      child: Row(
-                        children: unitOptions.map((opt) {
-                          final isSelected = unit == opt;
-                          return Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                if (isEstradiol) {
-                                  widget.onEstradiolUnitChanged(opt);
-                                } else {
-                                  widget.onProgesteroneUnitChanged(opt);
-                                }
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: isSelected ? Colors.white : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(6),
-                                  boxShadow: isSelected
-                                      ? [
-                                          BoxShadow(
-                                            color: Colors.black.withOpacity(0.05),
-                                            blurRadius: 4,
-                                            offset: const Offset(0, 1),
-                                          )
-                                        ]
-                                      : null,
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  opt,
-                                  style: GoogleFonts.manrope(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: isSelected ? AppTheme.primary : const Color(0xFF9B8B7E),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              // Time selection field
-              Expanded(
-                flex: 4,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'TIME',
-                      style: GoogleFonts.manrope(fontSize: 8, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C), letterSpacing: 1),
-                    ),
-                    const SizedBox(height: 6),
-                    GestureDetector(
-                      onTap: () async {
-                        final timeOfDay = await showTimePicker(
-                          context: context,
-                          initialTime: TimeOfDay.now(),
-                        );
-                        if (timeOfDay != null) {
-                          final formattedTime = timeOfDay.format(context);
-                          if (isEstradiol) {
-                            widget.onEstradiolTimeChanged(formattedTime);
-                          } else {
-                            widget.onProgesteroneTimeChanged(formattedTime);
-                          }
-                        }
-                      },
-                      child: Container(
-                        height: 40,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFFD0C4BC).withOpacity(0.4)),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.schedule, size: 14, color: AppTheme.primary),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                time,
-                                style: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.onSurface),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+              CupertinoSwitch(
+                value: checked,
+                activeColor: AppTheme.primary,
+                onChanged: (val) {
+                  if (isEstradiol) {
+                    widget.onEstradiolCheckedToggled(val);
+                  } else {
+                    widget.onProgesteroneCheckedToggled(val);
+                  }
+                },
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          if (checked) ...[
+            Row(
+              children: [
+                // Dose selection field
+                Expanded(
+                  flex: 3,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'DOSE',
+                        style: GoogleFonts.manrope(fontSize: 8, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C), letterSpacing: 1),
+                      ),
+                      const SizedBox(height: 6),
+                      GestureDetector(
+                        onTap: () => _openDosePicker(
+                          medName: isEstradiol ? 'Estradiol Patch' : 'Progesterone',
+                          unit: unit,
+                          initialDose: isEstradiol ? (_initialEstradiolDose ?? dose) : (_initialProgesteroneDose ?? dose),
+                          currentDose: dose,
+                          onDoseChanged: (newDose) {
+                            if (isEstradiol) {
+                              widget.onEstradiolDoseChanged(newDose);
+                            } else {
+                              widget.onProgesteroneDoseChanged(newDose);
+                            }
+                          },
+                        ),
+                        child: Container(
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0xFFD0C4BC).withOpacity(0.4)),
+                          ),
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            dose.toStringAsFixed(dose == dose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), ''),
+                            style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.onSurface),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Unit selection field
+                Expanded(
+                  flex: 3,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'UNIT',
+                        style: GoogleFonts.manrope(fontSize: 8, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C), letterSpacing: 1),
+                      ),
+                      const SizedBox(height: 6),
+                      Container(
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEDE7E5).withOpacity(0.6),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.all(2),
+                        child: Row(
+                          children: unitOptions.map((opt) {
+                            final isSelected = unit == opt;
+                            return Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  if (isEstradiol) {
+                                    widget.onEstradiolUnitChanged(opt);
+                                  } else {
+                                    widget.onProgesteroneUnitChanged(opt);
+                                  }
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: isSelected ? Colors.white : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(6),
+                                    boxShadow: isSelected
+                                        ? [
+                                            BoxShadow(
+                                              color: Colors.black.withOpacity(0.05),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 1),
+                                            )
+                                          ]
+                                        : null,
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    opt,
+                                    style: GoogleFonts.manrope(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: isSelected ? AppTheme.primary : const Color(0xFF9B8B7E),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Time selection field
+                Expanded(
+                  flex: 4,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'TIME',
+                        style: GoogleFonts.manrope(fontSize: 8, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C), letterSpacing: 1),
+                      ),
+                      const SizedBox(height: 6),
+                      GestureDetector(
+                        onTap: () => _openTimeSelector(
+                          context: context,
+                          currentTime: time,
+                          onTimeChanged: (formattedTime) {
+                            if (isEstradiol) {
+                              widget.onEstradiolTimeChanged(formattedTime);
+                            } else {
+                              widget.onProgesteroneTimeChanged(formattedTime);
+                            }
+                          },
+                        ),
+                        child: Container(
+                          height: 40,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0xFFD0C4BC).withOpacity(0.4)),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.schedule, size: 14, color: AppTheme.primary),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  time,
+                                  style: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.onSurface),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ] else ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Not scheduled for today',
+                        style: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C)),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        lastTaken == null
+                            ? 'No last taken date recorded'
+                            : 'Last taken: ${_formatDateTime(lastTaken, context)} (${_daysAgo(lastTaken)})',
+                        style: GoogleFonts.manrope(fontSize: 11, color: AppTheme.outline),
+                      ),
+                    ],
+                  ),
+                ),
+                OutlinedButton(
+                  onPressed: () async {
+                    final datePicked = await showDatePicker(
+                      context: context,
+                      initialDate: lastTaken ?? DateTime.now(),
+                      firstDate: DateTime.now().subtract(const Duration(days: 30)),
+                      lastDate: DateTime.now(),
+                    );
+                    if (datePicked == null) return;
+                    if (!mounted) return;
+                    final timePicked = await showTimePicker(
+                      context: context,
+                      initialTime: lastTaken != null
+                          ? TimeOfDay(hour: lastTaken.hour, minute: lastTaken.minute)
+                          : TimeOfDay.now(),
+                    );
+                    final finalDateTime = DateTime(
+                      datePicked.year,
+                      datePicked.month,
+                      datePicked.day,
+                      timePicked?.hour ?? 8,
+                      timePicked?.minute ?? 30,
+                    );
+                    setState(() {
+                      if (isEstradiol) {
+                        _estradiolLastTaken = finalDateTime;
+                      } else {
+                        _progesteroneLastTaken = finalDateTime;
+                      }
+                    });
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: AppTheme.primary.withOpacity(0.4)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                  child: Text(
+                    'Set Date',
+                    style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -387,15 +648,25 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
       ),
       title: Text(title, style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.onSurface)),
       subtitle: Text(subtitle, style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.outline)),
-      trailing: Container(
-        width: 32,
-        height: 32,
-        decoration: BoxDecoration(
-          color: checked ? AppTheme.primary : Colors.transparent,
-          shape: BoxShape.circle,
-          border: checked ? null : Border.all(color: const Color(0xFFD0C4BC), width: 2),
-        ),
-        child: checked ? const Icon(Icons.check, color: Colors.white, size: 18) : null,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            onTap: () => onCheckedChange(!checked),
+            child: Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: checked ? AppTheme.primary : Colors.transparent,
+                shape: BoxShape.circle,
+                border: checked ? null : Border.all(color: const Color(0xFFD0C4BC), width: 2),
+              ),
+              child: checked ? const Icon(Icons.check, color: Colors.white, size: 18) : null,
+            ),
+          ),
+          const SizedBox(width: 8),
+          const Icon(Icons.chevron_right, size: 16, color: Color(0xFF9B8B7E)),
+        ],
       ),
     );
   }
@@ -465,23 +736,39 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
             children: [
               _buildMedRow(
                 title: 'Estradiol Patch',
-                subtitle: '${widget.estradiolDose.toStringAsFixed(2).replaceAll(RegExp(r'\.00$'), '')} ${widget.estradiolUnit} • ${widget.estradiolTime}',
+                subtitle: widget.estradiolChecked
+                    ? '${widget.estradiolDose.toStringAsFixed(2).replaceAll(RegExp(r'\.00$'), '')} ${widget.estradiolUnit} • ${widget.estradiolTime}'
+                    : (_estradiolLastTaken == null
+                        ? 'Not scheduled today'
+                        : 'Last taken: ${_formatDate(_estradiolLastTaken!)}'),
                 icon: Icons.medication,
                 checked: widget.estradiolChecked,
                 onCheckedChange: (val) => widget.onEstradiolCheckedToggled(val!),
-                onTap: () => widget.onEstradiolCheckedToggled(!widget.estradiolChecked),
+                onTap: () {
+                  setState(() {
+                    _expandedIndex = _expandedIndex == 0 ? null : 0;
+                  });
+                },
               ),
-              if (widget.estradiolChecked) _buildInlineMedicationDetails('estradiol'),
+              if (_expandedIndex == 0) _buildInlineMedicationDetails('estradiol'),
               const Divider(color: Color(0xFFF2EDEA), height: 1),
               _buildMedRow(
                 title: 'Progesterone',
-                subtitle: '${widget.progesteroneDose.toStringAsFixed(0)} ${widget.progesteroneUnit} • ${widget.progesteroneTime}',
+                subtitle: widget.progesteroneChecked
+                    ? '${widget.progesteroneDose.toStringAsFixed(0)} ${widget.progesteroneUnit} • ${widget.progesteroneTime}'
+                    : (_progesteroneLastTaken == null
+                        ? 'Not scheduled today'
+                        : 'Last taken: ${_formatDate(_progesteroneLastTaken!)}'),
                 icon: Icons.medication,
                 checked: widget.progesteroneChecked,
                 onCheckedChange: (val) => widget.onProgesteroneCheckedToggled(val!),
-                onTap: () => widget.onProgesteroneCheckedToggled(!widget.progesteroneChecked),
+                onTap: () {
+                  setState(() {
+                    _expandedIndex = _expandedIndex == 1 ? null : 1;
+                  });
+                },
               ),
-              if (widget.progesteroneChecked) _buildInlineMedicationDetails('progesterone'),
+              if (_expandedIndex == 1) _buildInlineMedicationDetails('progesterone'),
             ],
           ),
         ),

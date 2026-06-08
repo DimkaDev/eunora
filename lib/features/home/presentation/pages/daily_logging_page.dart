@@ -20,6 +20,7 @@ import 'package:eunora/features/home/presentation/pages/daily_logging/severity_s
 import 'package:eunora/features/home/presentation/pages/daily_logging/triggers_step.dart';
 import 'package:eunora/features/home/presentation/pages/daily_logging/trigger_details_step.dart';
 import 'package:eunora/features/home/presentation/pages/daily_logging/daily_entry_step.dart';
+import 'package:eunora/features/home/presentation/widgets/dose_change_alert.dart';
 
 class DailyLoggingPage extends ConsumerStatefulWidget {
   const DailyLoggingPage({super.key});
@@ -62,7 +63,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   final Map<String, String> _customTriggerTexts = {};
 
   // Step 5: Medications & Supplements
-  bool _estradiolChecked = true;
+  bool _estradiolChecked = false;
   double _estradiolDose = 50.0; // Typical is 50.0 mcg
   String _estradiolUnit = 'mcg';
   String _estradiolTime = '08:30 AM';
@@ -73,11 +74,16 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   String _progesteroneTime = '08:00 PM';
 
   bool _vitaminDChecked = false;
-  bool _magnesiumChecked = true;
+  bool _magnesiumChecked = false;
 
   double _sleepDuration = 7.5;
   int _hydrationCups = 8;
   String _additionalNotes = '';
+  double? _initialEstradiolDose;
+  String? _initialEstradiolUnit;
+  double? _initialProgesteroneDose;
+  String? _initialProgesteroneUnit;
+
   late PageController _pageController;
 
   @override
@@ -97,15 +103,19 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
         final name = med.name.toLowerCase();
         if (name.contains('estradiol') || name.contains('estrogen') || name.contains('estradot')) {
           setState(() {
-            _estradiolChecked = true;
+            _estradiolChecked = false;
             _estradiolDose = med.dose;
             _estradiolUnit = med.unit;
+            _initialEstradiolDose = med.dose;
+            _initialEstradiolUnit = med.unit;
           });
         } else if (name.contains('progesterone') || name.contains('utrogestan')) {
           setState(() {
-            _progesteroneChecked = true;
+            _progesteroneChecked = false;
             _progesteroneDose = med.dose;
             _progesteroneUnit = med.unit;
+            _initialProgesteroneDose = med.dose;
+            _initialProgesteroneUnit = med.unit;
           });
         }
       }
@@ -138,9 +148,46 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
         curve: Curves.easeInOutCubic,
       );
     } else if (_currentStep == 4) {
-      setState(() {
-        _currentStep = 5;
-      });
+      Map<String, dynamic>? primaryChange;
+      if (_estradiolChecked && _initialEstradiolDose != null && (_estradiolDose != _initialEstradiolDose || _estradiolUnit != _initialEstradiolUnit)) {
+        primaryChange = {
+          'name': 'Estradiol Patch',
+          'oldDose': '${_initialEstradiolDose!.toStringAsFixed(_initialEstradiolDose == _initialEstradiolDose!.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $_initialEstradiolUnit',
+          'newDose': '${_estradiolDose.toStringAsFixed(_estradiolDose == _estradiolDose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $_estradiolUnit',
+        };
+      } else if (_progesteroneChecked && _initialProgesteroneDose != null && (_progesteroneDose != _initialProgesteroneDose || _progesteroneUnit != _initialProgesteroneUnit)) {
+        primaryChange = {
+          'name': 'Progesterone',
+          'oldDose': '${_initialProgesteroneDose!.toStringAsFixed(_initialProgesteroneDose == _initialProgesteroneDose!.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $_initialProgesteroneUnit',
+          'newDose': '${_progesteroneDose.toStringAsFixed(_progesteroneDose == _progesteroneDose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $_progesteroneUnit',
+        };
+      }
+
+      if (primaryChange != null) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          barrierColor: const Color(0xFF1D1B1A).withOpacity(0.4),
+          builder: (context) {
+            return DoseChangeAlert(
+              change: primaryChange!,
+              onConfirm: () {
+                Navigator.pop(context);
+                setState(() {
+                  _currentStep = 5;
+                });
+              },
+              onCancel: () {
+                Navigator.pop(context);
+              },
+            );
+          },
+        );
+      } else {
+        setState(() {
+          _currentStep = 5;
+        });
+      }
     }
   }
 
