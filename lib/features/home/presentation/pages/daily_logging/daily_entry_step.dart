@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/core/utils/animation_system.dart';
 import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
+import 'package:eunora/features/onboarding/presentation/widgets/add_medication_modal.dart';
+import 'package:eunora/features/onboarding/presentation/pages/other_medications_page.dart';
 
 class DailyEntryStep extends ConsumerStatefulWidget {
   final bool estradiolChecked;
@@ -483,6 +485,48 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
             ],
           ),
         ),
+        const SizedBox(height: 12),
+        InkWell(
+          onTap: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (context) => const AddMedicationModal(),
+            );
+          },
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppTheme.primary.withOpacity(0.2), width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.add_circle_outline, color: AppTheme.primary, size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  'Add HRT Medication',
+                  style: GoogleFonts.manrope(
+                    color: AppTheme.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
         const SizedBox(height: 24),
 
         // SUPPLEMENTS SECTION
@@ -516,6 +560,48 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                 onCheckedChange: (val) => widget.onMagnesiumCheckedToggled(val!),
               ),
             ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        InkWell(
+          onTap: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (context) => const AddOtherMedicationModal(),
+            );
+          },
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppTheme.primary.withOpacity(0.2), width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.add_circle_outline, color: AppTheme.primary, size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  'Add Supplement',
+                  style: GoogleFonts.manrope(
+                    color: AppTheme.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 24),

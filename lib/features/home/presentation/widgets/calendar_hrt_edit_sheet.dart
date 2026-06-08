@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'dart:ui';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 
@@ -123,9 +125,154 @@ class _CalendarHrtEditSheetState extends State<CalendarHrtEditSheet> {
     });
   }
 
+  List<double> _getAvailableDoses(String unit) {
+    final u = unit.toLowerCase();
+    if (u == 'mcg') {
+      return [12.5, 25.0, 37.5, 50.0, 62.5, 75.0, 87.5, 100.0, 112.5, 125.0, 150.0, 175.0, 200.0, 250.0];
+    } else if (u == 'mg') {
+      return [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 10.0, 20.0, 50.0, 100.0, 150.0, 200.0, 300.0, 400.0];
+    } else if (u == 'pump' || u == 'pumps') {
+      return [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
+    } else {
+      return List.generate(20, (i) => (i + 1).toDouble());
+    }
+  }
+
+  void _openDosePicker({
+    required String unit,
+    required double currentDose,
+    required ValueChanged<double> onDoseChanged,
+  }) {
+    final doses = _getAvailableDoses(unit);
+    int initialIndex = doses.indexWhere((d) => (d - currentDose).abs() < 0.01);
+    if (initialIndex == -1) initialIndex = 0;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFFFEF8F6),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Container(
+                  width: 48,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD0C4BC).withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      'Cancel',
+                      style: GoogleFonts.manrope(fontWeight: FontWeight.bold, color: const Color(0xFF8A817C)),
+                    ),
+                  ),
+                  Text(
+                    'Select Dose',
+                    style: GoogleFonts.notoSerif(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primary,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      'Done',
+                      style: GoogleFonts.manrope(fontWeight: FontWeight.bold, color: AppTheme.primary),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 200,
+                child: CupertinoPicker(
+                  scrollController: FixedExtentScrollController(initialItem: initialIndex),
+                  itemExtent: 44,
+                  onSelectedItemChanged: (index) {
+                    onDoseChanged(doses[index]);
+                  },
+                  children: doses.map((d) {
+                    return Center(
+                      child: Text(
+                        d.toStringAsFixed(d == d.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), ''),
+                        style: GoogleFonts.manrope(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.onSurface,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showDoseChangeWarningDialog(Map<String, dynamic> change) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: const Color(0xFF1D1B1A).withOpacity(0.4),
+      builder: (context) {
+        return _DoseChangeAlert(
+          change: change,
+          onConfirm: () {
+            Navigator.pop(context);
+            widget.onSave(_entries.map((e) => e.toMap()).toList());
+            Navigator.pop(this.context);
+          },
+          onCancel: () {
+            Navigator.pop(context);
+          },
+        );
+      },
+    );
+  }
+
   void _save() {
-    widget.onSave(_entries.map((e) => e.toMap()).toList());
-    Navigator.pop(context);
+    Map<String, dynamic>? primaryChange;
+    final initialEntries = widget.initialHrt.map(HrtEditEntry.fromMap).toList();
+    for (int i = 0; i < _entries.length; i++) {
+      if (i < initialEntries.length) {
+        if (_entries[i].dose != initialEntries[i].dose || _entries[i].unit != initialEntries[i].unit) {
+          primaryChange = {
+            'name': _entries[i].name,
+            'oldDose': '${initialEntries[i].dose} ${initialEntries[i].unit}',
+            'newDose': '${_entries[i].dose} ${_entries[i].unit}',
+          };
+          break;
+        }
+      }
+    }
+
+    if (primaryChange != null) {
+      _showDoseChangeWarningDialog(primaryChange);
+    } else {
+      widget.onSave(_entries.map((e) => e.toMap()).toList());
+      Navigator.pop(context);
+    }
   }
 
   @override
@@ -533,28 +680,41 @@ class _CalendarHrtEditSheetState extends State<CalendarHrtEditSheet> {
           Row(
             children: [
               Expanded(
-                child: Container(
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF5F3F0),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: TextField(
-                    controller:
-                        TextEditingController(text: entry.dose),
-                    keyboardType: TextInputType.number,
-                    style: GoogleFonts.manrope(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF1D1B1A),
+                child: GestureDetector(
+                  onTap: () {
+                    final currentDose = double.tryParse(entry.dose) ?? 1.0;
+                    _openDosePicker(
+                      unit: entry.unit,
+                      currentDose: currentDose,
+                      onDoseChanged: (newDose) {
+                        _setDose(
+                          index,
+                          newDose.toStringAsFixed(newDose == newDose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), ''),
+                        );
+                      },
+                    );
+                  },
+                  child: Container(
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF5F3F0),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          entry.dose,
+                          style: GoogleFonts.manrope(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF1D1B1A),
+                          ),
+                        ),
+                        const Icon(Icons.arrow_drop_down, color: Color(0xFF9B8B7E)),
+                      ],
                     ),
-                    onChanged: (v) => _setDose(index, v),
                   ),
                 ),
               ),
@@ -728,5 +888,290 @@ class _CalendarHrtEditSheetState extends State<CalendarHrtEditSheet> {
     final parts = time24.split(':');
     final hour = int.tryParse(parts.first) ?? 0;
     return hour < 12 ? 'AM' : 'PM';
+  }
+}
+
+class _DoseChangeAlert extends StatefulWidget {
+  final Map<String, dynamic> change;
+  final VoidCallback onConfirm;
+  final VoidCallback onCancel;
+
+  const _DoseChangeAlert({
+    required this.change,
+    required this.onConfirm,
+    required this.onCancel,
+  });
+
+  @override
+  State<_DoseChangeAlert> createState() => _DoseChangeAlertState();
+}
+
+class _DoseChangeAlertState extends State<_DoseChangeAlert> {
+  bool _showExplanation = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final name = widget.change['name'] ?? '';
+    final oldDose = widget.change['oldDose'] ?? '';
+    final newDose = widget.change['newDose'] ?? '';
+
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+      child: Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Container(
+          width: double.infinity,
+          constraints: const BoxConstraints(
+            maxWidth: 400,
+            minHeight: 520,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF1D1B1A).withOpacity(0.15),
+                blurRadius: 40,
+                offset: const Offset(0, 12),
+              ),
+            ],
+          ),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 36),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header Icon
+                  const Icon(
+                    Icons.help_outline_rounded,
+                    color: Color(0xFF9B8B7E),
+                    size: 38,
+                  ),
+                  const SizedBox(height: 16),
+                  // Alert Title
+                  Text(
+                    'We Noticed a Dose Change',
+                    style: GoogleFonts.notoSerif(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      height: 1.2,
+                      color: const Color(0xFF1D1B1A),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 14),
+                  // Alert Description
+                  Text.rich(
+                    TextSpan(
+                      style: GoogleFonts.manrope(
+                        fontSize: 13,
+                        height: 1.5,
+                        color: const Color(0xFF4D453F),
+                      ),
+                      children: [
+                        const TextSpan(text: 'Your last entry for '),
+                        TextSpan(
+                          text: name,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        TextSpan(text: ' showed $oldDose. Your new entry shows $newDose. Did your doctor change your dose?'),
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 28),
+                  // Visual Comparison
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8F2F0).withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xFFD0C4BC).withOpacity(0.1),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Before
+                        Expanded(
+                          child: Column(
+                            children: [
+                              Text(
+                                'BEFORE',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                  color: const Color(0xFF7F756E),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                oldDose,
+                                style: GoogleFonts.manrope(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF7F756E),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Arrow
+                        const Icon(
+                          Icons.arrow_forward_rounded,
+                          color: Color(0xFF9B8B7E),
+                          size: 22,
+                        ),
+                        // After
+                        Expanded(
+                          child: Column(
+                            children: [
+                              Text(
+                                'AFTER',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                  color: const Color(0xFF9B8B7E),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                newDose,
+                                style: GoogleFonts.manrope(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF9B8B7E),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  // Explanation Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEDDDF5),
+                      borderRadius: BorderRadius.circular(8),
+                      border: const Border(
+                        left: BorderSide(
+                          color: Color(0x33655A6E),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    child: Text(
+                      'Tracking dose changes helps us show you the impact on your symptoms. We\'ll track the next 14 days and compare.',
+                      style: GoogleFonts.manrope(
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                        height: 1.5,
+                        color: const Color(0xFF6C6074),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  // Button Section
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: widget.onConfirm,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF9B8B7E),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: Text(
+                        'Yes, My Dose Changed',
+                        style: GoogleFonts.manrope(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: OutlinedButton(
+                      onPressed: widget.onCancel,
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(
+                          color: Color(0xFFD0C4BC),
+                          width: 2,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: Text(
+                        'No, That Was a Mistake',
+                        style: GoogleFonts.manrope(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF1D1B1A),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Optional Link / Info Expansion
+                  const SizedBox(height: 20),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _showExplanation = !_showExplanation;
+                      });
+                    },
+                    child: Text(
+                      'How does before/after comparison work?',
+                      style: GoogleFonts.manrope(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF9B8B7E),
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                  if (_showExplanation) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEDE7E5).withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        'We\'ll track your symptoms for 14 days after your dose change. Then we\'ll show you patterns like "hot flashes decreased by 30%". This helps you and your doctor see if the new dose is working.',
+                        style: GoogleFonts.manrope(
+                          fontSize: 12,
+                          height: 1.4,
+                          color: const Color(0xFF4D453F),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

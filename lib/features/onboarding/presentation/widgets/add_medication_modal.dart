@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/models/medication.dart';
 import '../providers/medications_provider.dart';
@@ -93,6 +95,113 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
       default:
         return ['1', '2', '5', '10'];
     }
+  }
+
+  List<double> _getAvailableDoses(String unit) {
+    final u = unit.toLowerCase();
+    if (u == 'mcg') {
+      return [12.5, 25.0, 37.5, 50.0, 62.5, 75.0, 87.5, 100.0, 112.5, 125.0, 150.0, 175.0, 200.0, 250.0];
+    } else if (u == 'mg') {
+      return [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 10.0, 20.0, 50.0, 100.0, 150.0, 200.0, 300.0, 400.0];
+    } else if (u == 'pumps') {
+      return [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
+    } else if (u == 'applicator') {
+      return [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0];
+    } else {
+      return List.generate(20, (i) => (i + 1).toDouble());
+    }
+  }
+
+  void _openDosePicker({
+    required String unit,
+    required double currentDose,
+    required ValueChanged<double> onDoseChanged,
+  }) {
+    final doses = _getAvailableDoses(unit);
+    int initialIndex = doses.indexWhere((d) => (d - currentDose).abs() < 0.01);
+    if (initialIndex == -1) initialIndex = 0;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFFFEF8F6),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Container(
+                  width: 48,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD0C4BC).withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      'Cancel',
+                      style: GoogleFonts.manrope(fontWeight: FontWeight.bold, color: const Color(0xFF8A817C)),
+                    ),
+                  ),
+                  Text(
+                    'Select Dose',
+                    style: GoogleFonts.notoSerif(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primary,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      'Done',
+                      style: GoogleFonts.manrope(fontWeight: FontWeight.bold, color: AppTheme.primary),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 200,
+                child: CupertinoPicker(
+                  scrollController: FixedExtentScrollController(initialItem: initialIndex),
+                  itemExtent: 44,
+                  onSelectedItemChanged: (index) {
+                    onDoseChanged(doses[index]);
+                  },
+                  children: doses.map((d) {
+                    return Center(
+                      child: Text(
+                        d.toStringAsFixed(d == d.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), ''),
+                        style: GoogleFonts.manrope(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.onSurface,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _save() {
@@ -513,6 +622,16 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
                   setState(() {
                     _isCustomDose = true;
                   });
+                  final dose = double.tryParse(_doseController.text) ?? 1.0;
+                  _openDosePicker(
+                    unit: _selectedUnit,
+                    currentDose: dose,
+                    onDoseChanged: (newDose) {
+                      setState(() {
+                        _doseController.text = newDose.toStringAsFixed(newDose == newDose.toInt() ? 0 : 2);
+                      });
+                    },
+                  );
                 }
               },
               selectedColor: const Color(0xFF67594E),
@@ -576,58 +695,64 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
   }
 
   Widget _buildDoseInputRow({required bool showUnitSelector}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFF2EDE9),
-        borderRadius: BorderRadius.circular(12),
+    final dose = double.tryParse(_doseController.text) ?? 1.0;
+    return GestureDetector(
+      onTap: () => _openDosePicker(
+        unit: _selectedUnit,
+        currentDose: dose,
+        onDoseChanged: (newDose) {
+          setState(() {
+            _doseController.text = newDose.toStringAsFixed(newDose == newDose.toInt() ? 0 : 2);
+          });
+        },
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextFormField(
-              controller: _doseController,
-              textAlign: TextAlign.center,
-              keyboardType: TextInputType.number,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                hintText: 'Enter dose',
-              ),
-              validator: (value) => value == null || value.isEmpty ? '?' : null,
+      child: Container(
+        height: 56,
+        decoration: BoxDecoration(
+          color: const Color(0xFFF2EDE9),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              _doseController.text,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF1D1B1A)),
             ),
-          ),
-          if (showUnitSelector) ...[
-            Container(
-              width: 1,
-              height: 24,
-              color: const Color(0xFFD6D3D1),
+            Row(
+              children: [
+                if (showUnitSelector)
+                  DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _selectedUnit,
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() {
+                            _selectedUnit = val;
+                            final doses = _getAvailableDoses(val);
+                            _doseController.text = doses[0].toStringAsFixed(doses[0] == doses[0].toInt() ? 0 : 2);
+                          });
+                        }
+                      },
+                      items: ['mg', 'mcg', 'pumps', 'applicator']
+                          .map((u) => DropdownMenuItem(value: u, child: Text(u, style: const TextStyle(fontSize: 13))))
+                          .toList(),
+                    ),
+                  )
+                else
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      _selectedUnit,
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF4D453F)),
+                    ),
+                  ),
+                const Icon(Icons.arrow_drop_down, color: Color(0xFF4D453F)),
+              ],
             ),
-            DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _selectedUnit,
-                onChanged: (val) {
-                  if (val != null) {
-                    setState(() => _selectedUnit = val);
-                  }
-                },
-                items: ['mg', 'mcg', 'pumps', 'applicator']
-                    .map((u) => DropdownMenuItem(value: u, child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Text(u, style: const TextStyle(fontSize: 13)),
-                    )))
-                    .toList(),
-              ),
-            ),
-          ] else
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                _selectedUnit,
-                style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF4D453F)),
-              ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
