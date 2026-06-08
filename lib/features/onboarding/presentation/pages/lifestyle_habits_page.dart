@@ -6,7 +6,9 @@ import 'package:eunora/core/theme/app_theme.dart';
 import '../widgets/onboarding_header.dart';
 
 class LifestyleHabitsPage extends ConsumerStatefulWidget {
-  const LifestyleHabitsPage({super.key});
+  final VoidCallback? onNext;
+  final VoidCallback? onBack;
+  const LifestyleHabitsPage({super.key, this.onNext, this.onBack});
 
   @override
   ConsumerState<LifestyleHabitsPage> createState() => _LifestyleHabitsPageState();
@@ -31,6 +33,7 @@ class _LifestyleHabitsPageState extends ConsumerState<LifestyleHabitsPage> {
                 OnboardingHeader(
                   currentStep: 8,
                   subtitle: 'LIFESTYLE',
+                  onBack: widget.onBack,
                   onSkip: () => _showInfoDialog(context),
                 ),
                 Expanded(
@@ -359,8 +362,14 @@ class _LifestyleHabitsPageState extends ConsumerState<LifestyleHabitsPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ElevatedButton(
-                  onPressed: () => context.push('/active-setup'),
+                 ElevatedButton(
+                  onPressed: () {
+                    if (widget.onNext != null) {
+                      widget.onNext!();
+                    } else {
+                      context.push('/active-setup');
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF67594E),
                     foregroundColor: Colors.white,
@@ -375,7 +384,13 @@ class _LifestyleHabitsPageState extends ConsumerState<LifestyleHabitsPage> {
                 ),
                 const SizedBox(height: 12),
                 TextButton(
-                  onPressed: () => context.push('/active-setup'),
+                  onPressed: () {
+                    if (widget.onNext != null) {
+                      widget.onNext!();
+                    } else {
+                      context.push('/active-setup');
+                    }
+                  },
                   child: Text(
                     'SKIP THIS STEP',
                     style: TextStyle(

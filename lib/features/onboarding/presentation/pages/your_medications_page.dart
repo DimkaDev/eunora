@@ -10,7 +10,9 @@ import '../../domain/models/medication.dart';
 import '../widgets/add_medication_modal.dart';
 
 class YourMedicationsPage extends ConsumerWidget {
-  const YourMedicationsPage({super.key});
+  final VoidCallback? onNext;
+  final VoidCallback? onBack;
+  const YourMedicationsPage({super.key, this.onNext, this.onBack});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -28,7 +30,9 @@ class YourMedicationsPage extends ConsumerWidget {
                   currentStep: 2,
                   subtitle: 'MEDICATIONS',
                   onBack: () {
-                    if (context.canPop()) {
+                    if (onBack != null) {
+                      onBack!();
+                    } else if (context.canPop()) {
                       context.pop();
                     } else {
                       context.go('/menopause-stage');
@@ -365,10 +369,14 @@ class YourMedicationsPage extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ElevatedButton(
+                 ElevatedButton(
                   onPressed: () {
                     if (hasMedications) {
-                      context.push('/symptom-logging');
+                      if (onNext != null) {
+                        onNext!();
+                      } else {
+                        context.push('/symptom-logging');
+                      }
                     } else {
                       ref.read(medicationsProvider.notifier).setError(
                         'Please select or add a medication to continue, or tap Skip if you are not on HRT.'
@@ -389,7 +397,13 @@ class YourMedicationsPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 TextButton(
-                  onPressed: () => context.push('/symptom-logging'),
+                  onPressed: () {
+                    if (onNext != null) {
+                      onNext!();
+                    } else {
+                      context.push('/symptom-logging');
+                    }
+                  },
                   child: Text(
                     'SKIP THIS STEP',
                     style: TextStyle(

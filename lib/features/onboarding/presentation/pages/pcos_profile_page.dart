@@ -6,7 +6,9 @@ import 'package:eunora/features/onboarding/presentation/widgets/onboarding_heade
 import 'package:eunora/features/onboarding/presentation/widgets/profile_radio_card.dart';
 
 class PCOSProfilePage extends StatefulWidget {
-  const PCOSProfilePage({super.key});
+  final VoidCallback? onNext;
+  final VoidCallback? onBack;
+  const PCOSProfilePage({super.key, this.onNext, this.onBack});
 
   @override
   State<PCOSProfilePage> createState() => _PCOSProfilePageState();
@@ -106,6 +108,7 @@ class _PCOSProfilePageState extends State<PCOSProfilePage> {
                   currentStep: 1,
                   title: 'Health Profile',
                   subtitle: 'PCOS & HORMONE CONDITION',
+                  onBack: widget.onBack,
                   onSkip: _showInfoDialog,
                 ),
                 Expanded(
@@ -633,7 +636,15 @@ class _PCOSProfilePageState extends State<PCOSProfilePage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 ElevatedButton(
-                  onPressed: isReady ? () => context.push('/medications') : null,
+                  onPressed: isReady
+                      ? () {
+                          if (widget.onNext != null) {
+                            widget.onNext!();
+                          } else {
+                            context.push('/medications');
+                          }
+                        }
+                      : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF67594E),
                     foregroundColor: Colors.white,

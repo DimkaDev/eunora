@@ -15,14 +15,13 @@ import 'package:eunora/features/auth/presentation/pages/reset_password_page.dart
 import 'package:eunora/features/auth/presentation/pages/reset_password_success_page.dart';
 import 'package:eunora/features/auth/presentation/pages/verify_email_page.dart';
 import 'package:eunora/features/auth/presentation/pages/account_confirmed_page.dart';
-import 'package:eunora/features/onboarding/presentation/pages/menopause_stage_page.dart';
+import 'package:eunora/features/onboarding/presentation/pages/onboarding_flow_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/perimenopause_profile_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/menopause_stage_profile_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/postmenopause_profile_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/surgical_menopause_profile_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/pcos_profile_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/your_medications_page.dart';
-
 import 'package:eunora/features/onboarding/presentation/pages/frequent_symptoms_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/symptom_library_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/trigger_library_page.dart';
@@ -164,7 +163,7 @@ final GoRouter appRouter = GoRouter(
       pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
         context: context,
         state: state,
-        child: const MenopauseStagePage(),
+        child: const OnboardingFlowPage(),
       ),
     ),
     GoRoute(

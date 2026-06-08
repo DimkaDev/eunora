@@ -7,7 +7,9 @@ import 'package:eunora/core/theme/app_theme.dart';
 import '../widgets/onboarding_header.dart';
 
 class ContraceptionPage extends ConsumerStatefulWidget {
-  const ContraceptionPage({super.key});
+  final VoidCallback? onNext;
+  final VoidCallback? onBack;
+  const ContraceptionPage({super.key, this.onNext, this.onBack});
 
   @override
   ConsumerState<ContraceptionPage> createState() => _ContraceptionPageState();
@@ -56,6 +58,7 @@ class _ContraceptionPageState extends ConsumerState<ContraceptionPage> {
             OnboardingHeader(
               currentStep: 6,
               subtitle: 'CONTRACEPTION',
+              onBack: widget.onBack,
               onSkip: () => _showInfoDialog(context),
             ),
             Expanded(
@@ -390,7 +393,13 @@ class _ContraceptionPageState extends ConsumerState<ContraceptionPage> {
       mainAxisSize: MainAxisSize.min,
       children: [
         ElevatedButton(
-          onPressed: () => context.push('/weight'),
+          onPressed: () {
+            if (widget.onNext != null) {
+              widget.onNext!();
+            } else {
+              context.push('/weight');
+            }
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF67594E),
             foregroundColor: Colors.white,
@@ -405,7 +414,13 @@ class _ContraceptionPageState extends ConsumerState<ContraceptionPage> {
         ),
         const SizedBox(height: 12),
         TextButton(
-          onPressed: () => context.push('/weight'),
+          onPressed: () {
+            if (widget.onNext != null) {
+              widget.onNext!();
+            } else {
+              context.push('/weight');
+            }
+          },
           child: Text(
             'SKIP THIS STEP',
             style: TextStyle(

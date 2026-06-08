@@ -6,7 +6,9 @@ import 'package:eunora/core/theme/app_theme.dart';
 import '../widgets/onboarding_header.dart';
 
 class WeightPage extends ConsumerStatefulWidget {
-  const WeightPage({super.key});
+  final VoidCallback? onNext;
+  final VoidCallback? onBack;
+  const WeightPage({super.key, this.onNext, this.onBack});
 
   @override
   ConsumerState<WeightPage> createState() => _WeightPageState();
@@ -28,6 +30,7 @@ class _WeightPageState extends ConsumerState<WeightPage> {
                 OnboardingHeader(
                   currentStep: 7,
                   subtitle: 'WEIGHT',
+                  onBack: widget.onBack,
                   onSkip: () => _showInfoDialog(context),
                 ),
                 Expanded(
@@ -239,8 +242,14 @@ class _WeightPageState extends ConsumerState<WeightPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ElevatedButton(
-                  onPressed: () => context.push('/lifestyle-habits'),
+                 ElevatedButton(
+                  onPressed: () {
+                    if (widget.onNext != null) {
+                      widget.onNext!();
+                    } else {
+                      context.push('/lifestyle-habits');
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF67594E),
                     foregroundColor: Colors.white,
@@ -255,7 +264,13 @@ class _WeightPageState extends ConsumerState<WeightPage> {
                 ),
                 const SizedBox(height: 12),
                 TextButton(
-                  onPressed: () => context.push('/lifestyle-habits'),
+                  onPressed: () {
+                    if (widget.onNext != null) {
+                      widget.onNext!();
+                    } else {
+                      context.push('/lifestyle-habits');
+                    }
+                  },
                   child: Text(
                     'SKIP THIS QUESTION',
                     style: TextStyle(

@@ -7,7 +7,9 @@ import 'package:eunora/core/theme/app_theme.dart';
 import '../widgets/onboarding_header.dart';
 
 class HealthConditionsPage extends ConsumerStatefulWidget {
-  const HealthConditionsPage({super.key});
+  final VoidCallback? onNext;
+  final VoidCallback? onBack;
+  const HealthConditionsPage({super.key, this.onNext, this.onBack});
 
   @override
   ConsumerState<HealthConditionsPage> createState() => _HealthConditionsPageState();
@@ -47,6 +49,7 @@ class _HealthConditionsPageState extends ConsumerState<HealthConditionsPage> {
                 OnboardingHeader(
                   currentStep: 5,
                   subtitle: 'HEALTH CONDITIONS',
+                  onBack: widget.onBack,
                   onSkip: () => _showInfoDialog(context),
                 ),
                 Expanded(
@@ -497,8 +500,14 @@ class _HealthConditionsPageState extends ConsumerState<HealthConditionsPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ElevatedButton(
-                  onPressed: () => context.push('/contraception_screening'),
+                 ElevatedButton(
+                  onPressed: () {
+                    if (widget.onNext != null) {
+                      widget.onNext!();
+                    } else {
+                      context.push('/contraception_screening');
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF67594E),
                     foregroundColor: Colors.white,
@@ -510,7 +519,13 @@ class _HealthConditionsPageState extends ConsumerState<HealthConditionsPage> {
                 ),
                 const SizedBox(height: 12),
                 TextButton(
-                  onPressed: () => context.push('/contraception_screening'),
+                  onPressed: () {
+                    if (widget.onNext != null) {
+                      widget.onNext!();
+                    } else {
+                      context.push('/contraception_screening');
+                    }
+                  },
                   child: Text(
                     'SKIP THIS STEP',
                     style: TextStyle(

@@ -6,7 +6,9 @@ import 'package:eunora/features/onboarding/presentation/widgets/onboarding_heade
 import 'package:eunora/features/onboarding/presentation/widgets/profile_radio_card.dart';
 
 class MenopauseStageProfilePage extends StatefulWidget {
-  const MenopauseStageProfilePage({super.key});
+  final VoidCallback? onNext;
+  final VoidCallback? onBack;
+  const MenopauseStageProfilePage({super.key, this.onNext, this.onBack});
 
   @override
   State<MenopauseStageProfilePage> createState() => _MenopauseStageProfilePageState();
@@ -100,6 +102,7 @@ class _MenopauseStageProfilePageState extends State<MenopauseStageProfilePage> {
                   currentStep: 1,
                   title: 'Health Profile',
                   subtitle: 'MENOPAUSE STAGE',
+                  onBack: widget.onBack,
                   onSkip: _showInfoDialog,
                 ),
                 Expanded(
@@ -278,7 +281,15 @@ class _MenopauseStageProfilePageState extends State<MenopauseStageProfilePage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 ElevatedButton(
-                  onPressed: isReady ? () => context.push('/medications') : null,
+                  onPressed: isReady
+                      ? () {
+                          if (widget.onNext != null) {
+                            widget.onNext!();
+                          } else {
+                            context.push('/medications');
+                          }
+                        }
+                      : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF67594E),
                     foregroundColor: Colors.white,

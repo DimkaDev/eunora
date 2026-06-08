@@ -9,7 +9,9 @@ import 'package:go_router/go_router.dart';
 import 'package:eunora/core/utils/animation_system.dart';
 
 class MenopauseStagePage extends ConsumerStatefulWidget {
-  const MenopauseStagePage({super.key});
+  final VoidCallback? onNext;
+  final VoidCallback? onBack;
+  const MenopauseStagePage({super.key, this.onNext, this.onBack});
 
   @override
   ConsumerState<MenopauseStagePage> createState() => _MenopauseStagePageState();
@@ -579,24 +581,28 @@ class _MenopauseStagePageState extends ConsumerState<MenopauseStagePage> {
             child: Bounceable(
               onTap: hasSelection
                   ? () {
-                      switch (state.selectedStage) {
-                        case MenopauseStage.irregular:
-                          context.push('/perimenopause-profile');
-                          break;
-                        case MenopauseStage.noPeriod12Months:
-                          context.push('/menopause-stage-profile');
-                          break;
-                        case MenopauseStage.postmenopause:
-                          context.push('/postmenopause-profile');
-                          break;
-                        case MenopauseStage.surgical:
-                          context.push('/surgical-menopause-profile');
-                          break;
-                        case MenopauseStage.pcos:
-                          context.push('/pcos-profile');
-                          break;
-                        default:
-                          context.go('/home');
+                      if (widget.onNext != null) {
+                        widget.onNext!();
+                      } else {
+                        switch (state.selectedStage) {
+                          case MenopauseStage.irregular:
+                            context.push('/perimenopause-profile');
+                            break;
+                          case MenopauseStage.noPeriod12Months:
+                            context.push('/menopause-stage-profile');
+                            break;
+                          case MenopauseStage.postmenopause:
+                            context.push('/postmenopause-profile');
+                            break;
+                          case MenopauseStage.surgical:
+                            context.push('/surgical-menopause-profile');
+                            break;
+                          case MenopauseStage.pcos:
+                            context.push('/pcos-profile');
+                            break;
+                          default:
+                            context.go('/home');
+                        }
                       }
                     }
                   : null,

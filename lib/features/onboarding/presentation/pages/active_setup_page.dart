@@ -15,7 +15,8 @@ import 'package:eunora/features/onboarding/presentation/providers/medications_pr
 import 'package:eunora/features/onboarding/presentation/providers/other_medications_provider.dart';
 
 class ActiveSetupPage extends ConsumerStatefulWidget {
-  const ActiveSetupPage({super.key});
+  final VoidCallback? onBack;
+  const ActiveSetupPage({super.key, this.onBack});
 
   @override
   ConsumerState<ActiveSetupPage> createState() => _ActiveSetupPageState();
@@ -36,6 +37,7 @@ class _ActiveSetupPageState extends ConsumerState<ActiveSetupPage> {
               children: [
                 OnboardingHeader(
                   currentStep: 9,
+                  onBack: widget.onBack,
                   onSkip: () => _showInfoDialog(context),
                 ),
                 Expanded(

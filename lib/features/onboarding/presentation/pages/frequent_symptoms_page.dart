@@ -8,7 +8,9 @@ import '../../domain/models/symptom.dart';
 import '../widgets/onboarding_header.dart';
 
 class FrequentSymptomsPage extends ConsumerWidget {
-  const FrequentSymptomsPage({super.key});
+  final VoidCallback? onNext;
+  final VoidCallback? onBack;
+  const FrequentSymptomsPage({super.key, this.onNext, this.onBack});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -33,6 +35,7 @@ class FrequentSymptomsPage extends ConsumerWidget {
                 OnboardingHeader(
                   currentStep: 3,
                   subtitle: 'SYMPTOMS',
+                  onBack: onBack,
                   onSkip: () => _showInfoDialog(context),
                 ),
                 Expanded(
@@ -272,8 +275,14 @@ class FrequentSymptomsPage extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ElevatedButton(
-                  onPressed: () => context.push('/other-medications'),
+                 ElevatedButton(
+                  onPressed: () {
+                    if (onNext != null) {
+                      onNext!();
+                    } else {
+                      context.push('/other-medications');
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF67594E),
                     foregroundColor: Colors.white,
@@ -288,7 +297,13 @@ class FrequentSymptomsPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 TextButton(
-                  onPressed: () => context.push('/other-medications'),
+                  onPressed: () {
+                    if (onNext != null) {
+                      onNext!();
+                    } else {
+                      context.push('/other-medications');
+                    }
+                  },
                   child: Text(
                     'SKIP THIS STEP',
                     style: TextStyle(

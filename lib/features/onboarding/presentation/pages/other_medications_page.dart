@@ -10,7 +10,9 @@ import '../widgets/onboarding_header.dart';
 import '../widgets/other_medication_list_item.dart';
 
 class OtherMedicationsPage extends ConsumerWidget {
-  const OtherMedicationsPage({super.key});
+  final VoidCallback? onNext;
+  final VoidCallback? onBack;
+  const OtherMedicationsPage({super.key, this.onNext, this.onBack});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,6 +29,7 @@ class OtherMedicationsPage extends ConsumerWidget {
                 OnboardingHeader(
                   currentStep: 4,
                   subtitle: 'OTHER MEDICATIONS',
+                  onBack: onBack,
                   onSkip: () => _showInfoDialog(context),
                 ),
                 Expanded(
@@ -437,8 +440,14 @@ class OtherMedicationsPage extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ElevatedButton(
-                  onPressed: () => context.push('/health-conditions'),
+                 ElevatedButton(
+                  onPressed: () {
+                    if (onNext != null) {
+                      onNext!();
+                    } else {
+                      context.push('/health-conditions');
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF67594E),
                     foregroundColor: Colors.white,
@@ -453,7 +462,13 @@ class OtherMedicationsPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 TextButton(
-                  onPressed: () => context.push('/health-conditions'),
+                  onPressed: () {
+                    if (onNext != null) {
+                      onNext!();
+                    } else {
+                      context.push('/health-conditions');
+                    }
+                  },
                   child: Text(
                     'SKIP THIS STEP',
                     style: TextStyle(
