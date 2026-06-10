@@ -753,14 +753,19 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
     required HrtLogStatus status,
     required VoidCallback onTap,
   }) {
-    // Base tile styling
     Color tileBgColor = Colors.white;
     Color tileBorderColor = const Color(0xFFF2EDEA);
+    Color textColor = AppTheme.onSurface;
+    Color subtitleColor = AppTheme.outline;
+    Color iconColor = AppTheme.primary;
     Widget? trailingWidget;
 
     if (status == HrtLogStatus.taken) {
       tileBgColor = const Color(0xFFE8F5ED);
       tileBorderColor = const Color(0xFFC7E8D5);
+      textColor = const Color(0xFF1B432C);
+      subtitleColor = const Color(0xFF2D5A3E).withValues(alpha: 0.8);
+      iconColor = const Color(0xFF2D5A3E);
       trailingWidget = Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -783,14 +788,81 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
           const SuccessCheckmark(),
         ],
       );
+    } else if (status == HrtLogStatus.pending) {
+      tileBgColor = Colors.white;
+      tileBorderColor = const Color(0xFFF2EDEA);
+      textColor = AppTheme.onSurface;
+      subtitleColor = AppTheme.outline;
+      iconColor = AppTheme.primary;
+      trailingWidget = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppTheme.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.edit_calendar, color: AppTheme.primary, size: 10),
+                const SizedBox(width: 4),
+                Text(
+                  'Ready to log',
+                  style: GoogleFonts.manrope(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          const Icon(Icons.chevron_right, size: 16, color: Color(0xFF9B8B7E)),
+        ],
+      );
     } else {
-      trailingWidget = null;
+      tileBgColor = const Color(0xFFFFF6F4);
+      tileBorderColor = const Color(0xFFFFE3DC);
+      textColor = const Color(0xFF5A2518);
+      subtitleColor = const Color(0xFF8C3A25).withValues(alpha: 0.7);
+      iconColor = const Color(0xFF8C3A25);
+      trailingWidget = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFDAD3),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.info_outline, color: Color(0xFF8C3A25), size: 10),
+                const SizedBox(width: 4),
+                Text(
+                  'Not scheduled today',
+                  style: GoogleFonts.manrope(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF8C3A25),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          const Icon(Icons.chevron_right, size: 16, color: Color(0xFF8C3A25)),
+        ],
+      );
     }
 
-    Widget baseTile = Container(
+    return Container(
       decoration: BoxDecoration(
         color: tileBgColor,
-        border: Border.all(color: tileBorderColor),
       ),
       child: ListTile(
         onTap: onTap,
@@ -798,17 +870,21 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: const Color(0xFFEDDDF5).withValues(alpha: 0.3),
+            color: status == HrtLogStatus.taken
+                ? const Color(0xFFC7E8D5).withValues(alpha: 0.4)
+                : status == HrtLogStatus.skipped
+                    ? const Color(0xFFFFDAD3).withValues(alpha: 0.4)
+                    : const Color(0xFFEDDDF5).withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Icon(icon, color: AppTheme.primary, size: 20),
+          child: Icon(icon, color: iconColor, size: 20),
         ),
         title: Text(
           title,
           style: GoogleFonts.manrope(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: AppTheme.onSurface,
+            color: textColor,
           ),
         ),
         subtitle: Text(
@@ -816,93 +892,11 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
           style: GoogleFonts.manrope(
             fontSize: 10,
             fontWeight: FontWeight.bold,
-            color: AppTheme.outline,
+            color: subtitleColor,
           ),
         ),
         trailing: trailingWidget,
       ),
-    );
-
-    if (status == HrtLogStatus.taken) {
-      return baseTile;
-    }
-
-    // Overlay styles for pending/skipped (acting as the 2nd layer on top)
-    Color overlayBgColor;
-    Color overlayTextColor;
-    String overlayText = '';
-    IconData overlayIcon;
-
-    if (status == HrtLogStatus.pending) {
-      overlayBgColor = const Color(0xFFFAF9F6).withValues(alpha: 0.82); // Warm grey semi-transparent
-      overlayTextColor = const Color(0xFF8A817C);
-      overlayText = 'Ready to log';
-      overlayIcon = Icons.edit_calendar;
-    } else {
-      overlayBgColor = const Color(0xFFFFECE8).withValues(alpha: 0.85); // Red semi-transparent
-      overlayTextColor = const Color(0xFF8C3A25);
-      overlayText = 'Not scheduled today';
-      overlayIcon = Icons.info_outline;
-    }
-
-    return Stack(
-      children: [
-        baseTile,
-        Positioned.fill(
-          child: GestureDetector(
-            onTap: onTap,
-            child: Container(
-              decoration: BoxDecoration(
-                color: overlayBgColor,
-                border: Border.all(
-                  color: status == HrtLogStatus.pending
-                      ? const Color(0xFFE5E2DC).withValues(alpha: 0.5)
-                      : const Color(0xFFFFDAD3).withValues(alpha: 0.5),
-                ),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: status == HrtLogStatus.pending
-                          ? const Color(0xFFEAE6E0)
-                          : const Color(0xFFFFDAD3),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.03),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        )
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(overlayIcon, color: overlayTextColor, size: 14),
-                        const SizedBox(width: 6),
-                        Text(
-                          overlayText,
-                          style: GoogleFonts.manrope(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: overlayTextColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Icon(Icons.chevron_right, size: 16, color: overlayTextColor),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -964,62 +958,64 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppTheme.outlineVariant.withOpacity(0.3)),
+            border: Border.all(color: AppTheme.outlineVariant.withValues(alpha: 0.3)),
           ),
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            children: [
-              _buildMedRow(
-                title: 'Estradiol Patch',
-                subtitle: widget.estradiolChecked
-                    ? '${widget.estradiolDose.toStringAsFixed(2).replaceAll(RegExp(r'\.00$'), '')} ${widget.estradiolUnit} • ${widget.estradiolTime}'
-                    : (_estradiolLastTaken == null
-                        ? 'Not scheduled today'
-                        : 'Last taken: ${_formatDate(_estradiolLastTaken!)}'),
-                icon: Icons.medication,
-                status: _estradiolStatus,
-                onTap: () {
-                  setState(() {
-                    _expandedIndex = _expandedIndex == 0 ? null : 0;
-                  });
-                },
-              ),
-              if (_expandedIndex == 0) _buildInlineMedicationDetails('estradiol'),
-              const Divider(color: Color(0xFFF2EDEA), height: 1),
-              _buildMedRow(
-                title: 'Progesterone',
-                subtitle: widget.progesteroneChecked
-                    ? '${widget.progesteroneDose.toStringAsFixed(0)} ${widget.progesteroneUnit} • ${widget.progesteroneTime}'
-                    : (_progesteroneLastTaken == null
-                        ? 'Not scheduled today'
-                        : 'Last taken: ${_formatDate(_progesteroneLastTaken!)}'),
-                icon: Icons.medication,
-                status: _progesteroneStatus,
-                onTap: () {
-                  setState(() {
-                    _expandedIndex = _expandedIndex == 1 ? null : 1;
-                  });
-                },
-              ),
-              if (_expandedIndex == 1) _buildInlineMedicationDetails('progesterone'),
-              const Divider(color: Color(0xFFF2EDEA), height: 1),
-              _buildMedRow(
-                title: 'Estrogen Gel',
-                subtitle: _estrogenGelChecked
-                    ? '${_estrogenGelDose.toStringAsFixed(0)} $_estrogenGelUnit • $_estrogenGelTime'
-                    : (_estrogenGelLastTaken == null
-                        ? 'Not scheduled today'
-                        : 'Last taken: ${_formatDate(_estrogenGelLastTaken!)}'),
-                icon: Icons.opacity,
-                status: _estrogenGelStatus,
-                onTap: () {
-                  setState(() {
-                    _expandedIndex = _expandedIndex == 2 ? null : 2;
-                  });
-                },
-              ),
-              if (_expandedIndex == 2) _buildInlineMedicationDetails('estrogen_gel'),
-            ],
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(23),
+            child: Column(
+              children: [
+                _buildMedRow(
+                  title: 'Estradiol Patch',
+                  subtitle: widget.estradiolChecked
+                      ? '${widget.estradiolDose.toStringAsFixed(2).replaceAll(RegExp(r'\.00$'), '')} ${widget.estradiolUnit} • ${widget.estradiolTime}'
+                      : (_estradiolLastTaken == null
+                          ? 'Not scheduled today'
+                          : 'Last taken: ${_formatDate(_estradiolLastTaken!)}'),
+                  icon: Icons.medication,
+                  status: _estradiolStatus,
+                  onTap: () {
+                    setState(() {
+                      _expandedIndex = _expandedIndex == 0 ? null : 0;
+                    });
+                  },
+                ),
+                if (_expandedIndex == 0) _buildInlineMedicationDetails('estradiol'),
+                const Divider(color: Color(0xFFF2EDEA), height: 1),
+                _buildMedRow(
+                  title: 'Progesterone',
+                  subtitle: widget.progesteroneChecked
+                      ? '${widget.progesteroneDose.toStringAsFixed(0)} ${widget.progesteroneUnit} • ${widget.progesteroneTime}'
+                      : (_progesteroneLastTaken == null
+                          ? 'Not scheduled today'
+                          : 'Last taken: ${_formatDate(_progesteroneLastTaken!)}'),
+                  icon: Icons.medication,
+                  status: _progesteroneStatus,
+                  onTap: () {
+                    setState(() {
+                      _expandedIndex = _expandedIndex == 1 ? null : 1;
+                    });
+                  },
+                ),
+                if (_expandedIndex == 1) _buildInlineMedicationDetails('progesterone'),
+                const Divider(color: Color(0xFFF2EDEA), height: 1),
+                _buildMedRow(
+                  title: 'Estrogen Gel',
+                  subtitle: _estrogenGelChecked
+                      ? '${_estrogenGelDose.toStringAsFixed(0)} $_estrogenGelUnit • $_estrogenGelTime'
+                      : (_estrogenGelLastTaken == null
+                          ? 'Not scheduled today'
+                          : 'Last taken: ${_formatDate(_estrogenGelLastTaken!)}'),
+                  icon: Icons.opacity,
+                  status: _estrogenGelStatus,
+                  onTap: () {
+                    setState(() {
+                      _expandedIndex = _expandedIndex == 2 ? null : 2;
+                    });
+                  },
+                ),
+                if (_expandedIndex == 2) _buildInlineMedicationDetails('estrogen_gel'),
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 12),
@@ -1076,27 +1072,29 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppTheme.outlineVariant.withOpacity(0.3)),
+            border: Border.all(color: AppTheme.outlineVariant.withValues(alpha: 0.3)),
           ),
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            children: [
-              _buildSupplementRow(
-                title: 'Daily Vitamin D',
-                subtitle: '2000 IU • With Food',
-                icon: Icons.spa,
-                checked: widget.vitaminDChecked,
-                onCheckedChange: (val) => widget.onVitaminDCheckedToggled(val!),
-              ),
-              const Divider(color: Color(0xFFF2EDEA), height: 1),
-              _buildSupplementRow(
-                title: 'Magnesium Glycinate',
-                subtitle: '200 mg • Before Sleep',
-                icon: Icons.spa,
-                checked: widget.magnesiumChecked,
-                onCheckedChange: (val) => widget.onMagnesiumCheckedToggled(val!),
-              ),
-            ],
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(23),
+            child: Column(
+              children: [
+                _buildSupplementRow(
+                  title: 'Daily Vitamin D',
+                  subtitle: '2000 IU • With Food',
+                  icon: Icons.spa,
+                  checked: widget.vitaminDChecked,
+                  onCheckedChange: (val) => widget.onVitaminDCheckedToggled(val!),
+                ),
+                const Divider(color: Color(0xFFF2EDEA), height: 1),
+                _buildSupplementRow(
+                  title: 'Magnesium Glycinate',
+                  subtitle: '200 mg • Before Sleep',
+                  icon: Icons.spa,
+                  checked: widget.magnesiumChecked,
+                  onCheckedChange: (val) => widget.onMagnesiumCheckedToggled(val!),
+                ),
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 12),
