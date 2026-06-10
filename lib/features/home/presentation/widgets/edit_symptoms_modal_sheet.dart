@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
+import 'package:eunora/features/onboarding/domain/models/symptom.dart';
+import 'package:eunora/features/onboarding/presentation/providers/symptoms_provider.dart';
 
-class EditSymptomsModalSheet extends StatefulWidget {
+class EditSymptomsModalSheet extends ConsumerStatefulWidget {
   final List<Map<String, String>> initialSymptoms;
   final Function(List<Map<String, String>>) onSave;
 
@@ -13,10 +16,10 @@ class EditSymptomsModalSheet extends StatefulWidget {
   });
 
   @override
-  State<EditSymptomsModalSheet> createState() => _EditSymptomsModalSheetState();
+  ConsumerState<EditSymptomsModalSheet> createState() => _EditSymptomsModalSheetState();
 }
 
-class _EditSymptomsModalSheetState extends State<EditSymptomsModalSheet> {
+class _EditSymptomsModalSheetState extends ConsumerState<EditSymptomsModalSheet> {
   late List<Map<String, String>> _draftSymptoms;
 
   @override
@@ -43,6 +46,20 @@ class _EditSymptomsModalSheetState extends State<EditSymptomsModalSheet> {
   @override
   Widget build(BuildContext context) {
     final bool isEmpty = _draftSymptoms.isEmpty;
+    final library = ref.watch(symptomLibraryProvider);
+
+    // Find symptom details by name
+    Symptom findSymptomByName(String name) {
+      final nameLower = name.toLowerCase();
+      return library.firstWhere(
+        (s) => s.name.toLowerCase() == nameLower,
+        orElse: () => Symptom(
+          id: 's_${nameLower.replaceAll(' ', '_')}',
+          name: name,
+          iconName: 'medical_services',
+        ),
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.only(bottom: 24),
@@ -131,38 +148,57 @@ class _EditSymptomsModalSheetState extends State<EditSymptomsModalSheet> {
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
                   children: List.generate(_draftSymptoms.length, (index) {
-                    final symptom = _draftSymptoms[index];
-                    final String name = symptom['name'] ?? '';
-                    final String severity = symptom['severity'] ?? 'Mild';
+                    final symptomMapEntry = _draftSymptoms[index];
+                    final String name = symptomMapEntry['name'] ?? '';
+                    final String severity = symptomMapEntry['severity'] ?? 'Mild';
+
+                    final symptom = findSymptomByName(name);
+                    final symIcon = symptom.getIconData();
+                    final symColor = symptom.getIconColor();
+                    final symBg = symColor.withValues(alpha: 0.1);
 
                     return Container(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      padding: const EdgeInsets.all(16),
+                      margin: const EdgeInsets.only(bottom: 24),
+                      padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(32),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.03),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
+                            color: symColor.withValues(alpha: 0.04),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          )
                         ],
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Header: Name & Delete button
+                          // Header: Icon, Name & Delete button
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                name,
-                                style: GoogleFonts.manrope(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.onSurface,
-                                ),
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 44,
+                                    height: 44,
+                                    decoration: BoxDecoration(
+                                      color: symBg,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(symIcon, color: symColor, size: 22),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    name,
+                                    style: GoogleFonts.manrope(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.onSurface,
+                                    ),
+                                  ),
+                                ],
                               ),
                               IconButton(
                                 onPressed: () => _deleteSymptom(index),
@@ -173,45 +209,134 @@ class _EditSymptomsModalSheetState extends State<EditSymptomsModalSheet> {
                               ),
                             ],
                           ),
+                          const SizedBox(height: 24),
+                          Text(
+                            'INTENSITY',
+                            style: GoogleFonts.manrope(
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.5,
+                              color: const Color(0xFF8A817C),
+                            ),
+                          ),
                           const SizedBox(height: 12),
-
-                          // Severity segment selectors
-                          Row(
-                            children: ['Mild', 'Moderate', 'Severe'].map((level) {
-                              final isSelected = severity == level;
-                              Color selectedColor = AppTheme.primary;
-                              if (level == 'Moderate') selectedColor = const Color(0xFF817266);
-                              if (level == 'Severe') selectedColor = const Color(0xFF814F45);
-
-                              return Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                                  child: InkWell(
-                                    onTap: () => _updateSeverity(index, level),
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: Container(
-                                      alignment: Alignment.center,
-                                      padding: const EdgeInsets.symmetric(vertical: 10),
-                                      decoration: BoxDecoration(
-                                        color: isSelected ? selectedColor : const Color(0xFFF8F2F0),
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: isSelected ? selectedColor : Colors.transparent,
-                                        ),
-                                      ),
-                                      child: Text(
-                                        level,
-                                        style: GoogleFonts.manrope(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: isSelected ? Colors.white : AppTheme.onSurfaceVariant,
-                                        ),
-                                      ),
+                          
+                          // Custom fluid severity bar
+                          Container(
+                            height: 56,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [
+                                  Color(0xFFE2F5E2), // Soft Green (Mild)
+                                  Color(0xFFFFF1D0), // Soft Yellow/Orange (Moderate)
+                                  Color(0xFFFFE0E0), // Soft Red (Severe)
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(100),
+                            ),
+                            child: Stack(
+                              children: [
+                                // Sliding thumb
+                                AnimatedAlign(
+                                  duration: const Duration(milliseconds: 250),
+                                  curve: Curves.easeInOut,
+                                  alignment: severity == 'Mild'
+                                      ? Alignment.centerLeft
+                                      : severity == 'Moderate'
+                                          ? Alignment.center
+                                          : Alignment.centerRight,
+                                  child: Container(
+                                    width: MediaQuery.of(context).size.width * 0.26,
+                                    height: 48,
+                                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(100),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(alpha: 0.05),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 2),
+                                        )
+                                      ],
                                     ),
                                   ),
                                 ),
-                              );
-                            }).toList(),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () => _updateSeverity(index, 'Mild'),
+                                        behavior: HitTestBehavior.opaque,
+                                        child: Center(
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              const Text('😊', style: TextStyle(fontSize: 18)),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                'Mild',
+                                                style: GoogleFonts.manrope(
+                                                  fontSize: 9,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: severity == 'Mild' ? AppTheme.primary : const Color(0xFF8A817C),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () => _updateSeverity(index, 'Moderate'),
+                                        behavior: HitTestBehavior.opaque,
+                                        child: Center(
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              const Text('😐', style: TextStyle(fontSize: 18)),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                'Moderate',
+                                                style: GoogleFonts.manrope(
+                                                  fontSize: 9,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: severity == 'Moderate' ? AppTheme.primary : const Color(0xFF8A817C),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () => _updateSeverity(index, 'Severe'),
+                                        behavior: HitTestBehavior.opaque,
+                                        child: Center(
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              const Text('😟', style: TextStyle(fontSize: 18)),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                'Severe',
+                                                style: GoogleFonts.manrope(
+                                                  fontSize: 9,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: severity == 'Severe' ? AppTheme.primary : const Color(0xFF8A817C),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
