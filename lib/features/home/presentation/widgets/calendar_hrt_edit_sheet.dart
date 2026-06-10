@@ -5,6 +5,60 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/features/home/presentation/widgets/dose_change_alert.dart';
 
+enum HrtLogStatus { pending, taken, skipped }
+
+class SuccessCheckmark extends StatefulWidget {
+  const SuccessCheckmark({super.key});
+
+  @override
+  State<SuccessCheckmark> createState() => _SuccessCheckmarkState();
+}
+
+class _SuccessCheckmarkState extends State<SuccessCheckmark> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _scaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.3).chain(CurveTween(curve: Curves.easeOut)), weight: 60),
+      TweenSequenceItem(tween: Tween(begin: 1.3, end: 1.0).chain(CurveTween(curve: Curves.easeIn)), weight: 40),
+    ]).animate(_controller);
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: _scaleAnimation,
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: const BoxDecoration(
+          color: Color(0xFF2D5A3E),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(
+          Icons.check,
+          color: Colors.white,
+          size: 14,
+        ),
+      ),
+    );
+  }
+}
+
 /// A mutable copy of an HRT entry for editing within the sheet.
 class HrtEditEntry {
   String name;
@@ -104,7 +158,56 @@ class _CalendarHrtEditSheetState extends State<CalendarHrtEditSheet> {
     _lastTakenDates = {
       0: DateTime.now().subtract(const Duration(days: 2)),
       1: DateTime.now().subtract(const Duration(days: 1)),
+      2: DateTime.now().subtract(const Duration(days: 1)),
     };
+  }
+
+  String _formatDate(DateTime dt) {
+    return "${dt.day} ${_getMonthName(dt.month)}";
+  }
+
+  bool _isScheduledToday(String name, DateTime? lastTaken) {
+    String freq = 'daily';
+    if (name.toLowerCase().contains('estradiol')) {
+      freq = 'twice weekly';
+    } else if (name.toLowerCase().contains('gel')) {
+      freq = 'every 2 days';
+    }
+
+    if (freq == 'daily') {
+      return true;
+    }
+    if (lastTaken == null) {
+      return true;
+    }
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final thatDay = DateTime(lastTaken.year, lastTaken.month, lastTaken.day);
+    final daysDiff = today.difference(thatDay).inDays;
+
+    if (freq.contains('twice weekly')) {
+      return daysDiff >= 3;
+    }
+    if (freq.contains('every 2 days')) {
+      return daysDiff >= 2;
+    }
+    return true;
+  }
+
+  IconData _getMedIcon(String name) {
+    if (name.toLowerCase().contains('gel')) {
+      return Icons.opacity;
+    }
+    return Icons.medication;
+  }
+
+  HrtLogStatus _getEntryStatus(HrtEditEntry entry, int index) {
+    if (entry.isTaken) {
+      return HrtLogStatus.taken;
+    }
+    final lastTaken = _lastTakenDates[index];
+    final isScheduled = _isScheduledToday(entry.name, lastTaken);
+    return isScheduled ? HrtLogStatus.pending : HrtLogStatus.skipped;
   }
 
   String _formatDateTime(DateTime dt, BuildContext context) {
@@ -449,7 +552,161 @@ class _CalendarHrtEditSheetState extends State<CalendarHrtEditSheet> {
 
   Widget _buildMedicationCard(int index, HrtEditEntry entry) {
     final isExpanded = _expandedIndex == index;
-    final isTaken = entry.isTaken;
+    final status = _getEntryStatus(entry, index);
+
+    final icon = _getMedIcon(entry.name);
+    final lastTaken = _lastTakenDates[index];
+    final subtitle = entry.isTaken
+        ? '${entry.dose} ${entry.unit} • ${entry.timeTaken}'
+        : (lastTaken == null
+            ? 'Not scheduled today'
+            : 'Last taken: ${_formatDate(lastTaken)}');
+
+    Color tileBgColor = Colors.white;
+    Color tileBorderColor = const Color(0xFFF2EDEA);
+    Color textColor = AppTheme.onSurface;
+    Color subtitleColor = AppTheme.outline;
+    Color iconColor = AppTheme.primary;
+    Widget? trailingWidget;
+
+    if (status == HrtLogStatus.taken) {
+      tileBgColor = const Color(0xFFE8F5ED);
+      tileBorderColor = const Color(0xFFC7E8D5);
+      textColor = const Color(0xFF1B432C);
+      subtitleColor = const Color(0xFF2D5A3E).withValues(alpha: 0.8);
+      iconColor = const Color(0xFF2D5A3E);
+      trailingWidget = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFC7E8D5),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              'Taken',
+              style: GoogleFonts.manrope(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF2D5A3E),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          const SuccessCheckmark(),
+        ],
+      );
+    } else if (status == HrtLogStatus.pending) {
+      tileBgColor = Colors.white;
+      tileBorderColor = const Color(0xFFF2EDEA);
+      textColor = AppTheme.onSurface;
+      subtitleColor = AppTheme.outline;
+      iconColor = AppTheme.primary;
+      trailingWidget = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppTheme.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.edit_calendar, color: AppTheme.primary, size: 10),
+                const SizedBox(width: 4),
+                Text(
+                  'Ready to log',
+                  style: GoogleFonts.manrope(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          const Icon(Icons.chevron_right, size: 16, color: Color(0xFF9B8B7E)),
+        ],
+      );
+    } else {
+      tileBgColor = const Color(0xFFFFF6F4);
+      tileBorderColor = const Color(0xFFFFE3DC);
+      textColor = const Color(0xFF5A2518);
+      subtitleColor = const Color(0xFF8C3A25).withValues(alpha: 0.7);
+      iconColor = const Color(0xFF8C3A25);
+      trailingWidget = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFDAD3),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.info_outline, color: Color(0xFF8C3A25), size: 10),
+                const SizedBox(width: 4),
+                Text(
+                  'Not scheduled today',
+                  style: GoogleFonts.manrope(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF8C3A25),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          const Icon(Icons.chevron_right, size: 16, color: Color(0xFF8C3A25)),
+        ],
+      );
+    }
+
+    Widget baseTile = Container(
+      decoration: BoxDecoration(
+        color: tileBgColor,
+      ),
+      child: ListTile(
+        onTap: () => _toggleExpanded(index),
+        leading: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: status == HrtLogStatus.taken
+                ? const Color(0xFFC7E8D5).withValues(alpha: 0.4)
+                : status == HrtLogStatus.skipped
+                    ? const Color(0xFFFFDAD3).withValues(alpha: 0.4)
+                    : const Color(0xFFEDDDF5).withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Icon(icon, color: iconColor, size: 20),
+        ),
+        title: Text(
+          entry.name,
+          style: GoogleFonts.manrope(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: textColor,
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: GoogleFonts.manrope(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            color: subtitleColor,
+          ),
+        ),
+        trailing: trailingWidget,
+      ),
+    );
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -471,372 +728,243 @@ class _CalendarHrtEditSheetState extends State<CalendarHrtEditSheet> {
           ),
         ],
       ),
-      child: Column(
-        children: [
-          // Main row: tap to expand
-          InkWell(
-            onTap: () => _toggleExpanded(index),
-            borderRadius: BorderRadius.vertical(
-              top: const Radius.circular(20),
-              bottom: Radius.circular(isExpanded ? 0 : 20),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  // Medication icon
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF2DFD0),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: const Icon(Icons.medication,
-                        color: AppTheme.primary, size: 28),
-                  ),
-                  const SizedBox(width: 14),
-
-                  // Name + details
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          entry.name,
-                          style: GoogleFonts.manrope(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF1D1B1A),
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${entry.dose} ${entry.unit} · ${entry.applicationType}',
-                          style: GoogleFonts.manrope(
-                            fontSize: 13,
-                            color: const Color(0xFF7F756E),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Status badge + expand icon
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: isTaken
-                              ? const Color(0xFFE8F5ED)
-                              : const Color(0xFFFFF1ED),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          isTaken
-                              ? 'TAKEN ${entry.timeTaken}'
-                              : 'NOT TAKEN',
-                          style: GoogleFonts.manrope(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                            color: isTaken
-                                ? const Color(0xFF2D5A3E)
-                                : const Color(0xFF8C3A25),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      AnimatedRotation(
-                        duration: const Duration(milliseconds: 200),
-                        turns: isExpanded ? 0.5 : 0,
-                        child: const Icon(Icons.expand_more,
-                            size: 20, color: Color(0xFF9B8B7E)),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Expanded editing panel
-          if (isExpanded) ...[
-            const Divider(height: 1, color: Color(0xFFF2EDEA)),
-            _buildExpandedPanel(index, entry),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(19),
+        child: Column(
+          children: [
+            baseTile,
+            if (isExpanded) ...[
+              _buildExpandedPanel(index, entry),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildExpandedPanel(int index, HrtEditEntry entry) {
+    final lastTaken = _lastTakenDates[index];
+    final onboardingMeds = _entries;
+
+    List<String> unitOptions = ['mg', 'mcg'];
+    if (entry.name.toLowerCase().contains('gel')) {
+      unitOptions = ['pumps', 'mg'];
+    }
+    if (!unitOptions.contains(entry.unit)) {
+      unitOptions.add(entry.unit);
+    }
+    for (var m in onboardingMeds) {
+      if (!unitOptions.contains(m.unit)) {
+        unitOptions.add(m.unit);
+      }
+    }
+
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFFF8F2F0),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(20),
-          bottomRight: Radius.circular(20),
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F2EC).withValues(alpha: 0.85),
+        border: Border(
+          top: const BorderSide(color: Color(0xFFEAE5DF), width: 1),
+          bottom: const BorderSide(color: Color(0xFFEAE5DF), width: 1),
+          left: BorderSide(color: AppTheme.primary, width: 4),
         ),
       ),
-      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Log Dose Now button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                setState(() {
-                  _entries[index].isTaken = true;
-                  // Use current time
-                  final now = TimeOfDay.now();
-                  final h = now.hour.toString().padLeft(2, '0');
-                  final m = now.minute.toString().padLeft(2, '0');
-                  _entries[index].timeTaken = '$h:$m';
-                });
-              },
-              icon: const Icon(Icons.history_edu, size: 22),
-              label: Text(
-                'Log Dose Now',
-                style: GoogleFonts.manrope(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Taken today?',
+                style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.onSurface),
               ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF817266),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                elevation: 2,
+              CupertinoSwitch(
+                value: entry.isTaken,
+                activeColor: AppTheme.primary,
+                onChanged: (val) {
+                  setState(() {
+                    entry.isTaken = val;
+                    if (val) {
+                      final now = TimeOfDay.now();
+                      entry.timeTaken = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+                    }
+                  });
+                },
               ),
-            ),
+            ],
           ),
-          const SizedBox(height: 16),
-
-          // Today's log
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFEAE6E0)),
-            ),
-            padding: const EdgeInsets.all(14),
-            child: Column(
+          const SizedBox(height: 12),
+          if (entry.isTaken) ...[
+            Row(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Today's Log",
-                      style: GoogleFonts.manrope(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF1D1B1A),
+                Expanded(
+                  flex: 3,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'DOSE',
+                        style: GoogleFonts.manrope(fontSize: 8, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C), letterSpacing: 1),
                       ),
-                    ),
-                    TextButton.icon(
-                      onPressed: () => _showTimePicker(index),
-                      icon: const Icon(Icons.more_time, size: 16),
-                      label: Text(
-                        'Edit Time',
-                        style: GoogleFonts.manrope(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppTheme.primary,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                if (entry.isTaken) ...[
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF5F3F0),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.check_circle,
-                            color: AppTheme.primary, size: 20),
-                        const SizedBox(width: 12),
-                        Text(
-                          '${entry.timeTaken} ${_formatAmPm(entry.timeTaken)}',
-                          style: GoogleFonts.manrope(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF1D1B1A),
+                      const SizedBox(height: 6),
+                      GestureDetector(
+                        onTap: () {
+                          final currentDose = double.tryParse(entry.dose) ?? 1.0;
+                          _openDosePicker(
+                            index: index,
+                            unit: entry.unit,
+                            currentDose: currentDose,
+                            onDoseChanged: (newDose) {
+                              _setDose(
+                                index,
+                                newDose.toStringAsFixed(newDose == newDose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), ''),
+                              );
+                            },
+                          );
+                        },
+                        child: Container(
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0xFFD0C4BC).withValues(alpha: 0.4)),
+                          ),
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            entry.dose,
+                            style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.onSurface),
                           ),
                         ),
-                        const Spacer(),
-                        Text(
-                          'Manual',
-                          style: GoogleFonts.manrope(
-                            fontSize: 12,
-                            color: const Color(0xFF9B8B7E),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ] else ...[
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFF1ED),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFFFDAD3)),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Not scheduled for today',
-                                style: GoogleFonts.manrope(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF8C3A25),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 3,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'UNIT',
+                        style: GoogleFonts.manrope(fontSize: 8, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C), letterSpacing: 1),
+                      ),
+                      const SizedBox(height: 6),
+                      Container(
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEDE7E5).withValues(alpha: 0.6),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.all(2),
+                        child: Row(
+                          children: unitOptions.map((opt) {
+                            final isSelected = entry.unit == opt;
+                            return Expanded(
+                              child: GestureDetector(
+                                onTap: () => _setUnit(index, opt),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: isSelected ? Colors.white : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(6),
+                                    boxShadow: isSelected
+                                        ? [
+                                            BoxShadow(
+                                              color: Colors.black.withValues(alpha: 0.05),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 1),
+                                            )
+                                          ]
+                                        : null,
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    opt,
+                                    style: GoogleFonts.manrope(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: isSelected ? AppTheme.primary : const Color(0xFF9B8B7E),
+                                    ),
+                                  ),
                                 ),
                               ),
-                              const SizedBox(height: 2),
-                              Text(
-                                _lastTakenDates[index] == null
-                                    ? 'No last taken date recorded'
-                                    : 'Last taken: ${_formatDateTime(_lastTakenDates[index]!, context)} (${_daysAgo(_lastTakenDates[index]!)})',
-                                style: GoogleFonts.manrope(
-                                  fontSize: 11,
-                                  color: const Color(0xFF8C3A25).withOpacity(0.8),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 4,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'TIME',
+                        style: GoogleFonts.manrope(fontSize: 8, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C), letterSpacing: 1),
+                      ),
+                      const SizedBox(height: 6),
+                      GestureDetector(
+                        onTap: () => _showTimePicker(index),
+                        child: Container(
+                          height: 40,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0xFFD0C4BC).withValues(alpha: 0.4)),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.schedule, size: 14, color: AppTheme.primary),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  entry.timeTaken,
+                                  style: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.onSurface),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ],
             ),
-          ),
-          const SizedBox(height: 16),
-
-          // Dose editor
-          Text(
-            'UPDATE DOSE',
-            style: GoogleFonts.manrope(
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.5,
-              color: const Color(0xFF9B8B7E),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    final currentDose = double.tryParse(entry.dose) ?? 1.0;
-                    _openDosePicker(
-                      index: index,
-                      unit: entry.unit,
-                      currentDose: currentDose,
-                      onDoseChanged: (newDose) {
-                        _setDose(
-                          index,
-                          newDose.toStringAsFixed(newDose == newDose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), ''),
-                        );
-                      },
-                    );
-                  },
-                  child: Container(
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF5F3F0),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          entry.dose,
-                          style: GoogleFonts.manrope(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF1D1B1A),
-                          ),
-                        ),
-                        const Icon(Icons.arrow_drop_down, color: Color(0xFF9B8B7E)),
-                      ],
-                    ),
+          ] else ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Not scheduled for today',
+                        style: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C)),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        lastTaken == null
+                            ? 'No last taken date recorded'
+                            : 'Last taken: ${_formatDateTime(lastTaken, context)} (${_daysAgo(lastTaken)})',
+                        style: GoogleFonts.manrope(fontSize: 11, color: AppTheme.outline),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              // Unit selector
-              Container(
-                height: 56,
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF5F3F0),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: ['mcg', 'mg', 'pump'].map((u) {
-                    final isSelected = entry.unit == u;
-                    return InkWell(
-                      onTap: () => _setUnit(index, u),
-                      borderRadius: BorderRadius.circular(8),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppTheme.primary
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          u,
-                          style: GoogleFonts.manrope(
-                            fontSize: 13,
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.w500,
-                            color: isSelected
-                                ? Colors.white
-                                : const Color(0xFF7F756E),
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ],
       ),
     );
