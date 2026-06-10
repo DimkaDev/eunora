@@ -9,6 +9,60 @@ import 'package:eunora/features/onboarding/presentation/widgets/add_medication_m
 import 'package:eunora/features/onboarding/presentation/pages/other_medications_page.dart';
 import 'package:eunora/features/home/presentation/widgets/dose_change_alert.dart';
 
+enum HrtLogStatus { pending, taken, skipped }
+
+class SuccessCheckmark extends StatefulWidget {
+  const SuccessCheckmark({super.key});
+
+  @override
+  State<SuccessCheckmark> createState() => _SuccessCheckmarkState();
+}
+
+class _SuccessCheckmarkState extends State<SuccessCheckmark> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _scaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.3).chain(CurveTween(curve: Curves.easeOut)), weight: 60),
+      TweenSequenceItem(tween: Tween(begin: 1.3, end: 1.0).chain(CurveTween(curve: Curves.easeIn)), weight: 40),
+    ]).animate(_controller);
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: _scaleAnimation,
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: const BoxDecoration(
+          color: Color(0xFF2D5A3E),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(
+          Icons.check,
+          color: Colors.white,
+          size: 14,
+        ),
+      ),
+    );
+  }
+}
+
 class DailyEntryStep extends ConsumerStatefulWidget {
   final bool estradiolChecked;
   final double estradiolDose;
@@ -77,14 +131,62 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
   DateTime? _estradiolLastTaken = DateTime.now().subtract(const Duration(days: 2));
   DateTime? _progesteroneLastTaken = DateTime.now().subtract(const Duration(days: 1));
 
+  // 3rd element states (Estrogen Gel, Every 2 days, taken 1 day ago -> Not scheduled today)
+  bool _estrogenGelChecked = false;
+  double _estrogenGelDose = 2.0;
+  String _estrogenGelUnit = 'pumps';
+  String _estrogenGelTime = '09:00 AM';
+  DateTime? _estrogenGelLastTaken = DateTime.now().subtract(const Duration(days: 1));
+  double? _initialEstrogenGelDose = 2.0;
+
   double? _initialEstradiolDose;
   double? _initialProgesteroneDose;
+
+  late HrtLogStatus _estradiolStatus;
+  late HrtLogStatus _progesteroneStatus;
+  late HrtLogStatus _estrogenGelStatus;
+
+  bool _isScheduledToday(String frequency, DateTime? lastTaken) {
+    if (frequency.toLowerCase() == 'daily') {
+      return true;
+    }
+    if (lastTaken == null) {
+      return true;
+    }
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final thatDay = DateTime(lastTaken.year, lastTaken.month, lastTaken.day);
+    final daysDiff = today.difference(thatDay).inDays;
+
+    if (frequency.toLowerCase().contains('twice weekly')) {
+      return daysDiff >= 3;
+    }
+    if (frequency.toLowerCase().contains('every 2 days')) {
+      return daysDiff >= 2;
+    }
+    return true;
+  }
 
   @override
   void initState() {
     super.initState();
     _initialEstradiolDose = widget.estradiolDose;
     _initialProgesteroneDose = widget.progesteroneDose;
+    
+    final isEstradiolScheduled = _isScheduledToday('Twice weekly', _estradiolLastTaken);
+    _estradiolStatus = widget.estradiolChecked
+        ? HrtLogStatus.taken
+        : (isEstradiolScheduled ? HrtLogStatus.pending : HrtLogStatus.skipped);
+
+    final isProgesteroneScheduled = _isScheduledToday('Daily', _progesteroneLastTaken);
+    _progesteroneStatus = widget.progesteroneChecked
+        ? HrtLogStatus.taken
+        : (isProgesteroneScheduled ? HrtLogStatus.pending : HrtLogStatus.skipped);
+
+    final isEstrogenGelScheduled = _isScheduledToday('Every 2 days', _estrogenGelLastTaken);
+    _estrogenGelStatus = _estrogenGelChecked
+        ? HrtLogStatus.taken
+        : (isEstrogenGelScheduled ? HrtLogStatus.pending : HrtLogStatus.skipped);
   }
 
   String _formatDate(DateTime dt) {
@@ -347,14 +449,47 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
 
   Widget _buildInlineMedicationDetails(String medKey) {
     bool isEstradiol = medKey == 'estradiol';
-    bool checked = isEstradiol ? widget.estradiolChecked : widget.progesteroneChecked;
-    double dose = isEstradiol ? widget.estradiolDose : widget.progesteroneDose;
-    String unit = isEstradiol ? widget.estradiolUnit : widget.progesteroneUnit;
-    String time = isEstradiol ? widget.estradiolTime : widget.progesteroneTime;
-    DateTime? lastTaken = isEstradiol ? _estradiolLastTaken : _progesteroneLastTaken;
+    bool isProgesterone = medKey == 'progesterone';
+
+    bool checked;
+    double dose;
+    String unit;
+    String time;
+    DateTime? lastTaken;
+    double initialDose;
+    String medName;
+
+    if (isEstradiol) {
+      checked = widget.estradiolChecked;
+      dose = widget.estradiolDose;
+      unit = widget.estradiolUnit;
+      time = widget.estradiolTime;
+      lastTaken = _estradiolLastTaken;
+      initialDose = _initialEstradiolDose ?? dose;
+      medName = 'Estradiol Patch';
+    } else if (isProgesterone) {
+      checked = widget.progesteroneChecked;
+      dose = widget.progesteroneDose;
+      unit = widget.progesteroneUnit;
+      time = widget.progesteroneTime;
+      lastTaken = _progesteroneLastTaken;
+      initialDose = _initialProgesteroneDose ?? dose;
+      medName = 'Progesterone';
+    } else {
+      checked = _estrogenGelChecked;
+      dose = _estrogenGelDose;
+      unit = _estrogenGelUnit;
+      time = _estrogenGelTime;
+      lastTaken = _estrogenGelLastTaken;
+      initialDose = _initialEstrogenGelDose ?? dose;
+      medName = 'Estrogen Gel';
+    }
 
     // Dynamic unit options
     List<String> unitOptions = ['mg', 'mcg'];
+    if (medKey == 'estrogen_gel') {
+      unitOptions = ['pumps', 'mg'];
+    }
     if (!unitOptions.contains(unit)) {
       unitOptions.add(unit);
     }
@@ -369,9 +504,9 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
       margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF7F5F0).withOpacity(0.5),
+        color: const Color(0xFFF7F5F0).withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFD0C4BC).withOpacity(0.2)),
+        border: Border.all(color: const Color(0xFFD0C4BC).withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -387,11 +522,18 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                 value: checked,
                 activeColor: AppTheme.primary,
                 onChanged: (val) {
-                  if (isEstradiol) {
-                    widget.onEstradiolCheckedToggled(val);
-                  } else {
-                    widget.onProgesteroneCheckedToggled(val);
-                  }
+                  setState(() {
+                    if (isEstradiol) {
+                      _estradiolStatus = val ? HrtLogStatus.taken : (_isScheduledToday('Twice weekly', _estradiolLastTaken) ? HrtLogStatus.pending : HrtLogStatus.skipped);
+                      widget.onEstradiolCheckedToggled(val);
+                    } else if (isProgesterone) {
+                      _progesteroneStatus = val ? HrtLogStatus.taken : (_isScheduledToday('Daily', _progesteroneLastTaken) ? HrtLogStatus.pending : HrtLogStatus.skipped);
+                      widget.onProgesteroneCheckedToggled(val);
+                    } else {
+                      _estrogenGelChecked = val;
+                      _estrogenGelStatus = val ? HrtLogStatus.taken : (_isScheduledToday('Every 2 days', _estrogenGelLastTaken) ? HrtLogStatus.pending : HrtLogStatus.skipped);
+                    }
+                  });
                 },
               ),
             ],
@@ -413,15 +555,19 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                       const SizedBox(height: 6),
                       GestureDetector(
                         onTap: () => _openDosePicker(
-                          medName: isEstradiol ? 'Estradiol Patch' : 'Progesterone',
+                          medName: medName,
                           unit: unit,
-                          initialDose: isEstradiol ? (_initialEstradiolDose ?? dose) : (_initialProgesteroneDose ?? dose),
+                          initialDose: initialDose,
                           currentDose: dose,
                           onDoseChanged: (newDose) {
                             if (isEstradiol) {
                               widget.onEstradiolDoseChanged(newDose);
-                            } else {
+                            } else if (isProgesterone) {
                               widget.onProgesteroneDoseChanged(newDose);
+                            } else {
+                              setState(() {
+                                _estrogenGelDose = newDose;
+                              });
                             }
                           },
                         ),
@@ -430,7 +576,7 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFFD0C4BC).withOpacity(0.4)),
+                            border: Border.all(color: const Color(0xFFD0C4BC).withValues(alpha: 0.4)),
                           ),
                           alignment: Alignment.center,
                           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -458,7 +604,7 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                       Container(
                         height: 40,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEDE7E5).withOpacity(0.6),
+                          color: const Color(0xFFEDE7E5).withValues(alpha: 0.6),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         padding: const EdgeInsets.all(2),
@@ -470,8 +616,12 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                                 onTap: () {
                                   if (isEstradiol) {
                                     widget.onEstradiolUnitChanged(opt);
-                                  } else {
+                                  } else if (isProgesterone) {
                                     widget.onProgesteroneUnitChanged(opt);
+                                  } else {
+                                    setState(() {
+                                      _estrogenGelUnit = opt;
+                                    });
                                   }
                                 },
                                 child: Container(
@@ -481,7 +631,7 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                                     boxShadow: isSelected
                                         ? [
                                             BoxShadow(
-                                              color: Colors.black.withOpacity(0.05),
+                                              color: Colors.black.withValues(alpha: 0.05),
                                               blurRadius: 4,
                                               offset: const Offset(0, 1),
                                             )
@@ -525,8 +675,12 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                           onTimeChanged: (formattedTime) {
                             if (isEstradiol) {
                               widget.onEstradiolTimeChanged(formattedTime);
-                            } else {
+                            } else if (isProgesterone) {
                               widget.onProgesteroneTimeChanged(formattedTime);
+                            } else {
+                              setState(() {
+                                _estrogenGelTime = formattedTime;
+                              });
                             }
                           },
                         ),
@@ -536,7 +690,7 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFFD0C4BC).withOpacity(0.4)),
+                            border: Border.all(color: const Color(0xFFD0C4BC).withValues(alpha: 0.4)),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -581,47 +735,6 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                     ],
                   ),
                 ),
-                OutlinedButton(
-                  onPressed: () async {
-                    final datePicked = await showDatePicker(
-                      context: context,
-                      initialDate: lastTaken ?? DateTime.now(),
-                      firstDate: DateTime.now().subtract(const Duration(days: 30)),
-                      lastDate: DateTime.now(),
-                    );
-                    if (datePicked == null) return;
-                    if (!mounted) return;
-                    final timePicked = await showTimePicker(
-                      context: context,
-                      initialTime: lastTaken != null
-                          ? TimeOfDay(hour: lastTaken.hour, minute: lastTaken.minute)
-                          : TimeOfDay.now(),
-                    );
-                    final finalDateTime = DateTime(
-                      datePicked.year,
-                      datePicked.month,
-                      datePicked.day,
-                      timePicked?.hour ?? 8,
-                      timePicked?.minute ?? 30,
-                    );
-                    setState(() {
-                      if (isEstradiol) {
-                        _estradiolLastTaken = finalDateTime;
-                      } else {
-                        _progesteroneLastTaken = finalDateTime;
-                      }
-                    });
-                  },
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: AppTheme.primary.withOpacity(0.4)),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  ),
-                  child: Text(
-                    'Set Date',
-                    style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primary),
-                  ),
-                ),
               ],
             ),
           ],
@@ -634,40 +747,159 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
     required String title,
     required String subtitle,
     required IconData icon,
-    required bool checked,
-    required ValueChanged<bool?> onCheckedChange,
+    required HrtLogStatus status,
     required VoidCallback onTap,
   }) {
-    return ListTile(
-      onTap: onTap,
-      leading: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(color: const Color(0xFFEDDDF5).withOpacity(0.3), borderRadius: BorderRadius.circular(16)),
-        child: Icon(icon, color: AppTheme.primary, size: 20),
-      ),
-      title: Text(title, style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.onSurface)),
-      subtitle: Text(subtitle, style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.outline)),
-      trailing: Row(
+    // Base tile styling
+    Color tileBgColor = Colors.white;
+    Color tileBorderColor = const Color(0xFFF2EDEA);
+    Widget? trailingWidget;
+
+    if (status == HrtLogStatus.taken) {
+      tileBgColor = const Color(0xFFE8F5ED);
+      tileBorderColor = const Color(0xFFC7E8D5);
+      trailingWidget = Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          GestureDetector(
-            onTap: () => onCheckedChange(!checked),
-            child: Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: checked ? AppTheme.primary : Colors.transparent,
-                shape: BoxShape.circle,
-                border: checked ? null : Border.all(color: const Color(0xFFD0C4BC), width: 2),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFC7E8D5),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              'Taken',
+              style: GoogleFonts.manrope(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF2D5A3E),
               ),
-              child: checked ? const Icon(Icons.check, color: Colors.white, size: 18) : null,
             ),
           ),
           const SizedBox(width: 8),
-          const Icon(Icons.chevron_right, size: 16, color: Color(0xFF9B8B7E)),
+          const SuccessCheckmark(),
         ],
+      );
+    } else {
+      trailingWidget = null;
+    }
+
+    Widget baseTile = Container(
+      decoration: BoxDecoration(
+        color: tileBgColor,
+        border: Border.all(color: tileBorderColor),
       ),
+      child: ListTile(
+        onTap: onTap,
+        leading: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: const Color(0xFFEDDDF5).withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Icon(icon, color: AppTheme.primary, size: 20),
+        ),
+        title: Text(
+          title,
+          style: GoogleFonts.manrope(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.onSurface,
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: GoogleFonts.manrope(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.outline,
+          ),
+        ),
+        trailing: trailingWidget,
+      ),
+    );
+
+    if (status == HrtLogStatus.taken) {
+      return baseTile;
+    }
+
+    // Overlay styles for pending/skipped (acting as the 2nd layer on top)
+    Color overlayBgColor;
+    Color overlayTextColor;
+    String overlayText = '';
+    IconData overlayIcon;
+
+    if (status == HrtLogStatus.pending) {
+      overlayBgColor = const Color(0xFFFAF9F6).withValues(alpha: 0.82); // Warm grey semi-transparent
+      overlayTextColor = const Color(0xFF8A817C);
+      overlayText = 'Ready to log';
+      overlayIcon = Icons.edit_calendar;
+    } else {
+      overlayBgColor = const Color(0xFFFFECE8).withValues(alpha: 0.85); // Red semi-transparent
+      overlayTextColor = const Color(0xFF8C3A25);
+      overlayText = 'Not scheduled today';
+      overlayIcon = Icons.info_outline;
+    }
+
+    return Stack(
+      children: [
+        baseTile,
+        Positioned.fill(
+          child: GestureDetector(
+            onTap: onTap,
+            child: Container(
+              decoration: BoxDecoration(
+                color: overlayBgColor,
+                border: Border.all(
+                  color: status == HrtLogStatus.pending
+                      ? const Color(0xFFE5E2DC).withValues(alpha: 0.5)
+                      : const Color(0xFFFFDAD3).withValues(alpha: 0.5),
+                ),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: status == HrtLogStatus.pending
+                          ? const Color(0xFFEAE6E0)
+                          : const Color(0xFFFFDAD3),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        )
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(overlayIcon, color: overlayTextColor, size: 14),
+                        const SizedBox(width: 6),
+                        Text(
+                          overlayText,
+                          style: GoogleFonts.manrope(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: overlayTextColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Icon(Icons.chevron_right, size: 16, color: overlayTextColor),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -742,8 +974,7 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                         ? 'Not scheduled today'
                         : 'Last taken: ${_formatDate(_estradiolLastTaken!)}'),
                 icon: Icons.medication,
-                checked: widget.estradiolChecked,
-                onCheckedChange: (val) => widget.onEstradiolCheckedToggled(val!),
+                status: _estradiolStatus,
                 onTap: () {
                   setState(() {
                     _expandedIndex = _expandedIndex == 0 ? null : 0;
@@ -760,8 +991,7 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                         ? 'Not scheduled today'
                         : 'Last taken: ${_formatDate(_progesteroneLastTaken!)}'),
                 icon: Icons.medication,
-                checked: widget.progesteroneChecked,
-                onCheckedChange: (val) => widget.onProgesteroneCheckedToggled(val!),
+                status: _progesteroneStatus,
                 onTap: () {
                   setState(() {
                     _expandedIndex = _expandedIndex == 1 ? null : 1;
@@ -769,6 +999,23 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                 },
               ),
               if (_expandedIndex == 1) _buildInlineMedicationDetails('progesterone'),
+              const Divider(color: Color(0xFFF2EDEA), height: 1),
+              _buildMedRow(
+                title: 'Estrogen Gel',
+                subtitle: _estrogenGelChecked
+                    ? '${_estrogenGelDose.toStringAsFixed(0)} $_estrogenGelUnit • $_estrogenGelTime'
+                    : (_estrogenGelLastTaken == null
+                        ? 'Not scheduled today'
+                        : 'Last taken: ${_formatDate(_estrogenGelLastTaken!)}'),
+                icon: Icons.opacity,
+                status: _estrogenGelStatus,
+                onTap: () {
+                  setState(() {
+                    _expandedIndex = _expandedIndex == 2 ? null : 2;
+                  });
+                },
+              ),
+              if (_expandedIndex == 2) _buildInlineMedicationDetails('estrogen_gel'),
             ],
           ),
         ),

@@ -730,49 +730,6 @@ class _CalendarHrtEditSheetState extends State<CalendarHrtEditSheet> {
                             ],
                           ),
                         ),
-                        OutlinedButton(
-                          onPressed: () async {
-                            final lastTaken = _lastTakenDates[index];
-                            final datePicked = await showDatePicker(
-                              context: context,
-                              initialDate: lastTaken ?? DateTime.now(),
-                              firstDate: DateTime.now().subtract(const Duration(days: 30)),
-                              lastDate: DateTime.now(),
-                            );
-                            if (datePicked == null) return;
-                            if (!mounted) return;
-                            final timePicked = await showTimePicker(
-                              context: context,
-                              initialTime: lastTaken != null
-                                  ? TimeOfDay(hour: lastTaken.hour, minute: lastTaken.minute)
-                                  : TimeOfDay.now(),
-                            );
-                            final finalDateTime = DateTime(
-                              datePicked.year,
-                              datePicked.month,
-                              datePicked.day,
-                              timePicked?.hour ?? 8,
-                              timePicked?.minute ?? 30,
-                            );
-                            setState(() {
-                              _lastTakenDates[index] = finalDateTime;
-                            });
-                          },
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Color(0xFF8C3A25), width: 1),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Text(
-                            'Set Date',
-                            style: GoogleFonts.manrope(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF8C3A25),
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                   ),
