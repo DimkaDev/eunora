@@ -501,12 +501,15 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
     }
 
     return Container(
-      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-      padding: const EdgeInsets.all(16),
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF7F5F0).withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFD0C4BC).withValues(alpha: 0.2)),
+        color: const Color(0xFFF5F2EC).withValues(alpha: 0.85),
+        border: Border(
+          top: const BorderSide(color: Color(0xFFEAE5DF), width: 1),
+          bottom: const BorderSide(color: Color(0xFFEAE5DF), width: 1),
+          left: BorderSide(color: AppTheme.primary, width: 4),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
