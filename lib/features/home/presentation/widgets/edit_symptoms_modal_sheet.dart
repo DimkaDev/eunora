@@ -62,6 +62,9 @@ class _EditSymptomsModalSheetState extends ConsumerState<EditSymptomsModalSheet>
     }
 
     return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.70,
+      ),
       padding: const EdgeInsets.only(bottom: 24),
       decoration: const BoxDecoration(
         color: AppTheme.surface,

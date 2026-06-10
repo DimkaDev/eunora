@@ -40,6 +40,9 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
     }).toList();
 
     return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.70,
+      ),
       padding: const EdgeInsets.only(bottom: 24),
       decoration: const BoxDecoration(
         color: AppTheme.surface,
