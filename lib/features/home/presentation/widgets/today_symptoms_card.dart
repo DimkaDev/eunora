@@ -190,41 +190,83 @@ class TodaySymptomsCard extends StatelessWidget {
   }
 
   Widget _buildSymptomChip(String label, String severity) {
-    int blocks = 1;
-    if (severity == 'Moderate') blocks = 2;
-    if (severity == 'Severe') blocks = 3;
+    Color bg;
+    Color textColor;
+    Color barColor;
+    String emoji;
+    int blocks;
+
+    switch (severity) {
+      case 'Moderate':
+        bg = const Color(0xFFFFF7E6); // Light amber
+        textColor = const Color(0xFFD48806); // Amber text
+        barColor = const Color(0xFFFADB14); // Yellow/Orange bar
+        emoji = '😐';
+        blocks = 2;
+        break;
+      case 'Severe':
+        bg = const Color(0xFFFFF1F0); // Light coral red
+        textColor = const Color(0xFFCF1322); // Deep red text
+        barColor = const Color(0xFFFF4D4F); // Red bar
+        emoji = '😟';
+        blocks = 3;
+        break;
+      case 'Mild':
+      default:
+        bg = const Color(0xFFF6FFED); // Light green
+        textColor = const Color(0xFF389E0D); // Green text
+        barColor = const Color(0xFF73D13D); // Green bar
+        emoji = '😊';
+        blocks = 1;
+        break;
+    }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0E0D8),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.primary.withOpacity(0.08)),
+        color: bg,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: textColor.withValues(alpha: 0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+        border: Border.all(
+          color: textColor.withValues(alpha: 0.12),
+          width: 1,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
+            emoji,
+            style: const TextStyle(fontSize: 14),
+          ),
+          const SizedBox(width: 8),
+          Text(
             label,
             style: GoogleFonts.manrope(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: AppTheme.primary,
+              color: const Color(0xFF2A2421), // High contrast charcoal text
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
 
           // Mini severity indicator columns (3 bars)
           Row(
             children: List.generate(3, (index) {
               final active = index < blocks;
               return Container(
-                width: 3,
+                width: 3.5,
                 height: 10,
                 margin: const EdgeInsets.symmetric(horizontal: 0.5),
                 decoration: BoxDecoration(
-                  color: active ? AppTheme.primary : AppTheme.primary.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(1),
+                  color: active ? barColor : barColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(1.5),
                 ),
               );
             }),
@@ -236,7 +278,8 @@ class TodaySymptomsCard extends StatelessWidget {
             style: GoogleFonts.manrope(
               fontSize: 8,
               fontWeight: FontWeight.w900,
-              color: AppTheme.primary.withOpacity(0.6),
+              color: textColor,
+              letterSpacing: 0.5,
             ),
           ),
         ],

@@ -157,6 +157,53 @@ class DailyTriggersCard extends StatelessWidget {
     );
   }
 
+  Map<String, Color> _getTriggerColors(String name, String value) {
+    Color bg;
+    Color accent;
+
+    final String nameLower = name.toLowerCase();
+    final String valLower = value.toLowerCase();
+
+    if (nameLower == 'stress') {
+      if (valLower.contains('calm')) {
+        bg = const Color(0xFFF6FFED);
+        accent = const Color(0xFF389E0D);
+      } else if (valLower.contains('high') || valLower.contains('severe')) {
+        bg = const Color(0xFFFFF1F0);
+        accent = const Color(0xFFCF1322);
+      } else {
+        bg = const Color(0xFFFFF7E6);
+        accent = const Color(0xFFD48806);
+      }
+    } else if (nameLower == 'caffeine') {
+      bg = const Color(0xFFFDF6F0);
+      accent = const Color(0xFF8E6F5E);
+    } else if (nameLower == 'alcohol') {
+      bg = const Color(0xFFFFF1F0);
+      accent = const Color(0xFFCF1322);
+    } else if (nameLower == 'sugar') {
+      bg = const Color(0xFFF9F0FF);
+      accent = const Color(0xFF722ED1);
+    } else if (nameLower == 'lack of sleep' || nameLower == 'poor sleep') {
+      bg = const Color(0xFFF0F5FF);
+      accent = const Color(0xFF2F54EB);
+    } else if (nameLower == 'spicy food') {
+      bg = const Color(0xFFFFF2E8);
+      accent = const Color(0xFFD4380D);
+    } else if (nameLower == 'exercise') {
+      bg = const Color(0xFFE6FFFB);
+      accent = const Color(0xFF08979C);
+    } else if (nameLower == 'weather') {
+      bg = const Color(0xFFE6F7FF);
+      accent = const Color(0xFF096DD9);
+    } else {
+      bg = const Color(0xFFF5F5F4);
+      accent = const Color(0xFF78716C);
+    }
+
+    return {'bg': bg, 'accent': accent};
+  }
+
   // Grid State with trailing "+ Add New" dashed button
   Widget _buildGridState(BuildContext context) {
     final int itemsCount = loggedTriggers.length + 1; // Logged triggers + trailing add button
@@ -214,7 +261,9 @@ class DailyTriggersCard extends StatelessWidget {
         final String value = item['value'] ?? '';
         final IconData icon = item['icon'] ?? Icons.bolt;
 
-        final isStress = name.toLowerCase() == 'stress';
+        final colors = _getTriggerColors(name, value);
+        final bg = colors['bg']!;
+        final accent = colors['accent']!;
 
         return InkWell(
           onTap: onEditTrigger,
@@ -222,18 +271,34 @@ class DailyTriggersCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: isStress ? const Color(0xFFFFDAD3).withOpacity(0.6) : const Color(0xFFF5F5F4),
+              color: bg,
               borderRadius: BorderRadius.circular(16),
-              border: isStress
-                  ? Border.all(color: const Color(0xFFFFDAD3))
-                  : Border.all(color: Colors.transparent),
+              border: Border.all(
+                color: accent.withValues(alpha: 0.12),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: accent.withValues(alpha: 0.03),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Row(
               children: [
-                Icon(
-                  icon,
-                  color: isStress ? const Color(0xFF814F45) : const Color(0xFF78716C),
-                  size: 22,
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    color: accent,
+                    size: 16,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -246,7 +311,7 @@ class DailyTriggersCard extends StatelessWidget {
                         style: GoogleFonts.manrope(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: isStress ? const Color(0xFF814F45) : const Color(0xFF4D453F),
+                          color: const Color(0xFF2A2421), // Charcoal for best readability
                         ),
                       ),
                       const SizedBox(height: 1),
@@ -254,8 +319,8 @@ class DailyTriggersCard extends StatelessWidget {
                         value,
                         style: GoogleFonts.manrope(
                           fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: isStress ? const Color(0xFF683A31).withOpacity(0.8) : const Color(0xFFA8A29E),
+                          fontWeight: FontWeight.w700,
+                          color: accent,
                         ),
                       ),
                     ],
