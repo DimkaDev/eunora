@@ -95,18 +95,43 @@ class CalendarHrtEditSheet extends StatefulWidget {
 class _CalendarHrtEditSheetState extends State<CalendarHrtEditSheet> {
   late List<HrtEditEntry> _entries;
   int? _expandedIndex; // which card is expanded for editing
+  late Map<int, DateTime> _lastTakenDates;
 
   @override
   void initState() {
     super.initState();
     _entries = widget.initialHrt.map(HrtEditEntry.fromMap).toList();
+    _lastTakenDates = {
+      0: DateTime.now().subtract(const Duration(days: 2)),
+      1: DateTime.now().subtract(const Duration(days: 1)),
+    };
   }
 
-  void _toggleTaken(int index) {
-    setState(() {
-      _entries[index].isTaken = !_entries[index].isTaken;
-    });
+  String _formatDateTime(DateTime dt, BuildContext context) {
+    final dateStr = "${dt.day} ${_getMonthName(dt.month)}";
+    if (context.mounted) {
+      final timeStr = TimeOfDay(hour: dt.hour, minute: dt.minute).format(context);
+      return "$dateStr, $timeStr";
+    }
+    return dateStr;
   }
+
+  String _getMonthName(int m) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months[m - 1];
+  }
+
+  String _daysAgo(DateTime dt) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final thatDay = DateTime(dt.year, dt.month, dt.day);
+    final diff = today.difference(thatDay).inDays;
+    if (diff <= 0) return 'today';
+    if (diff == 1) return 'yesterday';
+    return '$diff days ago';
+  }
+
+
 
   void _setUnit(int index, String unit) {
     setState(() {
@@ -140,6 +165,7 @@ class _CalendarHrtEditSheetState extends State<CalendarHrtEditSheet> {
   }
 
   void _openDosePicker({
+    required int index,
     required String unit,
     required double currentDose,
     required ValueChanged<double> onDoseChanged,
@@ -147,6 +173,8 @@ class _CalendarHrtEditSheetState extends State<CalendarHrtEditSheet> {
     final doses = _getAvailableDoses(unit);
     int initialIndex = doses.indexWhere((d) => (d - currentDose).abs() < 0.01);
     if (initialIndex == -1) initialIndex = 0;
+
+    double tempDose = doses[initialIndex];
 
     showModalBottomSheet(
       context: context,
@@ -192,7 +220,39 @@ class _CalendarHrtEditSheetState extends State<CalendarHrtEditSheet> {
                   ),
                   TextButton(
                     onPressed: () {
-                      Navigator.pop(context);
+                      final initialEntries = widget.initialHrt.map(HrtEditEntry.fromMap).toList();
+                      double initialDose = 0;
+                      if (index < initialEntries.length) {
+                        initialDose = double.tryParse(initialEntries[index].dose) ?? 0;
+                      }
+
+                      if (initialDose > 0 && (tempDose - initialDose).abs() > 0.01) {
+                        showDialog(
+                          context: this.context,
+                          barrierDismissible: false,
+                          barrierColor: const Color(0xFF1D1B1A).withOpacity(0.4),
+                          builder: (dialogContext) {
+                            return DoseChangeAlert(
+                              change: {
+                                'name': _entries[index].name,
+                                'oldDose': '${initialDose.toStringAsFixed(initialDose == initialDose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $unit',
+                                'newDose': '${tempDose.toStringAsFixed(tempDose == tempDose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $unit',
+                              },
+                              onConfirm: () {
+                                Navigator.pop(dialogContext);
+                                onDoseChanged(tempDose);
+                                Navigator.pop(context);
+                              },
+                              onCancel: () {
+                                Navigator.pop(dialogContext);
+                              },
+                            );
+                          },
+                        );
+                      } else {
+                        onDoseChanged(tempDose);
+                        Navigator.pop(context);
+                      }
                     },
                     child: Text(
                       'Done',
@@ -208,7 +268,7 @@ class _CalendarHrtEditSheetState extends State<CalendarHrtEditSheet> {
                   scrollController: FixedExtentScrollController(initialItem: initialIndex),
                   itemExtent: 44,
                   onSelectedItemChanged: (index) {
-                    onDoseChanged(doses[index]);
+                    tempDose = doses[index];
                   },
                   children: doses.map((d) {
                     return Center(
@@ -634,31 +694,86 @@ class _CalendarHrtEditSheetState extends State<CalendarHrtEditSheet> {
                     ),
                   ),
                 ] else ...[
-                  InkWell(
-                    onTap: () => _toggleTaken(index),
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFF1ED),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFFFDAD3)),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.radio_button_unchecked,
-                              color: Color(0xFF8C3A25), size: 20),
-                          const SizedBox(width: 12),
-                          Text(
-                            'Not taken — tap to mark as taken',
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF1ED),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFFFDAD3)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Not scheduled for today',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF8C3A25),
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                _lastTakenDates[index] == null
+                                    ? 'No last taken date recorded'
+                                    : 'Last taken: ${_formatDateTime(_lastTakenDates[index]!, context)} (${_daysAgo(_lastTakenDates[index]!)})',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 11,
+                                  color: const Color(0xFF8C3A25).withOpacity(0.8),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        OutlinedButton(
+                          onPressed: () async {
+                            final lastTaken = _lastTakenDates[index];
+                            final datePicked = await showDatePicker(
+                              context: context,
+                              initialDate: lastTaken ?? DateTime.now(),
+                              firstDate: DateTime.now().subtract(const Duration(days: 30)),
+                              lastDate: DateTime.now(),
+                            );
+                            if (datePicked == null) return;
+                            if (!mounted) return;
+                            final timePicked = await showTimePicker(
+                              context: context,
+                              initialTime: lastTaken != null
+                                  ? TimeOfDay(hour: lastTaken.hour, minute: lastTaken.minute)
+                                  : TimeOfDay.now(),
+                            );
+                            final finalDateTime = DateTime(
+                              datePicked.year,
+                              datePicked.month,
+                              datePicked.day,
+                              timePicked?.hour ?? 8,
+                              timePicked?.minute ?? 30,
+                            );
+                            setState(() {
+                              _lastTakenDates[index] = finalDateTime;
+                            });
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Color(0xFF8C3A25), width: 1),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            'Set Date',
                             style: GoogleFonts.manrope(
-                              fontSize: 13,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
                               color: const Color(0xFF8C3A25),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -685,6 +800,7 @@ class _CalendarHrtEditSheetState extends State<CalendarHrtEditSheet> {
                   onTap: () {
                     final currentDose = double.tryParse(entry.dose) ?? 1.0;
                     _openDosePicker(
+                      index: index,
                       unit: entry.unit,
                       currentDose: currentDose,
                       onDoseChanged: (newDose) {
@@ -855,34 +971,108 @@ class _CalendarHrtEditSheetState extends State<CalendarHrtEditSheet> {
     );
   }
 
-  Future<void> _showTimePicker(int index) async {
-    final current = _entries[index].timeTaken.split(':');
-    final hour = int.tryParse(current.first) ?? 8;
-    final minute = int.tryParse(current.last) ?? 0;
-
-    final picked = await showTimePicker(
+  void _showTimePicker(int index) {
+    showModalBottomSheet(
       context: context,
-      initialTime: TimeOfDay(hour: hour, minute: minute),
-      builder: (ctx, child) => Theme(
-        data: Theme.of(ctx).copyWith(
-          colorScheme: ColorScheme.light(
-            primary: AppTheme.primary,
-            onPrimary: Colors.white,
-            surface: const Color(0xFFFEF8F6),
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFFFEF8F6),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
           ),
-        ),
-        child: child!,
-      ),
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Container(
+                  width: 48,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD0C4BC).withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                ),
+              ),
+              Text(
+                'Select Time',
+                style: GoogleFonts.notoSerif(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primary,
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    final now = TimeOfDay.now();
+                    final formatted = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+                    setState(() {
+                      _entries[index].timeTaken = formatted;
+                      _entries[index].isTaken = true;
+                    });
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.flash_on, color: Colors.white, size: 18),
+                  label: Text(
+                    'Set to Now (${TimeOfDay.now().format(context)})',
+                    style: GoogleFonts.manrope(fontWeight: FontWeight.bold, fontSize: 15),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    final current = _entries[index].timeTaken.split(':');
+                    final hour = int.tryParse(current.first) ?? 8;
+                    final minute = int.tryParse(current.last) ?? 0;
+                    final picked = await showTimePicker(
+                      context: this.context,
+                      initialTime: TimeOfDay(hour: hour, minute: minute),
+                    );
+                    if (picked != null) {
+                      setState(() {
+                        final h = picked.hour.toString().padLeft(2, '0');
+                        final m = picked.minute.toString().padLeft(2, '0');
+                        _entries[index].timeTaken = '$h:$m';
+                        _entries[index].isTaken = true;
+                      });
+                    }
+                  },
+                  icon: const Icon(Icons.schedule, color: AppTheme.primary, size: 18),
+                  label: Text(
+                    'Choose Custom Time...',
+                    style: GoogleFonts.manrope(fontWeight: FontWeight.bold, fontSize: 15, color: AppTheme.primary),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: AppTheme.primary.withOpacity(0.5), width: 1.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
-
-    if (picked != null) {
-      setState(() {
-        final h = picked.hour.toString().padLeft(2, '0');
-        final m = picked.minute.toString().padLeft(2, '0');
-        _entries[index].timeTaken = '$h:$m';
-        _entries[index].isTaken = true;
-      });
-    }
   }
 
   String _formatAmPm(String time24) {

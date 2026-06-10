@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/models/medication.dart';
 import '../providers/medications_provider.dart';
+import 'package:eunora/features/home/presentation/widgets/dose_change_alert.dart';
 
 class AddMedicationModal extends ConsumerStatefulWidget {
   final dynamic initialData; // Can be Medication for edit or String for prefill name
@@ -121,6 +122,8 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
     int initialIndex = doses.indexWhere((d) => (d - currentDose).abs() < 0.01);
     if (initialIndex == -1) initialIndex = 0;
 
+    double tempDose = doses[initialIndex];
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -165,7 +168,38 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
                   ),
                   TextButton(
                     onPressed: () {
-                      Navigator.pop(context);
+                      double initialDose = 0;
+                      if (widget.initialData is Medication) {
+                        initialDose = (widget.initialData as Medication).dose;
+                      }
+
+                      if (initialDose > 0 && (tempDose - initialDose).abs() > 0.01) {
+                        showDialog(
+                          context: this.context,
+                          barrierDismissible: false,
+                          barrierColor: const Color(0xFF1D1B1A).withOpacity(0.4),
+                          builder: (dialogContext) {
+                            return DoseChangeAlert(
+                              change: {
+                                'name': _nameController.text.isNotEmpty ? _nameController.text : 'Medication',
+                                'oldDose': '${initialDose.toStringAsFixed(initialDose == initialDose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $unit',
+                                'newDose': '${tempDose.toStringAsFixed(tempDose == tempDose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $unit',
+                              },
+                              onConfirm: () {
+                                Navigator.pop(dialogContext);
+                                onDoseChanged(tempDose);
+                                Navigator.pop(context);
+                              },
+                              onCancel: () {
+                                Navigator.pop(dialogContext);
+                              },
+                            );
+                          },
+                        );
+                      } else {
+                        onDoseChanged(tempDose);
+                        Navigator.pop(context);
+                      }
                     },
                     child: Text(
                       'Done',
@@ -181,7 +215,7 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
                   scrollController: FixedExtentScrollController(initialItem: initialIndex),
                   itemExtent: 44,
                   onSelectedItemChanged: (index) {
-                    onDoseChanged(doses[index]);
+                    tempDose = doses[index];
                   },
                   children: doses.map((d) {
                     return Center(
