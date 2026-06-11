@@ -382,7 +382,7 @@ class TriggerDetailsStep extends StatelessWidget {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text('😊', style: TextStyle(fontSize: 18)),
+                              Text(_getEmojiForValue('Stress', 'Calm'), style: const TextStyle(fontSize: 18)),
                               const SizedBox(height: 2),
                               Text(
                                 'Calm',
@@ -405,7 +405,7 @@ class TriggerDetailsStep extends StatelessWidget {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text('😐', style: TextStyle(fontSize: 18)),
+                              Text(_getEmojiForValue('Stress', 'Moderate'), style: const TextStyle(fontSize: 18)),
                               const SizedBox(height: 2),
                               Text(
                                 'Moderate',
@@ -428,7 +428,7 @@ class TriggerDetailsStep extends StatelessWidget {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text('😟', style: TextStyle(fontSize: 18)),
+                              Text(_getEmojiForValue('Stress', 'High'), style: const TextStyle(fontSize: 18)),
                               const SizedBox(height: 2),
                               Text(
                                 'High',
@@ -589,5 +589,81 @@ class TriggerDetailsStep extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _getEmojiForValue(String name, String value) {
+    final nameLower = name.toLowerCase();
+    final valLower = value.toLowerCase();
+
+    if (nameLower == 'stress') {
+      if (valLower == 'calm') return '😊';
+      if (valLower == 'moderate') return '😐';
+      if (valLower == 'high') return '😟';
+    }
+    if (nameLower == 'poor sleep' || nameLower == 'lack of sleep') {
+      if (valLower == 'mild') return '😊';
+      if (valLower == 'moderate') return '😐';
+      if (valLower == 'severe') return '😟';
+    }
+    if (nameLower == 'dehydration') {
+      if (valLower == 'mild') return '😊';
+      if (valLower == 'moderate') return '😐';
+      if (valLower == 'severe') return '😟';
+    }
+    if (nameLower == 'exercise') {
+      if (valLower == 'light') return '🚶';
+      if (valLower == 'moderate') return '🏃';
+      if (valLower == 'intense') return '🏋️';
+    }
+    if (nameLower == 'weather') {
+      if (valLower == 'sunny') return '☀️';
+      if (valLower == 'humid') return '☁️';
+      if (valLower == 'cold/change' || valLower.contains('cold')) return '❄️';
+    }
+    if (nameLower == 'travel') {
+      if (valLower == 'short') return '🚗';
+      if (valLower == 'medium') return '✈️';
+      if (valLower == 'long') return '🌍';
+    }
+    if (nameLower == 'work' || nameLower == 'overworking') {
+      if (valLower == '1-2 hours') return '⌚';
+      if (valLower == '3-4 hours') return '⏰';
+      if (valLower == '5+ hours') return '⏳';
+    }
+
+    switch (valLower) {
+      case 'calm':
+      case 'mild':
+      case 'low':
+        return '😊';
+      case 'moderate':
+        return '😐';
+      case 'high':
+      case 'severe':
+      case 'intense':
+        return '😟';
+      case 'light':
+        return '🚶';
+      case 'sunny':
+        return '☀️';
+      case 'humid':
+        return '☁️';
+      case 'cold/change':
+        return '❄️';
+      case 'short':
+        return '🚗';
+      case 'medium':
+        return '✈️';
+      case 'long':
+        return '🌍';
+      case '1-2 hours':
+        return '⌚';
+      case '3-4 hours':
+        return '⏰';
+      case '5+ hours':
+        return '⏳';
+      default:
+        return '✨';
+    }
   }
 }

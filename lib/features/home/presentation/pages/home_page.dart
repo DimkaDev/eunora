@@ -90,13 +90,19 @@ class _HomePageState extends ConsumerState<HomePage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => SymptomLoggingSheet(
-        onSave: (name, severity) {
+        loggedSymptoms: _loggedSymptoms,
+        onSave: (name, severity, duration) {
           setState(() {
             final existingIndex = _loggedSymptoms.indexWhere((s) => s['name'] == name);
             if (existingIndex != -1) {
               _loggedSymptoms[existingIndex]['severity'] = severity;
+              _loggedSymptoms[existingIndex]['duration'] = duration.toString();
             } else {
-              _loggedSymptoms.add({'name': name, 'severity': severity});
+              _loggedSymptoms.add({
+                'name': name,
+                'severity': severity,
+                'duration': duration.toString(),
+              });
             }
           });
         },
@@ -110,6 +116,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => TriggerLoggingSheet(
+        loggedTriggers: _loggedTriggers,
         onSave: (name, value, icon) {
           setState(() {
             final existingIndex = _loggedTriggers.indexWhere((t) => t['name'] == name);

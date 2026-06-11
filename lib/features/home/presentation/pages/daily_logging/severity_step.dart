@@ -188,7 +188,7 @@ class SeverityStep extends ConsumerWidget {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Text('😊', style: TextStyle(fontSize: 18)),
+                                    Text(_getEmojiForValue(symName, 'Mild'), style: const TextStyle(fontSize: 18)),
                                     const SizedBox(height: 2),
                                     Text(
                                       'Mild',
@@ -211,7 +211,7 @@ class SeverityStep extends ConsumerWidget {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Text('😐', style: TextStyle(fontSize: 18)),
+                                    Text(_getEmojiForValue(symName, 'Moderate'), style: const TextStyle(fontSize: 18)),
                                     const SizedBox(height: 2),
                                     Text(
                                       'Moderate',
@@ -234,7 +234,7 @@ class SeverityStep extends ConsumerWidget {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Text('😟', style: TextStyle(fontSize: 18)),
+                                    Text(_getEmojiForValue(symName, 'Severe'), style: const TextStyle(fontSize: 18)),
                                     const SizedBox(height: 2),
                                     Text(
                                       'Severe',
@@ -378,5 +378,31 @@ class SeverityStep extends ConsumerWidget {
         const SizedBox(height: 24),
       ],
     );
+  }
+
+  String _getEmojiForValue(String name, String value) {
+    final nameLower = name.toLowerCase();
+    final valLower = value.toLowerCase();
+
+    if (nameLower == 'hot flashes' || nameLower == 'night sweats') {
+      if (valLower == 'mild') return '🌡️';
+      if (valLower == 'moderate') return '🔥';
+      if (valLower == 'severe') return '🥵';
+    }
+
+    switch (valLower) {
+      case 'mild':
+      case 'low':
+        return '😊';
+      case 'moderate':
+      case 'medium':
+        return '😐';
+      case 'severe':
+      case 'high':
+      case 'intense':
+        return '😟';
+      default:
+        return '✨';
+    }
   }
 }

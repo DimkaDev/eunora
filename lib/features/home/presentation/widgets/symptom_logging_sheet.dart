@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:go_router/go_router.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/core/utils/animation_system.dart';
 import 'package:eunora/features/onboarding/domain/models/symptom.dart';
 import 'package:eunora/features/onboarding/presentation/providers/symptoms_provider.dart';
 
 class SymptomLoggingSheet extends ConsumerStatefulWidget {
-  final Function(String name, String severity) onSave;
+  final List<Map<String, String>> loggedSymptoms;
+  final Function(String name, String severity, int duration) onSave;
 
-  const SymptomLoggingSheet({super.key, required this.onSave});
+  const SymptomLoggingSheet({
+    super.key,
+    required this.loggedSymptoms,
+    required this.onSave,
+  });
 
   @override
   ConsumerState<SymptomLoggingSheet> createState() => _SymptomLoggingSheetState();
@@ -21,22 +25,20 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
   Symptom? _selectedSymptom;
   String _selectedSeverity = 'Mild';
   int _selectedDuration = 15;
+  
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(symptomsProvider);
     final library = ref.watch(symptomLibraryProvider);
+    final loggedNames = widget.loggedSymptoms.map((s) => s['name']?.toLowerCase()).toSet();
 
-    // Get frequent symptoms
-    final frequentSymptoms = state.frequentSymptomIds.map((id) {
-      return library.firstWhere(
-        (s) => s.id == id,
-        orElse: () => Symptom(
-          id: id,
-          name: id.replaceAll('s_', '').replaceAll('_', ' '),
-          iconName: 'medical_services',
-        ),
-      );
+    // Filter out already logged symptoms, and apply search query if active
+    final displaySymptoms = library.where((symptom) {
+      final matchesLogged = !loggedNames.contains(symptom.name.toLowerCase());
+      final matchesSearch = _searchQuery.isEmpty ||
+          symptom.name.toLowerCase().contains(_searchQuery.toLowerCase());
+      return matchesLogged && matchesSearch;
     }).toList();
 
     return Container(
@@ -105,14 +107,47 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
           ),
           const SizedBox(height: 24),
 
-          // Scrollable Body
+          // Body without animation, fixed search bar at the top of step 0
           Flexible(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: _currentStep == 0
-                  ? _buildSymptomSelection(frequentSymptoms)
-                  : _buildSeveritySelection(),
-            ),
+            child: _currentStep == 0
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                        child: TextField(
+                          onChanged: (val) {
+                            setState(() {
+                              _searchQuery = val;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            hintText: 'Search symptoms...',
+                            prefixIcon: const Icon(Icons.search, color: Color(0xFF9B8B7E)),
+                            filled: true,
+                            fillColor: const Color(0xFFF2EDEA).withValues(alpha: 0.5),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          style: GoogleFonts.manrope(),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          child: _buildSymptomSelection(displaySymptoms),
+                        ),
+                      ),
+                    ],
+                  )
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: _buildSeveritySelection(),
+                  ),
           ),
 
           // Action button (Only in Step 2)
@@ -125,7 +160,7 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
                 child: ElevatedButton(
                   onPressed: () {
                     if (_selectedSymptom != null) {
-                      widget.onSave(_selectedSymptom!.name, _selectedSeverity);
+                      widget.onSave(_selectedSymptom!.name, _selectedSeverity, _selectedDuration);
                       Navigator.pop(context);
                     }
                   },
@@ -153,35 +188,57 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
     );
   }
 
-  Widget _buildSymptomSelection(List<Symptom> frequentSymptoms) {
+  Widget _buildSymptomSelection(List<Symptom> displaySymptoms) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            childAspectRatio: 1.1,
-          ),
-          itemCount: frequentSymptoms.length + 1,
-          itemBuilder: (context, index) {
-            if (index == frequentSymptoms.length) {
+        if (displaySymptoms.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 40),
+            child: Center(
+              child: Text(
+                'No symptoms found',
+                style: GoogleFonts.manrope(
+                  color: AppTheme.onSurfaceVariant,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          )
+        else
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              childAspectRatio: 1.1,
+            ),
+            itemCount: displaySymptoms.length,
+            itemBuilder: (context, index) {
+              final symptom = displaySymptoms[index];
+              final symColor = symptom.getIconColor();
+              final symBg = symColor.withValues(alpha: 0.1);
+
               return Bounceable(
                 onTap: () {
-                  Navigator.pop(context);
-                  context.push('/symptom-library');
+                  setState(() {
+                    _selectedSymptom = symptom;
+                    _currentStep = 1;
+                  });
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFAF9F6),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(40),
-                    border: Border.all(
-                      color: const Color(0xFF9B8B7E).withValues(alpha: 0.2),
-                      width: 2,
-                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -190,96 +247,41 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
                         width: 64,
                         height: 64,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF9B8B7E).withValues(alpha: 0.05),
+                          color: symBg,
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          Icons.add,
-                          color: const Color(0xFF9B8B7E).withValues(alpha: 0.4),
-                          size: 32,
+                          symptom.getIconData(),
+                          color: symColor,
+                          size: 36,
                         ),
                       ),
                       const SizedBox(height: 12),
-                      Text(
-                        'Other',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF9B8B7E).withValues(alpha: 0.6),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text(
+                          symptom.name,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.manrope(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF9B8B7E),
+                            height: 1.1,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
               );
-            }
-
-            final symptom = frequentSymptoms[index];
-            final symColor = symptom.getIconColor();
-            final symBg = symColor.withValues(alpha: 0.1);
-
-            return Bounceable(
-              onTap: () {
-                setState(() {
-                  _selectedSymptom = symptom;
-                  _currentStep = 1;
-                });
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(40),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 64,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        color: symBg,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        symptom.getIconData(),
-                        color: symColor,
-                        size: 36,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text(
-                        symptom.name,
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.manrope(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF9B8B7E),
-                          height: 1.1,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
+            },
+          ),
         const SizedBox(height: 24),
       ],
     );
   }
-
   Widget _buildSeveritySelection() {
     if (_selectedSymptom == null) return const SizedBox.shrink();
 
@@ -396,7 +398,7 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Text('😊', style: TextStyle(fontSize: 18)),
+                                  Text(_getEmojiForValue(symName, 'Mild'), style: const TextStyle(fontSize: 18)),
                                   const SizedBox(height: 2),
                                   Text(
                                     'Mild',
@@ -423,7 +425,7 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Text('😐', style: TextStyle(fontSize: 18)),
+                                  Text(_getEmojiForValue(symName, 'Moderate'), style: const TextStyle(fontSize: 18)),
                                   const SizedBox(height: 2),
                                   Text(
                                     'Moderate',
@@ -450,7 +452,7 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Text('😟', style: TextStyle(fontSize: 18)),
+                                  Text(_getEmojiForValue(symName, 'Severe'), style: const TextStyle(fontSize: 18)),
                                   const SizedBox(height: 2),
                                   Text(
                                     'Severe',
@@ -572,5 +574,31 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
         const SizedBox(height: 24),
       ],
     );
+  }
+
+  String _getEmojiForValue(String name, String value) {
+    final nameLower = name.toLowerCase();
+    final valLower = value.toLowerCase();
+
+    if (nameLower == 'hot flashes' || nameLower == 'night sweats') {
+      if (valLower == 'mild') return '🌡️';
+      if (valLower == 'moderate') return '🔥';
+      if (valLower == 'severe') return '🥵';
+    }
+
+    switch (valLower) {
+      case 'mild':
+      case 'low':
+        return '😊';
+      case 'moderate':
+      case 'medium':
+        return '😐';
+      case 'severe':
+      case 'high':
+      case 'intense':
+        return '😟';
+      default:
+        return '✨';
+    }
   }
 }

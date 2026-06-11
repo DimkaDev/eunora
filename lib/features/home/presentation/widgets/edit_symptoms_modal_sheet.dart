@@ -37,6 +37,12 @@ class _EditSymptomsModalSheetState extends ConsumerState<EditSymptomsModalSheet>
     });
   }
 
+  void _updateDuration(int index, int duration) {
+    setState(() {
+      _draftSymptoms[index]['duration'] = duration.toString();
+    });
+  }
+
   void _deleteSymptom(int index) {
     setState(() {
       _draftSymptoms.removeAt(index);
@@ -154,11 +160,13 @@ class _EditSymptomsModalSheetState extends ConsumerState<EditSymptomsModalSheet>
                     final symptomMapEntry = _draftSymptoms[index];
                     final String name = symptomMapEntry['name'] ?? '';
                     final String severity = symptomMapEntry['severity'] ?? 'Mild';
+                    final int duration = int.tryParse(symptomMapEntry['duration'] ?? '15') ?? 15;
 
                     final symptom = findSymptomByName(name);
                     final symIcon = symptom.getIconData();
                     final symColor = symptom.getIconColor();
                     final symBg = symColor.withValues(alpha: 0.1);
+                    final hasDuration = symptom.id == 's_hot_flashes' || symptom.id == 's_night_sweats';
 
                     return Container(
                       margin: const EdgeInsets.only(bottom: 24),
@@ -275,7 +283,7 @@ class _EditSymptomsModalSheetState extends ConsumerState<EditSymptomsModalSheet>
                                           child: Column(
                                             mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
-                                              const Text('😊', style: TextStyle(fontSize: 18)),
+                                              Text(_getEmojiForValue(name, 'Mild'), style: const TextStyle(fontSize: 18)),
                                               const SizedBox(height: 2),
                                               Text(
                                                 'Mild',
@@ -298,7 +306,7 @@ class _EditSymptomsModalSheetState extends ConsumerState<EditSymptomsModalSheet>
                                           child: Column(
                                             mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
-                                              const Text('😐', style: TextStyle(fontSize: 18)),
+                                              Text(_getEmojiForValue(name, 'Moderate'), style: const TextStyle(fontSize: 18)),
                                               const SizedBox(height: 2),
                                               Text(
                                                 'Moderate',
@@ -321,7 +329,7 @@ class _EditSymptomsModalSheetState extends ConsumerState<EditSymptomsModalSheet>
                                           child: Column(
                                             mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
-                                              const Text('😟', style: TextStyle(fontSize: 18)),
+                                              Text(_getEmojiForValue(name, 'Severe'), style: const TextStyle(fontSize: 18)),
                                               const SizedBox(height: 2),
                                               Text(
                                                 'Severe',
@@ -341,6 +349,98 @@ class _EditSymptomsModalSheetState extends ConsumerState<EditSymptomsModalSheet>
                               ],
                             ),
                           ),
+                          if (hasDuration) ...[
+                            const SizedBox(height: 20),
+                            const Divider(color: Color(0xFFF7F5F0), height: 1),
+                            const SizedBox(height: 20),
+                            Text(
+                              'DURATION',
+                              style: GoogleFonts.manrope(
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.5,
+                                color: const Color(0xFF8A817C),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF7F5F0).withValues(alpha: 0.5),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      if (duration > 5) {
+                                        _updateDuration(index, duration - 5);
+                                      }
+                                    },
+                                    child: Container(
+                                      width: 44,
+                                      height: 44,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(16),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(alpha: 0.03),
+                                            blurRadius: 4,
+                                          )
+                                        ],
+                                      ),
+                                      child: const Icon(Icons.remove, color: AppTheme.primary),
+                                    ),
+                                  ),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                                    textBaseline: TextBaseline.alphabetic,
+                                    children: [
+                                      Text(
+                                        '$duration',
+                                        style: GoogleFonts.notoSerif(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppTheme.onSurface,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'min',
+                                        style: GoogleFonts.manrope(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                          color: const Color(0xFF8A817C),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      _updateDuration(index, duration + 5);
+                                    },
+                                    child: Container(
+                                      width: 44,
+                                      height: 44,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(16),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(alpha: 0.03),
+                                            blurRadius: 4,
+                                          )
+                                        ],
+                                      ),
+                                      child: const Icon(Icons.add, color: AppTheme.primary),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     );
@@ -383,5 +483,31 @@ class _EditSymptomsModalSheetState extends ConsumerState<EditSymptomsModalSheet>
         ],
       ),
     );
+  }
+
+  String _getEmojiForValue(String name, String value) {
+    final nameLower = name.toLowerCase();
+    final valLower = value.toLowerCase();
+
+    if (nameLower == 'hot flashes' || nameLower == 'night sweats') {
+      if (valLower == 'mild') return '🌡️';
+      if (valLower == 'moderate') return '🔥';
+      if (valLower == 'severe') return '🥵';
+    }
+
+    switch (valLower) {
+      case 'mild':
+      case 'low':
+        return '😊';
+      case 'moderate':
+      case 'medium':
+        return '😐';
+      case 'severe':
+      case 'high':
+      case 'intense':
+        return '😟';
+      default:
+        return '✨';
+    }
   }
 }
