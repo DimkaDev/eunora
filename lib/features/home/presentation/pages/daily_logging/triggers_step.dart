@@ -98,7 +98,7 @@ class TriggersStep extends ConsumerWidget {
                         color: bg,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(icon, color: AppTheme.primary, size: 24),
+                      child: Icon(icon, color: trigger.getIconColor(), size: 24),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -110,7 +110,7 @@ class TriggersStep extends ConsumerWidget {
                             style: GoogleFonts.manrope(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
-                              color: AppTheme.primary,
+                              color: AppTheme.onSurface,
                             ),
                           ),
                           const SizedBox(height: 4),
