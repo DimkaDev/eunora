@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
+import 'package:eunora/features/home/presentation/widgets/shared_logging/logging_card_wrapper.dart';
+import 'package:eunora/features/home/presentation/widgets/shared_logging/gradient_slider_selector.dart';
+import 'package:eunora/features/home/presentation/widgets/shared_logging/quantity_counter_selector.dart';
 
 class EditTriggersModalSheet extends StatefulWidget {
   final List<Map<String, dynamic>> initialTriggers;
@@ -215,18 +218,57 @@ class _EditTriggersModalSheetState extends State<EditTriggersModalSheet> {
                         final bool isAlcohol = name.toLowerCase() == 'alcohol';
                         final bool isStress = name.toLowerCase() == 'stress';
 
-                        if (isCaffeine) {
-                          final cups = int.tryParse(value.replaceAll(RegExp(r'[^0-9]'), '')) ?? 1;
-                          return _buildCaffeineDetailCard(index, name, cups);
-                        } else if (isAlcohol) {
-                          final glasses = int.tryParse(value.replaceAll(RegExp(r'[^0-9]'), '')) ?? 1;
-                          return _buildAlcoholDetailCard(index, name, glasses);
-                        } else if (isStress) {
-                          final currentLevel = value.replaceAll('Level: ', '').trim();
-                          return _buildStressDetailCard(index, name, currentLevel);
-                        } else {
-                          return _buildOtherTriggerDetailCard(index, name, value, icon);
-                        }
+                        final trigColor = _getTriggerColor(name);
+                        final trigBg = trigColor.withValues(alpha: 0.1);
+
+                        return LoggingCardWrapper(
+                          name: name,
+                          icon: icon,
+                          color: trigColor,
+                          backgroundColor: trigBg,
+                          trailingAction: IconButton(
+                            onPressed: () => _deleteTrigger(name),
+                            icon: const Icon(Icons.delete_outline),
+                            color: AppTheme.error,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                          children: [
+                            if (isCaffeine) ...[
+                              QuantityCounterSelector(
+                                value: int.tryParse(value.replaceAll(RegExp(r'[^0-9]'), '')) ?? 1,
+                                label: 'HOW MUCH TODAY?',
+                                onChanged: (cups) => _updateCaffeineCups(index, cups),
+                                displayValueBuilder: (cups) => '$cups cup${cups != 1 ? 's' : ''}',
+                                minValue: 1,
+                              ),
+                            ] else if (isAlcohol) ...[
+                              QuantityCounterSelector(
+                                value: int.tryParse(value.replaceAll(RegExp(r'[^0-9]'), '')) ?? 1,
+                                label: 'CONSUMPTION LOG',
+                                onChanged: (glasses) => _updateAlcoholGlasses(index, glasses),
+                                displayValueBuilder: (glasses) => '$glasses glass${glasses != 1 ? 'es' : ''}',
+                                minValue: 1,
+                              ),
+                            ] else if (isStress) ...[
+                              GradientSliderSelector(
+                                values: const ['Calm', 'Moderate', 'High'],
+                                currentValue: value.replaceAll('Level: ', '').trim(),
+                                onChanged: (level) => _updateStressLevel(index, level),
+                                label: 'INTENSITY LEVEL',
+                                emojiGetter: (val) => _getEmojiForValue(name, val),
+                              ),
+                            ] else ...[
+                              GradientSliderSelector(
+                                values: _getTriggerValues(name),
+                                currentValue: value,
+                                onChanged: (newVal) => _updateOtherValue(index, newVal),
+                                label: 'TRIGGER LEVEL / QUANTITY',
+                                emojiGetter: (val) => _getEmojiForValue(name, val),
+                              ),
+                            ],
+                          ],
+                        );
                       }),
                     ),
                   const SizedBox(height: 24),
@@ -262,506 +304,6 @@ class _EditTriggersModalSheetState extends State<EditTriggersModalSheet> {
                   ),
                 ),
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCaffeineDetailCard(int index, String name, int caffeineCups) {
-    final trigColor = _getTriggerColor(name);
-    final trigBg = trigColor.withValues(alpha: 0.1);
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-          )
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(color: trigBg, shape: BoxShape.circle),
-                    child: const Icon(Icons.coffee, color: Color(0xFF9D675C), size: 22),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    name,
-                    style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.onSurface),
-                  ),
-                ],
-              ),
-              IconButton(
-                onPressed: () => _deleteTrigger(name),
-                icon: const Icon(Icons.delete_outline),
-                color: AppTheme.error,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'HOW MUCH TODAY?',
-            style: GoogleFonts.manrope(fontSize: 9, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C), letterSpacing: 1.5),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF7F5F0).withValues(alpha: 0.6),
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    if (caffeineCups > 1) {
-                      _updateCaffeineCups(index, caffeineCups - 1);
-                    }
-                  },
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                    child: const Icon(Icons.remove, color: AppTheme.primary),
-                  ),
-                ),
-                Text(
-                  '$caffeineCups cup${caffeineCups != 1 ? 's' : ''}',
-                  style: GoogleFonts.notoSerif(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary),
-                ),
-                GestureDetector(
-                  onTap: () => _updateCaffeineCups(index, caffeineCups + 1),
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                    child: const Icon(Icons.add, color: AppTheme.primary),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAlcoholDetailCard(int index, String name, int alcoholGlasses) {
-    final trigColor = _getTriggerColor(name);
-    final trigBg = trigColor.withValues(alpha: 0.1);
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-          )
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(color: trigBg, shape: BoxShape.circle),
-                    child: const Icon(Icons.local_bar, color: Color(0xFF9D675C), size: 22),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    name,
-                    style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.onSurface),
-                  ),
-                ],
-              ),
-              IconButton(
-                onPressed: () => _deleteTrigger(name),
-                icon: const Icon(Icons.delete_outline),
-                color: AppTheme.error,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'CONSUMPTION LOG',
-            style: GoogleFonts.manrope(fontSize: 9, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C), letterSpacing: 1.5),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF7F5F0).withValues(alpha: 0.6),
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    if (alcoholGlasses > 1) {
-                      _updateAlcoholGlasses(index, alcoholGlasses - 1);
-                    }
-                  },
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                    child: const Icon(Icons.remove, color: AppTheme.primary),
-                  ),
-                ),
-                Text(
-                  '$alcoholGlasses glass${alcoholGlasses != 1 ? 'es' : ''}',
-                  style: GoogleFonts.notoSerif(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary),
-                ),
-                GestureDetector(
-                  onTap: () => _updateAlcoholGlasses(index, alcoholGlasses + 1),
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                    child: const Icon(Icons.add, color: AppTheme.primary),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStressDetailCard(int index, String name, String stressLevel) {
-    final trigColor = _getTriggerColor(name);
-    final trigBg = trigColor.withValues(alpha: 0.1);
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-          )
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(color: trigBg, shape: BoxShape.circle),
-                    child: const Icon(Icons.psychology, color: Color(0xFF9D675C), size: 22),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    name,
-                    style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.onSurface),
-                  ),
-                ],
-              ),
-              IconButton(
-                onPressed: () => _deleteTrigger(name),
-                icon: const Icon(Icons.delete_outline),
-                color: AppTheme.error,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'INTENSITY LEVEL',
-            style: GoogleFonts.manrope(fontSize: 9, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C), letterSpacing: 1.5),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            height: 56,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFFE2F5E2), // Soft Green (Calm)
-                  Color(0xFFFFF1D0), // Soft Yellow/Orange (Moderate)
-                  Color(0xFFFFE0E0), // Soft Red (High)
-                ],
-              ),
-              borderRadius: BorderRadius.circular(100),
-            ),
-            child: Stack(
-              children: [
-                // White sliding thumb selector
-                AnimatedAlign(
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeInOut,
-                  alignment: stressLevel == 'Calm'
-                      ? Alignment.centerLeft
-                      : stressLevel == 'Moderate'
-                          ? Alignment.center
-                          : Alignment.centerRight,
-                  child: Container(
-                    width: MediaQuery.of(context).size.width * 0.26,
-                    height: 48,
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(100),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-                // Three Buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => _updateStressLevel(index, 'Calm'),
-                        behavior: HitTestBehavior.opaque,
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text('😊', style: TextStyle(fontSize: 18)),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Calm',
-                                style: GoogleFonts.manrope(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                  color: stressLevel == 'Calm' ? AppTheme.primary : const Color(0xFF8A817C),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => _updateStressLevel(index, 'Moderate'),
-                        behavior: HitTestBehavior.opaque,
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text('😐', style: TextStyle(fontSize: 18)),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Moderate',
-                                style: GoogleFonts.manrope(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                  color: stressLevel == 'Moderate' ? AppTheme.primary : const Color(0xFF8A817C),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => _updateStressLevel(index, 'High'),
-                        behavior: HitTestBehavior.opaque,
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text('😟', style: TextStyle(fontSize: 18)),
-                              const SizedBox(height: 2),
-                              Text(
-                                'High',
-                                style: GoogleFonts.manrope(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                  color: stressLevel == 'High' ? AppTheme.primary : const Color(0xFF8A817C),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOtherTriggerDetailCard(int index, String name, String value, IconData icon) {
-    final trigColor = _getTriggerColor(name);
-    final trigBg = trigColor.withValues(alpha: 0.1);
-    final values = _getTriggerValues(name);
-    final isSelectedValue = values.contains(value) ? value : values[values.length ~/ 2];
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-          )
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(color: trigBg, shape: BoxShape.circle),
-                    child: Icon(icon, color: trigColor, size: 22),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    name,
-                    style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.onSurface),
-                  ),
-                ],
-              ),
-              IconButton(
-                onPressed: () => _deleteTrigger(name),
-                icon: const Icon(Icons.delete_outline),
-                color: AppTheme.error,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'TRIGGER LEVEL / QUANTITY',
-            style: GoogleFonts.manrope(
-              fontSize: 9,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.5,
-              color: const Color(0xFF8A817C),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            height: 56,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFFE2F5E2),
-                  Color(0xFFFFF1D0),
-                  Color(0xFFFFE0E0),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(100),
-            ),
-            child: Stack(
-              children: [
-                // White sliding thumb selector
-                AnimatedAlign(
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeInOut,
-                  alignment: isSelectedValue == values[0]
-                      ? Alignment.centerLeft
-                      : isSelectedValue == values[1]
-                          ? Alignment.center
-                          : Alignment.centerRight,
-                  child: Container(
-                    width: MediaQuery.of(context).size.width * 0.26,
-                    height: 48,
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(100),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-                Row(
-                  children: values.map((val) {
-                    final isSelected = isSelectedValue == val;
-                    return Expanded(
-                      child: GestureDetector(
-                        onTap: () => _updateOtherValue(index, val),
-                        behavior: HitTestBehavior.opaque,
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(_getEmojiForValue(name, val), style: const TextStyle(fontSize: 18)),
-                              const SizedBox(height: 2),
-                              Text(
-                                val,
-                                style: GoogleFonts.manrope(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                  color: isSelected ? AppTheme.primary : const Color(0xFF8A817C),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
             ),
           ),
         ],

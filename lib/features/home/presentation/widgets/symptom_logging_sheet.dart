@@ -5,6 +5,9 @@ import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/core/utils/animation_system.dart';
 import 'package:eunora/features/onboarding/domain/models/symptom.dart';
 import 'package:eunora/features/onboarding/presentation/providers/symptoms_provider.dart';
+import 'package:eunora/features/home/presentation/widgets/shared_logging/logging_card_wrapper.dart';
+import 'package:eunora/features/home/presentation/widgets/shared_logging/gradient_slider_selector.dart';
+import 'package:eunora/features/home/presentation/widgets/shared_logging/quantity_counter_selector.dart';
 
 class SymptomLoggingSheet extends ConsumerStatefulWidget {
   final List<Map<String, String>> loggedSymptoms;
@@ -292,286 +295,39 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
     final symBg = symColor.withValues(alpha: 0.1);
     final hasDuration = symptom.id == 's_hot_flashes' || symptom.id == 's_night_sweats';
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return LoggingCardWrapper(
+      name: symName,
+      icon: symIcon,
+      color: symColor,
+      backgroundColor: symBg,
       children: [
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: [
-              BoxShadow(
-                color: symColor.withValues(alpha: 0.04),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              )
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: symBg,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(symIcon, color: symColor, size: 22),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    symName,
-                    style: GoogleFonts.manrope(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.onSurface,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'INTENSITY',
-                style: GoogleFonts.manrope(
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.5,
-                  color: const Color(0xFF8A817C),
-                ),
-              ),
-              const SizedBox(height: 12),
-              // fluid severity slider
-              Container(
-                height: 56,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFFE2F5E2),
-                      Color(0xFFFFF1D0),
-                      Color(0xFFFFE0E0),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                child: Stack(
-                  children: [
-                    AnimatedAlign(
-                      duration: const Duration(milliseconds: 250),
-                      curve: Curves.easeInOut,
-                      alignment: _selectedSeverity == 'Mild'
-                          ? Alignment.centerLeft
-                          : _selectedSeverity == 'Moderate'
-                              ? Alignment.center
-                              : Alignment.centerRight,
-                      child: Container(
-                        width: MediaQuery.of(context).size.width * 0.26,
-                        height: 48,
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(100),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedSeverity = 'Mild';
-                              });
-                            },
-                            behavior: HitTestBehavior.opaque,
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(_getEmojiForValue(symName, 'Mild'), style: const TextStyle(fontSize: 18)),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'Mild',
-                                    style: GoogleFonts.manrope(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.bold,
-                                      color: _selectedSeverity == 'Mild' ? AppTheme.primary : const Color(0xFF8A817C),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedSeverity = 'Moderate';
-                              });
-                            },
-                            behavior: HitTestBehavior.opaque,
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(_getEmojiForValue(symName, 'Moderate'), style: const TextStyle(fontSize: 18)),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'Moderate',
-                                    style: GoogleFonts.manrope(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.bold,
-                                      color: _selectedSeverity == 'Moderate' ? AppTheme.primary : const Color(0xFF8A817C),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedSeverity = 'Severe';
-                              });
-                            },
-                            behavior: HitTestBehavior.opaque,
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(_getEmojiForValue(symName, 'Severe'), style: const TextStyle(fontSize: 18)),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'Severe',
-                                    style: GoogleFonts.manrope(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.bold,
-                                      color: _selectedSeverity == 'Severe' ? AppTheme.primary : const Color(0xFF8A817C),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              if (hasDuration) ...[
-                const SizedBox(height: 20),
-                const Divider(color: Color(0xFFF7F5F0), height: 1),
-                const SizedBox(height: 20),
-                Text(
-                  'DURATION',
-                  style: GoogleFonts.manrope(
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.5,
-                    color: const Color(0xFF8A817C),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF7F5F0).withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          if (_selectedDuration > 5) {
-                            setState(() {
-                              _selectedDuration -= 5;
-                            });
-                          }
-                        },
-                        child: Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.03),
-                                blurRadius: 4,
-                              )
-                            ],
-                          ),
-                          child: const Icon(Icons.remove, color: AppTheme.primary),
-                        ),
-                      ),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
-                          Text(
-                            '$_selectedDuration',
-                            style: GoogleFonts.notoSerif(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.onSurface,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'min',
-                            style: GoogleFonts.manrope(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFF8A817C),
-                            ),
-                          ),
-                        ],
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _selectedDuration += 5;
-                          });
-                        },
-                        child: Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.03),
-                                blurRadius: 4,
-                              )
-                            ],
-                          ),
-                          child: const Icon(Icons.add, color: AppTheme.primary),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ],
-          ),
+        GradientSliderSelector(
+          values: const ['Mild', 'Moderate', 'Severe'],
+          currentValue: _selectedSeverity,
+          onChanged: (val) {
+            setState(() {
+              _selectedSeverity = val;
+            });
+          },
+          label: 'INTENSITY',
+          emojiGetter: (val) => _getEmojiForValue(symName, val),
         ),
-        const SizedBox(height: 24),
+        if (hasDuration) ...[
+          const SizedBox(height: 20),
+          const Divider(color: Color(0xFFF7F5F0), height: 1),
+          QuantityCounterSelector(
+            value: _selectedDuration,
+            label: 'DURATION',
+            onChanged: (val) {
+              setState(() {
+                _selectedDuration = val;
+              });
+            },
+            displayValueBuilder: (val) => '$val min',
+            stepValue: 5,
+            minValue: 5,
+          ),
+        ],
       ],
     );
   }

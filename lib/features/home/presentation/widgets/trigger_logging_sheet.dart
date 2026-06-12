@@ -5,6 +5,9 @@ import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/core/utils/animation_system.dart';
 import 'package:eunora/features/onboarding/domain/models/trigger.dart';
 import 'package:eunora/features/onboarding/presentation/providers/triggers_provider.dart';
+import 'package:eunora/features/home/presentation/widgets/shared_logging/logging_card_wrapper.dart';
+import 'package:eunora/features/home/presentation/widgets/shared_logging/gradient_slider_selector.dart';
+import 'package:eunora/features/home/presentation/widgets/shared_logging/quantity_counter_selector.dart';
 
 class TriggerLoggingSheet extends ConsumerStatefulWidget {
   final List<Map<String, dynamic>> loggedTriggers;
@@ -334,448 +337,61 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
     final isAlcohol = name.toLowerCase() == 'alcohol';
     final isStress = name.toLowerCase() == 'stress';
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return LoggingCardWrapper(
+      name: name,
+      icon: icon,
+      color: trigColor,
+      backgroundColor: trigBg,
       children: [
-        Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(32),
-            boxShadow: [
-              BoxShadow(
-                color: trigColor.withValues(alpha: 0.04),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              )
-            ],
+        if (isCaffeine) ...[
+          QuantityCounterSelector(
+            value: int.tryParse((_selectedValue ?? '1').replaceAll(RegExp(r'[^0-9]'), '')) ?? 1,
+            label: 'HOW MUCH TODAY?',
+            onChanged: (val) {
+              setState(() {
+                _selectedValue = '$val cup${val != 1 ? 's' : ''}';
+              });
+            },
+            displayValueBuilder: (val) => '$val cup${val != 1 ? 's' : ''}',
+            minValue: 1,
           ),
-          child: isCaffeine
-              ? _buildCaffeineSelector(name, icon, trigColor, trigBg)
-              : isAlcohol
-                  ? _buildAlcoholSelector(name, icon, trigColor, trigBg)
-                  : isStress
-                      ? _buildStressSelector(name, icon, trigColor, trigBg)
-                      : _buildOtherSelector(name, icon, trigColor, trigBg),
-        ),
-        const SizedBox(height: 24),
-      ],
-    );
-  }
-
-  Widget _buildCaffeineSelector(String name, IconData icon, Color trigColor, Color trigBg) {
-    int cups = int.tryParse((_selectedValue ?? '1').replaceAll(RegExp(r'[^0-9]'), '')) ?? 1;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(color: trigBg, shape: BoxShape.circle),
-              child: Icon(icon, color: trigColor, size: 22),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              name,
-              style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.onSurface),
-            ),
-          ],
-        ),
-        const SizedBox(height: 24),
-        Text(
-          'HOW MUCH TODAY?',
-          style: GoogleFonts.manrope(fontSize: 9, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C), letterSpacing: 1.5),
-        ),
-        const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF7F5F0).withValues(alpha: 0.6),
-            borderRadius: BorderRadius.circular(30),
+        ] else if (isAlcohol) ...[
+          QuantityCounterSelector(
+            value: int.tryParse((_selectedValue ?? '1').replaceAll(RegExp(r'[^0-9]'), '')) ?? 1,
+            label: 'CONSUMPTION LOG',
+            onChanged: (val) {
+              setState(() {
+                _selectedValue = '$val glass${val != 1 ? 'es' : ''}';
+              });
+            },
+            displayValueBuilder: (val) => '$val glass${val != 1 ? 'es' : ''}',
+            minValue: 1,
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  if (cups > 1) {
-                    setState(() {
-                      _selectedValue = '${cups - 1} cup${cups - 1 != 1 ? 's' : ''}';
-                    });
-                  }
-                },
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                  child: const Icon(Icons.remove, color: AppTheme.primary),
-                ),
-              ),
-              Text(
-                '$cups cup${cups != 1 ? 's' : ''}',
-                style: GoogleFonts.notoSerif(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary),
-              ),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedValue = '${cups + 1} cup${cups + 1 != 1 ? 's' : ''}';
-                  });
-                },
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                  child: const Icon(Icons.add, color: AppTheme.primary),
-                ),
-              ),
-            ],
+        ] else if (isStress) ...[
+          GradientSliderSelector(
+            values: const ['Calm', 'Moderate', 'High'],
+            currentValue: _selectedValue ?? 'Moderate',
+            onChanged: (val) {
+              setState(() {
+                _selectedValue = val;
+              });
+            },
+            label: 'INTENSITY LEVEL',
+            emojiGetter: (val) => _getEmojiForValue(name, val),
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAlcoholSelector(String name, IconData icon, Color trigColor, Color trigBg) {
-    int glasses = int.tryParse((_selectedValue ?? '1').replaceAll(RegExp(r'[^0-9]'), '')) ?? 1;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(color: trigBg, shape: BoxShape.circle),
-              child: Icon(icon, color: trigColor, size: 22),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              name,
-              style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.onSurface),
-            ),
-          ],
-        ),
-        const SizedBox(height: 24),
-        Text(
-          'CONSUMPTION LOG',
-          style: GoogleFonts.manrope(fontSize: 9, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C), letterSpacing: 1.5),
-        ),
-        const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF7F5F0).withValues(alpha: 0.6),
-            borderRadius: BorderRadius.circular(30),
+        ] else ...[
+          GradientSliderSelector(
+            values: _getTriggerValues(name),
+            currentValue: _selectedValue ?? (_getTriggerValues(name).isNotEmpty ? _getTriggerValues(name)[_getTriggerValues(name).length ~/ 2] : 'Moderate'),
+            onChanged: (val) {
+              setState(() {
+                _selectedValue = val;
+              });
+            },
+            label: 'TRIGGER LEVEL / QUANTITY',
+            emojiGetter: (val) => _getEmojiForValue(name, val),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  if (glasses > 1) {
-                    setState(() {
-                      _selectedValue = '${glasses - 1} glass${glasses - 1 != 1 ? 'es' : ''}';
-                    });
-                  }
-                },
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                  child: const Icon(Icons.remove, color: AppTheme.primary),
-                ),
-              ),
-              Text(
-                '$glasses glass${glasses != 1 ? 'es' : ''}',
-                style: GoogleFonts.notoSerif(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary),
-              ),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedValue = '${glasses + 1} glass${glasses + 1 != 1 ? 'es' : ''}';
-                  });
-                },
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                  child: const Icon(Icons.add, color: AppTheme.primary),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStressSelector(String name, IconData icon, Color trigColor, Color trigBg) {
-    final stressLevel = _selectedValue ?? 'Moderate';
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(color: trigBg, shape: BoxShape.circle),
-              child: Icon(icon, color: trigColor, size: 22),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              name,
-              style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.onSurface),
-            ),
-          ],
-        ),
-        const SizedBox(height: 24),
-        Text(
-          'INTENSITY LEVEL',
-          style: GoogleFonts.manrope(fontSize: 9, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C), letterSpacing: 1.5),
-        ),
-        const SizedBox(height: 16),
-        Container(
-          height: 56,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [
-                Color(0xFFE2F5E2),
-                Color(0xFFFFF1D0),
-                Color(0xFFFFE0E0),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(100),
-          ),
-          child: Stack(
-            children: [
-              AnimatedAlign(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeInOut,
-                alignment: stressLevel == 'Calm'
-                    ? Alignment.centerLeft
-                    : stressLevel == 'Moderate'
-                        ? Alignment.center
-                        : Alignment.centerRight,
-                child: Container(
-                  width: MediaQuery.of(context).size.width * 0.26,
-                  height: 48,
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(100),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedValue = 'Calm';
-                        });
-                      },
-                      behavior: HitTestBehavior.opaque,
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text('😊', style: TextStyle(fontSize: 18)),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Calm',
-                              style: GoogleFonts.manrope(
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                                color: stressLevel == 'Calm' ? AppTheme.primary : const Color(0xFF8A817C),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedValue = 'Moderate';
-                        });
-                      },
-                      behavior: HitTestBehavior.opaque,
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text('😐', style: TextStyle(fontSize: 18)),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Moderate',
-                              style: GoogleFonts.manrope(
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                                color: stressLevel == 'Moderate' ? AppTheme.primary : const Color(0xFF8A817C),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedValue = 'High';
-                        });
-                      },
-                      behavior: HitTestBehavior.opaque,
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text('😟', style: TextStyle(fontSize: 18)),
-                            const SizedBox(height: 2),
-                            Text(
-                              'High',
-                              style: GoogleFonts.manrope(
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                                color: stressLevel == 'High' ? AppTheme.primary : const Color(0xFF8A817C),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildOtherSelector(String name, IconData icon, Color trigColor, Color trigBg) {
-    final values = _getTriggerValues(name);
-    final isSelectedValue = values.contains(_selectedValue) ? _selectedValue : values[values.length ~/ 2];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(color: trigBg, shape: BoxShape.circle),
-              child: Icon(icon, color: trigColor, size: 22),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              name,
-              style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.onSurface),
-            ),
-          ],
-        ),
-        const SizedBox(height: 24),
-        Text(
-          'TRIGGER LEVEL / QUANTITY',
-          style: GoogleFonts.manrope(
-            fontSize: 9,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.5,
-            color: const Color(0xFF8A817C),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Container(
-          height: 56,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [
-                Color(0xFFE2F5E2),
-                Color(0xFFFFF1D0),
-                Color(0xFFFFE0E0),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(100),
-          ),
-          child: Stack(
-            children: [
-              // White sliding thumb selector
-              AnimatedAlign(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeInOut,
-                alignment: isSelectedValue == values[0]
-                    ? Alignment.centerLeft
-                    : isSelectedValue == values[1]
-                        ? Alignment.center
-                        : Alignment.centerRight,
-                child: Container(
-                  width: MediaQuery.of(context).size.width * 0.26,
-                  height: 48,
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(100),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-              Row(
-                children: values.map((val) {
-                  final isSelected = isSelectedValue == val;
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedValue = val;
-                        });
-                      },
-                      behavior: HitTestBehavior.opaque,
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(_getEmojiForValue(name, val), style: const TextStyle(fontSize: 18)),
-                            const SizedBox(height: 2),
-                            Text(
-                              val,
-                              style: GoogleFonts.manrope(
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                                color: isSelected ? AppTheme.primary : const Color(0xFF8A817C),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ],
-          ),
-        ),
+        ],
       ],
     );
   }
