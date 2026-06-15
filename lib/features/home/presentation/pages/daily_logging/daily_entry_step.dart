@@ -485,20 +485,7 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
       medName = 'Estrogen Gel';
     }
 
-    // Dynamic unit options
-    List<String> unitOptions = ['mg', 'mcg'];
-    if (medKey == 'estrogen_gel') {
-      unitOptions = ['pumps', 'mg'];
-    }
-    if (!unitOptions.contains(unit)) {
-      unitOptions.add(unit);
-    }
-    final onboardingMeds = ref.read(medicationsProvider).medications;
-    for (var m in onboardingMeds) {
-      if (!unitOptions.contains(m.unit)) {
-        unitOptions.add(m.unit);
-      }
-    }
+
 
     return Container(
       margin: EdgeInsets.zero,
@@ -610,50 +597,14 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                           color: const Color(0xFFEDE7E5).withValues(alpha: 0.6),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding: const EdgeInsets.all(2),
-                        child: Row(
-                          children: unitOptions.map((opt) {
-                            final isSelected = unit == opt;
-                            return Expanded(
-                              child: GestureDetector(
-                                onTap: () {
-                                  if (isEstradiol) {
-                                    widget.onEstradiolUnitChanged(opt);
-                                  } else if (isProgesterone) {
-                                    widget.onProgesteroneUnitChanged(opt);
-                                  } else {
-                                    setState(() {
-                                      _estrogenGelUnit = opt;
-                                    });
-                                  }
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: isSelected ? Colors.white : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(6),
-                                    boxShadow: isSelected
-                                        ? [
-                                            BoxShadow(
-                                              color: Colors.black.withValues(alpha: 0.05),
-                                              blurRadius: 4,
-                                              offset: const Offset(0, 1),
-                                            )
-                                          ]
-                                        : null,
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    opt,
-                                    style: GoogleFonts.manrope(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: isSelected ? AppTheme.primary : const Color(0xFF9B8B7E),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
+                        alignment: Alignment.center,
+                        child: Text(
+                          unit,
+                          style: GoogleFonts.manrope(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primary,
+                          ),
                         ),
                       ),
                     ],

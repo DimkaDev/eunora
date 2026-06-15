@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:eunora/core/theme/app_theme.dart';
-import 'package:eunora/features/home/presentation/widgets/calendar_symptom_edit_sheet.dart';
-import 'package:eunora/features/home/presentation/widgets/calendar_trigger_edit_sheet.dart';
+import 'package:eunora/features/home/presentation/widgets/symptom_logging_sheet.dart';
+import 'package:eunora/features/home/presentation/widgets/edit_symptoms_modal_sheet.dart';
+import 'package:eunora/features/home/presentation/widgets/trigger_logging_sheet.dart';
+import 'package:eunora/features/home/presentation/widgets/edit_triggers_modal_sheet.dart';
 import 'package:eunora/features/home/presentation/widgets/calendar_hrt_edit_sheet.dart';
 import 'package:eunora/core/services/firestore_service.dart';
 import 'package:eunora/features/home/domain/entities/daily_log.dart';
@@ -241,24 +243,143 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     }
   }
 
+  List<Map<String, String>> _convertToEditSymptoms(List<String> list) {
+    return list.map((s) {
+      final parts = s.split(' · ');
+      final name = parts.first.trim();
+      String severity = 'Moderate';
+      if (parts.length > 1) {
+        final scoreStr = parts[1].split('/').first.trim();
+        final score = int.tryParse(scoreStr);
+        if (score != null) {
+          if (score <= 2) {
+            severity = 'Mild';
+          } else if (score <= 3) {
+            severity = 'Moderate';
+          } else {
+            severity = 'Severe';
+          }
+        } else {
+          severity = parts[1].trim();
+        }
+      }
+      return {
+        'name': name,
+        'severity': severity,
+        'duration': '30',
+      };
+    }).toList();
+  }
+
+  List<String> _convertFromEditSymptoms(List<Map<String, String>> list) {
+    return list.map((s) {
+      final name = s['name'] ?? '';
+      final severity = s['severity'] ?? 'Moderate';
+      int score = 3;
+      if (severity == 'Mild') {
+        score = 1;
+      } else if (severity == 'Moderate') {
+        score = 3;
+      } else if (severity == 'Severe') {
+        score = 5;
+      }
+      return '$name · $score/5';
+    }).toList();
+  }
+
+  List<Map<String, dynamic>> _convertToEditTriggers(List<String> list) {
+    final triggerCatalog = {
+      'Caffeine': {'icon': Icons.local_cafe, 'defaultValue': '1 cup'},
+      'Stress': {'icon': Icons.psychology, 'defaultValue': 'Level: Moderate'},
+      'Alcohol': {'icon': Icons.wine_bar, 'defaultValue': '1 glass'},
+      'Red wine': {'icon': Icons.wine_bar, 'defaultValue': '1 glass'},
+      'Exercise': {'icon': Icons.fitness_center, 'defaultValue': 'Logged'},
+      'Weather': {'icon': Icons.cloud, 'defaultValue': 'Logged'},
+      'Poor sleep': {'icon': Icons.bedtime, 'defaultValue': 'Logged'},
+      'Poor Sleep': {'icon': Icons.bedtime, 'defaultValue': 'Logged'},
+      'Specific Foods': {'icon': Icons.restaurant, 'defaultValue': 'Logged'},
+    };
+
+    return list.map((name) {
+      final catalog = triggerCatalog[name] ?? {'icon': Icons.bolt, 'defaultValue': 'Logged'};
+      return {
+        'name': name,
+        'value': catalog['defaultValue'],
+        'icon': catalog['icon'],
+      };
+    }).toList();
+  }
+
+  List<String> _convertFromEditTriggers(List<Map<String, dynamic>> list) {
+    return list.map((t) => t['name'] as String).toList();
+  }
+
+  void _showAddSymptomSheet(MockDailyLog log) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => SymptomLoggingSheet(
+        loggedSymptoms: _convertToEditSymptoms(log.symptoms),
+        onSave: (name, severity, duration) {
+          setState(() {
+            final editList = _convertToEditSymptoms(log.symptoms);
+            final existingIndex = editList.indexWhere((s) => s['name'] == name);
+            if (existingIndex != -1) {
+              editList[existingIndex]['severity'] = severity;
+              editList[existingIndex]['duration'] = duration.toString();
+            } else {
+              editList.add({
+                'name': name,
+                'severity': severity,
+                'duration': duration.toString(),
+              });
+            }
+            log.symptoms = _convertFromEditSymptoms(editList);
+            log.itemsCount = log.symptoms.length + log.hrt.length + log.triggers.length;
+          });
+        },
+      ),
+    );
+  }
+
   void _showSymptomEditSheet(MockDailyLog log) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => DraggableScrollableSheet(
-        initialChildSize: 0.88,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        builder: (_, scrollController) => CalendarSymptomEditSheet(
-          initialSymptoms: List<String>.from(log.symptoms),
-          onSave: (updated) {
-            setState(() {
-              log.symptoms = updated;
-              log.itemsCount = updated.length + log.hrt.length;
-            });
-          },
-        ),
+      builder: (context) => EditSymptomsModalSheet(
+        initialSymptoms: _convertToEditSymptoms(log.symptoms),
+        onSave: (newSymptoms) {
+          setState(() {
+            log.symptoms = _convertFromEditSymptoms(newSymptoms);
+            log.itemsCount = log.symptoms.length + log.hrt.length + log.triggers.length;
+          });
+        },
+      ),
+    );
+  }
+
+  void _showAddTriggerSheet(MockDailyLog log) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => TriggerLoggingSheet(
+        loggedTriggers: _convertToEditTriggers(log.triggers),
+        onSave: (name, value, icon) {
+          setState(() {
+            final editList = _convertToEditTriggers(log.triggers);
+            final existingIndex = editList.indexWhere((t) => t['name'] == name);
+            if (existingIndex != -1) {
+              editList[existingIndex]['value'] = value;
+            } else {
+              editList.add({'name': name, 'value': value, 'icon': icon});
+            }
+            log.triggers = _convertFromEditTriggers(editList);
+            log.itemsCount = log.symptoms.length + log.hrt.length + log.triggers.length;
+          });
+        },
       ),
     );
   }
@@ -268,18 +389,14 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => DraggableScrollableSheet(
-        initialChildSize: 0.85,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        builder: (_, scrollController) => CalendarTriggerEditSheet(
-          initialTriggers: List<String>.from(log.triggers),
-          onSave: (updated) {
-            setState(() {
-              log.triggers = updated;
-            });
-          },
-        ),
+      builder: (context) => EditTriggersModalSheet(
+        initialTriggers: _convertToEditTriggers(log.triggers),
+        onSave: (newTriggers) {
+          setState(() {
+            log.triggers = _convertFromEditTriggers(newTriggers);
+            log.itemsCount = log.symptoms.length + log.hrt.length + log.triggers.length;
+          });
+        },
       ),
     );
   }
@@ -1355,21 +1472,51 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                   ),
                 ],
               ),
-              InkWell(
-                onTap: () => _showSymptomEditSheet(log),
-                child: Row(
-                  children: [
-                    Text(
-                      'Edit',
-                      style: GoogleFonts.manrope(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primary,
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => _showAddSymptomSheet(log),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.add, color: AppTheme.primary, size: 14),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Add',
+                            style: GoogleFonts.manrope(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const Icon(Icons.chevron_right, size: 16, color: AppTheme.primary),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 12),
+                  InkWell(
+                    onTap: () => _showSymptomEditSheet(log),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Edit',
+                          style: GoogleFonts.manrope(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primary,
+                          ),
+                        ),
+                        const Icon(Icons.chevron_right, size: 16, color: AppTheme.primary),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -1614,21 +1761,51 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                   ),
                 ],
               ),
-              InkWell(
-                onTap: () => _showTriggerEditSheet(log),
-                child: Row(
-                  children: [
-                    Text(
-                      'Edit',
-                      style: GoogleFonts.manrope(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primary,
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => _showAddTriggerSheet(log),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.add, color: AppTheme.primary, size: 14),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Add',
+                            style: GoogleFonts.manrope(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const Icon(Icons.chevron_right, size: 16, color: AppTheme.primary),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 12),
+                  InkWell(
+                    onTap: () => _showTriggerEditSheet(log),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Edit',
+                          style: GoogleFonts.manrope(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primary,
+                          ),
+                        ),
+                        const Icon(Icons.chevron_right, size: 16, color: AppTheme.primary),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

@@ -859,40 +859,14 @@ class _CalendarHrtEditSheetState extends State<CalendarHrtEditSheet> {
                           color: const Color(0xFFEDE7E5).withValues(alpha: 0.6),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding: const EdgeInsets.all(2),
-                        child: Row(
-                          children: unitOptions.map((opt) {
-                            final isSelected = entry.unit == opt;
-                            return Expanded(
-                              child: GestureDetector(
-                                onTap: () => _setUnit(index, opt),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: isSelected ? Colors.white : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(6),
-                                    boxShadow: isSelected
-                                        ? [
-                                            BoxShadow(
-                                              color: Colors.black.withValues(alpha: 0.05),
-                                              blurRadius: 4,
-                                              offset: const Offset(0, 1),
-                                            )
-                                          ]
-                                        : null,
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    opt,
-                                    style: GoogleFonts.manrope(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: isSelected ? AppTheme.primary : const Color(0xFF9B8B7E),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
+                        alignment: Alignment.center,
+                        child: Text(
+                          entry.unit,
+                          style: GoogleFonts.manrope(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primary,
+                          ),
                         ),
                       ),
                     ],

@@ -545,8 +545,9 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
 
   Widget _buildTypeTile(MedicationType type) {
     final isSelected = _selectedType == type;
+    final isEditing = widget.initialData is Medication;
     return InkWell(
-      onTap: () {
+      onTap: isEditing ? null : () {
         setState(() {
           _selectedType = type;
           if (type == MedicationType.gel) {
@@ -565,33 +566,36 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
           _isCustomDose = false;
         });
       },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primary.withOpacity(0.05) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? AppTheme.primary : const Color(0xFFD0C4BC),
-            width: isSelected ? 2 : 1,
+      child: Opacity(
+        opacity: isEditing && !isSelected ? 0.5 : 1.0,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? AppTheme.primary.withOpacity(0.05) : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected ? AppTheme.primary : const Color(0xFFD0C4BC),
+              width: isSelected ? 2 : 1,
+            ),
           ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              _getIconData(type.iconName),
-              color: AppTheme.primary.withOpacity(isSelected ? 1.0 : 0.7),
-              size: 18,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              type.displayName,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                color: isSelected ? AppTheme.primary : const Color(0xFF4D453F),
+          child: Row(
+            children: [
+              Icon(
+                _getIconData(type.iconName),
+                color: AppTheme.primary.withOpacity(isSelected ? 1.0 : 0.7),
+                size: 18,
               ),
-            ),
-          ],
+              const SizedBox(width: 8),
+              Text(
+                type.displayName,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  color: isSelected ? AppTheme.primary : const Color(0xFF4D453F),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -609,7 +613,8 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
   Widget _buildDoseSelector() {
     final presets = _getDosePresets(_selectedType);
     final currentDoseStr = _doseController.text;
-    final showUnitSelector = _selectedType == MedicationType.other;
+    final isEditing = widget.initialData is Medication;
+    final showUnitSelector = _selectedType == MedicationType.other && !isEditing;
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
