@@ -12,6 +12,9 @@ import 'package:eunora/features/home/presentation/widgets/calendar_hrt_edit_shee
 import 'package:eunora/core/services/firestore_service.dart';
 import 'package:eunora/features/home/domain/entities/daily_log.dart';
 import 'package:eunora/features/onboarding/domain/models/symptom.dart';
+import 'package:eunora/features/onboarding/domain/models/medication.dart';
+import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
+
 
 class MockDailyLog {
   List<String> symptoms;
@@ -20,6 +23,7 @@ class MockDailyLog {
   List<Map<String, String>> hrt;
   List<String> triggers;
   int itemsCount;
+  DailyLog? originalLog;
 
   MockDailyLog({
     required this.symptoms,
@@ -28,6 +32,7 @@ class MockDailyLog {
     required this.hrt,
     required this.triggers,
     required this.itemsCount,
+    this.originalLog,
   });
 }
 
@@ -192,6 +197,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           hrt: hrtList,
           triggers: log.triggers,
           itemsCount: symptomsList.length + hrtList.length + log.triggers.length,
+          originalLog: log,
         );
       }
 
@@ -216,6 +222,294 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       return _aprilLogs[day];
     }
     return null;
+  }
+
+  Future<void> _saveLogToFirestore(int day, MockDailyLog mockLog) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final targetDate = DateTime(_focusedMonth.year, _focusedMonth.month, day);
+    final dateStr = "${targetDate.year}-${targetDate.month.toString().padLeft(2, '0')}-${targetDate.day.toString().padLeft(2, '0')}";
+
+    final List<HrtIntakeLog> hrtIntakes = [];
+    for (final h in mockLog.hrt) {
+      final name = h['name'] ?? '';
+      final isTaken = h['isTaken'] == 'true';
+      final details = h['details'] ?? '';
+      final status = h['status'] ?? '';
+
+      String time = '08:30 AM';
+      if (status.toLowerCase().contains('taken') && !status.toLowerCase().contains('not')) {
+        time = status.replaceAll(RegExp(r'taken\s*', caseSensitive: false), '').trim();
+        if (!time.contains('AM') && !time.contains('PM')) {
+          time = '$time AM';
+        }
+      }
+
+      double dose = 50.0;
+      String unit = 'mcg';
+      if (details.isNotEmpty) {
+        final parts = details.split(' · ');
+        if (parts.isNotEmpty) {
+          final doseAndUnit = parts.first.trim().split(' ');
+          if (doseAndUnit.isNotEmpty) {
+            dose = double.tryParse(doseAndUnit.first) ?? 50.0;
+            if (doseAndUnit.length > 1) {
+              unit = doseAndUnit[1];
+            }
+          }
+        }
+      }
+
+      final meds = ref.read(medicationsProvider).medications;
+      final matchingMed = meds.firstWhere(
+        (m) => m.name.toLowerCase() == name.toLowerCase(),
+        orElse: () => Medication(name: name, type: MedicationType.other, dose: dose, unit: unit, frequency: ''),
+      );
+
+      hrtIntakes.add(HrtIntakeLog(
+        medicationId: matchingMed.id,
+        name: name,
+        dose: dose,
+        unit: unit,
+        time: time,
+        isTaken: isTaken,
+      ));
+    }
+
+    DailyLog dailyLog;
+    if (mockLog.originalLog != null) {
+      final orig = mockLog.originalLog!;
+      final List<LoggedSymptom> loggedSymptoms = mockLog.symptoms.map((s) {
+        final parts = s.split(' · ');
+        final name = parts.first.trim();
+        String severityStr = 'Moderate';
+        if (parts.length > 1) {
+          final scoreStr = parts[1].split('/').first.trim();
+          final score = int.tryParse(scoreStr);
+          if (score != null) {
+            if (score <= 2) {
+              severityStr = 'Mild';
+            } else if (score <= 3) {
+              severityStr = 'Moderate';
+            } else {
+              severityStr = 'Severe';
+            }
+          }
+        }
+        return LoggedSymptom(
+          symptom: Symptom(
+            id: 's_${name.toLowerCase().replaceAll(' ', '_')}',
+            name: name,
+            iconName: name.toLowerCase().contains('flash')
+                ? 'thermostat'
+                : name.toLowerCase().contains('mood')
+                    ? 'mood'
+                    : name.toLowerCase().contains('sleep')
+                        ? 'dark_mode'
+                        : name.toLowerCase().contains('dry')
+                            ? 'opacity'
+                            : 'accessibility_new',
+            category: 'General',
+          ),
+          severity: severityStr,
+        );
+      }).toList();
+
+      bool estradiolChecked = false;
+      double estradiolDose = 50.0;
+      String estradiolUnit = 'mcg';
+      String estradiolTime = '08:30 AM';
+
+      bool progesteroneChecked = false;
+      double progesteroneDose = 100.0;
+      String progesteroneUnit = 'mg';
+      String progesteroneTime = '08:00 PM';
+
+      for (final h in mockLog.hrt) {
+        final name = h['name']?.toLowerCase() ?? '';
+        final isTaken = h['isTaken'] == 'true';
+        final details = h['details'] ?? '';
+        final status = h['status'] ?? '';
+
+        String time = '08:30 AM';
+        if (status.toLowerCase().contains('taken') && !status.toLowerCase().contains('not')) {
+          time = status.replaceAll(RegExp(r'taken\s*', caseSensitive: false), '').trim();
+          if (!time.contains('AM') && !time.contains('PM')) {
+            time = '$time AM';
+          }
+        }
+
+        double dose = 50.0;
+        String unit = 'mcg';
+        if (details.isNotEmpty) {
+          final parts = details.split(' · ');
+          if (parts.isNotEmpty) {
+            final doseAndUnit = parts.first.trim().split(' ');
+            if (doseAndUnit.isNotEmpty) {
+              dose = double.tryParse(doseAndUnit.first) ?? 50.0;
+              if (doseAndUnit.length > 1) {
+                unit = doseAndUnit[1];
+              }
+            }
+          }
+        }
+
+        if (name.contains('estradiol') || name.contains('estrogen') || name.contains('estradot')) {
+          estradiolChecked = isTaken;
+          estradiolDose = dose;
+          estradiolUnit = unit;
+          estradiolTime = time;
+        } else if (name.contains('progesterone') || name.contains('utrogestan')) {
+          progesteroneChecked = isTaken;
+          progesteroneDose = dose;
+          progesteroneUnit = unit;
+          progesteroneTime = time;
+        }
+      }
+
+      dailyLog = orig.copyWith(
+        symptoms: loggedSymptoms,
+        triggers: mockLog.triggers,
+        estradiolChecked: estradiolChecked,
+        estradiolDose: estradiolDose,
+        estradiolUnit: estradiolUnit,
+        estradiolTime: estradiolTime,
+        progesteroneChecked: progesteroneChecked,
+        progesteroneDose: progesteroneDose,
+        progesteroneUnit: progesteroneUnit,
+        progesteroneTime: progesteroneTime,
+        hrtIntakes: hrtIntakes,
+      );
+    } else {
+      final List<LoggedSymptom> loggedSymptoms = mockLog.symptoms.map((s) {
+        final parts = s.split(' · ');
+        final name = parts.first.trim();
+        String severityStr = 'Moderate';
+        if (parts.length > 1) {
+          final scoreStr = parts[1].split('/').first.trim();
+          final score = int.tryParse(scoreStr);
+          if (score != null) {
+            if (score <= 2) {
+              severityStr = 'Mild';
+            } else if (score <= 3) {
+              severityStr = 'Moderate';
+            } else {
+              severityStr = 'Severe';
+            }
+          }
+        }
+        return LoggedSymptom(
+          symptom: Symptom(
+            id: 's_${name.toLowerCase().replaceAll(' ', '_')}',
+            name: name,
+            iconName: name.toLowerCase().contains('flash')
+                ? 'thermostat'
+                : name.toLowerCase().contains('mood')
+                    ? 'mood'
+                    : name.toLowerCase().contains('sleep')
+                        ? 'dark_mode'
+                        : name.toLowerCase().contains('dry')
+                            ? 'opacity'
+                            : 'accessibility_new',
+            category: 'General',
+          ),
+          severity: severityStr,
+        );
+      }).toList();
+
+      bool estradiolChecked = false;
+      double estradiolDose = 50.0;
+      String estradiolUnit = 'mcg';
+      String estradiolTime = '08:30 AM';
+
+      bool progesteroneChecked = false;
+      double progesteroneDose = 100.0;
+      String progesteroneUnit = 'mg';
+      String progesteroneTime = '08:00 PM';
+
+      for (final h in mockLog.hrt) {
+        final name = h['name']?.toLowerCase() ?? '';
+        final isTaken = h['isTaken'] == 'true';
+        final details = h['details'] ?? '';
+        final status = h['status'] ?? '';
+
+        String time = '08:30 AM';
+        if (status.toLowerCase().contains('taken') && !status.toLowerCase().contains('not')) {
+          time = status.replaceAll(RegExp(r'taken\s*', caseSensitive: false), '').trim();
+          if (!time.contains('AM') && !time.contains('PM')) {
+            time = '$time AM';
+          }
+        }
+
+        double dose = 50.0;
+        String unit = 'mcg';
+        if (details.isNotEmpty) {
+          final parts = details.split(' · ');
+          if (parts.isNotEmpty) {
+            final doseAndUnit = parts.first.trim().split(' ');
+            if (doseAndUnit.isNotEmpty) {
+              dose = double.tryParse(doseAndUnit.first) ?? 50.0;
+              if (doseAndUnit.length > 1) {
+                unit = doseAndUnit[1];
+              }
+            }
+          }
+        }
+
+        if (name.contains('estradiol') || name.contains('estrogen') || name.contains('estradot')) {
+          estradiolChecked = isTaken;
+          estradiolDose = dose;
+          estradiolUnit = unit;
+          estradiolTime = time;
+        } else if (name.contains('progesterone') || name.contains('utrogestan')) {
+          progesteroneChecked = isTaken;
+          progesteroneDose = dose;
+          progesteroneUnit = unit;
+          progesteroneTime = time;
+        }
+      }
+
+      dailyLog = DailyLog(
+        id: dateStr,
+        userId: user.uid,
+        date: targetDate,
+        symptoms: loggedSymptoms,
+        triggers: mockLog.triggers,
+        caffeineCups: 0,
+        alcoholGlasses: 0,
+        stressLevel: 'Moderate',
+        foodsTriggered: false,
+        foodsNotes: '',
+        customTriggerCounters: {},
+        customTriggerTexts: {},
+        estradiolChecked: estradiolChecked,
+        estradiolDose: estradiolDose,
+        estradiolUnit: estradiolUnit,
+        estradiolTime: estradiolTime,
+        progesteroneChecked: progesteroneChecked,
+        progesteroneDose: progesteroneDose,
+        progesteroneUnit: progesteroneUnit,
+        progesteroneTime: progesteroneTime,
+        vitaminDChecked: false,
+        magnesiumChecked: false,
+        sleepDuration: 7.0,
+        hydrationCups: 0,
+        weight: null,
+        additionalNotes: '',
+        hrtIntakes: hrtIntakes,
+        createdAt: DateTime.now(),
+      );
+    }
+
+    mockLog.originalLog = dailyLog;
+    setState(() {
+      _dbLogs[day] = mockLog;
+    });
+
+    ref.read(firestoreServiceProvider).saveDailyLog(user.uid, dailyLog).catchError((e) {
+      debugPrint("Error saving daily log: $e");
+    });
   }
 
   void _previousMonth() {
@@ -338,6 +632,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             log.symptoms = _convertFromEditSymptoms(editList);
             log.itemsCount = log.symptoms.length + log.hrt.length + log.triggers.length;
           });
+          _saveLogToFirestore(_selectedDay, log);
         },
       ),
     );
@@ -355,6 +650,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             log.symptoms = _convertFromEditSymptoms(newSymptoms);
             log.itemsCount = log.symptoms.length + log.hrt.length + log.triggers.length;
           });
+          _saveLogToFirestore(_selectedDay, log);
         },
       ),
     );
@@ -379,6 +675,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             log.triggers = _convertFromEditTriggers(editList);
             log.itemsCount = log.symptoms.length + log.hrt.length + log.triggers.length;
           });
+          _saveLogToFirestore(_selectedDay, log);
         },
       ),
     );
@@ -396,6 +693,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             log.triggers = _convertFromEditTriggers(newTriggers);
             log.itemsCount = log.symptoms.length + log.hrt.length + log.triggers.length;
           });
+          _saveLogToFirestore(_selectedDay, log);
         },
       ),
     );
@@ -417,6 +715,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
               log.hrt.clear();
               log.hrt.addAll(updated);
             });
+            _saveLogToFirestore(_selectedDay, log);
           },
         ),
       ),
@@ -940,7 +1239,10 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            onPressed: () => context.push('/daily-logging'),
+            onPressed: () async {
+              await context.push('/daily-logging');
+              _fetchLogsForFocusedMonth();
+            },
             icon: const Icon(Icons.add, color: Colors.white),
             label: const Text('Start Today\'s Log'),
             style: ElevatedButton.styleFrom(
@@ -1039,7 +1341,11 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                         SizedBox(
                           width: 200,
                           child: ElevatedButton(
-                            onPressed: () => context.push('/daily-logging'),
+                            onPressed: () async {
+                              final targetDate = DateTime(_focusedMonth.year, _focusedMonth.month, _selectedDay);
+                              await context.push('/daily-logging', extra: targetDate);
+                              _fetchLogsForFocusedMonth();
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppTheme.primary,
                               foregroundColor: Colors.white,
@@ -1434,6 +1740,100 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     );
   }
 
+  Map<String, Color> _getSymptomColorsForDisplay(String s) {
+    final parts = s.split(' · ');
+    String severity = 'Moderate';
+    if (parts.length > 1) {
+      final scoreStr = parts[1].split('/').first.trim();
+      final score = int.tryParse(scoreStr);
+      if (score != null) {
+        if (score <= 2) {
+          severity = 'Mild';
+        } else if (score <= 3) {
+          severity = 'Moderate';
+        } else {
+          severity = 'Severe';
+        }
+      }
+    }
+
+    switch (severity) {
+      case 'Mild':
+        return {
+          'bg': const Color(0xFFF6FFED),
+          'border': const Color(0xFFD9F7BE),
+          'text': const Color(0xFF389E0D),
+        };
+      case 'Severe':
+        return {
+          'bg': const Color(0xFFFFF1F0),
+          'border': const Color(0xFFFFCCC7),
+          'text': const Color(0xFFCF1322),
+        };
+      case 'Moderate':
+      default:
+        return {
+          'bg': const Color(0xFFFFF7E6),
+          'border': const Color(0xFFFFE7BA),
+          'text': const Color(0xFFD48806),
+        };
+    }
+  }
+
+  Map<String, Color> _getTriggerColorsForDisplay(String name) {
+    Color bg;
+    Color border;
+    Color text;
+
+    switch (name.toLowerCase()) {
+      case 'stress':
+        bg = const Color(0xFFF3E8FF);
+        border = const Color(0xFFE9D5FF);
+        text = const Color(0xFF7E22CE);
+        break;
+      case 'caffeine':
+        bg = const Color(0xFFFDF8F5);
+        border = const Color(0xFFEDD8CE);
+        text = const Color(0xFF854D0E);
+        break;
+      case 'alcohol':
+      case 'red wine':
+        bg = const Color(0xFFFFF1F2);
+        border = const Color(0xFFFECDD3);
+        text = const Color(0xFFBE123C);
+        break;
+      case 'sugar':
+      case 'sugar & sweets':
+        bg = const Color(0xFFF7FEE7);
+        border = const Color(0xFFE2F9B8);
+        text = const Color(0xFF4D7C0F);
+        break;
+      case 'lack of sleep':
+      case 'poor sleep':
+        bg = const Color(0xFFF0F9FF);
+        border = const Color(0xFFBAE6FD);
+        text = const Color(0xFF0369A1);
+        break;
+      case 'spicy food':
+      case 'foods':
+        bg = const Color(0xFFFFF1F0);
+        border = const Color(0xFFFFCCC7);
+        text = const Color(0xFFCF1322);
+        break;
+      default:
+        bg = const Color(0xFFF0FDFA);
+        border = const Color(0xFFCCFBF1);
+        text = const Color(0xFF0F766E);
+        break;
+    }
+
+    return {
+      'bg': bg,
+      'border': border,
+      'text': text,
+    };
+  }
+
   Widget _buildLoggedSymptomsCard(MockDailyLog log) {
     return Container(
       width: double.infinity,
@@ -1472,51 +1872,21 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                   ),
                 ],
               ),
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => _showAddSymptomSheet(log),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.add, color: AppTheme.primary, size: 14),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Add',
-                            style: GoogleFonts.manrope(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.primary,
-                            ),
-                          ),
-                        ],
+              InkWell(
+                onTap: () => _showSymptomEditSheet(log),
+                child: Row(
+                  children: [
+                    Text(
+                      'Edit',
+                      style: GoogleFonts.manrope(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primary,
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  InkWell(
-                    onTap: () => _showSymptomEditSheet(log),
-                    child: Row(
-                      children: [
-                        Text(
-                          'Edit',
-                          style: GoogleFonts.manrope(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.primary,
-                          ),
-                        ),
-                        const Icon(Icons.chevron_right, size: 16, color: AppTheme.primary),
-                      ],
-                    ),
-                  ),
-                ],
+                    const Icon(Icons.chevron_right, size: 16, color: AppTheme.primary),
+                  ],
+                ),
               ),
             ],
           ),
@@ -1524,24 +1894,56 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: log.symptoms.map((s) {
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEDDDF5).withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFD0C1D8)),
-                ),
-                child: Text(
-                  s,
-                  style: GoogleFonts.manrope(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF6C6074),
+            children: [
+              ...log.symptoms.map((s) {
+                final colors = _getSymptomColorsForDisplay(s);
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: colors['bg'],
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: colors['border']!),
+                  ),
+                  child: Text(
+                    s,
+                    style: GoogleFonts.manrope(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: colors['text'],
+                    ),
+                  ),
+                );
+              }),
+              GestureDetector(
+                onTap: () => _showAddSymptomSheet(log),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: const Color(0xFFD0C4BC).withValues(alpha: 0.6),
+                      style: BorderStyle.solid,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.add, color: Color(0xFFA8A29E), size: 14),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Add',
+                        style: GoogleFonts.manrope(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFFA8A29E),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              );
-            }).toList(),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           const Divider(height: 1, color: Color(0xFFF2EDEA)),
@@ -1761,86 +2163,79 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                   ),
                 ],
               ),
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => _showAddTriggerSheet(log),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.add, color: AppTheme.primary, size: 14),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Add',
-                            style: GoogleFonts.manrope(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.primary,
-                            ),
-                          ),
-                        ],
+              InkWell(
+                onTap: () => _showTriggerEditSheet(log),
+                child: Row(
+                  children: [
+                    Text(
+                      'Edit',
+                      style: GoogleFonts.manrope(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primary,
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  InkWell(
-                    onTap: () => _showTriggerEditSheet(log),
-                    child: Row(
-                      children: [
-                        Text(
-                          'Edit',
-                          style: GoogleFonts.manrope(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.primary,
-                          ),
-                        ),
-                        const Icon(Icons.chevron_right, size: 16, color: AppTheme.primary),
-                      ],
-                    ),
-                  ),
-                ],
+                    const Icon(Icons.chevron_right, size: 16, color: AppTheme.primary),
+                  ],
+                ),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          if (log.triggers.isEmpty)
-            Text(
-              'No triggers recorded today.',
-              style: GoogleFonts.manrope(
-                fontSize: 13,
-                fontStyle: FontStyle.italic,
-                color: AppTheme.onSurfaceVariant,
-              ),
-            )
-          else
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: log.triggers.map((t) {
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ...log.triggers.map((t) {
+                final colors = _getTriggerColorsForDisplay(t);
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppTheme.tertiaryFixed.withValues(alpha: 0.3),
+                    color: colors['bg'],
                     borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: colors['border']!),
                   ),
                   child: Text(
                     t,
                     style: GoogleFonts.manrope(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFF814F45),
+                      color: colors['text'],
                     ),
                   ),
                 );
-              }).toList(),
-            ),
+              }),
+              GestureDetector(
+                onTap: () => _showAddTriggerSheet(log),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: const Color(0xFFD0C4BC).withValues(alpha: 0.6),
+                      style: BorderStyle.solid,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.add, color: Color(0xFFA8A29E), size: 14),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Add',
+                        style: GoogleFonts.manrope(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFFA8A29E),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );

@@ -21,9 +21,11 @@ import 'package:eunora/features/home/presentation/pages/daily_logging/triggers_s
 import 'package:eunora/features/home/presentation/pages/daily_logging/trigger_details_step.dart';
 import 'package:eunora/features/home/presentation/pages/daily_logging/daily_entry_step.dart';
 import 'package:eunora/features/home/presentation/widgets/dose_change_alert.dart';
+import 'package:eunora/features/home/presentation/widgets/success_animation_widget.dart';
 
 class DailyLoggingPage extends ConsumerStatefulWidget {
-  const DailyLoggingPage({super.key});
+  final DateTime? initialDate;
+  const DailyLoggingPage({super.key, this.initialDate});
 
   @override
   ConsumerState<DailyLoggingPage> createState() => _DailyLoggingPageState();
@@ -340,8 +342,64 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
 
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      final date = DateTime.now();
+      final date = widget.initialDate ?? DateTime.now();
       final dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+
+      final List<HrtIntakeLog> hrtIntakes = [];
+      final meds = ref.read(medicationsProvider).medications;
+      for (final med in meds) {
+        final name = med.name.toLowerCase();
+        if (name.contains('estradiol') || name.contains('estrogen') || name.contains('estradot')) {
+          hrtIntakes.add(HrtIntakeLog(
+            medicationId: med.id,
+            name: med.name,
+            dose: _estradiolDose,
+            unit: _estradiolUnit,
+            time: _estradiolTime,
+            isTaken: _estradiolChecked,
+          ));
+        } else if (name.contains('progesterone') || name.contains('utrogestan')) {
+          hrtIntakes.add(HrtIntakeLog(
+            medicationId: med.id,
+            name: med.name,
+            dose: _progesteroneDose,
+            unit: _progesteroneUnit,
+            time: _progesteroneTime,
+            isTaken: _progesteroneChecked,
+          ));
+        } else {
+          hrtIntakes.add(HrtIntakeLog(
+            medicationId: med.id,
+            name: med.name,
+            dose: med.dose,
+            unit: med.unit,
+            time: '08:00 AM',
+            isTaken: false,
+          ));
+        }
+      }
+      if (hrtIntakes.isEmpty) {
+        if (_estradiolChecked) {
+          hrtIntakes.add(HrtIntakeLog(
+            medicationId: 'estradiol_default',
+            name: 'Estradiol',
+            dose: _estradiolDose,
+            unit: _estradiolUnit,
+            time: _estradiolTime,
+            isTaken: true,
+          ));
+        }
+        if (_progesteroneChecked) {
+          hrtIntakes.add(HrtIntakeLog(
+            medicationId: 'progesterone_default',
+            name: 'Progesterone',
+            dose: _progesteroneDose,
+            unit: _progesteroneUnit,
+            time: _progesteroneTime,
+            isTaken: true,
+          ));
+        }
+      }
 
       final List<LoggedSymptom> loggedSymptoms = [];
       for (final id in _selectedSymptomIds) {
@@ -411,6 +469,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
         hydrationCups: _hydrationCups,
         weight: null,
         additionalNotes: _additionalNotes,
+        hrtIntakes: hrtIntakes,
         createdAt: DateTime.now(),
       );
 
@@ -780,23 +839,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Spacer(),
-                Container(
-                  width: 112,
-                  height: 112,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
-                        blurRadius: 24,
-                      )
-                    ],
-                  ),
-                  child: const Center(
-                    child: Icon(Icons.auto_awesome, color: AppTheme.primary, size: 48),
-                  ),
-                ),
+                const SuccessAnimationWidget(),
                 const SizedBox(height: 32),
                 Text(
                   "You're all set, Sarah.",

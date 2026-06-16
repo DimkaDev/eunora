@@ -24,7 +24,10 @@ import 'package:eunora/core/utils/animation_system.dart';
 import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
 import 'package:eunora/features/onboarding/domain/models/medication.dart';
 import 'package:eunora/features/home/presentation/widgets/calendar_hrt_edit_sheet.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:eunora/core/services/firestore_service.dart';
+import 'package:eunora/features/home/domain/entities/daily_log.dart';
+import 'package:eunora/features/onboarding/domain/models/symptom.dart';
 
 
 class HomePage extends ConsumerStatefulWidget {
@@ -56,7 +59,221 @@ class _HomePageState extends ConsumerState<HomePage> {
     _takenTime['Estradiol Patch'] = '08:30';
     _takenStatus['Progesterone'] = false;
     _takenTime['Progesterone'] = '21:00';
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchTodayLog();
+    });
   }
+
+  Future<void> _fetchTodayLog() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final date = DateTime.now();
+    final dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+
+    final log = await ref.read(firestoreServiceProvider).getDailyLog(user.uid, dateStr);
+    if (log != null) {
+      setState(() {
+        _loggedSymptoms.clear();
+        for (final s in log.symptoms) {
+          _loggedSymptoms.add({
+            'name': s.symptom.name,
+            'severity': s.severity ?? 'Moderate',
+          });
+        }
+
+        _loggedTriggers.clear();
+        for (final t in log.triggers) {
+          String name = t;
+          dynamic value = 'Logged';
+          IconData icon = Icons.bolt;
+
+          if (t.startsWith('Caffeine:')) {
+            name = 'Caffeine';
+            value = t.replaceAll('Caffeine:', '').trim();
+            icon = Icons.local_cafe;
+          } else if (t.startsWith('Alcohol:')) {
+            name = 'Alcohol';
+            value = t.replaceAll('Alcohol:', '').trim();
+            icon = Icons.wine_bar;
+          } else if (t.startsWith('Stress:')) {
+            name = 'Stress';
+            value = t.replaceAll('Stress:', '').trim();
+            icon = Icons.psychology;
+          } else if (t.startsWith('Foods:')) {
+            name = 'Foods';
+            value = t.replaceAll('Foods:', '').trim();
+            icon = Icons.restaurant;
+          }
+
+          _loggedTriggers.add({
+            'name': name,
+            'value': value,
+            'icon': icon,
+          });
+        }
+
+        _takenStatus['Estradiol Patch'] = log.estradiolChecked;
+        _takenStatus['Estradiol'] = log.estradiolChecked;
+        _takenTime['Estradiol Patch'] = log.estradiolTime.isEmpty ? '08:30' : log.estradiolTime;
+        _takenStatus['Progesterone'] = log.progesteroneChecked;
+        _takenStatus['Utrogestan'] = log.progesteroneChecked;
+        _takenTime['Progesterone'] = log.progesteroneTime.isEmpty ? '21:00' : log.progesteroneTime;
+      });
+    }
+  }
+
+  Future<void> _saveTodayLogToFirestore() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final date = DateTime.now();
+    final dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+
+    final List<LoggedSymptom> symptomsList = _loggedSymptoms.map((s) {
+      final name = s['name'] ?? '';
+      final severity = s['severity'] ?? 'Moderate';
+      return LoggedSymptom(
+        symptom: Symptom(
+          id: 's_${name.toLowerCase().replaceAll(' ', '_')}',
+          name: name,
+          iconName: 'medical_services',
+          category: 'General',
+        ),
+        severity: severity,
+      );
+    }).toList();
+
+    final List<String> triggerNames = _loggedTriggers.map<String>((t) {
+      final name = t['name'] ?? '';
+      final val = t['value'] ?? 'Logged';
+      if (name == 'Caffeine') return 'Caffeine: $val';
+      if (name == 'Alcohol') return 'Alcohol: $val';
+      if (name == 'Stress') return 'Stress: $val';
+      if (name == 'Foods') return 'Foods: $val';
+      return name;
+    }).toList();
+
+    int caffeineCups = 0;
+    int alcoholGlasses = 0;
+    String stressLevel = 'Moderate';
+    bool foodsTriggered = false;
+    String foodsNotes = '';
+
+    for (final t in _loggedTriggers) {
+      final name = t['name'] ?? '';
+      final val = (t['value'] ?? '').toString();
+      if (name == 'Caffeine') {
+        caffeineCups = int.tryParse(val.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+      } else if (name == 'Alcohol') {
+        alcoholGlasses = int.tryParse(val.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+      } else if (name == 'Stress') {
+        stressLevel = val;
+      } else if (name == 'Foods') {
+        foodsTriggered = true;
+        foodsNotes = val;
+      }
+    }
+
+    final estradiolChecked = _takenStatus['Estradiol Patch'] ?? _takenStatus['Estradiol'] ?? false;
+    final progesteroneChecked = _takenStatus['Progesterone'] ?? _takenStatus['Utrogestan'] ?? false;
+
+    final meds = ref.read(medicationsProvider).medications;
+    double estradiolDose = 50.0;
+    String estradiolUnit = 'mcg';
+    double progesteroneDose = 100.0;
+    String progesteroneUnit = 'mg';
+
+    final List<HrtIntakeLog> hrtIntakes = [];
+    for (final med in meds) {
+      final name = med.name.toLowerCase();
+      final isTaken = _takenStatus[med.name] ?? false;
+      final time = _takenTime[med.name] ?? (name.contains('estradiol') ? '08:30' : '21:00');
+
+      if (name.contains('estradiol') || name.contains('estrogen') || name.contains('estradot')) {
+        estradiolDose = med.dose;
+        estradiolUnit = med.unit;
+        hrtIntakes.add(HrtIntakeLog(
+          medicationId: med.id,
+          name: med.name,
+          dose: med.dose,
+          unit: med.unit,
+          time: time,
+          isTaken: isTaken,
+        ));
+      } else if (name.contains('progesterone') || name.contains('utrogestan')) {
+        progesteroneDose = med.dose;
+        progesteroneUnit = med.unit;
+        hrtIntakes.add(HrtIntakeLog(
+          medicationId: med.id,
+          name: med.name,
+          dose: med.dose,
+          unit: med.unit,
+          time: time,
+          isTaken: isTaken,
+        ));
+      } else {
+        hrtIntakes.add(HrtIntakeLog(
+          medicationId: med.id,
+          name: med.name,
+          dose: med.dose,
+          unit: med.unit,
+          time: time,
+          isTaken: isTaken,
+        ));
+      }
+    }
+
+    if (hrtIntakes.isEmpty) {
+      if (estradiolChecked) {
+        hrtIntakes.add(HrtIntakeLog(
+          medicationId: 'estradiol_default',
+          name: 'Estradiol',
+          dose: estradiolDose,
+          unit: estradiolUnit,
+          time: '08:30',
+          isTaken: true,
+        ));
+      }
+      if (progesteroneChecked) {
+        hrtIntakes.add(HrtIntakeLog(
+          medicationId: 'progesterone_default',
+          name: 'Progesterone',
+          dose: progesteroneDose,
+          unit: progesteroneUnit,
+          time: '21:00',
+          isTaken: true,
+        ));
+      }
+    }
+
+    final dailyLog = DailyLog(
+      id: dateStr,
+      userId: user.uid,
+      date: date,
+      symptoms: symptomsList,
+      triggers: triggerNames,
+      caffeineCups: caffeineCups,
+      alcoholGlasses: alcoholGlasses,
+      stressLevel: stressLevel,
+      foodsTriggered: foodsTriggered,
+      foodsNotes: foodsNotes,
+      estradiolChecked: estradiolChecked,
+      estradiolDose: estradiolDose,
+      estradiolUnit: estradiolUnit,
+      estradiolTime: _takenTime['Estradiol Patch'] ?? '08:30',
+      progesteroneChecked: progesteroneChecked,
+      progesteroneDose: progesteroneDose,
+      progesteroneUnit: progesteroneUnit,
+      progesteroneTime: _takenTime['Progesterone'] ?? '21:00',
+      hrtIntakes: hrtIntakes,
+      createdAt: DateTime.now(),
+    );
+
+    await ref.read(firestoreServiceProvider).saveDailyLog(user.uid, dailyLog);
+  }
+
 
   double _getLoggingProgress(List<Medication> medications) {
     double progress = 0.0;
@@ -105,6 +322,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               });
             }
           });
+          _saveTodayLogToFirestore();
         },
       ),
     );
@@ -126,6 +344,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               _loggedTriggers.add({'name': name, 'value': value, 'icon': icon});
             }
           });
+          _saveTodayLogToFirestore();
         },
       ),
     );
@@ -143,6 +362,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             _loggedSymptoms.clear();
             _loggedSymptoms.addAll(newSymptoms);
           });
+          _saveTodayLogToFirestore();
         },
       ),
     );
@@ -160,6 +380,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             _loggedTriggers.clear();
             _loggedTriggers.addAll(newTriggers);
           });
+          _saveTodayLogToFirestore();
         },
       ),
     );
@@ -207,6 +428,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 _takenTime[name] = time;
               }
             });
+            _saveTodayLogToFirestore();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
@@ -247,6 +469,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         _takenStatus['Progesterone'] = prog;
         _takenStatus['Utrogestan'] = prog;
       });
+      _fetchTodayLog();
     }
   }
 

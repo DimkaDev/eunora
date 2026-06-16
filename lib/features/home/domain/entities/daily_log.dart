@@ -27,6 +27,7 @@ class DailyLog {
   final int hydrationCups;
   final double? weight;
   final String additionalNotes;
+  final List<HrtIntakeLog> hrtIntakes;
   final DateTime createdAt;
 
   DailyLog({
@@ -56,6 +57,7 @@ class DailyLog {
     this.hydrationCups = 0,
     this.weight,
     this.additionalNotes = '',
+    this.hrtIntakes = const [],
     required this.createdAt,
   });
 
@@ -86,6 +88,7 @@ class DailyLog {
     int? hydrationCups,
     double? weight,
     String? additionalNotes,
+    List<HrtIntakeLog>? hrtIntakes,
     DateTime? createdAt,
   }) {
     return DailyLog(
@@ -115,6 +118,7 @@ class DailyLog {
       hydrationCups: hydrationCups ?? this.hydrationCups,
       weight: weight ?? this.weight,
       additionalNotes: additionalNotes ?? this.additionalNotes,
+      hrtIntakes: hrtIntakes ?? this.hrtIntakes,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -147,6 +151,7 @@ class DailyLog {
       'hydrationCups': hydrationCups,
       'weight': weight,
       'additionalNotes': additionalNotes,
+      'hrtIntakes': hrtIntakes.map((h) => h.toMap()).toList(),
       'createdAt': createdAt.toIso8601String(),
     };
   }
@@ -181,6 +186,9 @@ class DailyLog {
       hydrationCups: map['hydrationCups'] as int? ?? 0,
       weight: (map['weight'] as num?)?.toDouble(),
       additionalNotes: map['additionalNotes'] as String? ?? '',
+      hrtIntakes: (map['hrtIntakes'] as List? ?? [])
+          .map((h) => HrtIntakeLog.fromMap(Map<String, dynamic>.from(h as Map)))
+          .toList(),
       createdAt: _parseDateTime(map['createdAt']) ?? DateTime.now(),
     );
   }
@@ -194,5 +202,63 @@ class DailyLog {
       }
     } catch (_) {}
     return null;
+  }
+}
+
+class HrtIntakeLog {
+  final String medicationId;
+  final String name;
+  final double dose;
+  final String unit;
+  final String time;
+  final bool isTaken;
+
+  HrtIntakeLog({
+    required this.medicationId,
+    required this.name,
+    required this.dose,
+    required this.unit,
+    required this.time,
+    required this.isTaken,
+  });
+
+  HrtIntakeLog copyWith({
+    String? medicationId,
+    String? name,
+    double? dose,
+    String? unit,
+    String? time,
+    bool? isTaken,
+  }) {
+    return HrtIntakeLog(
+      medicationId: medicationId ?? this.medicationId,
+      name: name ?? this.name,
+      dose: dose ?? this.dose,
+      unit: unit ?? this.unit,
+      time: time ?? this.time,
+      isTaken: isTaken ?? this.isTaken,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'medicationId': medicationId,
+      'name': name,
+      'dose': dose,
+      'unit': unit,
+      'time': time,
+      'isTaken': isTaken,
+    };
+  }
+
+  factory HrtIntakeLog.fromMap(Map<String, dynamic> map) {
+    return HrtIntakeLog(
+      medicationId: map['medicationId'] as String? ?? '',
+      name: map['name'] as String? ?? '',
+      dose: (map['dose'] as num? ?? 0.0).toDouble(),
+      unit: map['unit'] as String? ?? '',
+      time: map['time'] as String? ?? '',
+      isTaken: map['isTaken'] as bool? ?? false,
+    );
   }
 }

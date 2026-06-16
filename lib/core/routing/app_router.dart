@@ -273,11 +273,14 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/daily-logging',
-      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
-        context: context,
-        state: state,
-        child: const DailyLoggingPage(),
-      ),
+      pageBuilder: (BuildContext context, GoRouterState state) {
+        final date = state.extra as DateTime?;
+        return buildSmoothPageTransition(
+          context: context,
+          state: state,
+          child: DailyLoggingPage(initialDate: date),
+        );
+      },
     ),
     GoRoute(
       path: '/weight',

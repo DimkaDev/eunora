@@ -7,6 +7,11 @@ import 'package:eunora/features/onboarding/domain/models/medication.dart';
 import 'package:eunora/features/home/presentation/widgets/calendar_hrt_edit_sheet.dart';
 import 'package:eunora/features/onboarding/presentation/widgets/add_medication_modal.dart';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:eunora/core/services/firestore_service.dart';
+import 'package:eunora/features/home/domain/entities/daily_log.dart';
+import 'package:eunora/features/home/domain/entities/hrt_dose_change.dart';
+
 class HrtTrackerPage extends ConsumerStatefulWidget {
   const HrtTrackerPage({super.key});
 
@@ -15,42 +20,85 @@ class HrtTrackerPage extends ConsumerStatefulWidget {
 }
 
 class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
-  // Navigation / Calendar states
-  int _selectedMonthOffset = 0; // 0 = March 2026, 1 = April 2026, 2 = May 2026
-  int _selectedDay = 19;
+  DateTime _focusedMonth = DateTime.now();
+  late int _selectedDay;
 
-  final List<String> _months = ['March 2026', 'April 2026', 'May 2026'];
+  Map<int, DailyLog> _monthlyLogs = {};
+  List<HrtDoseChange> _monthlyDoseChanges = [];
+  bool _isLoadingLogs = false;
 
-  // Logging states for today (March 19)
-  final Map<String, bool> _takenStatus = {};
-  final Map<String, String> _takenTime = {};
+  final List<String> _monthsNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  final List<String> _weekdays = [
+    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+  ];
 
   @override
   void initState() {
     super.initState();
-    // Default initial logs
-    _takenStatus['Estradiol'] = true;
-    _takenTime['Estradiol'] = '08:30';
-    _takenStatus['Utrogestan'] = false;
-    _takenTime['Utrogestan'] = '21:00';
+    _selectedDay = DateTime.now().day;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await ref.read(medicationsProvider.notifier).loadFromFirestore();
+      _fetchLogsForFocusedMonth();
+    });
+  }
+
+  Future<void> _fetchLogsForFocusedMonth() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    setState(() {
+      _isLoadingLogs = true;
+    });
+
+    try {
+      final daysInMonth = DateUtils.getDaysInMonth(_focusedMonth.year, _focusedMonth.month);
+      final start = DateTime(_focusedMonth.year, _focusedMonth.month, 1);
+      final end = DateTime(_focusedMonth.year, _focusedMonth.month, daysInMonth, 23, 59, 59);
+
+      final dbLogs = await ref.read(firestoreServiceProvider).getDailyLogsHistory(user.uid, start, end);
+      final allDoseChanges = await ref.read(firestoreServiceProvider).getHrtDoseChanges(user.uid);
+
+      final Map<int, DailyLog> fetchedLogs = {};
+      for (final log in dbLogs) {
+        fetchedLogs[log.date.day] = log;
+      }
+
+      final monthlyChanges = allDoseChanges.where((change) {
+        return change.changeDate.year == _focusedMonth.year &&
+               change.changeDate.month == _focusedMonth.month;
+      }).toList();
+
+      setState(() {
+        _monthlyLogs = fetchedLogs;
+        _monthlyDoseChanges = monthlyChanges;
+        _isLoadingLogs = false;
+      });
+    } catch (e) {
+      debugPrint("Error fetching HRT logs: $e");
+      setState(() {
+        _isLoadingLogs = false;
+      });
+    }
   }
 
   void _previousMonth() {
-    if (_selectedMonthOffset > 0) {
-      setState(() {
-        _selectedMonthOffset--;
-        _selectedDay = 1;
-      });
-    }
+    setState(() {
+      _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
+      _selectedDay = 1;
+    });
+    _fetchLogsForFocusedMonth();
   }
 
   void _nextMonth() {
-    if (_selectedMonthOffset < _months.length - 1) {
-      setState(() {
-        _selectedMonthOffset++;
-        _selectedDay = 1;
-      });
-    }
+    setState(() {
+      _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1);
+      _selectedDay = 1;
+    });
+    _fetchLogsForFocusedMonth();
   }
 
   void _selectDay(int day) {
@@ -59,13 +107,150 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     });
   }
 
+  Future<void> _saveTodayHrtLog(Medication med, bool isTaken) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final today = DateTime.now();
+    final dateStr = "${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
+
+    final currentLog = await ref.read(firestoreServiceProvider).getDailyLog(user.uid, dateStr);
+
+    final nowTime = TimeOfDay.now();
+    final timeStr = "${nowTime.hour.toString().padLeft(2, '0')}:${nowTime.minute.toString().padLeft(2, '0')}";
+
+    DailyLog dailyLog;
+    if (currentLog != null) {
+      final updatedIntakes = List<HrtIntakeLog>.from(currentLog.hrtIntakes);
+      final existingIndex = updatedIntakes.indexWhere((h) => h.medicationId == med.id);
+
+      if (existingIndex != -1) {
+        updatedIntakes[existingIndex] = updatedIntakes[existingIndex].copyWith(
+          isTaken: isTaken,
+          time: isTaken ? timeStr : updatedIntakes[existingIndex].time,
+        );
+      } else {
+        updatedIntakes.add(HrtIntakeLog(
+          medicationId: med.id,
+          name: med.name,
+          dose: med.dose,
+          unit: med.unit,
+          time: timeStr,
+          isTaken: isTaken,
+        ));
+      }
+
+      dailyLog = currentLog.copyWith(hrtIntakes: updatedIntakes);
+    } else {
+      final hrtIntake = HrtIntakeLog(
+        medicationId: med.id,
+        name: med.name,
+        dose: med.dose,
+        unit: med.unit,
+        time: timeStr,
+        isTaken: isTaken,
+      );
+
+      dailyLog = DailyLog(
+        id: dateStr,
+        userId: user.uid,
+        date: today,
+        hrtIntakes: [hrtIntake],
+        createdAt: DateTime.now(),
+      );
+    }
+
+    await ref.read(firestoreServiceProvider).saveDailyLog(user.uid, dailyLog);
+    _fetchLogsForFocusedMonth();
+  }
+
+  Future<void> _saveHrtLoggingSheet(List<Map<String, String>> updatedList) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final targetDate = DateTime(_focusedMonth.year, _focusedMonth.month, _selectedDay);
+    final dateStr = "${targetDate.year}-${targetDate.month.toString().padLeft(2, '0')}-${targetDate.day.toString().padLeft(2, '0')}";
+
+    final currentLog = await ref.read(firestoreServiceProvider).getDailyLog(user.uid, dateStr);
+
+    final List<HrtIntakeLog> hrtIntakes = [];
+    for (final updated in updatedList) {
+      final name = updated['name'] ?? '';
+      final isTaken = updated['isTaken'] == 'true';
+      final status = updated['status'] ?? '';
+      final details = updated['details'] ?? '';
+
+      String time = '08:00';
+      final match = RegExp(r'(\d{1,2}:\d{2})').firstMatch(status);
+      if (match != null) {
+        time = match.group(1) ?? '08:00';
+      }
+
+      double dose = 50.0;
+      String unit = 'mcg';
+      if (details.isNotEmpty) {
+        final parts = details.split(' · ');
+        if (parts.isNotEmpty) {
+          final doseAndUnit = parts.first.trim().split(' ');
+          if (doseAndUnit.isNotEmpty) {
+            dose = double.tryParse(doseAndUnit.first) ?? 50.0;
+            if (doseAndUnit.length > 1) {
+              unit = doseAndUnit[1];
+            }
+          }
+        }
+      }
+
+      final meds = ref.read(medicationsProvider).medications;
+      final matchingMed = meds.firstWhere(
+        (m) => m.name.toLowerCase() == name.toLowerCase(),
+        orElse: () => Medication(name: name, type: MedicationType.other, dose: dose, unit: unit, frequency: ''),
+      );
+
+      hrtIntakes.add(HrtIntakeLog(
+        medicationId: matchingMed.id,
+        name: name,
+        dose: dose,
+        unit: unit,
+        time: time,
+        isTaken: isTaken,
+      ));
+    }
+
+    DailyLog dailyLog;
+    if (currentLog != null) {
+      dailyLog = currentLog.copyWith(hrtIntakes: hrtIntakes);
+    } else {
+      dailyLog = DailyLog(
+        id: dateStr,
+        userId: user.uid,
+        date: targetDate,
+        hrtIntakes: hrtIntakes,
+        createdAt: DateTime.now(),
+      );
+    }
+
+    await ref.read(firestoreServiceProvider).saveDailyLog(user.uid, dailyLog);
+    _fetchLogsForFocusedMonth();
+  }
+
   void _showHrtLoggingSheet(List<Medication> medications) {
-    // Construct the List<Map<String, String>> that CalendarHrtEditSheet expects
+    final targetLog = _monthlyLogs[_selectedDay];
     final hrtList = medications.map((med) {
-      final isTaken = _takenStatus[med.name] ?? false;
-      final time = _takenTime[med.name] ?? '08:00';
+      bool isTaken = false;
+      String time = '08:00';
+
+      if (targetLog != null) {
+        final logged = targetLog.hrtIntakes.firstWhere(
+          (h) => h.medicationId == med.id || h.name.toLowerCase() == med.name.toLowerCase(),
+          orElse: () => HrtIntakeLog(medicationId: med.id, name: med.name, dose: med.dose, unit: med.unit, time: '08:00', isTaken: false),
+        );
+        isTaken = logged.isTaken;
+        time = logged.time;
+      }
+
       final appType = med.type.displayName;
-      
+
       return {
         'name': med.name,
         'details': '${med.dose.toStringAsFixed(0)} ${med.unit} · $appType',
@@ -84,34 +269,21 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
         maxChildSize: 0.95,
         builder: (_, scrollController) => CalendarHrtEditSheet(
           initialHrt: hrtList,
-          onSave: (updatedList) {
-            setState(() {
-              for (final updated in updatedList) {
-                final name = updated['name'] ?? '';
-                final isTaken = updated['isTaken'] == 'true';
-                final status = updated['status'] ?? '';
-                
-                String time = '08:00';
-                final match = RegExp(r'(\d{1,2}:\d{2})').firstMatch(status);
-                if (match != null) {
-                  time = match.group(1) ?? '08:00';
-                }
-
-                _takenStatus[name] = isTaken;
-                _takenTime[name] = time;
-              }
-            });
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Doses logged successfully!',
-                  style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
+          onSave: (updatedList) async {
+            await _saveHrtLoggingSheet(updatedList);
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Doses logged successfully!',
+                    style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
+                  ),
+                  backgroundColor: AppTheme.primary,
+                  behavior: SnackBarBehavior.floating,
+                  duration: const Duration(seconds: 2),
                 ),
-                backgroundColor: AppTheme.primary,
-                behavior: SnackBarBehavior.floating,
-                duration: const Duration(seconds: 2),
-              ),
-            );
+              );
+            }
           },
         ),
       ),
@@ -120,7 +292,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
 
   void _addMockMedications() {
     final refNotifier = ref.read(medicationsProvider.notifier);
-    
+
     final estradiol = Medication(
       name: 'Estradiol',
       type: MedicationType.patch,
@@ -138,13 +310,6 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
 
     refNotifier.addMedication(estradiol);
     refNotifier.addMedication(utrogestan);
-
-    setState(() {
-      _takenStatus['Estradiol'] = true;
-      _takenTime['Estradiol'] = '08:30';
-      _takenStatus['Utrogestan'] = false;
-      _takenTime['Utrogestan'] = '21:00';
-    });
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -344,7 +509,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
 
   // --- DASHBOARD VIEW ---
   Widget _buildDashboard(List<Medication> medications) {
-    final currentMonth = _months[_selectedMonthOffset];
+    final currentMonthLabel = '${_monthsNames[_focusedMonth.month - 1]} ${_focusedMonth.year}';
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -376,7 +541,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
             const SizedBox(height: 28),
 
             // Monthly Schedule Section
-            _buildMonthlyScheduleSection(currentMonth),
+            _buildMonthlyScheduleSection(currentMonthLabel),
             const SizedBox(height: 24),
 
             // Adherence Section
@@ -423,7 +588,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Select Month',
+                'Select Month (${_focusedMonth.year})',
                 style: GoogleFonts.notoSerif(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -431,21 +596,30 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              Row(
-                children: List.generate(_months.length, (index) {
-                  final isSelected = _selectedMonthOffset == index;
-                  return Expanded(
-                    child: GestureDetector(
+              Flexible(
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    childAspectRatio: 2.2,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                  ),
+                  itemCount: 12,
+                  itemBuilder: (context, index) {
+                    final monthVal = index + 1;
+                    final isSelected = _focusedMonth.month == monthVal;
+                    return GestureDetector(
                       onTap: () {
                         setState(() {
-                          _selectedMonthOffset = index;
+                          _focusedMonth = DateTime(_focusedMonth.year, monthVal);
                           _selectedDay = 1;
                         });
+                        _fetchLogsForFocusedMonth();
                         Navigator.pop(context);
                       },
                       child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
                           color: isSelected ? AppTheme.primary : Colors.white,
                           borderRadius: BorderRadius.circular(12),
@@ -455,18 +629,17 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                         ),
                         alignment: Alignment.center,
                         child: Text(
-                          _months[index].toUpperCase(),
-                          textAlign: TextAlign.center,
+                          _monthsNames[index].substring(0, 3).toUpperCase(),
                           style: GoogleFonts.manrope(
-                            fontSize: 10,
+                            fontSize: 12,
                             fontWeight: FontWeight.bold,
                             color: isSelected ? Colors.white : AppTheme.onSurface,
                           ),
                         ),
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  },
+                ),
               ),
             ],
           ),
@@ -476,6 +649,14 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
   }
 
   Widget _buildTodayDoseSection(List<Medication> medications) {
+    final today = DateTime.now();
+    final isCurrentMonth = today.year == _focusedMonth.year && today.month == _focusedMonth.month;
+    final todayLog = isCurrentMonth ? _monthlyLogs[today.day] : null;
+
+    final weekdayName = _weekdays[today.weekday - 1];
+    final monthName = _monthsNames[today.month - 1].substring(0, 3);
+    final dateLabel = "$weekdayName, $monthName ${today.day}";
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -495,7 +676,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
               ),
             ),
             Text(
-              "Wednesday, Mar 19",
+              dateLabel,
               style: GoogleFonts.manrope(
                 fontSize: 12,
                 color: const Color(0xFF9B8B7E),
@@ -506,8 +687,18 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
         ),
         const SizedBox(height: 12),
         ...medications.map((med) {
-          final isTaken = _takenStatus[med.name] ?? false;
-          final time = _takenTime[med.name] ?? '';
+          bool isTaken = false;
+          String time = '';
+
+          if (todayLog != null) {
+            final logged = todayLog.hrtIntakes.firstWhere(
+              (h) => h.medicationId == med.id || h.name.toLowerCase() == med.name.toLowerCase(),
+              orElse: () => HrtIntakeLog(medicationId: med.id, name: med.name, dose: med.dose, unit: med.unit, time: '', isTaken: false),
+            );
+            isTaken = logged.isTaken;
+            time = logged.time;
+          }
+
           final icon = med.type == MedicationType.patch 
               ? Icons.water_drop 
               : Icons.medication;
@@ -533,7 +724,6 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
             ),
             child: Row(
               children: [
-                // Icon
                 GestureDetector(
                   onTap: () => _showHrtLoggingSheet(medications),
                   child: Container(
@@ -547,8 +737,6 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                   ),
                 ),
                 const SizedBox(width: 14),
-
-                // Name & details
                 Expanded(
                   child: GestureDetector(
                     onTap: () => _showHrtLoggingSheet(medications),
@@ -565,7 +753,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          '${med.dose.toStringAsFixed(0)} ${med.unit} ${med.type.displayName.toLowerCase()} • Since Mar 2026',
+                          '${med.dose.toStringAsFixed(0)} ${med.unit} ${med.type.displayName.toLowerCase()} • Protocol dose',
                           style: GoogleFonts.manrope(
                             fontSize: 12,
                             color: const Color(0xFF9B8B7E),
@@ -604,20 +792,9 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                     ),
                   ),
                 ),
-
-                // Custom toggle switch
                 GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      final current = _takenStatus[med.name] ?? false;
-                      _takenStatus[med.name] = !current;
-                      if (!current) {
-                        final now = TimeOfDay.now();
-                        final h = now.hour.toString().padLeft(2, '0');
-                        final m = now.minute.toString().padLeft(2, '0');
-                        _takenTime[med.name] = '$h:$m';
-                      }
-                    });
+                  onTap: () async {
+                    await _saveTodayHrtLog(med, !isTaken);
                   },
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
@@ -654,7 +831,6 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Section header with Month Navigation
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -720,8 +896,6 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
           ],
         ),
         const SizedBox(height: 12),
-
-        // Calendar Container
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -738,7 +912,6 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
           ),
           child: Column(
             children: [
-              // Days of week header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day) {
@@ -757,15 +930,10 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                 }).toList(),
               ),
               const SizedBox(height: 12),
-
-              // Calendar Days Grid
               _buildCalendarDaysGrid(),
-              
               const SizedBox(height: 16),
               const Divider(color: Color(0xFFF2EDEA), height: 1),
               const SizedBox(height: 16),
-
-              // Activity Log Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -788,8 +956,6 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                 ],
               ),
               const SizedBox(height: 16),
-
-              // Activity log records based on the month
               _buildActivityLogsForMonth(),
             ],
           ),
@@ -819,35 +985,25 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
   Widget _buildCalendarDaysGrid() {
     final List<Widget> dayWidgets = [];
 
-    // Let's generate days for March 2026 (starts on Sunday)
-    // 0 = March 2026, 1 = April 2026, 2 = May 2026
-    int totalDays = 31;
-    int startOffset = 0; // offset days at the beginning of the week
+    final totalDays = DateUtils.getDaysInMonth(_focusedMonth.year, _focusedMonth.month);
+    final firstDayOfMonth = DateTime(_focusedMonth.year, _focusedMonth.month, 1);
+    final startWeekday = firstDayOfMonth.weekday;
+    final startOffset = startWeekday - 1;
 
-    if (_selectedMonthOffset == 0) {
-      // March 2026 starts on Sunday (6 offset days if Monday is first column)
-      startOffset = 6;
-      totalDays = 31;
-    } else if (_selectedMonthOffset == 1) {
-      // April 2026 starts on Wednesday (2 offset days)
-      startOffset = 2;
-      totalDays = 30;
-    } else {
-      // May 2026 starts on Friday (4 offset days)
-      startOffset = 4;
-      totalDays = 31;
-    }
-
-    // Offset cells (overflow from previous month)
     for (int i = 0; i < startOffset; i++) {
       dayWidgets.add(const SizedBox(width: 32, height: 32));
     }
 
-    // Month days
+    final today = DateTime.now();
+
     for (int day = 1; day <= totalDays; day++) {
       final isSelected = _selectedDay == day;
-      final isToday = _selectedMonthOffset == 0 && day == 19;
-      final isDoseChange = _selectedMonthOffset == 0 && day == 15;
+      final isToday = today.year == _focusedMonth.year && today.month == _focusedMonth.month && today.day == day;
+
+      final dayLog = _monthlyLogs[day];
+      final isTaken = dayLog != null && dayLog.hrtIntakes.isNotEmpty && dayLog.hrtIntakes.any((h) => h.isTaken);
+
+      final isDoseChange = _monthlyDoseChanges.any((change) => change.changeDate.day == day);
 
       dayWidgets.add(
         GestureDetector(
@@ -873,7 +1029,12 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                               shape: BoxShape.circle,
                               border: Border.all(color: AppTheme.primary, width: 1.5),
                             )
-                          : null,
+                          : isTaken
+                              ? BoxDecoration(
+                                  color: const Color(0xFFD8C9E0).withOpacity(0.15),
+                                  shape: BoxShape.circle,
+                                )
+                              : null,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -881,25 +1042,25 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                     '$day',
                     style: GoogleFonts.manrope(
                       fontSize: 12,
-                      fontWeight: (isSelected || isToday || isDoseChange) 
-                          ? FontWeight.bold 
+                      fontWeight: (isSelected || isToday || isDoseChange || isTaken)
+                          ? FontWeight.bold
                           : FontWeight.w500,
                       color: isToday && isSelected
                           ? Colors.white
                           : isDoseChange
                               ? AppTheme.primary
-                              : (day > 19 && _selectedMonthOffset == 0)
+                              : (day > today.day && isToday)
                                   ? const Color(0xFF9B8B7E).withOpacity(0.4)
                                   : AppTheme.onSurface,
                     ),
                   ),
-                  if (day == 1 && _selectedMonthOffset == 0)
+                  if (isTaken && !isToday && !isSelected)
                     Container(
                       margin: const EdgeInsets.only(top: 1),
                       width: 3,
                       height: 3,
                       decoration: const BoxDecoration(
-                        color: Color(0xFF9B8B7E),
+                        color: Color(0xFFD8C9E0),
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -923,8 +1084,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
         final start = rowIndex * 7;
         final end = (start + 7 < dayWidgets.length) ? start + 7 : dayWidgets.length;
         final rowWidgets = dayWidgets.sublist(start, end);
-        
-        // Add spacers if the last row is shorter than 7 elements
+
         while (rowWidgets.length < 7) {
           rowWidgets.add(const SizedBox(width: 32, height: 32));
         }
@@ -941,40 +1101,42 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
   }
 
   Widget _buildActivityLogsForMonth() {
-    if (_selectedMonthOffset == 0) {
-      // March 2026 Logs
-      final isEstradiolLogged = _takenStatus['Estradiol'] ?? false;
-      final isUtrogestanLogged = _takenStatus['Utrogestan'] ?? false;
-      int loggedCount = 0;
-      if (isEstradiolLogged) loggedCount++;
-      if (isUtrogestanLogged) loggedCount++;
+    final List<Map<String, dynamic>> activities = [];
 
-      return Column(
-        children: [
-          _buildActivityRow(
-            color: AppTheme.primary,
-            title: 'Today: Wednesday, Mar 19',
-            description: '2 medications scheduled. $loggedCount logged. Symptoms: Mild headache.',
-            isActive: _selectedDay == 19,
-          ),
-          const SizedBox(height: 16),
-          _buildActivityRow(
-            color: const Color(0xFFE8A89B),
-            title: 'Friday, Mar 15',
-            description: 'Dose change: Estradiol increased to 75 mcg.',
-            isActive: _selectedDay == 15,
-          ),
-          const SizedBox(height: 16),
-          _buildActivityRow(
-            color: const Color(0xFF9B8B7E).withOpacity(0.4),
-            title: 'Sunday, Mar 1',
-            description: 'Started initial HRT protocol.',
-            isActive: _selectedDay == 1,
-          ),
-        ],
-      );
-    } else {
-      // Future/other months: Empty log message
+    _monthlyLogs.forEach((day, log) {
+      final loggedMeds = log.hrtIntakes.where((h) => h.isTaken).map((h) => h.name).toList();
+      if (loggedMeds.isNotEmpty) {
+        final date = DateTime(_focusedMonth.year, _focusedMonth.month, day);
+        final dateLabel = "${_weekdays[date.weekday - 1]}, ${_monthsNames[_focusedMonth.month - 1].substring(0, 3)} $day";
+
+        activities.add({
+          'day': day,
+          'type': 'intake',
+          'color': AppTheme.primary,
+          'title': 'Intake: $dateLabel',
+          'description': '${log.hrtIntakes.length} medications scheduled. ${loggedMeds.length} logged (${loggedMeds.join(', ')}).',
+        });
+      }
+    });
+
+    for (final change in _monthlyDoseChanges) {
+      final day = change.changeDate.day;
+      final date = change.changeDate;
+      final dateLabel = "${_weekdays[date.weekday - 1]}, ${_monthsNames[_focusedMonth.month - 1].substring(0, 3)} $day";
+      final direction = change.newDose > change.oldDose ? 'increased' : 'decreased';
+
+      activities.add({
+        'day': day,
+        'type': 'dose_change',
+        'color': const Color(0xFFE8A89B),
+        'title': 'Dose Change: $dateLabel',
+        'description': '${change.medicationName} $direction to ${change.newDose.toStringAsFixed(0)} ${change.unit}.',
+      });
+    }
+
+    activities.sort((a, b) => (b['day'] as int).compareTo(a['day'] as int));
+
+    if (activities.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 16),
@@ -989,6 +1151,20 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
         ),
       );
     }
+
+    return Column(
+      children: activities.map((act) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: _buildActivityRow(
+            color: act['color'] as Color,
+            title: act['title'] as String,
+            description: act['description'] as String,
+            isActive: _selectedDay == act['day'] as int,
+          ),
+        );
+      }).toList(),
+    );
   }
 
   Widget _buildActivityRow({
@@ -1047,6 +1223,31 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
   }
 
   Widget _buildAdherenceCard() {
+    final totalDays = DateUtils.getDaysInMonth(_focusedMonth.year, _focusedMonth.month);
+
+    final today = DateTime.now();
+    final isCurrentMonth = today.year == _focusedMonth.year && today.month == _focusedMonth.month;
+    final limitDay = isCurrentMonth ? today.day : totalDays;
+
+    int totalScheduled = 0;
+    int totalLogged = 0;
+
+    for (int day = 1; day <= limitDay; day++) {
+      final log = _monthlyLogs[day];
+      if (log != null) {
+        totalScheduled += log.hrtIntakes.length;
+        totalLogged += log.hrtIntakes.where((h) => h.isTaken).length;
+      }
+    }
+
+    int rate = 100;
+    if (totalScheduled > 0) {
+      rate = ((totalLogged / totalScheduled) * 100).round();
+    } else {
+      final hasMeds = ref.read(medicationsProvider).medications.isNotEmpty;
+      rate = hasMeds ? 100 : 0;
+    }
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -1082,7 +1283,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Adherence this month: 92%',
+                  'Adherence this month: $rate%',
                   style: GoogleFonts.manrope(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
@@ -1091,7 +1292,9 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  "You're staying consistent! Keep it up.",
+                  rate >= 80
+                      ? "You're staying consistent! Keep it up."
+                      : "Try checking your reminders to log doses daily.",
                   style: GoogleFonts.manrope(
                     fontSize: 11,
                     color: const Color(0xFF2D5A3E).withOpacity(0.8),
