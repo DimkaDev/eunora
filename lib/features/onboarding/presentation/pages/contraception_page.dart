@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/utils/animation_system.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import '../widgets/onboarding_header.dart';
+import '../providers/onboarding_profile_provider.dart';
 
 class ContraceptionPage extends ConsumerStatefulWidget {
   final VoidCallback? onNext;
@@ -38,6 +39,30 @@ class _ContraceptionPageState extends ConsumerState<ContraceptionPage> {
   void initState() {
     super.initState();
     _selectedContraceptionUnit = _doseUnitController.text.isEmpty ? 'mcg' : _doseUnitController.text;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final profile = ref.read(onboardingProfileProvider);
+      if (profile != null) {
+        setState(() {
+          _isUsingContraception = profile.isUsingContraception;
+          if (profile.contraceptionType != null) {
+            _selectedType = profile.contraceptionType!;
+          }
+          if (profile.contraceptionBrand != null) {
+            _brandController.text = profile.contraceptionBrand!;
+          }
+          if (profile.contraceptionDose != null) {
+            final parts = profile.contraceptionDose!.split(' ');
+            if (parts.isNotEmpty) {
+              _doseQuantityController.text = parts.first;
+              if (parts.length > 1) {
+                _doseUnitController.text = parts[1];
+                _selectedContraceptionUnit = parts[1];
+              }
+            }
+          }
+        });
+      }
+    });
   }
 
   @override
@@ -394,6 +419,15 @@ class _ContraceptionPageState extends ConsumerState<ContraceptionPage> {
       children: [
         ElevatedButton(
           onPressed: () {
+            final dose = _doseQuantityController.text.isNotEmpty 
+                ? '${_doseQuantityController.text} $_selectedContraceptionUnit'
+                : null;
+            ref.read(onboardingProfileProvider.notifier).updateProfile((p) => p.copyWith(
+              isUsingContraception: _isUsingContraception,
+              contraceptionType: _isUsingContraception == true ? _selectedType : null,
+              contraceptionBrand: _isUsingContraception == true ? _brandController.text : null,
+              contraceptionDose: _isUsingContraception == true ? dose : null,
+            ));
             if (widget.onNext != null) {
               widget.onNext!();
             } else {
@@ -415,6 +449,12 @@ class _ContraceptionPageState extends ConsumerState<ContraceptionPage> {
         const SizedBox(height: 12),
         TextButton(
           onPressed: () {
+            ref.read(onboardingProfileProvider.notifier).updateProfile((p) => p.copyWith(
+              isUsingContraception: null,
+              contraceptionType: null,
+              contraceptionBrand: null,
+              contraceptionDose: null,
+            ));
             if (widget.onNext != null) {
               widget.onNext!();
             } else {

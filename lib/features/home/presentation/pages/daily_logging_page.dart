@@ -96,8 +96,10 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
       final symptomsState = ref.read(symptomsProvider);
       final triggersState = ref.read(triggersProvider);
       setState(() {
-        _selectedSymptomIds.retainAll(symptomsState.frequentSymptomIds);
-        _selectedTriggerIds.retainAll(triggersState.activeTriggerIds);
+        _selectedSymptomIds.clear();
+        _selectedSymptomIds.addAll(symptomsState.frequentSymptomIds);
+        _selectedTriggerIds.clear();
+        _selectedTriggerIds.addAll(triggersState.activeTriggerIds);
       });
 
       final meds = ref.read(medicationsProvider).medications;
@@ -105,7 +107,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
         final name = med.name.toLowerCase();
         if (name.contains('estradiol') || name.contains('estrogen') || name.contains('estradot')) {
           setState(() {
-            _estradiolChecked = false;
+            _estradiolChecked = true;
             _estradiolDose = med.dose;
             _estradiolUnit = med.unit;
             _initialEstradiolDose = med.dose;
@@ -113,7 +115,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
           });
         } else if (name.contains('progesterone') || name.contains('utrogestan')) {
           setState(() {
-            _progesteroneChecked = false;
+            _progesteroneChecked = true;
             _progesteroneDose = med.dose;
             _progesteroneUnit = med.unit;
             _initialProgesteroneDose = med.dose;

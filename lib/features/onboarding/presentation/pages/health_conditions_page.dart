@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/utils/animation_system.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import '../widgets/onboarding_header.dart';
+import '../providers/onboarding_profile_provider.dart';
 
 class HealthConditionsPage extends ConsumerStatefulWidget {
   final VoidCallback? onNext;
@@ -19,6 +20,21 @@ class _HealthConditionsPageState extends ConsumerState<HealthConditionsPage> {
   final Set<String> _selectedConditions = {};
   final TextEditingController _otherConditionController = TextEditingController();
   bool _noneOfAbove = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final profile = ref.read(onboardingProfileProvider);
+      if (profile != null) {
+        setState(() {
+          _selectedConditions.addAll(profile.healthConditions);
+          _otherConditionController.text = profile.healthConditionsOther ?? '';
+          _noneOfAbove = profile.noneOfAboveConditions ?? false;
+        });
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -502,6 +518,11 @@ class _HealthConditionsPageState extends ConsumerState<HealthConditionsPage> {
               children: [
                  ElevatedButton(
                   onPressed: () {
+                    ref.read(onboardingProfileProvider.notifier).updateProfile((p) => p.copyWith(
+                      healthConditions: _selectedConditions.toList(),
+                      healthConditionsOther: _otherConditionController.text,
+                      noneOfAboveConditions: _noneOfAbove,
+                    ));
                     if (widget.onNext != null) {
                       widget.onNext!();
                     } else {
@@ -520,6 +541,11 @@ class _HealthConditionsPageState extends ConsumerState<HealthConditionsPage> {
                 const SizedBox(height: 12),
                 TextButton(
                   onPressed: () {
+                    ref.read(onboardingProfileProvider.notifier).updateProfile((p) => p.copyWith(
+                      healthConditions: const [],
+                      healthConditionsOther: '',
+                      noneOfAboveConditions: true,
+                    ));
                     if (widget.onNext != null) {
                       widget.onNext!();
                     } else {

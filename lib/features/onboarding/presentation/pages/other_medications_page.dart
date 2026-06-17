@@ -630,6 +630,7 @@ class AddOtherMedicationModal extends ConsumerStatefulWidget {
 class _AddOtherMedicationModalState extends ConsumerState<AddOtherMedicationModal> {
   late final TextEditingController _nameController;
   late final TextEditingController _doseController;
+  String _selectedUnit = 'mg';
   String? _selectedCategory;
   String? _selectedFrequency;
   bool _hasReminder = false;
@@ -637,12 +638,36 @@ class _AddOtherMedicationModalState extends ConsumerState<AddOtherMedicationModa
   final List<String> _categories = ['Vitamins', 'Minerals', 'Herbal', 'Prescription', 'Other'];
   final List<String> _frequencies = ['Daily', 'Twice daily', 'Weekly', 'As needed'];
   final List<String> _suggestions = ['Vitamin D', 'Calcium', 'Magnesium', 'Ibuprofen', 'Antidepressant'];
+  final List<String> _units = ['mg', 'mcg', 'g', 'ml', 'drops', 'pumps', 'tablets', 'capsules'];
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.medication?.name ?? widget.initialName);
-    _doseController = TextEditingController(text: widget.medication?.dose);
+
+    // Try to parse initial dose and unit
+    final rawDose = widget.medication?.dose;
+    String initialDose = '';
+    String initialUnit = 'mg';
+
+    if (rawDose != null && rawDose.isNotEmpty) {
+      final match = RegExp(r'^([\d\.,\s]+)(.*)$').firstMatch(rawDose);
+      if (match != null) {
+        initialDose = match.group(1)?.trim() ?? '';
+        final unitPart = match.group(2)?.trim() ?? 'mg';
+        final cleanedUnit = unitPart.toLowerCase();
+        if (_units.contains(cleanedUnit)) {
+          initialUnit = cleanedUnit;
+        } else {
+          initialUnit = _units.firstWhere((u) => cleanedUnit.contains(u), orElse: () => 'mg');
+        }
+      } else {
+        initialDose = rawDose;
+      }
+    }
+
+    _doseController = TextEditingController(text: initialDose);
+    _selectedUnit = initialUnit;
     _selectedCategory = widget.medication?.category ?? _getDefaultCategory(widget.initialName);
     _selectedFrequency = widget.medication?.frequency ?? 'Daily';
     _hasReminder = widget.medication?.hasReminder ?? false;
@@ -669,11 +694,14 @@ class _AddOtherMedicationModalState extends ConsumerState<AddOtherMedicationModa
     final name = _nameController.text.trim();
     if (name.isEmpty) return;
 
+    final doseVal = _doseController.text.trim();
+    final combinedDose = doseVal.isNotEmpty ? '$doseVal $_selectedUnit' : null;
+
     final notifier = ref.read(otherMedicationsProvider.notifier);
     if (widget.medication != null) {
       notifier.updateMedication(widget.medication!.copyWith(
         name: name,
-        dose: _doseController.text.trim(),
+        dose: combinedDose,
         category: _selectedCategory,
         frequency: _selectedFrequency,
         hasReminder: _hasReminder,
@@ -681,7 +709,7 @@ class _AddOtherMedicationModalState extends ConsumerState<AddOtherMedicationModa
     } else {
       notifier.addMedication(
         name: name,
-        dose: _doseController.text.trim(),
+        dose: combinedDose,
         category: _selectedCategory,
         frequency: _selectedFrequency,
         hasReminder: _hasReminder,
@@ -762,9 +790,53 @@ class _AddOtherMedicationModalState extends ConsumerState<AddOtherMedicationModa
                   // Dose Input
                   _buildLabel('Dose (optional)'),
                   const SizedBox(height: 8),
-                  _buildTextField(
-                    controller: _doseController,
-                    hint: 'e.g., 2000 IU, 400 mg',
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: TextField(
+                          controller: _doseController,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          decoration: InputDecoration(
+                            hintText: 'e.g., 400, 2',
+                            hintStyle: TextStyle(color: const Color(0xFF4D453F).withOpacity(0.4)),
+                            filled: true,
+                            fillColor: const Color(0xFFF2EDE9),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF2EDE9),
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        height: 56,
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: _selectedUnit,
+                            onChanged: (val) {
+                              if (val != null) {
+                                setState(() => _selectedUnit = val);
+                              }
+                            },
+                            icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF4D453F)),
+                            style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1D1B1A), fontSize: 14),
+                            dropdownColor: const Color(0xFFFEF8F6),
+                            borderRadius: BorderRadius.circular(16),
+                            items: _units
+                                .map((u) => DropdownMenuItem(
+                                      value: u,
+                                      child: Text(u),
+                                    ))
+                                .toList(),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 24),
 

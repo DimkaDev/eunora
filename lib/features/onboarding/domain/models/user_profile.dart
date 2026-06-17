@@ -29,6 +29,7 @@ class UserProfile {
   final String? procedureType;
   final String? hrtTiming;
   final List<String> selectedStageSymptoms;
+  final List<String> selectedTriggers;
   final int? overallFeeling;
 
   final List<String> conditions;
@@ -86,6 +87,7 @@ class UserProfile {
     this.procedureType,
     this.hrtTiming,
     this.selectedStageSymptoms = const [],
+    this.selectedTriggers = const [],
     this.overallFeeling,
     this.conditions = const [],
     this.otherConditionText,
@@ -136,6 +138,7 @@ class UserProfile {
     String? procedureType,
     String? hrtTiming,
     List<String>? selectedStageSymptoms,
+    List<String>? selectedTriggers,
     int? overallFeeling,
     List<String>? conditions,
     String? otherConditionText,
@@ -185,6 +188,7 @@ class UserProfile {
       procedureType: procedureType ?? this.procedureType,
       hrtTiming: hrtTiming ?? this.hrtTiming,
       selectedStageSymptoms: selectedStageSymptoms ?? this.selectedStageSymptoms,
+      selectedTriggers: selectedTriggers ?? this.selectedTriggers,
       overallFeeling: overallFeeling ?? this.overallFeeling,
       conditions: conditions ?? this.conditions,
       otherConditionText: otherConditionText ?? this.otherConditionText,
@@ -237,6 +241,7 @@ class UserProfile {
       'procedureType': procedureType,
       'hrtTiming': hrtTiming,
       'selectedStageSymptoms': selectedStageSymptoms,
+      'selectedTriggers': selectedTriggers,
       'overallFeeling': overallFeeling,
       'conditions': conditions,
       'otherConditionText': otherConditionText,
@@ -289,6 +294,7 @@ class UserProfile {
       procedureType: map['procedureType'] as String?,
       hrtTiming: map['hrtTiming'] as String?,
       selectedStageSymptoms: List<String>.from(map['selectedStageSymptoms'] ?? const []),
+      selectedTriggers: List<String>.from(map['selectedTriggers'] ?? const []),
       overallFeeling: map['overallFeeling'] as int?,
       conditions: List<String>.from(map['conditions'] ?? const []),
       otherConditionText: map['otherConditionText'] as String?,

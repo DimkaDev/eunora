@@ -4,15 +4,18 @@ import 'package:go_router/go_router.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
+import 'package:eunora/features/onboarding/presentation/providers/onboarding_profile_provider.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
+class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProviderStateMixin {
   late AnimationController _rippleController;
   late AnimationController _logoController;
   late AnimationController _textController;
@@ -109,7 +112,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       _textController.forward();
     });
 
-    // Navigate to correct destination as soon as auth state is initialized and animations finish
+    // Navigate to correct destination as soon as auth state is initialized, animations finish, and data is loaded
     Future.wait([
       Future.delayed(const Duration(milliseconds: 1800)),
       FirebaseAuth.instance.authStateChanges().first,
@@ -117,10 +120,21 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       if (!mounted) return;
       final user = results[1] as User?;
       if (user != null) {
+        // Load the onboarding profile from Firestore (which also populates providers)
+        await ref.read(onboardingProfileProvider.notifier).loadOrCreate();
+        final profile = ref.read(onboardingProfileProvider);
+
         final prefs = await SharedPreferences.getInstance();
         if (!mounted) return;
-        final isCompleted = prefs.getBool('onboarding_completed_${user.uid}') ?? false;
-        if (isCompleted) {
+        
+        final isCompletedLocal = prefs.getBool('onboarding_completed_${user.uid}') ?? false;
+        final isCompletedRemote = profile?.isOnboardingCompleted ?? false;
+
+        if (isCompletedLocal || isCompletedRemote) {
+          if (isCompletedRemote && !isCompletedLocal) {
+            // Cache remote status to local SharedPreferences
+            await prefs.setBool('onboarding_completed_${user.uid}', true);
+          }
           context.go('/home');
         } else {
           context.go('/menopause-stage');

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import '../widgets/onboarding_header.dart';
+import '../providers/onboarding_profile_provider.dart';
 
 class LifestyleHabitsPage extends ConsumerStatefulWidget {
   final VoidCallback? onNext;
@@ -20,6 +21,23 @@ class _LifestyleHabitsPageState extends ConsumerState<LifestyleHabitsPage> {
   double _sleepHours = 7;
   String _exerciseFrequency = '3-4x/week';
   String _caffeineIntake = 'Moderate';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final profile = ref.read(onboardingProfileProvider);
+      if (profile != null) {
+        setState(() {
+          _smokingStatus = profile.smokingStatus ?? 'Never';
+          _alcoholFrequency = profile.alcoholFrequency ?? 'Rarely';
+          _sleepHours = profile.sleepHours ?? 7;
+          _exerciseFrequency = profile.exerciseFrequency ?? '3-4x/week';
+          _caffeineIntake = profile.caffeineIntake ?? 'Moderate';
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -364,6 +382,13 @@ class _LifestyleHabitsPageState extends ConsumerState<LifestyleHabitsPage> {
               children: [
                  ElevatedButton(
                   onPressed: () {
+                    ref.read(onboardingProfileProvider.notifier).updateProfile((p) => p.copyWith(
+                      smokingStatus: _smokingStatus,
+                      alcoholFrequency: _alcoholFrequency,
+                      sleepHours: _sleepHours,
+                      exerciseFrequency: _exerciseFrequency,
+                      caffeineIntake: _caffeineIntake,
+                    ));
                     if (widget.onNext != null) {
                       widget.onNext!();
                     } else {
@@ -385,6 +410,13 @@ class _LifestyleHabitsPageState extends ConsumerState<LifestyleHabitsPage> {
                 const SizedBox(height: 12),
                 TextButton(
                   onPressed: () {
+                    ref.read(onboardingProfileProvider.notifier).updateProfile((p) => p.copyWith(
+                      smokingStatus: null,
+                      alcoholFrequency: null,
+                      sleepHours: null,
+                      exerciseFrequency: null,
+                      caffeineIntake: null,
+                    ));
                     if (widget.onNext != null) {
                       widget.onNext!();
                     } else {

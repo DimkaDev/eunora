@@ -13,6 +13,7 @@ import 'package:eunora/features/onboarding/presentation/providers/menopause_stag
 import 'package:eunora/features/onboarding/presentation/providers/symptoms_provider.dart';
 import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
 import 'package:eunora/features/onboarding/presentation/providers/other_medications_provider.dart';
+import 'package:eunora/features/onboarding/presentation/providers/onboarding_profile_provider.dart';
 
 class ActiveSetupPage extends ConsumerStatefulWidget {
   final VoidCallback? onBack;
@@ -25,6 +26,26 @@ class ActiveSetupPage extends ConsumerStatefulWidget {
 class _ActiveSetupPageState extends ConsumerState<ActiveSetupPage> {
   TimeOfDay _hrtTime = const TimeOfDay(hour: 8, minute: 0);
   TimeOfDay _logTime = const TimeOfDay(hour: 20, minute: 0);
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final profile = ref.read(onboardingProfileProvider);
+      if (profile != null) {
+        setState(() {
+          _hrtTime = TimeOfDay(
+            hour: profile.notificationSettings.hrtTimeHour,
+            minute: profile.notificationSettings.hrtTimeMinute,
+          );
+          _logTime = TimeOfDay(
+            hour: profile.notificationSettings.eveningLogTimeHour,
+            minute: profile.notificationSettings.eveningLogTimeMinute,
+          );
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -375,12 +396,8 @@ class _ActiveSetupPageState extends ConsumerState<ActiveSetupPage> {
                       final activeMeds = ref.read(medicationsProvider).medications;
                       final otherMeds = ref.read(otherMedicationsProvider).medications;
 
-                      final profile = UserProfile(
-                        uid: user.uid,
-                        email: user.email ?? '',
-                        age: 50, // default age
+                      ref.read(onboardingProfileProvider.notifier).updateProfile((p) => p.copyWith(
                         menopauseStage: selectedStage,
-                        yearsInStage: '1',
                         selectedStageSymptoms: symptomsState.frequentSymptomIds,
                         medications: activeMeds,
                         otherMedications: otherMeds,
@@ -390,13 +407,10 @@ class _ActiveSetupPageState extends ConsumerState<ActiveSetupPage> {
                           eveningLogTimeHour: _logTime.hour,
                           eveningLogTimeMinute: _logTime.minute,
                         ),
-                        isOnboardingCompleted: true,
-                        createdAt: DateTime.now(),
-                        updatedAt: DateTime.now(),
-                      );
+                      ));
 
                       try {
-                        await ref.read(firestoreServiceProvider).saveUserProfile(profile);
+                        await ref.read(onboardingProfileProvider.notifier).saveToFirestore();
                       } catch (e) {
                         debugPrint("Error saving user profile to firestore: $e");
                       }

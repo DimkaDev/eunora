@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import '../widgets/onboarding_header.dart';
+import '../providers/onboarding_profile_provider.dart';
 
 class WeightPage extends ConsumerStatefulWidget {
   final VoidCallback? onNext;
@@ -19,6 +20,20 @@ class _WeightPageState extends ConsumerState<WeightPage> {
   bool _isMetric = true;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final profile = ref.read(onboardingProfileProvider);
+      if (profile != null) {
+        setState(() {
+          _weight = profile.weight ?? 70;
+          _isMetric = profile.isMetric ?? true;
+        });
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFEF8F6), // background
@@ -28,7 +43,7 @@ class _WeightPageState extends ConsumerState<WeightPage> {
             child: Column(
               children: [
                 OnboardingHeader(
-                  currentStep: 7,
+                  currentStep: 8,
                   subtitle: 'WEIGHT',
                   onBack: widget.onBack,
                   onSkip: () => _showInfoDialog(context),
@@ -244,6 +259,10 @@ class _WeightPageState extends ConsumerState<WeightPage> {
               children: [
                  ElevatedButton(
                   onPressed: () {
+                    ref.read(onboardingProfileProvider.notifier).updateProfile((p) => p.copyWith(
+                      weight: _weight,
+                      isMetric: _isMetric,
+                    ));
                     if (widget.onNext != null) {
                       widget.onNext!();
                     } else {
@@ -265,6 +284,10 @@ class _WeightPageState extends ConsumerState<WeightPage> {
                 const SizedBox(height: 12),
                 TextButton(
                   onPressed: () {
+                    ref.read(onboardingProfileProvider.notifier).updateProfile((p) => p.copyWith(
+                      weight: null,
+                      isMetric: _isMetric,
+                    ));
                     if (widget.onNext != null) {
                       widget.onNext!();
                     } else {

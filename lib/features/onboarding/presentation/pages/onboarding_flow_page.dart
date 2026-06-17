@@ -16,6 +16,8 @@ import 'package:eunora/features/onboarding/presentation/pages/weight_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/lifestyle_habits_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/active_setup_page.dart';
 
+import 'package:eunora/features/onboarding/presentation/providers/onboarding_profile_provider.dart';
+
 class OnboardingFlowPage extends ConsumerStatefulWidget {
   const OnboardingFlowPage({super.key});
 
@@ -31,6 +33,9 @@ class _OnboardingFlowPageState extends ConsumerState<OnboardingFlowPage> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _currentStep);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(onboardingProfileProvider.notifier).loadOrCreate();
+    });
   }
 
   @override

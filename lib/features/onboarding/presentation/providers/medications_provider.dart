@@ -27,7 +27,7 @@ class MedicationsState {
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class Medications extends _$Medications {
   @override
   MedicationsState build() {
