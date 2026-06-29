@@ -24,6 +24,16 @@ class DashboardHeader extends ConsumerWidget {
     final notifications = ref.watch(notificationHistoryProvider);
     final hasUnread = notifications.any((n) => !n.isRead);
 
+    final hour = DateTime.now().hour;
+    final String greeting;
+    if (hour >= 5 && hour < 12) {
+      greeting = 'Good morning';
+    } else if (hour >= 12 && hour < 18) {
+      greeting = 'Good afternoon';
+    } else {
+      greeting = 'Good evening';
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
@@ -38,51 +48,63 @@ class DashboardHeader extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Good morning, $userName',
-                style: GoogleFonts.notoSerif(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primary,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '$greeting, $userName',
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: GoogleFonts.notoSerif(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primary,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Text(
-                    date.toUpperCase(),
-                    style: GoogleFonts.manrope(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
-                      color: const Color(0xFF78716C),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        date.toUpperCase(),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: GoogleFonts.manrope(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                          color: const Color(0xFF78716C),
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    width: 4,
-                    height: 4,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFD6D3D1),
-                      shape: BoxShape.circle,
+                    const SizedBox(width: 8),
+                    Container(
+                      width: 4,
+                      height: 4,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFD6D3D1),
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    cycleInfo,
-                    style: GoogleFonts.manrope(
-                      fontSize: 10,
-                      fontStyle: FontStyle.italic,
-                      color: const Color(0xFFA8A29E),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        cycleInfo,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: GoogleFonts.manrope(
+                          fontSize: 10,
+                          fontStyle: FontStyle.italic,
+                          color: const Color(0xFFA8A29E),
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
           Row(
             children: [

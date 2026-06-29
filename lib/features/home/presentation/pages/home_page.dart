@@ -28,6 +28,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:eunora/core/services/firestore_service.dart';
 import 'package:eunora/features/home/domain/entities/daily_log.dart';
 import 'package:eunora/features/onboarding/domain/models/symptom.dart';
+import 'package:eunora/features/onboarding/domain/models/user_profile.dart';
+import 'package:eunora/features/onboarding/presentation/providers/menopause_stage_provider.dart';
+import 'package:eunora/features/onboarding/presentation/providers/onboarding_profile_provider.dart';
+
 
 
 class HomePage extends ConsumerStatefulWidget {
@@ -40,6 +44,7 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage> {
   int _selectedIndex = 0;
   late final InsightType _insightType;
+  bool _isLoading = true;
 
   // Daily Logging States
   final Map<String, bool> _takenStatus = {};
@@ -67,60 +72,73 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   Future<void> _fetchTodayLog() async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    if (user == null) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+      return;
+    }
 
     final date = DateTime.now();
     final dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
 
-    final log = await ref.read(firestoreServiceProvider).getDailyLog(user.uid, dateStr);
-    if (log != null) {
-      setState(() {
-        _loggedSymptoms.clear();
-        for (final s in log.symptoms) {
-          _loggedSymptoms.add({
-            'name': s.symptom.name,
-            'severity': s.severity ?? 'Moderate',
-          });
-        }
-
-        _loggedTriggers.clear();
-        for (final t in log.triggers) {
-          String name = t;
-          dynamic value = 'Logged';
-          IconData icon = Icons.bolt;
-
-          if (t.startsWith('Caffeine:')) {
-            name = 'Caffeine';
-            value = t.replaceAll('Caffeine:', '').trim();
-            icon = Icons.local_cafe;
-          } else if (t.startsWith('Alcohol:')) {
-            name = 'Alcohol';
-            value = t.replaceAll('Alcohol:', '').trim();
-            icon = Icons.wine_bar;
-          } else if (t.startsWith('Stress:')) {
-            name = 'Stress';
-            value = t.replaceAll('Stress:', '').trim();
-            icon = Icons.psychology;
-          } else if (t.startsWith('Foods:')) {
-            name = 'Foods';
-            value = t.replaceAll('Foods:', '').trim();
-            icon = Icons.restaurant;
+    try {
+      final log = await ref.read(firestoreServiceProvider).getDailyLog(user.uid, dateStr);
+      if (log != null && mounted) {
+        setState(() {
+          _loggedSymptoms.clear();
+          for (final s in log.symptoms) {
+            _loggedSymptoms.add({
+              'name': s.symptom.name,
+              'severity': s.severity ?? 'Moderate',
+            });
           }
 
-          _loggedTriggers.add({
-            'name': name,
-            'value': value,
-            'icon': icon,
-          });
-        }
+          _loggedTriggers.clear();
+          for (final t in log.triggers) {
+            String name = t;
+            dynamic value = 'Logged';
+            IconData icon = Icons.bolt;
 
-        _takenStatus['Estradiol Patch'] = log.estradiolChecked;
-        _takenStatus['Estradiol'] = log.estradiolChecked;
-        _takenTime['Estradiol Patch'] = log.estradiolTime.isEmpty ? '08:30' : log.estradiolTime;
-        _takenStatus['Progesterone'] = log.progesteroneChecked;
-        _takenStatus['Utrogestan'] = log.progesteroneChecked;
-        _takenTime['Progesterone'] = log.progesteroneTime.isEmpty ? '21:00' : log.progesteroneTime;
-      });
+            if (t.startsWith('Caffeine:')) {
+              name = 'Caffeine';
+              value = t.replaceAll('Caffeine:', '').trim();
+              icon = Icons.local_cafe;
+            } else if (t.startsWith('Alcohol:')) {
+              name = 'Alcohol';
+              value = t.replaceAll('Alcohol:', '').trim();
+              icon = Icons.wine_bar;
+            } else if (t.startsWith('Stress:')) {
+              name = 'Stress';
+              value = t.replaceAll('Stress:', '').trim();
+              icon = Icons.psychology;
+            } else if (t.startsWith('Foods:')) {
+              name = 'Foods';
+              value = t.replaceAll('Foods:', '').trim();
+              icon = Icons.restaurant;
+            }
+
+            _loggedTriggers.add({
+              'name': name,
+              'value': value,
+              'icon': icon,
+            });
+          }
+
+          _takenStatus['Estradiol Patch'] = log.estradiolChecked;
+          _takenStatus['Estradiol'] = log.estradiolChecked;
+          _takenTime['Estradiol Patch'] = log.estradiolTime.isEmpty ? '08:30' : log.estradiolTime;
+          _takenStatus['Progesterone'] = log.progesteroneChecked;
+          _takenStatus['Utrogestan'] = log.progesteroneChecked;
+          _takenTime['Progesterone'] = log.progesteroneTime.isEmpty ? '21:00' : log.progesteroneTime;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetching daily log: $e");
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -474,26 +492,79 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Widget _buildHomeDashboard(double progress, List<Medication> medications) {
+    final userProfile = ref.watch(onboardingProfileProvider);
+    
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+    String userName = 'Sarah';
+    if (userProfile != null && userProfile.email.isNotEmpty) {
+      final emailName = userProfile.email.split('@').first;
+      if (emailName.isNotEmpty) {
+        userName = emailName[0].toUpperCase() + emailName.substring(1);
+      }
+    } else if (firebaseUser != null && firebaseUser.email != null && firebaseUser.email!.isNotEmpty) {
+      final emailName = firebaseUser.email!.split('@').first;
+      if (emailName.isNotEmpty) {
+        userName = emailName[0].toUpperCase() + emailName.substring(1);
+      }
+    }
+
+    final date = DateTime.now();
+    final weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    final months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    final weekdayStr = weekdays[date.weekday - 1];
+    final monthStr = months[date.month - 1];
+    final dateString = '$weekdayStr, $monthStr ${date.day}';
+
+    String cycleInfo = '1 week in cycle';
+    if (userProfile != null) {
+      switch (userProfile.menopauseStage) {
+        case MenopauseStage.irregular:
+          cycleInfo = 'Irregular Cycle';
+          break;
+        case MenopauseStage.noPeriod12Months:
+          cycleInfo = 'No Period > 12 Mos';
+          break;
+        case MenopauseStage.postmenopause:
+          cycleInfo = 'Postmenopause';
+          break;
+        case MenopauseStage.surgical:
+          cycleInfo = 'Surgical Menopause';
+          break;
+        case MenopauseStage.pcos:
+          cycleInfo = 'PCOS';
+          break;
+      }
+    }
+
     return Column(
       children: [
-        const DashboardHeader(
-          userName: 'Sarah',
-          date: 'Wednesday, March 19',
-          cycleInfo: '1 week in cycle',
+        DashboardHeader(
+          userName: userName,
+          date: dateString,
+          cycleInfo: cycleInfo,
           profileImageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCcyvRmigFQWEnghTEoPCUvu6Lls83qWwGf81JXXAHmxs_PI1albuWzfyX8hJHYDK2oDWVWOWPMCqACZzrOSiUrEriDUDMizBdlzmoikkKEMsviNymTb1SmeDL2M5mjpE7ZBB0lVSTa1Di99-xd5i_L5XTTvhH9uNbS-BEM4dPF7EevWWNXW_jzlWxSVjPjBZ3OPwiDpUtKeUmcOYd5ry2dtceFPJ-WL6Bp-ZEtlShywIcbEgix84xxFqoBGr1QXN6ehV00Hjb-W4c',
         ),
         Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 120),
-            child: Column(
-              children: [
-                FadeInEntrance(
-                  delay: Duration.zero,
-                  child: DailyLogCard(
-                    progress: progress,
-                    onStartLog: _handleStartOrResumeLogging,
+          child: _isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primary),
                   ),
-                ),
+                )
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 120),
+                  child: Column(
+                    children: [
+                      FadeInEntrance(
+                        delay: Duration.zero,
+                        child: DailyLogCard(
+                          progress: progress,
+                          onStartLog: _handleStartOrResumeLogging,
+                        ),
+                      ),
                 const SizedBox(height: 24),
                 FadeInEntrance(
                   delay: const Duration(milliseconds: 30),

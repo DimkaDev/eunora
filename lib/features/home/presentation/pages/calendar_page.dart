@@ -45,9 +45,20 @@ class CalendarPage extends ConsumerStatefulWidget {
 
 class _CalendarPageState extends ConsumerState<CalendarPage> {
   // Navigation states
-  DateTime _focusedMonth = DateTime(2026, 4); // Default to April 2026 for mock data
-  int _selectedDay = 13; // Selected day of month
+  DateTime _focusedMonth = DateTime(DateTime.now().year, DateTime.now().month);
+  int _selectedDay = DateTime.now().day;
   bool _legendExpanded = false;
+
+  static const _weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  static const _months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+  String _formatSelectedDate() {
+    // Clamp selectedDay to valid range for the focused month to prevent crash on month navigation
+    final totalDays = DateUtils.getDaysInMonth(_focusedMonth.year, _focusedMonth.month);
+    final day = _selectedDay > totalDays ? totalDays : _selectedDay;
+    final targetDate = DateTime(_focusedMonth.year, _focusedMonth.month, day);
+    return '${_weekdays[targetDate.weekday - 1]}, ${_months[targetDate.month - 1]} $day';
+  }
 
   // Firestore Database Logs
   Map<int, MockDailyLog> _dbLogs = {};
@@ -1285,7 +1296,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Daily Log: April $_selectedDay',
+                    'Daily Log: ${_months[_focusedMonth.month - 1]} $_selectedDay',
                     style: GoogleFonts.notoSerif(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -1367,7 +1378,13 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                         ),
                         const SizedBox(height: 8),
                         TextButton(
-                          onPressed: () => setState(() => _selectedDay = 13),
+                          onPressed: () {
+                            setState(() {
+                              _focusedMonth = DateTime(DateTime.now().year, DateTime.now().month);
+                              _selectedDay = DateTime.now().day;
+                            });
+                            _fetchLogsForFocusedMonth();
+                          },
                           child: Text(
                             'BACK TO TODAY',
                             style: GoogleFonts.manrope(
@@ -1708,7 +1725,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Sunday, April $_selectedDay',
+                _formatSelectedDate(),
                 style: GoogleFonts.notoSerif(
                   fontSize: 24,
                   fontWeight: FontWeight.w500,

@@ -35,7 +35,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   int _currentStep = 0; // 0 to 5 (Step 1 to Step 6)
 
   // Step 1: Symptoms Selection
-  final Set<String> _selectedSymptomIds = {'s_hot_flashes'};
+  final Set<String> _selectedSymptomIds = {};
   final List<String> _customSymptoms = [];
 
   // Step 2: Symptom Severities & Durations
@@ -52,7 +52,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   };
 
   // Step 3: Trigger Selection
-  final Set<String> _selectedTriggerIds = {'t_stress'};
+  final Set<String> _selectedTriggerIds = {};
   final List<String> _customTriggers = [];
 
   // Step 4: Trigger Details
@@ -92,38 +92,30 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _currentStep);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final symptomsState = ref.read(symptomsProvider);
-      final triggersState = ref.read(triggersProvider);
-      setState(() {
-        _selectedSymptomIds.clear();
-        _selectedSymptomIds.addAll(symptomsState.frequentSymptomIds);
-        _selectedTriggerIds.clear();
-        _selectedTriggerIds.addAll(triggersState.activeTriggerIds);
-      });
+    
+    // Read the onboarding choices synchronously to pre-populate them as active by default
+    final symptomsState = ref.read(symptomsProvider);
+    final triggersState = ref.read(triggersProvider);
+    _selectedSymptomIds.addAll(symptomsState.frequentSymptomIds);
+    _selectedTriggerIds.addAll(triggersState.activeTriggerIds);
 
-      final meds = ref.read(medicationsProvider).medications;
-      for (final med in meds) {
-        final name = med.name.toLowerCase();
-        if (name.contains('estradiol') || name.contains('estrogen') || name.contains('estradot')) {
-          setState(() {
-            _estradiolChecked = true;
-            _estradiolDose = med.dose;
-            _estradiolUnit = med.unit;
-            _initialEstradiolDose = med.dose;
-            _initialEstradiolUnit = med.unit;
-          });
-        } else if (name.contains('progesterone') || name.contains('utrogestan')) {
-          setState(() {
-            _progesteroneChecked = true;
-            _progesteroneDose = med.dose;
-            _progesteroneUnit = med.unit;
-            _initialProgesteroneDose = med.dose;
-            _initialProgesteroneUnit = med.unit;
-          });
-        }
+    final meds = ref.read(medicationsProvider).medications;
+    for (final med in meds) {
+      final name = med.name.toLowerCase();
+      if (name.contains('estradiol') || name.contains('estrogen') || name.contains('estradot')) {
+        _estradiolChecked = true;
+        _estradiolDose = med.dose;
+        _estradiolUnit = med.unit;
+        _initialEstradiolDose = med.dose;
+        _initialEstradiolUnit = med.unit;
+      } else if (name.contains('progesterone') || name.contains('utrogestan')) {
+        _progesteroneChecked = true;
+        _progesteroneDose = med.dose;
+        _progesteroneUnit = med.unit;
+        _initialProgesteroneDose = med.dose;
+        _initialProgesteroneUnit = med.unit;
       }
-    });
+    }
   }
 
   @override

@@ -5,6 +5,7 @@ import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:eunora/core/services/notification_ids.dart';
 import 'package:eunora/features/onboarding/domain/models/notification_settings.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 
 /// Central notification service for the Eunora app.
 ///
@@ -21,6 +22,13 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   bool _initialized = false;
+
+  /// Optional callback to log generated notifications into the history.
+  Future<void> Function({
+    required String title,
+    required String body,
+    required String type,
+  })? onNotificationGenerated;
 
   // ── Android channel definitions ─────────────────────────────────────────
 
@@ -101,6 +109,13 @@ class NotificationService {
 
     // Load timezone data.
     tz_data.initializeTimeZones();
+    try {
+      final timezoneInfo = await FlutterTimezone.getLocalTimezone();
+      final String timeZoneName = timezoneInfo.identifier;
+      tz.setLocalLocation(tz.getLocation(timeZoneName));
+    } catch (e) {
+      debugPrint("Error initializing local location: $e");
+    }
 
     const androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -137,6 +152,12 @@ class NotificationService {
     return status.isGranted;
   }
 
+  /// Check if notification permission is granted.
+  Future<bool> isPermissionGranted() async {
+    final status = await Permission.notification.status;
+    return status.isGranted;
+  }
+
   // ── Scheduling helpers ───────────────────────────────────────────────────
 
   /// Cancel all scheduled and displayed notifications.
@@ -159,16 +180,26 @@ class NotificationService {
     final body = (medicationName != null && medicationName.isNotEmpty)
         ? 'Time to take your $medicationName. Stay consistent for best results.'
         : 'Time to take your HRT medication. Consistency matters!';
+    
+    final title = '💊 Time for your HRT';
 
     await _plugin.zonedSchedule(
       id: NotificationIds.hrtReminder,
-      title: '💊 Time for your HRT',
+      title: title,
       body: body,
       scheduledDate: _nextInstanceOf(time),
       notificationDetails: _reminderDetails(),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
     );
+
+    if (onNotificationGenerated != null) {
+      await onNotificationGenerated!(
+        title: title,
+        body: body,
+        type: 'hrt',
+      );
+    }
   }
 
   // ── Daily Log Reminder ───────────────────────────────────────────────────
@@ -177,16 +208,58 @@ class NotificationService {
   Future<void> scheduleDailyLogReminder({required TimeOfDay time}) async {
     await _plugin.cancel(id: NotificationIds.dailyLog);
 
+    const title = '📓 How are you feeling today?';
+    const body = 'Log your symptoms to track patterns and get better AI-powered insights.';
+
     await _plugin.zonedSchedule(
       id: NotificationIds.dailyLog,
-      title: '📓 How are you feeling today?',
-      body:
-          'Log your symptoms to track patterns and get better AI-powered insights.',
+      title: title,
+      body: body,
       scheduledDate: _nextInstanceOf(time),
       notificationDetails: _reminderDetails(),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
     );
+
+    if (onNotificationGenerated != null) {
+      await onNotificationGenerated!(
+        title: title,
+        body: body,
+        type: 'log',
+      );
+    }
+  }
+
+  // ── Custom Reminder ──────────────────────────────────────────────────────
+
+  /// Schedule a custom daily reminder with a custom [id], [title], and [time].
+  Future<void> scheduleCustomReminder({
+    required int id,
+    required String title,
+    required TimeOfDay time,
+    String? body,
+  }) async {
+    await _plugin.cancel(id: id);
+
+    final resolvedBody = body ?? 'Reminder for $title';
+
+    await _plugin.zonedSchedule(
+      id: id,
+      title: title,
+      body: resolvedBody,
+      scheduledDate: _nextInstanceOf(time),
+      notificationDetails: _reminderDetails(),
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
+
+    if (onNotificationGenerated != null) {
+      await onNotificationGenerated!(
+        title: title,
+        body: resolvedBody,
+        type: 'hrt',
+      );
+    }
   }
 
   // ── Immediate / event-based notifications ───────────────────────────────
@@ -195,23 +268,40 @@ class NotificationService {
   Future<void> showInsightNotification([
     String title = 'New insight available',
   ]) async {
+    const body = 'Eunora has spotted a pattern in your recent data. Tap to view.';
+    final fullTitle = '✨ $title';
     await _plugin.show(
       id: NotificationIds.aiInsight,
-      title: '✨ $title',
-      body: 'Eunora has spotted a pattern in your recent data. Tap to view.',
+      title: fullTitle,
+      body: body,
       notificationDetails: _insightDetails(),
     );
+    if (onNotificationGenerated != null) {
+      await onNotificationGenerated!(
+        title: fullTitle,
+        body: body,
+        type: 'insight',
+      );
+    }
   }
 
   /// Fire a "Doctor Report Ready" notification immediately.
   Future<void> showReportReadyNotification() async {
+    const title = '📄 Your report is ready';
+    const body = 'Your doctor report has been generated and is ready to review or share.';
     await _plugin.show(
       id: NotificationIds.doctorReport,
-      title: '📄 Your report is ready',
-      body:
-          'Your doctor report has been generated and is ready to review or share.',
+      title: title,
+      body: body,
       notificationDetails: _insightDetails(),
     );
+    if (onNotificationGenerated != null) {
+      await onNotificationGenerated!(
+        title: title,
+        body: body,
+        type: 'report',
+      );
+    }
   }
 
   /// Fire a subscription reminder immediately.
@@ -219,13 +309,21 @@ class NotificationService {
   Future<void> showSubscriptionReminderNotification({
     int daysLeft = 3,
   }) async {
+    const title = '🔔 Subscription renews soon';
+    final body = 'Your Eunora Premium subscription renews in $daysLeft day${daysLeft == 1 ? '' : 's'}. No action needed.';
     await _plugin.show(
       id: NotificationIds.subscriptionReminder,
-      title: '🔔 Subscription renews soon',
-      body:
-          'Your Eunora Premium subscription renews in $daysLeft day${daysLeft == 1 ? '' : 's'}. No action needed.',
+      title: title,
+      body: body,
       notificationDetails: _accountDetails(),
     );
+    if (onNotificationGenerated != null) {
+      await onNotificationGenerated!(
+        title: title,
+        body: body,
+        type: 'subscription',
+      );
+    }
   }
 
   // ── Weekly Digest ────────────────────────────────────────────────────────
@@ -240,7 +338,7 @@ class NotificationService {
       body: 'See how your symptoms trended this week and what has changed.',
       scheduledDate: _nextSundayAt9am(),
       notificationDetails: _insightDetails(),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
     );
   }

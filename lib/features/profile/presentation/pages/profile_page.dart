@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
@@ -7,15 +8,16 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:eunora/features/onboarding/presentation/providers/menopause_stage_provider.dart';
 import 'package:eunora/features/onboarding/presentation/widgets/profile_radio_card.dart';
+import 'package:eunora/features/onboarding/presentation/providers/onboarding_profile_provider.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends ConsumerState<ProfilePage> {
   // Toggle states
   bool _dailyReminder = true;
   bool _weeklyDigest = false;
@@ -171,6 +173,34 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final userProfile = ref.watch(onboardingProfileProvider);
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+
+    String displayName = 'Sarah Johnson';
+    if (userProfile != null && userProfile.email.isNotEmpty) {
+      final emailName = userProfile.email.split('@').first;
+      if (emailName.isNotEmpty) {
+        displayName = emailName[0].toUpperCase() + emailName.substring(1);
+      }
+    } else if (firebaseUser != null && firebaseUser.email != null && firebaseUser.email!.isNotEmpty) {
+      final emailName = firebaseUser.email!.split('@').first;
+      if (emailName.isNotEmpty) {
+        displayName = emailName[0].toUpperCase() + emailName.substring(1);
+      }
+    }
+
+    String initials = 'SJ';
+    if (displayName.isNotEmpty) {
+      final parts = displayName.trim().split(RegExp(r'\s+'));
+      if (parts.length > 1) {
+        initials = (parts[0][0] + parts[1][0]).toUpperCase();
+      } else if (parts.isNotEmpty && parts[0].isNotEmpty) {
+        initials = parts[0][0].toUpperCase();
+      }
+    }
+
+    final displayEmail = userProfile?.email ?? firebaseUser?.email ?? 'sarah@email.com';
+
     return Scaffold(
       backgroundColor: AppTheme.surface,
       appBar: AppBar(
@@ -190,12 +220,6 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.more_vert, color: AppTheme.primary),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
@@ -234,7 +258,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      'SJ',
+                      initials,
                       style: GoogleFonts.notoSerif(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -245,7 +269,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Sarah Johnson',
+                    displayName,
                     style: GoogleFonts.notoSerif(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -254,7 +278,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'sarah@email.com',
+                    displayEmail,
                     style: GoogleFonts.manrope(
                       fontSize: 14,
                       color: AppTheme.onSurfaceVariant,

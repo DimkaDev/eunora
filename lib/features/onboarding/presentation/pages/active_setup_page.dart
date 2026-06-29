@@ -6,14 +6,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../widgets/onboarding_header.dart';
-import 'package:eunora/core/services/firestore_service.dart';
-import 'package:eunora/features/onboarding/domain/models/user_profile.dart';
 import 'package:eunora/features/onboarding/domain/models/notification_settings.dart';
 import 'package:eunora/features/onboarding/presentation/providers/menopause_stage_provider.dart';
 import 'package:eunora/features/onboarding/presentation/providers/symptoms_provider.dart';
 import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
 import 'package:eunora/features/onboarding/presentation/providers/other_medications_provider.dart';
 import 'package:eunora/features/onboarding/presentation/providers/onboarding_profile_provider.dart';
+import 'package:eunora/core/utils/animation_system.dart';
+import 'package:eunora/core/services/notification_service.dart';
+import 'package:eunora/features/profile/presentation/widgets/notification_permission_dialog.dart';
 
 class ActiveSetupPage extends ConsumerStatefulWidget {
   final VoidCallback? onBack;
@@ -26,6 +27,9 @@ class ActiveSetupPage extends ConsumerStatefulWidget {
 class _ActiveSetupPageState extends ConsumerState<ActiveSetupPage> {
   TimeOfDay _hrtTime = const TimeOfDay(hour: 8, minute: 0);
   TimeOfDay _logTime = const TimeOfDay(hour: 20, minute: 0);
+  bool _hrtReminderEnabled = true;
+  bool _eveningLogReminderEnabled = true;
+  final List<Map<String, dynamic>> _customReminders = [];
 
   @override
   void initState() {
@@ -42,6 +46,8 @@ class _ActiveSetupPageState extends ConsumerState<ActiveSetupPage> {
             hour: profile.notificationSettings.eveningLogTimeHour,
             minute: profile.notificationSettings.eveningLogTimeMinute,
           );
+          _hrtReminderEnabled = profile.notificationSettings.hrtReminder;
+          _eveningLogReminderEnabled = profile.notificationSettings.eveningLogReminder;
         });
       }
     });
@@ -74,6 +80,8 @@ class _ActiveSetupPageState extends ConsumerState<ActiveSetupPage> {
                           emoji: '🌿',
                           bgColor: const Color(0xFFE5F3F4),
                           time: _hrtTime,
+                          isEnabled: _hrtReminderEnabled,
+                          onToggle: (val) => setState(() => _hrtReminderEnabled = val),
                           onTimeChanged: (newTime) => setState(() => _hrtTime = newTime),
                         ),
                         const SizedBox(height: 16),
@@ -83,8 +91,36 @@ class _ActiveSetupPageState extends ConsumerState<ActiveSetupPage> {
                           emoji: '🌙',
                           bgColor: const Color(0xFFEDE8F4),
                           time: _logTime,
+                          isEnabled: _eveningLogReminderEnabled,
+                          onToggle: (val) => setState(() => _eveningLogReminderEnabled = val),
                           onTimeChanged: (newTime) => setState(() => _logTime = newTime),
                         ),
+                        ..._customReminders.map((reminder) {
+                          final int index = _customReminders.indexOf(reminder);
+                          return Column(
+                            children: [
+                              const SizedBox(height: 16),
+                              _buildReminderCard(
+                                title: reminder['title'] as String,
+                                subtitle: 'Custom Daily Reminder',
+                                emoji: reminder['emoji'] as String,
+                                bgColor: const Color(0xFFF2EDE9),
+                                time: reminder['time'] as TimeOfDay,
+                                isEnabled: reminder['isEnabled'] as bool,
+                                onToggle: (val) {
+                                  setState(() {
+                                    _customReminders[index]['isEnabled'] = val;
+                                  });
+                                },
+                                onTimeChanged: (newTime) {
+                                  setState(() {
+                                    _customReminders[index]['time'] = newTime;
+                                  });
+                                },
+                              ),
+                            ],
+                          );
+                        }).toList(),
                         const SizedBox(height: 16),
                         _buildAddButton(),
                         const SizedBox(height: 24),
@@ -174,119 +210,132 @@ class _ActiveSetupPageState extends ConsumerState<ActiveSetupPage> {
     required String emoji,
     required Color bgColor,
     required TimeOfDay time,
+    required bool isEnabled,
+    required ValueChanged<bool> onToggle,
     required Function(TimeOfDay) onTimeChanged,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 24,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: bgColor,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Center(
-                      child: Text(emoji, style: const TextStyle(fontSize: 20)),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1D1B1A),
-                        ),
-                      ),
-                      Text(
-                        subtitle,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF4D453F),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const Icon(Icons.more_horiz, color: Color(0xFF4D453F)),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF7F5F0),
-              borderRadius: BorderRadius.circular(16),
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 200),
+      opacity: isEnabled ? 1.0 : 0.5,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.white),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 24,
+              offset: const Offset(0, 4),
             ),
-            child: Row(
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildTimeStepperButton(Icons.remove, () {
-                  final newTime = _adjustTime(time, -30);
-                  onTimeChanged(newTime);
-                }),
-                GestureDetector(
-                  onTap: () async {
-                    final picked = await showTimePicker(
-                      context: context,
-                      initialTime: time,
-                    );
-                    if (picked != null) onTimeChanged(picked);
-                  },
-                  child: Column(
-                    children: [
-                      Text(
-                        _formatTime(time),
-                        style: const TextStyle(
-                          fontFamily: 'Noto Serif',
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF655A6E),
-                        ),
+                Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: bgColor,
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      Text(
-                        time.period == DayPeriod.am ? 'AM' : 'PM',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF655A6E).withOpacity(0.6),
-                          letterSpacing: 1.2,
-                        ),
+                      child: Center(
+                        child: Text(emoji, style: const TextStyle(fontSize: 20)),
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1D1B1A),
+                          ),
+                        ),
+                        Text(
+                          subtitle,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF4D453F),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                _buildTimeStepperButton(Icons.add, () {
-                  final newTime = _adjustTime(time, 30);
-                  onTimeChanged(newTime);
-                }),
+                AnimatedSwitch(
+                  value: isEnabled,
+                  onChanged: onToggle,
+                  activeColor: const Color(0xFF817266),
+                ),
               ],
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            IgnorePointer(
+              ignoring: !isEnabled,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF7F5F0),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildTimeStepperButton(Icons.remove, () {
+                      final newTime = _adjustTime(time, -30);
+                      onTimeChanged(newTime);
+                    }),
+                    GestureDetector(
+                      onTap: () async {
+                        final picked = await showTimePicker(
+                          context: context,
+                          initialTime: time,
+                        );
+                        if (picked != null) onTimeChanged(picked);
+                      },
+                      child: Column(
+                        children: [
+                          Text(
+                            _formatTime(time),
+                            style: const TextStyle(
+                              fontFamily: 'Noto Serif',
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF655A6E),
+                            ),
+                          ),
+                          Text(
+                            time.period == DayPeriod.am ? 'AM' : 'PM',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF655A6E).withOpacity(0.6),
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    _buildTimeStepperButton(Icons.add, () {
+                      final newTime = _adjustTime(time, 30);
+                      onTimeChanged(newTime);
+                    }),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -314,43 +363,221 @@ class _ActiveSetupPageState extends ConsumerState<ActiveSetupPage> {
   }
 
   Widget _buildAddButton() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 20),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: const Color(0xFF7F756E).withOpacity(0.3),
-          style: BorderStyle.solid,
-          width: 2,
+    return InkWell(
+      onTap: _showAddReminderSheet,
+      borderRadius: BorderRadius.circular(24),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: const Color(0xFF7F756E).withOpacity(0.3),
+            style: BorderStyle.solid,
+            width: 2,
+          ),
         ),
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: const Color(0xFF4D453F).withOpacity(0.4),
-                style: BorderStyle.solid,
-                width: 2,
+        child: Column(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color(0xFF4D453F).withOpacity(0.4),
+                  style: BorderStyle.solid,
+                  width: 2,
+                ),
+              ),
+              child: const Icon(Icons.add, color: Color(0xFF4D453F), size: 20),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Add New Reminder',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF4D453F),
               ),
             ),
-            child: const Icon(Icons.add, color: Color(0xFF4D453F), size: 20),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Add New Reminder',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF4D453F),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+
+  void _showAddReminderSheet() {
+    final titleController = TextEditingController();
+    TimeOfDay selectedTime = const TimeOfDay(hour: 12, minute: 0);
+    String selectedEmoji = '⏰';
+    final emojis = ['⏰', '💊', '💧', '🍎', '🏃‍♀️', '🧘‍♀️', '🛌', '🌿', '🌙'];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              padding: EdgeInsets.fromLTRB(24, 20, 24, 40 + MediaQuery.of(context).viewInsets.bottom),
+              decoration: const BoxDecoration(
+                color: Color(0xFFFEF8F6),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Add Daily Reminder',
+                        style: GoogleFonts.notoSerif(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF1D1B1A),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Color(0xFF67594E)),
+                        onPressed: () => Navigator.pop(context),
+                        style: IconButton.styleFrom(
+                          backgroundColor: const Color(0xFFF2EDE9),
+                          padding: const EdgeInsets.all(8),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Reminder Title',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1D1B1A)),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: titleController,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      hintText: 'e.g., Take Vitamin D, Drink water',
+                      hintStyle: TextStyle(color: const Color(0xFF4D453F).withOpacity(0.4)),
+                      filled: true,
+                      fillColor: const Color(0xFFF2EDE9),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Choose Emoji',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1D1B1A)),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 50,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: emojis.length,
+                      separatorBuilder: (context, index) => const SizedBox(width: 12),
+                      itemBuilder: (context, index) {
+                        final emoji = emojis[index];
+                        final isSelected = selectedEmoji == emoji;
+                        return GestureDetector(
+                          onTap: () => setModalState(() => selectedEmoji = emoji),
+                          child: Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: isSelected ? const Color(0xFF817266) : const Color(0xFFF2EDE9),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: Text(emoji, style: const TextStyle(fontSize: 20)),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Time',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1D1B1A)),
+                  ),
+                  const SizedBox(height: 8),
+                  InkWell(
+                    onTap: () async {
+                      final picked = await showTimePicker(
+                        context: context,
+                        initialTime: selectedTime,
+                      );
+                      if (picked != null) {
+                        setModalState(() => selectedTime = picked);
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF2EDE9),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            _formatTime(selectedTime),
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF1D1B1A)),
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                selectedTime.period == DayPeriod.am ? 'AM' : 'PM',
+                                style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF4D453F)),
+                              ),
+                              const Icon(Icons.arrow_drop_down, color: Color(0xFF4D453F)),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  ElevatedButton(
+                    onPressed: () {
+                      final title = titleController.text.trim();
+                      if (title.isNotEmpty) {
+                        setState(() {
+                          _customReminders.add({
+                            'id': DateTime.now().millisecondsSinceEpoch % 100000,
+                            'title': title,
+                            'time': selectedTime,
+                            'emoji': selectedEmoji,
+                            'isEnabled': true,
+                          });
+                        });
+                        Navigator.pop(context);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF817266),
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 56),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'ADD REMINDER',
+                      style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -385,6 +612,31 @@ class _ActiveSetupPageState extends ConsumerState<ActiveSetupPage> {
                   onPressed: () async {
                     final user = FirebaseAuth.instance.currentUser;
                     if (user != null) {
+                      // Check if permission is already granted.
+                      bool alreadyGranted = false;
+                      try {
+                        alreadyGranted = await NotificationService.instance.isPermissionGranted();
+                      } catch (e) {
+                        debugPrint("Error checking notification permission: $e");
+                      }
+
+                      if (!alreadyGranted) {
+                        // First request permission via the custom dialog if not already granted.
+                        final granted = await showDialog<bool>(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) => const NotificationPermissionDialog(),
+                        );
+
+                        if (granted == true) {
+                          try {
+                            await NotificationService.instance.requestPermission();
+                          } catch (e) {
+                            debugPrint("Error requesting notification permission: $e");
+                          }
+                        }
+                      }
+
                       final prefs = await SharedPreferences.getInstance();
                       await prefs.setBool('onboarding_completed_${user.uid}', true);
 
@@ -396,18 +648,47 @@ class _ActiveSetupPageState extends ConsumerState<ActiveSetupPage> {
                       final activeMeds = ref.read(medicationsProvider).medications;
                       final otherMeds = ref.read(otherMedicationsProvider).medications;
 
+                      final settings = NotificationSettings(
+                        hrtReminder: _hrtReminderEnabled,
+                        eveningLogReminder: _eveningLogReminderEnabled,
+                        hrtTimeHour: _hrtTime.hour,
+                        hrtTimeMinute: _hrtTime.minute,
+                        eveningLogTimeHour: _logTime.hour,
+                        eveningLogTimeMinute: _logTime.minute,
+                      );
+
                       ref.read(onboardingProfileProvider.notifier).updateProfile((p) => p.copyWith(
                         menopauseStage: selectedStage,
                         selectedStageSymptoms: symptomsState.frequentSymptomIds,
                         medications: activeMeds,
                         otherMedications: otherMeds,
-                        notificationSettings: NotificationSettings(
-                          hrtTimeHour: _hrtTime.hour,
-                          hrtTimeMinute: _hrtTime.minute,
-                          eveningLogTimeHour: _logTime.hour,
-                          eveningLogTimeMinute: _logTime.minute,
-                        ),
+                        notificationSettings: settings,
                       ));
+
+                      // Apply to scheduler
+                      final firstMedName = activeMeds.isNotEmpty ? activeMeds.first.name : null;
+                      try {
+                        await NotificationService.instance.applySettings(settings, medicationName: firstMedName);
+                      } catch (e) {
+                        debugPrint("Error applying notification settings: $e");
+                      }
+
+                      // Schedule custom reminders
+                      for (final rem in _customReminders) {
+                        try {
+                          if (rem['isEnabled'] as bool) {
+                            await NotificationService.instance.scheduleCustomReminder(
+                              id: rem['id'] as int,
+                              title: rem['title'] as String,
+                              time: rem['time'] as TimeOfDay,
+                            );
+                          } else {
+                            await NotificationService.instance.cancelById(rem['id'] as int);
+                          }
+                        } catch (e) {
+                          debugPrint("Error scheduling custom reminder: $e");
+                        }
+                      }
 
                       try {
                         await ref.read(onboardingProfileProvider.notifier).saveToFirestore();
