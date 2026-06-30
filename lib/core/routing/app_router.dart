@@ -38,6 +38,14 @@ import 'package:eunora/features/profile/presentation/pages/profile_page.dart';
 import 'package:eunora/features/profile/presentation/pages/help_center_page.dart';
 import 'package:eunora/features/profile/presentation/pages/notification_preferences_page.dart';
 import 'package:eunora/features/profile/presentation/pages/premium_upgrade_page.dart';
+import 'dart:io';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:eunora/core/services/premium_guard_provider.dart';
+import 'package:eunora/features/insights/presentation/pages/insights_screen.dart';
+import 'package:eunora/features/insights/presentation/pages/correlation_detail_screen.dart';
+import 'package:eunora/features/passport/presentation/pages/passport_screen.dart';
+import 'package:eunora/features/passport/presentation/pages/passport_preview_screen.dart';
+import 'package:eunora/features/passport/providers/passport_screen_controller.dart';
 import 'package:eunora/features/home/presentation/pages/notification_center_page.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -349,6 +357,61 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/premium-upgrade',
       pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const PremiumUpgradePage(),
+      ),
+    ),
+    GoRoute(
+      path: '/insights',
+      pageBuilder: (context, state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const InsightsScreen(),
+      ),
+      routes: [
+        GoRoute(
+          path: ':correlationId',
+          redirect: (context, state) {
+            final container = ProviderScope.containerOf(context);
+            return container.read(premiumGuardProvider) ? null : '/paywall';
+          },
+          pageBuilder: (context, state) => buildSmoothPageTransition(
+            context: context,
+            state: state,
+            child: CorrelationDetailScreen(
+              id: state.pathParameters['correlationId']!,
+            ),
+          ),
+        ),
+      ],
+    ),
+    GoRoute(
+      path: '/passport',
+      redirect: (context, state) {
+        return null; // tab itself handles Free/progress state inline, no redirect needed
+      },
+      pageBuilder: (context, state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const PassportScreen(),
+      ),
+      routes: [
+        GoRoute(
+          path: 'preview',
+          pageBuilder: (context, state) => buildSmoothPageTransition(
+            context: context,
+            state: state,
+            child: PassportPreviewScreen(
+              file: state.extra as File,
+            ),
+          ),
+        ),
+      ],
+    ),
+    GoRoute(
+      path: '/paywall',
+      pageBuilder: (context, state) => buildSmoothPageTransition(
         context: context,
         state: state,
         child: const PremiumUpgradePage(),

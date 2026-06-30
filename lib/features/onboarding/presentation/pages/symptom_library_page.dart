@@ -55,10 +55,9 @@ class _SymptomLibraryPageState extends ConsumerState<SymptomLibraryPage> {
         padding: const EdgeInsets.fromLTRB(16, 24, 16, 100),
         child: Column(
           children: [
+            _buildExplanationHeader(),
             _buildSearchBar(),
             const SizedBox(height: 24),
-            _buildAddCustomSymptomButton(context),
-            const SizedBox(height: 32),
             ...groupedSymptoms.entries.map((entry) {
               return _buildCategorySection(context, entry.key, entry.value, notifier);
             }),
@@ -88,6 +87,49 @@ class _SymptomLibraryPageState extends ConsumerState<SymptomLibraryPage> {
     );
   }
 
+  Widget _buildExplanationHeader() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEDE7E5).withOpacity(0.5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFD0C4BC).withOpacity(0.3)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.info_outline, color: Color(0xFF67594E), size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Symptom Library',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1D1B1A),
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Choose symptoms from the library to track. Selected items will be pre-filled and visible in your Daily Log screen.',
+                  style: TextStyle(
+                    color: const Color(0xFF4D453F).withOpacity(0.8),
+                    fontSize: 12,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSearchBar() {
     return Container(
       decoration: BoxDecoration(
@@ -103,57 +145,6 @@ class _SymptomLibraryPageState extends ConsumerState<SymptomLibraryPage> {
           prefixIcon: const Icon(Icons.search, color: Color(0xFF4D453F)),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        ),
-      ),
-    );
-  }
-
-
-
-  Widget _buildAddCustomSymptomButton(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (context) => const AddCustomSymptomModal(),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFD0C4BC)), // outline-variant
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF67594E).withOpacity(0.1), // primary container / 10
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.add, color: Color(0xFF67594E)), // primary
-                ),
-                const SizedBox(width: 16),
-                const Text(
-                  'Add your own symptom',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF67594E),
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-            const Icon(Icons.chevron_right, color: Color(0xFF67594E)),
-          ],
         ),
       ),
     );

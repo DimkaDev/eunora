@@ -8,6 +8,7 @@ import 'package:eunora/features/home/presentation/widgets/dashboard_header.dart'
 import 'package:eunora/features/home/presentation/widgets/insight_card.dart';
 import 'package:eunora/features/home/presentation/widgets/weekly_patterns_card.dart';
 import 'package:eunora/features/home/presentation/widgets/insight_teaser_card.dart';
+import 'package:eunora/features/home/presentation/widgets/passport_dashboard_card.dart';
 import 'package:eunora/features/home/presentation/widgets/daily_log_card.dart';
 import 'package:eunora/features/home/presentation/widgets/medication_hrt_card.dart';
 import 'package:eunora/features/home/presentation/widgets/today_symptoms_card.dart';
@@ -606,7 +607,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 const SizedBox(height: 24),
                 FadeInEntrance(
                   delay: const Duration(milliseconds: 150),
-                  child: const WeeklyPatternsCard(),
+                  child: const PassportDashboardCard(),
                 ),
                 const SizedBox(height: 24),
                 FadeInEntrance(

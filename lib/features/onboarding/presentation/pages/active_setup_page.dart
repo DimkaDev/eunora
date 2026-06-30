@@ -10,6 +10,7 @@ import 'package:eunora/features/onboarding/domain/models/notification_settings.d
 import 'package:eunora/features/onboarding/presentation/providers/menopause_stage_provider.dart';
 import 'package:eunora/features/onboarding/presentation/providers/symptoms_provider.dart';
 import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
+import 'package:eunora/features/onboarding/presentation/providers/triggers_provider.dart';
 import 'package:eunora/features/onboarding/presentation/providers/other_medications_provider.dart';
 import 'package:eunora/features/onboarding/presentation/providers/onboarding_profile_provider.dart';
 import 'package:eunora/core/utils/animation_system.dart';
@@ -659,7 +660,8 @@ class _ActiveSetupPageState extends ConsumerState<ActiveSetupPage> {
 
                       ref.read(onboardingProfileProvider.notifier).updateProfile((p) => p.copyWith(
                         menopauseStage: selectedStage,
-                        selectedStageSymptoms: symptomsState.frequentSymptomIds,
+                        selectedStageSymptoms: symptomsState.loggedSymptoms.map((l) => l.symptom.id).toList(),
+                        selectedTriggers: ref.read(triggersProvider).activeTriggerIds,
                         medications: activeMeds,
                         otherMedications: otherMeds,
                         notificationSettings: settings,

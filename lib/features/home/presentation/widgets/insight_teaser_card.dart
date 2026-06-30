@@ -1,218 +1,160 @@
 import 'package:flutter/material.dart';
-import 'dart:ui' show ImageFilter;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:ui' show ImageFilter;
+import 'package:eunora/core/theme/app_theme.dart';
+import 'package:eunora/core/widgets/app_card.dart';
+import 'package:eunora/core/services/premium_guard_provider.dart';
+import 'package:eunora/features/insights/models/insight_result.dart';
+import 'package:eunora/features/insights/providers/insights_provider.dart';
 
-class InsightTeaserCard extends StatelessWidget {
+class InsightTeaserCard extends ConsumerWidget {
   const InsightTeaserCard({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFEDDDF5).withOpacity(0.4)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final insightsAsync = ref.watch(insightsProvider);
+    final isPremium = ref.watch(premiumGuardProvider);
+
+    return insightsAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (insights) {
+        // Filter displayable trigger / doseChange insights
+        final displayable = insights.where((i) => i.type == InsightType.trigger || i.type == InsightType.doseChange).toList();
+        if (displayable.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        final topInsight = displayable.first;
+        final bool isDoseChange = topInsight.type == InsightType.doseChange;
+
+        return AppCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Top header with badge and lock
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFEDDDF5),
-                                borderRadius: BorderRadius.circular(100),
-                              ),
-                              child: Text(
-                                'INSIGHTS TEASER',
-                                style: GoogleFonts.manrope(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 1.2,
-                                  color: const Color(0xFF211828),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'Top pattern: Red wine → +4.2 hot flashes next day',
-                              style: GoogleFonts.notoSerif(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF1D1B1A),
-                                height: 1.3,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF2EDEA),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.lock,
-                          size: 16,
-                          color: Color(0xFF655A6E),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  
-                  // Correlation strength info
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Correlation strength',
-                        style: GoogleFonts.manrope(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF4D453F),
-                        ),
-                      ),
-                      Text(
-                        '79%',
-                        style: GoogleFonts.manrope(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF67594E),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  
-                  // Premium gradient progress bar
                   Container(
-                    width: double.infinity,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF2EDEA),
-                      borderRadius: BorderRadius.circular(100),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFEDDDF5),
+                      borderRadius: BorderRadius.all(Radius.circular(100)),
                     ),
-                    alignment: Alignment.centerLeft,
-                    child: FractionallySizedBox(
-                      widthFactor: 0.79,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF67594E), Color(0xFF817266)],
-                          ),
-                          borderRadius: BorderRadius.circular(100),
-                        ),
+                    child: Text(
+                      'TOP INSIGHT',
+                      style: GoogleFonts.manrope(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.2,
+                        color: const Color(0xFF211828),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  
-                  // Blurred, select-disabled text paragraph
-                  Opacity(
-                    opacity: 0.35,
-                    child: ImageFiltered(
-                      imageFilter: ImageFilter.blur(sigmaX: 1.5, sigmaY: 1.5),
-                      child: Text(
-                        'Drinking red wine in the evening is followed by a significant increase in night sweat intensity...',
-                        style: GoogleFonts.notoSerif(
-                          fontSize: 12,
-                          fontStyle: FontStyle.italic,
-                          color: const Color(0xFF1D1B1A),
-                          height: 1.5,
-                        ),
-                      ),
+                  if (!isPremium)
+                    const Icon(
+                      Icons.lock,
+                      size: 16,
+                      color: Color(0xFF655A6E),
                     ),
-                  ),
-                  const SizedBox(height: 48), // Padding so button does not cover text
                 ],
               ),
-            ),
-            
-            // Bottom premium upgrade overlay
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                height: 100,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.white.withOpacity(0.0),
-                      Colors.white.withOpacity(0.9),
-                      Colors.white,
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
+              const SizedBox(height: 12),
+              if (!isPremium) ...[
+                // Locked Teaser State for Free users
+                Text(
+                  'Potential Symptom Correlative Identified',
+                  style: GoogleFonts.notoSerif(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1D1B1A),
                   ),
                 ),
-                alignment: Alignment.bottomCenter,
-                padding: const EdgeInsets.only(bottom: 20, left: 24, right: 24),
-                child: Container(
-                  width: double.infinity,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF67594E), Color(0xFF817266)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(100),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF67594E).withOpacity(0.2),
-                        blurRadius: 12,
-                        offset: const Offset(0, 6),
+                const SizedBox(height: 8),
+                Opacity(
+                  opacity: 0.35,
+                  child: ImageFiltered(
+                    imageFilter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
+                    child: Text(
+                      'Caffeine is followed by a significant increase in hot flash frequency...',
+                      style: GoogleFonts.notoSerif(
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                        color: const Color(0xFF1D1B1A),
                       ),
-                    ],
+                    ),
                   ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  height: 44,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () => context.push('/premium-upgrade'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
+                      backgroundColor: AppTheme.primary,
                       shape: const StadiumBorder(),
                     ),
                     child: Text(
                       'Unlock Premium Insights',
                       style: GoogleFonts.manrope(
-                        fontSize: 13,
+                        fontSize: 12,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                     ),
                   ),
                 ),
-              ),
-            ),
-          ],
-        ),
-      ),
+              ] else ...[
+                // Unlocked State for Premium users
+                Text(
+                  topInsight.label,
+                  style: GoogleFonts.notoSerif(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1D1B1A),
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () => context.push('/insights'),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
+                        'See all insights ›',
+                        style: GoogleFonts.manrope(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primary,
+                        ),
+                      ),
+                    ),
+                    if (topInsight.correlationPercent != null)
+                      Text(
+                        'Strength: ${topInsight.correlationPercent}%',
+                        style: GoogleFonts.manrope(
+                          fontSize: 12,
+                          color: AppTheme.onSurfaceVariant,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        );
+      },
     );
   }
 }

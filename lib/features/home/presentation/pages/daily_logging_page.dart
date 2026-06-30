@@ -15,6 +15,9 @@ import 'package:eunora/features/onboarding/domain/models/trigger.dart';
 import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
 import 'package:eunora/features/onboarding/presentation/providers/triggers_provider.dart';
 
+import 'package:eunora/features/onboarding/presentation/providers/onboarding_profile_provider.dart';
+import 'package:eunora/features/onboarding/presentation/providers/other_medications_provider.dart';
+
 import 'package:eunora/features/home/presentation/pages/daily_logging/symptoms_step.dart';
 import 'package:eunora/features/home/presentation/pages/daily_logging/severity_step.dart';
 import 'package:eunora/features/home/presentation/pages/daily_logging/triggers_step.dart';
@@ -79,12 +82,16 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   bool _magnesiumChecked = false;
 
   double _sleepDuration = 7.5;
-  int _hydrationCups = 8;
+  int _hydrationCups = 4;
   String _additionalNotes = '';
+  final Map<String, bool> _otherMedsChecked = {};
   double? _initialEstradiolDose;
   String? _initialEstradiolUnit;
   double? _initialProgesteroneDose;
   String? _initialProgesteroneUnit;
+
+  bool _isMedsInitialized = false;
+  bool _isSymptomsInitialized = false;
 
   late PageController _pageController;
 
@@ -92,36 +99,219 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _currentStep);
-    
-    // Read the onboarding choices synchronously to pre-populate them as active by default
-    final symptomsState = ref.read(symptomsProvider);
-    final triggersState = ref.read(triggersProvider);
-    _selectedSymptomIds.addAll(symptomsState.frequentSymptomIds);
-    _selectedTriggerIds.addAll(triggersState.activeTriggerIds);
-
-    final meds = ref.read(medicationsProvider).medications;
-    for (final med in meds) {
-      final name = med.name.toLowerCase();
-      if (name.contains('estradiol') || name.contains('estrogen') || name.contains('estradot')) {
-        _estradiolChecked = true;
-        _estradiolDose = med.dose;
-        _estradiolUnit = med.unit;
-        _initialEstradiolDose = med.dose;
-        _initialEstradiolUnit = med.unit;
-      } else if (name.contains('progesterone') || name.contains('utrogestan')) {
-        _progesteroneChecked = true;
-        _progesteroneDose = med.dose;
-        _progesteroneUnit = med.unit;
-        _initialProgesteroneDose = med.dose;
-        _initialProgesteroneUnit = med.unit;
-      }
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadExistingLog();
+    });
   }
 
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadExistingLog() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final date = widget.initialDate ?? DateTime.now();
+    final dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+
+    try {
+      final existingLog = await ref.read(firestoreServiceProvider).getDailyLog(user.uid, dateStr);
+      if (existingLog != null && mounted) {
+        setState(() {
+          _isMedsInitialized = true;
+          _isSymptomsInitialized = true;
+
+          // Populate symptoms
+          _selectedSymptomIds.clear();
+          _selectedSymptomIds.addAll(existingLog.symptoms.map((s) => s.symptom.id));
+          for (final s in existingLog.symptoms) {
+            _symptomSeverities[s.symptom.id] = s.severity ?? 'Mild';
+          }
+
+          // Populate triggers
+          _selectedTriggerIds.clear();
+          for (final t in existingLog.triggers) {
+            final tLower = t.toLowerCase();
+            if (tLower.contains('caffeine')) {
+              _selectedTriggerIds.add('t_caffeine');
+            } else if (tLower.contains('alcohol')) {
+              _selectedTriggerIds.add('t_alcohol');
+            } else if (tLower.contains('stress')) {
+              _selectedTriggerIds.add('t_stress');
+            } else if (tLower.contains('foods')) {
+              _selectedTriggerIds.add('t_foods');
+            } else {
+              final matchedId = 't_${t.toLowerCase().replaceAll(' ', '_')}';
+              _selectedTriggerIds.add(matchedId);
+            }
+          }
+
+          _caffeineCups = existingLog.caffeineCups;
+          _alcoholGlasses = existingLog.alcoholGlasses;
+          _stressLevel = existingLog.stressLevel;
+          _foodsTriggered = existingLog.foodsTriggered;
+          _foodsNotes = existingLog.foodsNotes ?? '';
+          _customTriggerCounters.clear();
+          _customTriggerCounters.addAll(existingLog.customTriggerCounters ?? {});
+          _customTriggerTexts.clear();
+          _customTriggerTexts.addAll(existingLog.customTriggerTexts ?? {});
+
+          // Populate medications
+          _estradiolChecked = existingLog.estradiolChecked;
+          _estradiolDose = existingLog.estradiolDose;
+          _estradiolUnit = existingLog.estradiolUnit;
+          _estradiolTime = existingLog.estradiolTime;
+          _initialEstradiolDose = existingLog.estradiolDose;
+          _initialEstradiolUnit = existingLog.estradiolUnit;
+
+          _progesteroneChecked = existingLog.progesteroneChecked;
+          _progesteroneDose = existingLog.progesteroneDose;
+          _progesteroneUnit = existingLog.progesteroneUnit;
+          _progesteroneTime = existingLog.progesteroneTime;
+          _initialProgesteroneDose = existingLog.progesteroneDose;
+          _initialProgesteroneUnit = existingLog.progesteroneUnit;
+
+          _vitaminDChecked = existingLog.vitaminDChecked;
+          _magnesiumChecked = existingLog.magnesiumChecked;
+          _sleepDuration = existingLog.sleepDuration;
+          _hydrationCups = existingLog.hydrationCups;
+
+          // Parse other medications from additional notes
+          _otherMedsChecked.clear();
+          if (existingLog.additionalNotes.contains('Supplements taken today:')) {
+            final parts = existingLog.additionalNotes.split('Supplements taken today:');
+            _additionalNotes = parts[0].trim();
+            final medsPart = parts[1].trim();
+            final list = medsPart.split(',').map((e) => e.trim());
+            final otherMeds = ref.read(otherMedicationsProvider).medications;
+            for (final med in otherMeds) {
+              if (list.any((element) => element.contains(med.name))) {
+                _otherMedsChecked[med.id] = true;
+              }
+            }
+          } else {
+            _additionalNotes = existingLog.additionalNotes;
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint("Error loading existing daily log: $e");
+    }
+  }
+
+  Future<void> _saveDraft() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final date = widget.initialDate ?? DateTime.now();
+    final dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+
+    final List<HrtIntakeLog> hrtIntakes = [];
+    final meds = ref.read(medicationsProvider).medications;
+    for (final med in meds) {
+      final name = med.name.toLowerCase();
+      if (name.contains('estradiol') || name.contains('estrogen') || name.contains('estradot')) {
+        hrtIntakes.add(HrtIntakeLog(
+          medicationId: med.id,
+          name: med.name,
+          dose: _estradiolDose,
+          unit: _estradiolUnit,
+          time: _estradiolTime,
+          isTaken: _estradiolChecked,
+        ));
+      } else if (name.contains('progesterone') || name.contains('utrogestan')) {
+        hrtIntakes.add(HrtIntakeLog(
+          medicationId: med.id,
+          name: med.name,
+          dose: _progesteroneDose,
+          unit: _progesteroneUnit,
+          time: _progesteroneTime,
+          isTaken: _progesteroneChecked,
+        ));
+      }
+    }
+
+    final List<LoggedSymptom> loggedSymptoms = [];
+    for (final id in _selectedSymptomIds) {
+      final name = _getSymptomName(id);
+      final severityStr = _symptomSeverities[id] ?? 'Mild';
+      loggedSymptoms.add(
+        LoggedSymptom(
+          symptom: Symptom(id: id, name: name, iconName: 'medical_services', category: 'General'),
+          severity: severityStr,
+        ),
+      );
+    }
+
+    final List<String> triggerNames = [];
+    for (final id in _selectedTriggerIds) {
+      if (id == 't_caffeine') {
+        triggerNames.add('Caffeine: $_caffeineCups cups');
+      } else if (id == 't_alcohol') {
+        triggerNames.add('Alcohol: $_alcoholGlasses glasses');
+      } else if (id == 't_stress') {
+        triggerNames.add('Stress: $_stressLevel');
+      } else if (id == 't_foods') {
+        triggerNames.add(_foodsTriggered ? 'Foods: $_foodsNotes' : 'Foods');
+      } else {
+        triggerNames.add(id.replaceAll('t_', '').toUpperCase());
+      }
+    }
+
+    final List<String> loggedOtherMeds = [];
+    _otherMedsChecked.forEach((key, checked) {
+      if (checked) {
+        try {
+          final med = ref.read(otherMedicationsProvider).medications.firstWhere((m) => m.id == key);
+          loggedOtherMeds.add("${med.name}${med.dose != null ? ' (${med.dose})' : ''}");
+        } catch (e) {}
+      }
+    });
+    
+    String finalNotes = _additionalNotes;
+    if (loggedOtherMeds.isNotEmpty) {
+      finalNotes = "${finalNotes.isNotEmpty ? '$finalNotes\n\n' : ''}Supplements taken today: ${loggedOtherMeds.join(', ')}";
+    }
+
+    final dailyLog = DailyLog(
+      id: dateStr,
+      userId: user.uid,
+      date: date,
+      symptoms: loggedSymptoms,
+      triggers: triggerNames,
+      caffeineCups: _caffeineCups,
+      alcoholGlasses: _alcoholGlasses,
+      stressLevel: _stressLevel,
+      foodsTriggered: _foodsTriggered,
+      foodsNotes: _foodsNotes,
+      customTriggerCounters: _customTriggerCounters,
+      customTriggerTexts: _customTriggerTexts,
+      estradiolChecked: _estradiolChecked,
+      estradiolDose: _estradiolDose,
+      estradiolUnit: _estradiolUnit,
+      estradiolTime: _estradiolTime,
+      progesteroneChecked: _progesteroneChecked,
+      progesteroneDose: _progesteroneDose,
+      progesteroneUnit: _progesteroneUnit,
+      progesteroneTime: _progesteroneTime,
+      vitaminDChecked: _vitaminDChecked,
+      magnesiumChecked: _magnesiumChecked,
+      sleepDuration: _sleepDuration,
+      hydrationCups: _hydrationCups,
+      weight: null,
+      additionalNotes: finalNotes,
+      hrtIntakes: hrtIntakes,
+      createdAt: DateTime.now(),
+    );
+
+    try {
+      await ref.read(firestoreServiceProvider).saveDailyLog(user.uid, dailyLog);
+    } catch (e) {
+      debugPrint("Error saving daily log draft: $e");
+    }
   }
 
   String _getSymptomName(String id) {
@@ -134,6 +324,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   }
 
   void _nextStep() {
+    _saveDraft();
     if (_currentStep < 4) {
       setState(() {
         _currentStep++;
@@ -188,6 +379,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   }
 
   void _prevStep() {
+    _saveDraft();
     if (_currentStep > 0 && _currentStep <= 4) {
       setState(() {
         _currentStep--;
@@ -436,6 +628,23 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
         }
       }
 
+      final List<String> loggedOtherMeds = [];
+      _otherMedsChecked.forEach((key, checked) {
+        if (checked) {
+          try {
+            final med = ref.read(otherMedicationsProvider).medications.firstWhere((m) => m.id == key);
+            loggedOtherMeds.add("${med.name}${med.dose != null ? ' (${med.dose})' : ''}");
+          } catch (e) {
+            // handle error
+          }
+        }
+      });
+      
+      String finalNotes = _additionalNotes;
+      if (loggedOtherMeds.isNotEmpty) {
+        finalNotes = "${finalNotes.isNotEmpty ? '$finalNotes\n\n' : ''}Supplements taken today: ${loggedOtherMeds.join(', ')}";
+      }
+
       final dailyLog = DailyLog(
         id: dateStr,
         userId: user.uid,
@@ -462,7 +671,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
         sleepDuration: _sleepDuration,
         hydrationCups: _hydrationCups,
         weight: null,
-        additionalNotes: _additionalNotes,
+        additionalNotes: finalNotes,
         hrtIntakes: hrtIntakes,
         createdAt: DateTime.now(),
       );
@@ -485,6 +694,66 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Reactive initialization from profile/providers once loaded
+    final profile = ref.watch(onboardingProfileProvider);
+    if (profile != null && !_isMedsInitialized && !_isSymptomsInitialized) {
+      _isMedsInitialized = true;
+      _isSymptomsInitialized = true;
+
+      // Initialize symptoms from profile
+      _selectedSymptomIds.clear();
+      _selectedSymptomIds.addAll(profile.selectedStageSymptoms);
+
+      // Triggers start unchecked
+      _selectedTriggerIds.clear();
+
+      // Initialize medications from profile
+      for (final med in profile.medications) {
+        final name = med.name.toLowerCase();
+        if (name.contains('estradiol') || name.contains('estrogen') || name.contains('estradot')) {
+          _estradiolChecked = false; // Default to unchecked ("ready to log") per spec
+          _estradiolDose = med.dose;
+          _estradiolUnit = med.unit;
+          _initialEstradiolDose = med.dose;
+          _initialEstradiolUnit = med.unit;
+        } else if (name.contains('progesterone') || name.contains('utrogestan')) {
+          _progesteroneChecked = false; // Default to unchecked ("ready to log") per spec
+          _progesteroneDose = med.dose;
+          _progesteroneUnit = med.unit;
+          _initialProgesteroneDose = med.dose;
+          _initialProgesteroneUnit = med.unit;
+        }
+      }
+    } else if (profile == null && !_isMedsInitialized && !_isSymptomsInitialized) {
+      final meds = ref.watch(medicationsProvider).medications;
+      if (meds.isNotEmpty) {
+        _isMedsInitialized = true;
+        for (final med in meds) {
+          final name = med.name.toLowerCase();
+          if (name.contains('estradiol') || name.contains('estrogen') || name.contains('estradot')) {
+            _estradiolChecked = false;
+            _estradiolDose = med.dose;
+            _estradiolUnit = med.unit;
+            _initialEstradiolDose = med.dose;
+            _initialEstradiolUnit = med.unit;
+          } else if (name.contains('progesterone') || name.contains('utrogestan')) {
+            _progesteroneChecked = false;
+            _progesteroneDose = med.dose;
+            _progesteroneUnit = med.unit;
+            _initialProgesteroneDose = med.dose;
+            _initialProgesteroneUnit = med.unit;
+          }
+        }
+      }
+      final symptomsState = ref.watch(symptomsProvider);
+      if (symptomsState.frequentSymptomIds.isNotEmpty) {
+        _isSymptomsInitialized = true;
+        _selectedSymptomIds.clear();
+        _selectedSymptomIds.addAll(symptomsState.frequentSymptomIds);
+        _selectedTriggerIds.clear();
+      }
+    }
+
     // Reactive Symptom & Trigger Listeners
     ref.listen(symptomsProvider, (previous, next) {
       setState(() {
@@ -502,8 +771,17 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
       return _buildSuccessScreen();
     }
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFFAF9F6), // brand-cream
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        await _saveDraft();
+        if (context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFFAF9F6), // brand-cream
       body: SafeArea(
         child: Column(
           children: [
@@ -648,6 +926,13 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
                       sleepDuration: _sleepDuration,
                       hydrationCups: _hydrationCups,
                       additionalNotes: _additionalNotes,
+                      otherMedsChecked: _otherMedsChecked,
+                      onOtherMedsChanged: (val) {
+                        setState(() {
+                          _otherMedsChecked.clear();
+                          _otherMedsChecked.addAll(val);
+                        });
+                      },
                       onEstradiolCheckedToggled: (val) {
                         setState(() {
                           _estradiolChecked = val;
@@ -722,7 +1007,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
           ],
         ),
       ),
-    );
+    ),);
   }
 
   String _getStepTitle() {

@@ -768,9 +768,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
               const SizedBox(height: 16),
               _buildCalendarCard(isApril),
               const SizedBox(height: 24),
-              if (!isApril)
-                _buildEmptyState()
-              else if (activeLog == null)
+              if (activeLog == null)
                 _buildUnloggedState()
               else
                 _buildLoggedDetailsState(activeLog),
@@ -1251,7 +1249,10 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () async {
-              await context.push('/daily-logging');
+              final totalDays = DateUtils.getDaysInMonth(_focusedMonth.year, _focusedMonth.month);
+              final day = _selectedDay > totalDays ? totalDays : _selectedDay;
+              final targetDate = DateTime(_focusedMonth.year, _focusedMonth.month, day);
+              await context.push('/daily-logging', extra: targetDate);
               _fetchLogsForFocusedMonth();
             },
             icon: const Icon(Icons.add, color: Colors.white),

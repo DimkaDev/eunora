@@ -4,9 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/core/utils/animation_system.dart';
+import 'package:eunora/features/onboarding/domain/models/medication.dart';
 import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
 import 'package:eunora/features/onboarding/presentation/widgets/add_medication_modal.dart';
 import 'package:eunora/features/onboarding/presentation/pages/other_medications_page.dart';
+import 'package:eunora/features/onboarding/presentation/providers/other_medications_provider.dart';
 import 'package:eunora/features/home/presentation/widgets/dose_change_alert.dart';
 
 enum HrtLogStatus { pending, taken, skipped }
@@ -92,6 +94,9 @@ class DailyEntryStep extends ConsumerStatefulWidget {
   final ValueChanged<int> onHydrationCupsChanged;
   final ValueChanged<String> onAdditionalNotesChanged;
 
+  final Map<String, bool> otherMedsChecked;
+  final ValueChanged<Map<String, bool>> onOtherMedsChanged;
+
   const DailyEntryStep({
     super.key,
     required this.estradiolChecked,
@@ -107,6 +112,8 @@ class DailyEntryStep extends ConsumerStatefulWidget {
     required this.sleepDuration,
     required this.hydrationCups,
     required this.additionalNotes,
+    required this.otherMedsChecked,
+    required this.onOtherMedsChanged,
     required this.onEstradiolCheckedToggled,
     required this.onEstradiolDoseChanged,
     required this.onEstradiolUnitChanged,
@@ -142,10 +149,6 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
   double? _initialEstradiolDose;
   double? _initialProgesteroneDose;
 
-  late HrtLogStatus _estradiolStatus;
-  late HrtLogStatus _progesteroneStatus;
-  late HrtLogStatus _estrogenGelStatus;
-
   bool _isScheduledToday(String frequency, DateTime? lastTaken) {
     if (frequency.toLowerCase() == 'daily') {
       return true;
@@ -172,21 +175,6 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
     super.initState();
     _initialEstradiolDose = widget.estradiolDose;
     _initialProgesteroneDose = widget.progesteroneDose;
-    
-    final isEstradiolScheduled = _isScheduledToday('Twice weekly', _estradiolLastTaken);
-    _estradiolStatus = widget.estradiolChecked
-        ? HrtLogStatus.taken
-        : (isEstradiolScheduled ? HrtLogStatus.pending : HrtLogStatus.skipped);
-
-    final isProgesteroneScheduled = _isScheduledToday('Daily', _progesteroneLastTaken);
-    _progesteroneStatus = widget.progesteroneChecked
-        ? HrtLogStatus.taken
-        : (isProgesteroneScheduled ? HrtLogStatus.pending : HrtLogStatus.skipped);
-
-    final isEstrogenGelScheduled = _isScheduledToday('Every 2 days', _estrogenGelLastTaken);
-    _estrogenGelStatus = _estrogenGelChecked
-        ? HrtLogStatus.taken
-        : (isEstrogenGelScheduled ? HrtLogStatus.pending : HrtLogStatus.skipped);
   }
 
   String _formatDate(DateTime dt) {
@@ -466,7 +454,9 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
       time = widget.estradiolTime;
       lastTaken = _estradiolLastTaken;
       initialDose = _initialEstradiolDose ?? dose;
-      medName = 'Estradiol Patch';
+      final medications = ref.read(medicationsProvider).medications;
+      final med = medications.firstWhere((m) => m.name.toLowerCase().contains('estradiol') || m.name.toLowerCase().contains('estrogen') || m.name.toLowerCase().contains('estradot'), orElse: () => Medication(name: 'Estradiol Patch', type: MedicationType.patch, dose: 0.05, unit: 'mg', frequency: 'Daily'));
+      medName = med.name;
     } else if (isProgesterone) {
       checked = widget.progesteroneChecked;
       dose = widget.progesteroneDose;
@@ -474,7 +464,9 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
       time = widget.progesteroneTime;
       lastTaken = _progesteroneLastTaken;
       initialDose = _initialProgesteroneDose ?? dose;
-      medName = 'Progesterone';
+      final medications = ref.read(medicationsProvider).medications;
+      final med = medications.firstWhere((m) => m.name.toLowerCase().contains('progesterone') || m.name.toLowerCase().contains('utrogestan'), orElse: () => Medication(name: 'Progesterone', type: MedicationType.pill, dose: 100, unit: 'mg', frequency: 'Daily'));
+      medName = med.name;
     } else {
       checked = _estrogenGelChecked;
       dose = _estrogenGelDose;
@@ -512,18 +504,15 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                 value: checked,
                 activeColor: AppTheme.primary,
                 onChanged: (val) {
-                  setState(() {
-                    if (isEstradiol) {
-                      _estradiolStatus = val ? HrtLogStatus.taken : (_isScheduledToday('Twice weekly', _estradiolLastTaken) ? HrtLogStatus.pending : HrtLogStatus.skipped);
-                      widget.onEstradiolCheckedToggled(val);
-                    } else if (isProgesterone) {
-                      _progesteroneStatus = val ? HrtLogStatus.taken : (_isScheduledToday('Daily', _progesteroneLastTaken) ? HrtLogStatus.pending : HrtLogStatus.skipped);
-                      widget.onProgesteroneCheckedToggled(val);
-                    } else {
+                  if (isEstradiol) {
+                    widget.onEstradiolCheckedToggled(val);
+                  } else if (isProgesterone) {
+                    widget.onProgesteroneCheckedToggled(val);
+                  } else {
+                    setState(() {
                       _estrogenGelChecked = val;
-                      _estrogenGelStatus = val ? HrtLogStatus.taken : (_isScheduledToday('Every 2 days', _estrogenGelLastTaken) ? HrtLogStatus.pending : HrtLogStatus.skipped);
-                    }
-                  });
+                    });
+                  }
                 },
               ),
             ],
@@ -877,6 +866,24 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
 
   @override
   Widget build(BuildContext context) {
+    final medications = ref.watch(medicationsProvider).medications;
+    final otherMedications = ref.watch(otherMedicationsProvider).medications;
+
+    final isEstradiolScheduled = _isScheduledToday('Twice weekly', _estradiolLastTaken);
+    final estradiolStatus = widget.estradiolChecked
+        ? HrtLogStatus.taken
+        : (isEstradiolScheduled ? HrtLogStatus.pending : HrtLogStatus.skipped);
+
+    final isProgesteroneScheduled = _isScheduledToday('Daily', _progesteroneLastTaken);
+    final progesteroneStatus = widget.progesteroneChecked
+        ? HrtLogStatus.taken
+        : (isProgesteroneScheduled ? HrtLogStatus.pending : HrtLogStatus.skipped);
+
+    final isEstrogenGelScheduled = _isScheduledToday('Every 2 days', _estrogenGelLastTaken);
+    final estrogenGelStatus = _estrogenGelChecked
+        ? HrtLogStatus.taken
+        : (isEstrogenGelScheduled ? HrtLogStatus.pending : HrtLogStatus.skipped);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -915,56 +922,86 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
             borderRadius: BorderRadius.circular(23),
             child: Column(
               children: [
-                _buildMedRow(
-                  title: 'Estradiol Patch',
-                  subtitle: widget.estradiolChecked
-                      ? '${widget.estradiolDose.toStringAsFixed(2).replaceAll(RegExp(r'\.00$'), '')} ${widget.estradiolUnit} • ${widget.estradiolTime}'
-                      : (_estradiolLastTaken == null
-                          ? 'Not scheduled today'
-                          : 'Last taken: ${_formatDate(_estradiolLastTaken!)}'),
-                  icon: Icons.medication,
-                  status: _estradiolStatus,
-                  onTap: () {
-                    setState(() {
-                      _expandedIndex = _expandedIndex == 0 ? null : 0;
-                    });
-                  },
-                ),
-                if (_expandedIndex == 0) _buildInlineMedicationDetails('estradiol'),
-                const Divider(color: Color(0xFFF2EDEA), height: 1),
-                _buildMedRow(
-                  title: 'Progesterone',
-                  subtitle: widget.progesteroneChecked
-                      ? '${widget.progesteroneDose.toStringAsFixed(0)} ${widget.progesteroneUnit} • ${widget.progesteroneTime}'
-                      : (_progesteroneLastTaken == null
-                          ? 'Not scheduled today'
-                          : 'Last taken: ${_formatDate(_progesteroneLastTaken!)}'),
-                  icon: Icons.medication,
-                  status: _progesteroneStatus,
-                  onTap: () {
-                    setState(() {
-                      _expandedIndex = _expandedIndex == 1 ? null : 1;
-                    });
-                  },
-                ),
-                if (_expandedIndex == 1) _buildInlineMedicationDetails('progesterone'),
-                const Divider(color: Color(0xFFF2EDEA), height: 1),
-                _buildMedRow(
-                  title: 'Estrogen Gel',
-                  subtitle: _estrogenGelChecked
-                      ? '${_estrogenGelDose.toStringAsFixed(0)} $_estrogenGelUnit • $_estrogenGelTime'
-                      : (_estrogenGelLastTaken == null
-                          ? 'Not scheduled today'
-                          : 'Last taken: ${_formatDate(_estrogenGelLastTaken!)}'),
-                  icon: Icons.opacity,
-                  status: _estrogenGelStatus,
-                  onTap: () {
-                    setState(() {
-                      _expandedIndex = _expandedIndex == 2 ? null : 2;
-                    });
-                  },
-                ),
-                if (_expandedIndex == 2) _buildInlineMedicationDetails('estrogen_gel'),
+                if (medications.any((m) => m.name.toLowerCase().contains('estradiol') || m.name.toLowerCase().contains('estrogen') || m.name.toLowerCase().contains('estradot'))) ...[
+                  (() {
+                    final med = medications.firstWhere((m) => m.name.toLowerCase().contains('estradiol') || m.name.toLowerCase().contains('estrogen') || m.name.toLowerCase().contains('estradot'));
+                    return Column(
+                      children: [
+                        _buildMedRow(
+                          title: med.name,
+                          subtitle: widget.estradiolChecked
+                              ? '${widget.estradiolDose.toStringAsFixed(2).replaceAll(RegExp(r'\.00$'), '')} ${widget.estradiolUnit} • ${widget.estradiolTime}'
+                              : (_estradiolLastTaken == null
+                                  ? 'Not scheduled today'
+                                  : 'Last taken: ${_formatDate(_estradiolLastTaken!)}'),
+                          icon: Icons.medication,
+                          status: estradiolStatus,
+                          onTap: () {
+                            setState(() {
+                              _expandedIndex = _expandedIndex == 0 ? null : 0;
+                            });
+                          },
+                        ),
+                        if (_expandedIndex == 0) _buildInlineMedicationDetails('estradiol'),
+                        const Divider(color: Color(0xFFF2EDEA), height: 1),
+                      ],
+                    );
+                  })(),
+                ],
+                if (medications.any((m) => m.name.toLowerCase().contains('progesterone') || m.name.toLowerCase().contains('utrogestan'))) ...[
+                  (() {
+                    final med = medications.firstWhere((m) => m.name.toLowerCase().contains('progesterone') || m.name.toLowerCase().contains('utrogestan'));
+                    return Column(
+                      children: [
+                        _buildMedRow(
+                          title: med.name,
+                          subtitle: widget.progesteroneChecked
+                              ? '${widget.progesteroneDose.toStringAsFixed(0)} ${widget.progesteroneUnit} • ${widget.progesteroneTime}'
+                              : (_progesteroneLastTaken == null
+                                  ? 'Not scheduled today'
+                                  : 'Last taken: ${_formatDate(_progesteroneLastTaken!)}'),
+                          icon: Icons.medication,
+                          status: progesteroneStatus,
+                          onTap: () {
+                            setState(() {
+                              _expandedIndex = _expandedIndex == 1 ? null : 1;
+                            });
+                          },
+                        ),
+                        if (_expandedIndex == 1) _buildInlineMedicationDetails('progesterone'),
+                        const Divider(color: Color(0xFFF2EDEA), height: 1),
+                      ],
+                    );
+                  })(),
+                ],
+                if (medications.isEmpty || medications.any((m) => !m.name.toLowerCase().contains('estradiol') && !m.name.toLowerCase().contains('estrogen') && !m.name.toLowerCase().contains('estradot') && !m.name.toLowerCase().contains('progesterone') && !m.name.toLowerCase().contains('utrogestan'))) ...[
+                  (() {
+                    final med = medications.firstWhere(
+                      (m) => !m.name.toLowerCase().contains('estradiol') && !m.name.toLowerCase().contains('estrogen') && !m.name.toLowerCase().contains('estradot') && !m.name.toLowerCase().contains('progesterone') && !m.name.toLowerCase().contains('utrogestan'),
+                      orElse: () => Medication(name: 'Estrogen Gel', type: MedicationType.gel, dose: 1, unit: 'g', frequency: 'Every 2 days'),
+                    );
+                    return Column(
+                      children: [
+                        _buildMedRow(
+                          title: med.name,
+                          subtitle: _estrogenGelChecked
+                              ? '${_estrogenGelDose.toStringAsFixed(0)} $_estrogenGelUnit • $_estrogenGelTime'
+                              : (_estrogenGelLastTaken == null
+                                  ? 'Not scheduled today'
+                                  : 'Last taken: ${_formatDate(_estrogenGelLastTaken!)}'),
+                          icon: Icons.opacity,
+                          status: estrogenGelStatus,
+                          onTap: () {
+                            setState(() {
+                              _expandedIndex = _expandedIndex == 2 ? null : 2;
+                            });
+                          },
+                        ),
+                        if (_expandedIndex == 2) _buildInlineMedicationDetails('estrogen_gel'),
+                      ],
+                    );
+                  })(),
+                ],
               ],
             ),
           ),
@@ -1029,21 +1066,50 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
             borderRadius: BorderRadius.circular(23),
             child: Column(
               children: [
-                _buildSupplementRow(
-                  title: 'Daily Vitamin D',
-                  subtitle: '2000 IU • With Food',
-                  icon: Icons.spa,
-                  checked: widget.vitaminDChecked,
-                  onCheckedChange: (val) => widget.onVitaminDCheckedToggled(val!),
-                ),
-                const Divider(color: Color(0xFFF2EDEA), height: 1),
-                _buildSupplementRow(
-                  title: 'Magnesium Glycinate',
-                  subtitle: '200 mg • Before Sleep',
-                  icon: Icons.spa,
-                  checked: widget.magnesiumChecked,
-                  onCheckedChange: (val) => widget.onMagnesiumCheckedToggled(val!),
-                ),
+                if (otherMedications.isEmpty) ...[
+                  _buildSupplementRow(
+                    title: 'Daily Vitamin D',
+                    subtitle: '2000 IU • With Food',
+                    icon: Icons.spa,
+                    checked: widget.vitaminDChecked,
+                    onCheckedChange: (val) => widget.onVitaminDCheckedToggled(val!),
+                  ),
+                  const Divider(color: Color(0xFFF2EDEA), height: 1),
+                  _buildSupplementRow(
+                    title: 'Magnesium Glycinate',
+                    subtitle: '200 mg • Before Sleep',
+                    icon: Icons.spa,
+                    checked: widget.magnesiumChecked,
+                    onCheckedChange: (val) => widget.onMagnesiumCheckedToggled(val!),
+                  ),
+                ] else ...[
+                  for (int i = 0; i < otherMedications.length; i++) ...[
+                    (() {
+                      final med = otherMedications[i];
+                      return _buildSupplementRow(
+                        title: med.name,
+                        subtitle: '${med.dose ?? ''} • ${med.frequency ?? ''}',
+                        icon: Icons.spa,
+                        checked: widget.otherMedsChecked[med.id] ?? false,
+                        onCheckedChange: (val) {
+                          final newMap = Map<String, bool>.from(widget.otherMedsChecked);
+                          newMap[med.id] = val!;
+                          widget.onOtherMedsChanged(newMap);
+
+                          // Also sync with parent default checks if names match
+                          final nameLower = med.name.toLowerCase();
+                          if (nameLower.contains('vitamin d')) {
+                            widget.onVitaminDCheckedToggled(val);
+                          } else if (nameLower.contains('magnesium')) {
+                            widget.onMagnesiumCheckedToggled(val);
+                          }
+                        },
+                      );
+                    })(),
+                    if (i < otherMedications.length - 1)
+                      const Divider(color: Color(0xFFF2EDEA), height: 1),
+                  ],
+                ],
               ],
             ),
           ),
