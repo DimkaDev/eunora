@@ -132,6 +132,11 @@ class _HomePageState extends ConsumerState<HomePage> {
           _takenStatus['Progesterone'] = log.progesteroneChecked;
           _takenStatus['Utrogestan'] = log.progesteroneChecked;
           _takenTime['Progesterone'] = log.progesteroneTime.isEmpty ? '21:00' : log.progesteroneTime;
+
+          for (final intake in log.hrtIntakes) {
+            _takenStatus[intake.name] = intake.isTaken;
+            _takenTime[intake.name] = intake.time;
+          }
         });
       }
     } catch (e) {
@@ -577,6 +582,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                         _takenStatus.clear();
                         _takenStatus.addAll(newStatus);
                       });
+                      _saveTodayLogToFirestore();
                     },
                     onManageTap: () => _showHrtLoggingSheet(medications),
                   ),

@@ -67,16 +67,13 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   final Map<String, int> _customTriggerCounters = {};
   final Map<String, String> _customTriggerTexts = {};
 
-  // Step 5: Medications & Supplements
-  bool _estradiolChecked = false;
-  double _estradiolDose = 50.0; // Typical is 50.0 mcg
-  String _estradiolUnit = 'mcg';
-  String _estradiolTime = '08:30 AM';
-
-  bool _progesteroneChecked = false;
-  double _progesteroneDose = 100.0; // Typical is 100.0 mg
-  String _progesteroneUnit = 'mg';
-  String _progesteroneTime = '08:00 PM';
+  // Step 5: Medications & Supplements (Fully dynamic maps keyed by medication ID)
+  final Map<String, bool> _hrtChecked = {};
+  final Map<String, double> _hrtDoses = {};
+  final Map<String, String> _hrtUnits = {};
+  final Map<String, String> _hrtTimes = {};
+  final Map<String, double> _initialHrtDoses = {};
+  final Map<String, String> _initialHrtUnits = {};
 
   bool _vitaminDChecked = false;
   bool _magnesiumChecked = false;
@@ -85,10 +82,6 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   int _hydrationCups = 4;
   String _additionalNotes = '';
   final Map<String, bool> _otherMedsChecked = {};
-  double? _initialEstradiolDose;
-  String? _initialEstradiolUnit;
-  double? _initialProgesteroneDose;
-  String? _initialProgesteroneUnit;
 
   bool _isMedsInitialized = false;
   bool _isSymptomsInitialized = false;
@@ -160,19 +153,37 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
           _customTriggerTexts.addAll(existingLog.customTriggerTexts ?? {});
 
           // Populate medications
-          _estradiolChecked = existingLog.estradiolChecked;
-          _estradiolDose = existingLog.estradiolDose;
-          _estradiolUnit = existingLog.estradiolUnit;
-          _estradiolTime = existingLog.estradiolTime;
-          _initialEstradiolDose = existingLog.estradiolDose;
-          _initialEstradiolUnit = existingLog.estradiolUnit;
-
-          _progesteroneChecked = existingLog.progesteroneChecked;
-          _progesteroneDose = existingLog.progesteroneDose;
-          _progesteroneUnit = existingLog.progesteroneUnit;
-          _progesteroneTime = existingLog.progesteroneTime;
-          _initialProgesteroneDose = existingLog.progesteroneDose;
-          _initialProgesteroneUnit = existingLog.progesteroneUnit;
+          if (existingLog.hrtIntakes.isNotEmpty) {
+            for (final intake in existingLog.hrtIntakes) {
+              _hrtChecked[intake.medicationId] = intake.isTaken;
+              _hrtDoses[intake.medicationId] = intake.dose;
+              _hrtUnits[intake.medicationId] = intake.unit;
+              _hrtTimes[intake.medicationId] = intake.time;
+              _initialHrtDoses[intake.medicationId] = intake.dose;
+              _initialHrtUnits[intake.medicationId] = intake.unit;
+            }
+          } else {
+            // Backwards compatibility fallback from flat fields
+            final meds = ref.read(medicationsProvider).medications;
+            for (final med in meds) {
+              final name = med.name.toLowerCase();
+              if (name.contains('estradiol') || name.contains('estrogen') || name.contains('estradot')) {
+                _hrtChecked[med.id] = existingLog.estradiolChecked;
+                _hrtDoses[med.id] = existingLog.estradiolDose;
+                _hrtUnits[med.id] = existingLog.estradiolUnit;
+                _hrtTimes[med.id] = existingLog.estradiolTime;
+                _initialHrtDoses[med.id] = existingLog.estradiolDose;
+                _initialHrtUnits[med.id] = existingLog.estradiolUnit;
+              } else if (name.contains('progesterone') || name.contains('utrogestan')) {
+                _hrtChecked[med.id] = existingLog.progesteroneChecked;
+                _hrtDoses[med.id] = existingLog.progesteroneDose;
+                _hrtUnits[med.id] = existingLog.progesteroneUnit;
+                _hrtTimes[med.id] = existingLog.progesteroneTime;
+                _initialHrtDoses[med.id] = existingLog.progesteroneDose;
+                _initialHrtUnits[med.id] = existingLog.progesteroneUnit;
+              }
+            }
+          }
 
           _vitaminDChecked = existingLog.vitaminDChecked;
           _magnesiumChecked = existingLog.magnesiumChecked;
@@ -211,26 +222,42 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
 
     final List<HrtIntakeLog> hrtIntakes = [];
     final meds = ref.read(medicationsProvider).medications;
+    
+    bool estradiolChecked = false;
+    double estradiolDose = 50.0;
+    String estradiolUnit = 'mcg';
+    String estradiolTime = '08:30 AM';
+    bool progesteroneChecked = false;
+    double progesteroneDose = 100.0;
+    String progesteroneUnit = 'mg';
+    String progesteroneTime = '08:00 PM';
+
     for (final med in meds) {
+      final checked = _hrtChecked[med.id] ?? false;
+      final dose = _hrtDoses[med.id] ?? med.dose;
+      final unit = _hrtUnits[med.id] ?? med.unit;
+      final time = _hrtTimes[med.id] ?? '08:00 AM';
+
+      hrtIntakes.add(HrtIntakeLog(
+        medicationId: med.id,
+        name: med.name,
+        dose: dose,
+        unit: unit,
+        time: time,
+        isTaken: checked,
+      ));
+
       final name = med.name.toLowerCase();
       if (name.contains('estradiol') || name.contains('estrogen') || name.contains('estradot')) {
-        hrtIntakes.add(HrtIntakeLog(
-          medicationId: med.id,
-          name: med.name,
-          dose: _estradiolDose,
-          unit: _estradiolUnit,
-          time: _estradiolTime,
-          isTaken: _estradiolChecked,
-        ));
+        estradiolChecked = checked;
+        estradiolDose = dose;
+        estradiolUnit = unit;
+        estradiolTime = time;
       } else if (name.contains('progesterone') || name.contains('utrogestan')) {
-        hrtIntakes.add(HrtIntakeLog(
-          medicationId: med.id,
-          name: med.name,
-          dose: _progesteroneDose,
-          unit: _progesteroneUnit,
-          time: _progesteroneTime,
-          isTaken: _progesteroneChecked,
-        ));
+        progesteroneChecked = checked;
+        progesteroneDose = dose;
+        progesteroneUnit = unit;
+        progesteroneTime = time;
       }
     }
 
@@ -289,14 +316,14 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
       foodsNotes: _foodsNotes,
       customTriggerCounters: _customTriggerCounters,
       customTriggerTexts: _customTriggerTexts,
-      estradiolChecked: _estradiolChecked,
-      estradiolDose: _estradiolDose,
-      estradiolUnit: _estradiolUnit,
-      estradiolTime: _estradiolTime,
-      progesteroneChecked: _progesteroneChecked,
-      progesteroneDose: _progesteroneDose,
-      progesteroneUnit: _progesteroneUnit,
-      progesteroneTime: _progesteroneTime,
+      estradiolChecked: estradiolChecked,
+      estradiolDose: estradiolDose,
+      estradiolUnit: estradiolUnit,
+      estradiolTime: estradiolTime,
+      progesteroneChecked: progesteroneChecked,
+      progesteroneDose: progesteroneDose,
+      progesteroneUnit: progesteroneUnit,
+      progesteroneTime: progesteroneTime,
       vitaminDChecked: _vitaminDChecked,
       magnesiumChecked: _magnesiumChecked,
       sleepDuration: _sleepDuration,
@@ -336,18 +363,22 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
       );
     } else if (_currentStep == 4) {
       Map<String, dynamic>? primaryChange;
-      if (_estradiolChecked && _initialEstradiolDose != null && (_estradiolDose != _initialEstradiolDose || _estradiolUnit != _initialEstradiolUnit)) {
-        primaryChange = {
-          'name': 'Estradiol Patch',
-          'oldDose': '${_initialEstradiolDose!.toStringAsFixed(_initialEstradiolDose == _initialEstradiolDose!.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $_initialEstradiolUnit',
-          'newDose': '${_estradiolDose.toStringAsFixed(_estradiolDose == _estradiolDose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $_estradiolUnit',
-        };
-      } else if (_progesteroneChecked && _initialProgesteroneDose != null && (_progesteroneDose != _initialProgesteroneDose || _progesteroneUnit != _initialProgesteroneUnit)) {
-        primaryChange = {
-          'name': 'Progesterone',
-          'oldDose': '${_initialProgesteroneDose!.toStringAsFixed(_initialProgesteroneDose == _initialProgesteroneDose!.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $_initialProgesteroneUnit',
-          'newDose': '${_progesteroneDose.toStringAsFixed(_progesteroneDose == _progesteroneDose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $_progesteroneUnit',
-        };
+      final meds = ref.read(medicationsProvider).medications;
+      for (final med in meds) {
+        final checked = _hrtChecked[med.id] ?? false;
+        final dose = _hrtDoses[med.id] ?? med.dose;
+        final unit = _hrtUnits[med.id] ?? med.unit;
+        final initialDose = _initialHrtDoses[med.id];
+        final initialUnit = _initialHrtUnits[med.id];
+
+        if (checked && initialDose != null && (dose != initialDose || unit != initialUnit)) {
+          primaryChange = {
+            'name': med.name,
+            'oldDose': '${initialDose.toStringAsFixed(initialDose == initialDose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $initialUnit',
+            'newDose': '${dose.toStringAsFixed(dose == dose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $unit',
+          };
+          break;
+        }
       }
 
       if (primaryChange != null) {
@@ -495,6 +526,16 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   }
 
   void _finishLoggingAndSync() async {
+    // Legacy compatibility variables for result/database tracking
+    bool estradiolChecked = false;
+    double estradiolDose = 50.0;
+    String estradiolUnit = 'mcg';
+    String estradiolTime = '08:30 AM';
+    bool progesteroneChecked = false;
+    double progesteroneDose = 100.0;
+    String progesteroneUnit = 'mg';
+    String progesteroneTime = '08:00 PM';
+
     // Generate results
     final List<Map<String, String>> symptomsResult = [];
     for (final id in _selectedSymptomIds) {
@@ -533,57 +574,33 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
 
       final List<HrtIntakeLog> hrtIntakes = [];
       final meds = ref.read(medicationsProvider).medications;
+
       for (final med in meds) {
+        final checked = _hrtChecked[med.id] ?? false;
+        final dose = _hrtDoses[med.id] ?? med.dose;
+        final unit = _hrtUnits[med.id] ?? med.unit;
+        final time = _hrtTimes[med.id] ?? '08:00 AM';
+
+        hrtIntakes.add(HrtIntakeLog(
+          medicationId: med.id,
+          name: med.name,
+          dose: dose,
+          unit: unit,
+          time: time,
+          isTaken: checked,
+        ));
+
         final name = med.name.toLowerCase();
         if (name.contains('estradiol') || name.contains('estrogen') || name.contains('estradot')) {
-          hrtIntakes.add(HrtIntakeLog(
-            medicationId: med.id,
-            name: med.name,
-            dose: _estradiolDose,
-            unit: _estradiolUnit,
-            time: _estradiolTime,
-            isTaken: _estradiolChecked,
-          ));
+          estradiolChecked = checked;
+          estradiolDose = dose;
+          estradiolUnit = unit;
+          estradiolTime = time;
         } else if (name.contains('progesterone') || name.contains('utrogestan')) {
-          hrtIntakes.add(HrtIntakeLog(
-            medicationId: med.id,
-            name: med.name,
-            dose: _progesteroneDose,
-            unit: _progesteroneUnit,
-            time: _progesteroneTime,
-            isTaken: _progesteroneChecked,
-          ));
-        } else {
-          hrtIntakes.add(HrtIntakeLog(
-            medicationId: med.id,
-            name: med.name,
-            dose: med.dose,
-            unit: med.unit,
-            time: '08:00 AM',
-            isTaken: false,
-          ));
-        }
-      }
-      if (hrtIntakes.isEmpty) {
-        if (_estradiolChecked) {
-          hrtIntakes.add(HrtIntakeLog(
-            medicationId: 'estradiol_default',
-            name: 'Estradiol',
-            dose: _estradiolDose,
-            unit: _estradiolUnit,
-            time: _estradiolTime,
-            isTaken: true,
-          ));
-        }
-        if (_progesteroneChecked) {
-          hrtIntakes.add(HrtIntakeLog(
-            medicationId: 'progesterone_default',
-            name: 'Progesterone',
-            dose: _progesteroneDose,
-            unit: _progesteroneUnit,
-            time: _progesteroneTime,
-            isTaken: true,
-          ));
+          progesteroneChecked = checked;
+          progesteroneDose = dose;
+          progesteroneUnit = unit;
+          progesteroneTime = time;
         }
       }
 
@@ -658,14 +675,14 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
         foodsNotes: _foodsNotes,
         customTriggerCounters: _customTriggerCounters,
         customTriggerTexts: _customTriggerTexts,
-        estradiolChecked: _estradiolChecked,
-        estradiolDose: _estradiolDose,
-        estradiolUnit: _estradiolUnit,
-        estradiolTime: _estradiolTime,
-        progesteroneChecked: _progesteroneChecked,
-        progesteroneDose: _progesteroneDose,
-        progesteroneUnit: _progesteroneUnit,
-        progesteroneTime: _progesteroneTime,
+        estradiolChecked: estradiolChecked,
+        estradiolDose: estradiolDose,
+        estradiolUnit: estradiolUnit,
+        estradiolTime: estradiolTime,
+        progesteroneChecked: progesteroneChecked,
+        progesteroneDose: progesteroneDose,
+        progesteroneUnit: progesteroneUnit,
+        progesteroneTime: progesteroneTime,
         vitaminDChecked: _vitaminDChecked,
         magnesiumChecked: _magnesiumChecked,
         sleepDuration: _sleepDuration,
@@ -685,8 +702,8 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
     final result = {
       'symptoms': symptomsResult,
       'triggers': triggersResult,
-      'estradiolTaken': _estradiolChecked,
-      'progesteroneTaken': _progesteroneChecked,
+      'estradiolTaken': estradiolChecked,
+      'progesteroneTaken': progesteroneChecked,
     };
 
     Navigator.pop(context, result);
@@ -709,40 +726,24 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
 
       // Initialize medications from profile
       for (final med in profile.medications) {
-        final name = med.name.toLowerCase();
-        if (name.contains('estradiol') || name.contains('estrogen') || name.contains('estradot')) {
-          _estradiolChecked = false; // Default to unchecked ("ready to log") per spec
-          _estradiolDose = med.dose;
-          _estradiolUnit = med.unit;
-          _initialEstradiolDose = med.dose;
-          _initialEstradiolUnit = med.unit;
-        } else if (name.contains('progesterone') || name.contains('utrogestan')) {
-          _progesteroneChecked = false; // Default to unchecked ("ready to log") per spec
-          _progesteroneDose = med.dose;
-          _progesteroneUnit = med.unit;
-          _initialProgesteroneDose = med.dose;
-          _initialProgesteroneUnit = med.unit;
-        }
+        _hrtChecked[med.id] = false;
+        _hrtDoses[med.id] = med.dose;
+        _hrtUnits[med.id] = med.unit;
+        _hrtTimes[med.id] = '08:00 AM';
+        _initialHrtDoses[med.id] = med.dose;
+        _initialHrtUnits[med.id] = med.unit;
       }
     } else if (profile == null && !_isMedsInitialized && !_isSymptomsInitialized) {
       final meds = ref.watch(medicationsProvider).medications;
       if (meds.isNotEmpty) {
         _isMedsInitialized = true;
         for (final med in meds) {
-          final name = med.name.toLowerCase();
-          if (name.contains('estradiol') || name.contains('estrogen') || name.contains('estradot')) {
-            _estradiolChecked = false;
-            _estradiolDose = med.dose;
-            _estradiolUnit = med.unit;
-            _initialEstradiolDose = med.dose;
-            _initialEstradiolUnit = med.unit;
-          } else if (name.contains('progesterone') || name.contains('utrogestan')) {
-            _progesteroneChecked = false;
-            _progesteroneDose = med.dose;
-            _progesteroneUnit = med.unit;
-            _initialProgesteroneDose = med.dose;
-            _initialProgesteroneUnit = med.unit;
-          }
+          _hrtChecked[med.id] = false;
+          _hrtDoses[med.id] = med.dose;
+          _hrtUnits[med.id] = med.unit;
+          _hrtTimes[med.id] = '08:00 AM';
+          _initialHrtDoses[med.id] = med.dose;
+          _initialHrtUnits[med.id] = med.unit;
         }
       }
       final symptomsState = ref.watch(symptomsProvider);
@@ -913,14 +914,32 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
                   SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                     child: DailyEntryStep(
-                      estradiolChecked: _estradiolChecked,
-                      estradiolDose: _estradiolDose,
-                      estradiolUnit: _estradiolUnit,
-                      estradiolTime: _estradiolTime,
-                      progesteroneChecked: _progesteroneChecked,
-                      progesteroneDose: _progesteroneDose,
-                      progesteroneUnit: _progesteroneUnit,
-                      progesteroneTime: _progesteroneTime,
+                      hrtChecked: _hrtChecked,
+                      hrtDoses: _hrtDoses,
+                      hrtUnits: _hrtUnits,
+                      hrtTimes: _hrtTimes,
+                      initialHrtDoses: _initialHrtDoses,
+                      initialHrtUnits: _initialHrtUnits,
+                      onHrtCheckedToggled: (medId, val) {
+                        setState(() {
+                          _hrtChecked[medId] = val;
+                        });
+                      },
+                      onHrtDoseChanged: (medId, val) {
+                        setState(() {
+                          _hrtDoses[medId] = val;
+                        });
+                      },
+                      onHrtUnitChanged: (medId, val) {
+                        setState(() {
+                          _hrtUnits[medId] = val;
+                        });
+                      },
+                      onHrtTimeChanged: (medId, val) {
+                        setState(() {
+                          _hrtTimes[medId] = val;
+                        });
+                      },
                       vitaminDChecked: _vitaminDChecked,
                       magnesiumChecked: _magnesiumChecked,
                       sleepDuration: _sleepDuration,
@@ -931,46 +950,6 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
                         setState(() {
                           _otherMedsChecked.clear();
                           _otherMedsChecked.addAll(val);
-                        });
-                      },
-                      onEstradiolCheckedToggled: (val) {
-                        setState(() {
-                          _estradiolChecked = val;
-                        });
-                      },
-                      onEstradiolDoseChanged: (val) {
-                        setState(() {
-                          _estradiolDose = val;
-                        });
-                      },
-                      onEstradiolUnitChanged: (val) {
-                        setState(() {
-                          _estradiolUnit = val;
-                        });
-                      },
-                      onEstradiolTimeChanged: (val) {
-                        setState(() {
-                          _estradiolTime = val;
-                        });
-                      },
-                      onProgesteroneCheckedToggled: (val) {
-                        setState(() {
-                          _progesteroneChecked = val;
-                        });
-                      },
-                      onProgesteroneDoseChanged: (val) {
-                        setState(() {
-                          _progesteroneDose = val;
-                        });
-                      },
-                      onProgesteroneUnitChanged: (val) {
-                        setState(() {
-                          _progesteroneUnit = val;
-                        });
-                      },
-                      onProgesteroneTimeChanged: (val) {
-                        setState(() {
-                          _progesteroneTime = val;
                         });
                       },
                       onVitaminDCheckedToggled: (val) {
