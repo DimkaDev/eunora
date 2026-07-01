@@ -8,6 +8,7 @@ import 'package:eunora/features/onboarding/presentation/pages/terms_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/privacy_policy_page.dart';
 import 'package:eunora/features/auth/presentation/pages/signup_page.dart';
 import 'package:eunora/features/auth/presentation/pages/sign_in_page.dart';
+import 'package:eunora/features/auth/presentation/pages/demo_seeding_page.dart';
 import 'package:eunora/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:eunora/features/auth/presentation/pages/forgot_password_email_sent_page.dart';
 import 'package:eunora/features/auth/presentation/pages/forgot_password_otp_page.dart';
@@ -105,6 +106,14 @@ final GoRouter appRouter = GoRouter(
         context: context,
         state: state,
         child: const SignInPage(),
+      ),
+    ),
+    GoRoute(
+      path: '/demo',
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const DemoSeedingPage(),
       ),
     ),
     GoRoute(

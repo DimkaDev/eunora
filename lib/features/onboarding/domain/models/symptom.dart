@@ -167,10 +167,20 @@ class LoggedSymptom {
   }
 
   factory LoggedSymptom.fromMap(Map<String, dynamic> map) {
+    // Support two formats:
+    // 1. Nested: {'id': uuid, 'symptom': {'id': 's_...', 'name': ...}, 'intensity': ...}
+    // 2. Flat:   {'id': 's_hot_flashes', 'name': 'Hot Flashes', 'intensity': ...}  ← used by demo seeder & insights engine
+    final Symptom symptom;
+    if (map['symptom'] != null && map['symptom'] is Map) {
+      symptom = Symptom.fromMap(Map<String, dynamic>.from(map['symptom'] as Map));
+    } else {
+      // Flat format — symptom fields are at the top level
+      symptom = Symptom.fromMap(map);
+    }
     return LoggedSymptom(
       id: map['id'] as String?,
-      symptom: Symptom.fromMap(Map<String, dynamic>.from(map['symptom'] as Map)),
-      intensity: map['intensity'] as int?,
+      symptom: symptom,
+      intensity: (map['intensity'] as num?)?.toInt(),
       severity: map['severity'] as String?,
       durationMinutes: map['durationMinutes'] as int?,
     );

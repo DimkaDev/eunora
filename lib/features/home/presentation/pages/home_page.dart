@@ -32,6 +32,7 @@ import 'package:eunora/features/onboarding/domain/models/symptom.dart';
 import 'package:eunora/features/onboarding/domain/models/user_profile.dart';
 import 'package:eunora/features/onboarding/presentation/providers/menopause_stage_provider.dart';
 import 'package:eunora/features/onboarding/presentation/providers/onboarding_profile_provider.dart';
+import 'package:eunora/core/services/premium_guard_provider.dart';
 
 
 
@@ -564,6 +565,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                   padding: const EdgeInsets.fromLTRB(16, 24, 16, 120),
                   child: Column(
                     children: [
+                      // 🔧 DEV TOOL: Premium toggle
+                      _buildPremiumToggle(),
+                      const SizedBox(height: 12),
                       FadeInEntrance(
                         delay: Duration.zero,
                         child: DailyLogCard(
@@ -587,6 +591,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     onManageTap: () => _showHrtLoggingSheet(medications),
                   ),
                 ),
+
                 const SizedBox(height: 24),
                 FadeInEntrance(
                   delay: const Duration(milliseconds: 60),
@@ -613,7 +618,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                 const SizedBox(height: 24),
                 FadeInEntrance(
                   delay: const Duration(milliseconds: 150),
-                  child: const PassportDashboardCard(),
+                  child: PassportDashboardCard(
+                    onGeneratePassport: () => setState(() => _selectedIndex = 3),
+                  ),
                 ),
                 const SizedBox(height: 24),
                 FadeInEntrance(
@@ -755,6 +762,55 @@ class _HomePageState extends ConsumerState<HomePage> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPremiumToggle() {
+    final isPremium = ref.watch(premiumGuardProvider);
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: GestureDetector(
+        onTap: () => ref.read(premiumGuardProvider.notifier).state = !isPremium,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(
+            color: isPremium
+                ? const Color(0xFF1D1B1A).withOpacity(0.88)
+                : AppTheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(100),
+            border: Border.all(
+              color: isPremium
+                  ? const Color(0xFFD4AF37)
+                  : AppTheme.outlineVariant,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                isPremium ? Icons.star_rounded : Icons.star_border_rounded,
+                size: 14,
+                color: isPremium
+                    ? const Color(0xFFD4AF37)
+                    : AppTheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                isPremium
+                    ? '★ Premium ON  —  tap to disable'
+                    : '☆ Premium OFF  —  tap to enable',
+                style: GoogleFonts.manrope(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: isPremium
+                      ? const Color(0xFFD4AF37)
+                      : AppTheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

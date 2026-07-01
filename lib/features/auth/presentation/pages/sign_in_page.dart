@@ -98,6 +98,8 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                       _buildHeader(),
                       const SizedBox(height: 32),
                       _buildFormCard(),
+                      const SizedBox(height: 12),
+                      _buildTestSeedButton(),
                       const SizedBox(height: 24),
                       _buildSocialSection(),
                       const SizedBox(height: 40),
@@ -560,4 +562,30 @@ class _SignInPageState extends ConsumerState<SignInPage> {
       ),
     );
   }
+
+  Widget _buildTestSeedButton() {
+    return Container(
+      width: double.infinity,
+      height: 52,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFF817266).withOpacity(0.4), width: 1.5),
+      ),
+      child: Bounceable(
+        onTap: () => context.push('/demo'),
+        child: Center(
+          child: Text(
+            '🧪  Try Demo (90-Day Sample Data)',
+            style: GoogleFonts.manrope(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF67594E),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
+

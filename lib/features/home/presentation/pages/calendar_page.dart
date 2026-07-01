@@ -46,23 +46,29 @@ class CalendarPage extends ConsumerStatefulWidget {
 class _CalendarPageState extends ConsumerState<CalendarPage> {
   // Navigation states
   DateTime _focusedMonth = DateTime(DateTime.now().year, DateTime.now().month);
-  int _selectedDay = DateTime.now().day;
+  DateTime? _selectedDate = DateTime.now();
   bool _legendExpanded = false;
+
+  // Swipe page controller – start at page 1000 so we can go left/right freely
+  late final PageController _pageController;
+  static const int _initialPage = 1000;
 
   static const _weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   static const _months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
   String _formatSelectedDate() {
-    // Clamp selectedDay to valid range for the focused month to prevent crash on month navigation
-    final totalDays = DateUtils.getDaysInMonth(_focusedMonth.year, _focusedMonth.month);
-    final day = _selectedDay > totalDays ? totalDays : _selectedDay;
-    final targetDate = DateTime(_focusedMonth.year, _focusedMonth.month, day);
-    return '${_weekdays[targetDate.weekday - 1]}, ${_months[targetDate.month - 1]} $day';
+    if (_selectedDate == null) return 'Select a day';
+    return '${_weekdays[_selectedDate!.weekday - 1]}, ${_months[_selectedDate!.month - 1]} ${_selectedDate!.day}';
   }
 
-  // Firestore Database Logs
-  Map<int, MockDailyLog> _dbLogs = {};
+  // Cache of logs keyed by "yyyy-MM" string to avoid re-fetching
+  final Map<String, Map<int, MockDailyLog>> _monthLogsCache = {};
   bool _isLoadingDbLogs = false;
+
+  // Convenience getter for the focused month's logs
+  Map<int, MockDailyLog> get _dbLogs => _monthLogsCache[_monthKey(_focusedMonth)] ?? {};
+
+  String _monthKey(DateTime m) => '${m.year}-${m.month.toString().padLeft(2, '0')}';
 
   // Mock Database for April 2026
   late final Map<int, MockDailyLog> _aprilLogs;
@@ -149,24 +155,36 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         itemsCount: 4,
       ),
     };
+    _pageController = PageController(initialPage: _initialPage);
     // Fetch logs from firestore post build phase
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _fetchLogsForFocusedMonth();
+      _fetchLogsForMonth(_focusedMonth);
     });
   }
 
-  Future<void> _fetchLogsForFocusedMonth() async {
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _fetchLogsForMonth(DateTime month) async {
+    final key = _monthKey(month);
+    // Skip if already cached
+    if (_monthLogsCache.containsKey(key)) return;
+
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    setState(() {
-      _isLoadingDbLogs = true;
-    });
+    // Show loading spinner only for the currently focused month
+    if (month.year == _focusedMonth.year && month.month == _focusedMonth.month) {
+      if (mounted) setState(() => _isLoadingDbLogs = true);
+    }
 
     try {
-      final daysInMonth = DateUtils.getDaysInMonth(_focusedMonth.year, _focusedMonth.month);
-      final start = DateTime(_focusedMonth.year, _focusedMonth.month, 1);
-      final end = DateTime(_focusedMonth.year, _focusedMonth.month, daysInMonth, 23, 59, 59);
+      final daysInMonth = DateUtils.getDaysInMonth(month.year, month.month);
+      final start = DateTime(month.year, month.month, 1);
+      final end = DateTime(month.year, month.month, daysInMonth, 23, 59, 59);
 
       final dbLogs = await ref.read(firestoreServiceProvider).getDailyLogsHistory(user.uid, start, end);
 
@@ -184,26 +202,36 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         }).toList();
 
         final List<Map<String, String>> hrtList = [];
-        if (log.estradiolChecked) {
+        for (final intake in log.hrtIntakes) {
           hrtList.add({
-            'name': 'Estradiol',
-            'details': '${log.estradiolDose.toStringAsFixed(0)} ${log.estradiolUnit} · Patch',
-            'status': 'Taken ${log.estradiolTime}',
-            'isTaken': 'true',
+            'name': intake.name,
+            'details': '${intake.dose.toStringAsFixed(0)} ${intake.unit}',
+            'status': intake.isTaken ? 'Taken ${intake.time}' : 'Not taken',
+            'isTaken': intake.isTaken ? 'true' : 'false',
           });
         }
-        if (log.progesteroneChecked) {
-          hrtList.add({
-            'name': 'Progesterone',
-            'details': '${log.progesteroneDose.toStringAsFixed(0)} ${log.progesteroneUnit} · Tablet',
-            'status': 'Taken ${log.progesteroneTime}',
-            'isTaken': 'true',
-          });
+        if (hrtList.isEmpty) {
+          if (log.estradiolChecked) {
+            hrtList.add({
+              'name': 'Estradiol',
+              'details': '${log.estradiolDose.toStringAsFixed(0)} ${log.estradiolUnit} · Patch',
+              'status': 'Taken ${log.estradiolTime}',
+              'isTaken': 'true',
+            });
+          }
+          if (log.progesteroneChecked) {
+            hrtList.add({
+              'name': 'Progesterone',
+              'details': '${log.progesteroneDose.toStringAsFixed(0)} ${log.progesteroneUnit} · Tablet',
+              'status': 'Taken ${log.progesteroneTime}',
+              'isTaken': 'true',
+            });
+          }
         }
 
         fetchedMap[day] = MockDailyLog(
           symptoms: symptomsList,
-          sleepInfo: '${log.sleepDuration} hours',
+          sleepInfo: '${log.sleepDuration.toStringAsFixed(1)} hours',
           moodInfo: 'Logged',
           hrt: hrtList,
           triggers: log.triggers,
@@ -212,26 +240,40 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         );
       }
 
-      setState(() {
-        _dbLogs = fetchedMap;
-        _isLoadingDbLogs = false;
-      });
+      // Store in cache
+      _monthLogsCache[key] = fetchedMap;
+
+      if (mounted) {
+        setState(() {
+          if (month.year == _focusedMonth.year && month.month == _focusedMonth.month) {
+            _isLoadingDbLogs = false;
+          }
+        });
+      }
     } catch (e) {
-      debugPrint("Error fetching logs: $e");
-      setState(() {
-        _isLoadingDbLogs = false;
-      });
+      debugPrint('Error fetching logs for $key: $e');
+      if (mounted) setState(() => _isLoadingDbLogs = false);
     }
   }
 
-  MockDailyLog? _getLogForDay(int day) {
-    if (_dbLogs.containsKey(day)) {
-      return _dbLogs[day];
-    }
+  // Legacy wrapper used by existing save calls
+  Future<void> _fetchLogsForFocusedMonth() => _fetchLogsForMonth(_focusedMonth);
+
+  MockDailyLog? _getLogForDay(int? day) {
+    if (day == null) return null;
+    final cached = _monthLogsCache[_monthKey(_focusedMonth)];
+    if (cached != null && cached.containsKey(day)) return cached[day];
     final isApril = _focusedMonth.year == 2026 && _focusedMonth.month == 4;
-    if (isApril && _aprilLogs.containsKey(day)) {
-      return _aprilLogs[day];
-    }
+    if (isApril && _aprilLogs.containsKey(day)) return _aprilLogs[day];
+    return null;
+  }
+
+  MockDailyLog? _getLogForSelectedDate() {
+    if (_selectedDate == null) return null;
+    final cached = _monthLogsCache[_monthKey(_selectedDate!)];
+    if (cached != null && cached.containsKey(_selectedDate!.day)) return cached[_selectedDate!.day];
+    final isApril = _selectedDate!.year == 2026 && _selectedDate!.month == 4;
+    if (isApril && _aprilLogs.containsKey(_selectedDate!.day)) return _aprilLogs[_selectedDate!.day];
     return null;
   }
 
@@ -524,28 +566,36 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   }
 
   void _previousMonth() {
-    setState(() {
-      _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
-      _selectedDay = 1;
-    });
-    _fetchLogsForFocusedMonth();
+    _pageController.previousPage(
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeInOut,
+    );
   }
 
   void _nextMonth() {
+    _pageController.nextPage(
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _onPageChanged(int page) {
+    final delta = page - _initialPage;
+    final now = DateTime.now();
+    final newMonth = DateTime(now.year, now.month + delta);
     setState(() {
-      _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1);
-      _selectedDay = 1;
+      _focusedMonth = newMonth;
     });
-    _fetchLogsForFocusedMonth();
+    // Fetch current and prefetch neighbours
+    _fetchLogsForMonth(newMonth);
+    _fetchLogsForMonth(DateTime(newMonth.year, newMonth.month - 1));
+    _fetchLogsForMonth(DateTime(newMonth.year, newMonth.month + 1));
   }
 
   void _selectDay(int day) {
-    final totalDays = DateUtils.getDaysInMonth(_focusedMonth.year, _focusedMonth.month);
-    if (day > 0 && day <= totalDays) {
-      setState(() {
-        _selectedDay = day;
-      });
-    }
+    setState(() {
+      _selectedDate = DateTime(_focusedMonth.year, _focusedMonth.month, day);
+    });
   }
 
   List<Map<String, String>> _convertToEditSymptoms(List<String> list) {
@@ -643,7 +693,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             log.symptoms = _convertFromEditSymptoms(editList);
             log.itemsCount = log.symptoms.length + log.hrt.length + log.triggers.length;
           });
-          _saveLogToFirestore(_selectedDay, log);
+          _saveLogToFirestore(_selectedDate!.day, log);
         },
       ),
     );
@@ -661,7 +711,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             log.symptoms = _convertFromEditSymptoms(newSymptoms);
             log.itemsCount = log.symptoms.length + log.hrt.length + log.triggers.length;
           });
-          _saveLogToFirestore(_selectedDay, log);
+          _saveLogToFirestore(_selectedDate!.day, log);
         },
       ),
     );
@@ -686,7 +736,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             log.triggers = _convertFromEditTriggers(editList);
             log.itemsCount = log.symptoms.length + log.hrt.length + log.triggers.length;
           });
-          _saveLogToFirestore(_selectedDay, log);
+          _saveLogToFirestore(_selectedDate!.day, log);
         },
       ),
     );
@@ -704,7 +754,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             log.triggers = _convertFromEditTriggers(newTriggers);
             log.itemsCount = log.symptoms.length + log.hrt.length + log.triggers.length;
           });
-          _saveLogToFirestore(_selectedDay, log);
+          _saveLogToFirestore(_selectedDate!.day, log);
         },
       ),
     );
@@ -726,7 +776,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
               log.hrt.clear();
               log.hrt.addAll(updated);
             });
-            _saveLogToFirestore(_selectedDay, log);
+            _saveLogToFirestore(_selectedDate!.day, log);
           },
         ),
       ),
@@ -735,15 +785,14 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isApril = _focusedMonth.year == 2026 && _focusedMonth.month == 4;
-    final activeLog = _getLogForDay(_selectedDay);
+    final activeLog = _getLogForSelectedDate();
+    final isCurrentMonthLoaded = _monthLogsCache.containsKey(_monthKey(_focusedMonth));
 
     return Container(
       color: AppTheme.background,
-      child: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 120),
-          child: Column(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 24, 20, 100),
+        child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -766,18 +815,73 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
               const SizedBox(height: 24),
               _buildMonthNavigation(),
               const SizedBox(height: 16),
-              _buildCalendarCard(isApril),
+              // PageView for horizontal swipe between months
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  // Calculate dynamic rows for the focused month to size the PageView container perfectly.
+                  final totalDays = DateUtils.getDaysInMonth(_focusedMonth.year, _focusedMonth.month);
+                  final firstDay = DateTime(_focusedMonth.year, _focusedMonth.month, 1);
+                  final prefix = firstDay.weekday - 1;
+                  final rowsCount = ((prefix + totalDays) / 7).ceil();
+
+                  final cellSize = constraints.maxWidth / 7;
+                  final gridHeight = cellSize * rowsCount;
+                  
+                  // exact dimensions: weekday header (20) + gap (10) + card padding (32) + optional safety (2)
+                  final totalCardHeight = gridHeight + 20 + 10 + 32 + 2;
+
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOut,
+                    height: totalCardHeight,
+                    child: PageView.builder(
+                      controller: _pageController,
+                      onPageChanged: _onPageChanged,
+                      itemBuilder: (context, page) {
+                        final delta = page - _initialPage;
+                        final now = DateTime.now();
+                        final monthForPage = DateTime(now.year, now.month + delta);
+                        final isApril = monthForPage.year == 2026 && monthForPage.month == 4;
+                        final isCached = _monthLogsCache.containsKey(_monthKey(monthForPage));
+                        
+                        return AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 200),
+                          child: ClipRect(
+                            key: ValueKey(monthForPage),
+                            child: isCached
+                                ? _buildCalendarCardForMonth(monthForPage, isApril)
+                                : _buildCalendarSkeleton(),
+                          ),
+                        );
+
+                      },
+                    ),
+                  );
+                },
+              ),
+
+
+
               const SizedBox(height: 24),
-              if (activeLog == null)
-                _buildUnloggedState()
-              else
-                _buildLoggedDetailsState(activeLog),
+              // Show skeleton while initial load, logged state otherwise
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: (!isCurrentMonthLoaded)
+                    ? _buildDayDetailSkeleton()
+                    : (_selectedDate == null
+                        ? _buildNoDaySelectedState()
+                        : (activeLog == null
+                            ? _buildUnloggedState()
+                            : _buildLoggedDetailsState(activeLog))),
+              ),
             ],
           ),
         ),
-      ),
-    );
+      );
   }
+
+
+
 
   void _showMonthPicker() {
     showModalBottomSheet(
@@ -828,7 +932,12 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                       onTap: () {
                         setState(() {
                           _focusedMonth = DateTime(2026, monthVal);
-                          _selectedDay = 1;
+                          final now = DateTime.now();
+                          if (now.year == 2026 && now.month == monthVal) {
+                            _selectedDate = now;
+                          } else {
+                            _selectedDate = null;
+                          }
                         });
                         Navigator.pop(context);
                       },
@@ -950,7 +1059,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     );
   }
 
-  Widget _buildCalendarCard(bool isApril) {
+  Widget _buildCalendarCardForMonth(DateTime month, bool isApril) {
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.surfaceContainerLowest,
@@ -987,15 +1096,83 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             }).toList(),
           ),
           const SizedBox(height: 10),
-          _buildDaysGrid(isApril),
+          _buildDaysGrid(month, isApril),
         ],
       ),
     );
   }
 
-  Widget _buildDaysGrid(bool isApril) {
-    final totalDays = DateUtils.getDaysInMonth(_focusedMonth.year, _focusedMonth.month);
-    final firstDayOfMonth = DateTime(_focusedMonth.year, _focusedMonth.month, 1);
+  /// Placeholder skeleton shown while fetching month data
+  Widget _buildCalendarSkeleton() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.outlineVariant.withValues(alpha: 0.2)),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((d) {
+              return Expanded(
+                child: Text(
+                  d,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.manrope(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primary.withValues(alpha: 0.6),
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 10),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 7,
+              childAspectRatio: 0.85,
+              mainAxisSpacing: 6,
+            ),
+            itemCount: 35,
+            itemBuilder: (_, i) => Center(
+              child: Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Placeholder skeleton shown below the calendar while day data is loading
+  Widget _buildDayDetailSkeleton() {
+    return Column(
+      children: List.generate(3, (i) => Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        height: 64,
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(16),
+        ),
+      )),
+    );
+  }
+
+  Widget _buildDaysGrid(DateTime month, bool isApril) {
+    final totalDays = DateUtils.getDaysInMonth(month.year, month.month);
+    final firstDayOfMonth = DateTime(month.year, month.month, 1);
     
     // weekday is 1 (Monday) to 7 (Sunday)
     final startWeekday = firstDayOfMonth.weekday;
@@ -1004,7 +1181,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     final List<Widget> dayWidgets = [];
     
     // Previous month overflow days
-    final prevMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
+    final prevMonth = DateTime(month.year, month.month - 1);
     final prevMonthTotalDays = DateUtils.getDaysInMonth(prevMonth.year, prevMonth.month);
     for (int i = prefixDaysCount - 1; i >= 0; i--) {
       final dayNum = prevMonthTotalDays - i;
@@ -1012,27 +1189,31 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     }
     
     // Current month days
+    final cachedLogsForMonth = _monthLogsCache[_monthKey(month)] ?? {};
+    final isAprilFallback = month.year == 2026 && month.month == 4;
     for (int day = 1; day <= totalDays; day++) {
-      final isSelected = _selectedDay == day;
-      final hasData = _getLogForDay(day) != null;
-      
+      MockDailyLog? logForDay = cachedLogsForMonth[day];
+      if (logForDay == null && isAprilFallback) logForDay = _aprilLogs[day];
+      final isSelected = _selectedDate != null &&
+          _selectedDate!.year == month.year &&
+          _selectedDate!.month == month.month &&
+          _selectedDate!.day == day;
+      final hasData = logForDay != null;
+
       Color? backgroundIntensity;
-      if (hasData) {
-        final logForDay = _getLogForDay(day);
-        if (logForDay != null) {
-          if (logForDay.symptoms.isNotEmpty) {
-            final firstSymptom = logForDay.symptoms.first.toLowerCase();
-            if (firstSymptom.contains('severe') || firstSymptom.contains('5/5') || firstSymptom.contains('4/5')) {
-              backgroundIntensity = const Color(0xFFF9B7A9).withValues(alpha: 0.6); // Reddish orange for severe
-            } else {
-              backgroundIntensity = const Color(0xFFEDDDF5).withValues(alpha: 0.6); // Purple for general logs
-            }
+      if (logForDay != null) {
+        if (logForDay.symptoms.isNotEmpty) {
+          final firstSymptom = logForDay.symptoms.first.toLowerCase();
+          if (firstSymptom.contains('severe') || firstSymptom.contains('5/5') || firstSymptom.contains('4/5')) {
+            backgroundIntensity = const Color(0xFFF9B7A9).withValues(alpha: 0.6);
           } else {
-            backgroundIntensity = const Color(0xFFEDDDF5).withValues(alpha: 0.4);
+            backgroundIntensity = const Color(0xFFEDDDF5).withValues(alpha: 0.6);
           }
+        } else {
+          backgroundIntensity = const Color(0xFFEDDDF5).withValues(alpha: 0.4);
         }
       }
-      
+
       dayWidgets.add(
         _buildCalendarDay(
           day: day,
@@ -1250,7 +1431,9 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           ElevatedButton.icon(
             onPressed: () async {
               final totalDays = DateUtils.getDaysInMonth(_focusedMonth.year, _focusedMonth.month);
-              final day = _selectedDay > totalDays ? totalDays : _selectedDay;
+              final day = _selectedDate == null 
+                  ? DateTime.now().day.clamp(1, totalDays)
+                  : (_selectedDate!.day > totalDays ? totalDays : _selectedDate!.day);
               final targetDate = DateTime(_focusedMonth.year, _focusedMonth.month, day);
               await context.push('/daily-logging', extra: targetDate);
               _fetchLogsForFocusedMonth();
@@ -1269,6 +1452,48 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoDaySelectedState() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppTheme.outlineVariant.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.touch_app_outlined,
+            size: 40,
+            color: Color(0xFF9B8B7E),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Select a Day',
+            style: GoogleFonts.notoSerif(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Choose any day on the calendar to view its logged symptoms, triggers, and medications.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.manrope(
+              fontSize: 13,
+              color: AppTheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -1297,7 +1522,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Daily Log: ${_months[_focusedMonth.month - 1]} $_selectedDay',
+                    'Daily Log: ${_months[_selectedDate!.month - 1]} ${_selectedDate!.day}',
                     style: GoogleFonts.notoSerif(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -1354,7 +1579,11 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                           width: 200,
                           child: ElevatedButton(
                             onPressed: () async {
-                              final targetDate = DateTime(_focusedMonth.year, _focusedMonth.month, _selectedDay);
+                              final totalDays = DateUtils.getDaysInMonth(_focusedMonth.year, _focusedMonth.month);
+                              final day = _selectedDate == null 
+                                  ? DateTime.now().day.clamp(1, totalDays)
+                                  : (_selectedDate!.day > totalDays ? totalDays : _selectedDate!.day);
+                              final targetDate = DateTime(_focusedMonth.year, _focusedMonth.month, day);
                               await context.push('/daily-logging', extra: targetDate);
                               _fetchLogsForFocusedMonth();
                             },
@@ -1382,7 +1611,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                           onPressed: () {
                             setState(() {
                               _focusedMonth = DateTime(DateTime.now().year, DateTime.now().month);
-                              _selectedDay = DateTime.now().day;
+                              _selectedDate = DateTime.now();
                             });
                             _fetchLogsForFocusedMonth();
                           },
