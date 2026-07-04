@@ -909,68 +909,82 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
           ],
         ),
         const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.03),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-              ),
-            ],
-            border: Border.all(color: const Color(0xFFEAE6E0)),
-          ),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day) {
-                  return SizedBox(
-                    width: 32,
-                    child: Text(
-                      day,
-                      textAlign: TextAlign.center,
+        GestureDetector(
+          onHorizontalDragEnd: (details) {
+            // Detect swipe direction
+            if (details.primaryVelocity != null) {
+              if (details.primaryVelocity! < 0) {
+                // Swiped Left: Go to next month
+                _nextMonth();
+              } else if (details.primaryVelocity! > 0) {
+                // Swiped Right: Go to previous month
+                _previousMonth();
+              }
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+              border: Border.all(color: const Color(0xFFEAE6E0)),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day) {
+                    return SizedBox(
+                      width: 32,
+                      child: Text(
+                        day,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.manrope(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF9B8B7E),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 12),
+                _buildCalendarDaysGrid(),
+                const SizedBox(height: 16),
+                const Divider(color: Color(0xFFF2EDEA), height: 1),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'ACTIVITY LOG',
                       style: GoogleFonts.manrope(
                         fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF9B8B7E),
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.2,
+                        color: AppTheme.primary,
                       ),
                     ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 12),
-              _buildCalendarDaysGrid(),
-              const SizedBox(height: 16),
-              const Divider(color: Color(0xFFF2EDEA), height: 1),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'ACTIVITY LOG',
-                    style: GoogleFonts.manrope(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1.2,
-                      color: AppTheme.primary,
+                    Row(
+                      children: [
+                        _buildLogTag('Meds', const Color(0xFFD8C9E0).withOpacity(0.3)),
+                        const SizedBox(width: 6),
+                        _buildLogTag('Dose \u2191', const Color(0xFFE8A89B).withOpacity(0.2)),
+                      ],
                     ),
-                  ),
-                  Row(
-                    children: [
-                      _buildLogTag('Meds', const Color(0xFFD8C9E0).withOpacity(0.3)),
-                      const SizedBox(width: 6),
-                      _buildLogTag('Dose \u2191', const Color(0xFFE8A89B).withOpacity(0.2)),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _buildActivityLogsForMonth(),
-            ],
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildActivityLogsForMonth(),
+              ],
+            ),
           ),
         ),
       ],

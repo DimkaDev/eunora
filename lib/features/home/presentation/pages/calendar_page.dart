@@ -812,12 +812,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         }
 
         final currentRows = getRowsForMonth(_focusedMonth);
-        final prevRows = getRowsForMonth(DateTime(_focusedMonth.year, _focusedMonth.month - 1));
-        final nextRows = getRowsForMonth(DateTime(_focusedMonth.year, _focusedMonth.month + 1));
-        
-        // Use maximum rows from visible months to avoid any possible bottom overflow on swipe
-        final maxRows = [currentRows, prevRows, nextRows].reduce((a, b) => a > b ? a : b);
-        final gridHeight = cellSize * maxRows;
+        final gridHeight = cellSize * currentRows;
         
         // Header height (20) + gap (10) + vertical padding (32) + safe margin (16)
         final totalCardHeight = gridHeight + 20 + 10 + 32 + 16;
@@ -825,26 +820,37 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         return SizedBox(
           height: totalCardHeight,
           child: ClipRect(
-            child: PageView.builder(
-              controller: _pageController,
-              onPageChanged: _onPageChanged,
-              itemBuilder: (context, page) {
-                final delta = page - _initialPage;
-                final now = DateTime.now();
-                final monthForPage = DateTime(now.year, now.month + delta);
-                final isApril = monthForPage.year == 2026 && monthForPage.month == 4;
-                final isCached = _monthLogsCache.containsKey(_monthKey(monthForPage));
-                
-                return AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  child: ClipRect(
-                    key: ValueKey(monthForPage),
-                    child: isCached
-                        ? _buildCalendarCardForMonth(monthForPage, isApril)
-                        : _buildCalendarSkeleton(),
-                  ),
-                );
+            child: GestureDetector(
+              onHorizontalDragEnd: (details) {
+                if (details.primaryVelocity != null) {
+                  if (details.primaryVelocity! < 0) {
+                    _nextMonth();
+                  } else if (details.primaryVelocity! > 0) {
+                    _previousMonth();
+                  }
+                }
               },
+              child: PageView.builder(
+                controller: _pageController,
+                onPageChanged: _onPageChanged,
+                itemBuilder: (context, page) {
+                  final delta = page - _initialPage;
+                  final now = DateTime.now();
+                  final monthForPage = DateTime(now.year, now.month + delta);
+                  final isApril = monthForPage.year == 2026 && monthForPage.month == 4;
+                  final isCached = _monthLogsCache.containsKey(_monthKey(monthForPage));
+                  
+                  return AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    child: ClipRect(
+                      key: ValueKey(monthForPage),
+                      child: isCached
+                          ? _buildCalendarCardForMonth(monthForPage, isApril)
+                          : _buildCalendarSkeleton(),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         );
