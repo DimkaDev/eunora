@@ -252,6 +252,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
       final appType = med.type.displayName;
 
       return {
+        'id': med.id,
         'name': med.name,
         'details': '${med.dose.toStringAsFixed(0)} ${med.unit} · $appType',
         'status': isTaken ? 'Taken $time' : 'Not taken',
@@ -262,6 +263,8 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      isDismissible: true,
+      enableDrag: true,
       backgroundColor: Colors.transparent,
       builder: (_) => DraggableScrollableSheet(
         initialChildSize: 0.75,
@@ -270,6 +273,14 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
         builder: (_, scrollController) => CalendarHrtEditSheet(
           initialHrt: hrtList,
           onSave: (updatedList) async {
+            // Delete removed medications first
+            final updatedIds = updatedList.map((e) => e['id']).where((id) => id != null).toSet();
+            for (final med in medications) {
+              if (!updatedIds.contains(med.id)) {
+                ref.read(medicationsProvider.notifier).removeMedication(med.id);
+              }
+            }
+
             await _saveHrtLoggingSheet(updatedList);
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -649,13 +660,15 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
   }
 
   Widget _buildTodayDoseSection(List<Medication> medications) {
-    final today = DateTime.now();
-    final isCurrentMonth = today.year == _focusedMonth.year && today.month == _focusedMonth.month;
-    final todayLog = isCurrentMonth ? _monthlyLogs[today.day] : null;
+    final selectedDate = DateTime(_focusedMonth.year, _focusedMonth.month, _selectedDay);
+    final selectedLog = _monthlyLogs[_selectedDay];
 
-    final weekdayName = _weekdays[today.weekday - 1];
-    final monthName = _monthsNames[today.month - 1].substring(0, 3);
-    final dateLabel = "$weekdayName, $monthName ${today.day}";
+    final weekdayName = _weekdays[selectedDate.weekday - 1];
+    final monthName = _monthsNames[selectedDate.month - 1].substring(0, 3);
+    final dateLabel = "$weekdayName, $monthName $_selectedDay";
+
+    final today = DateTime.now();
+    final isTodaySelected = today.year == selectedDate.year && today.month == selectedDate.month && today.day == selectedDate.day;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -666,7 +679,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
             GestureDetector(
               onTap: () => _showHrtLoggingSheet(medications),
               child: Text(
-                "TODAY'S DOSE",
+                isTodaySelected ? "TODAY'S DOSE" : "LOGGED DOSE",
                 style: GoogleFonts.manrope(
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
@@ -690,8 +703,8 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
           bool isTaken = false;
           String time = '';
 
-          if (todayLog != null) {
-            final logged = todayLog.hrtIntakes.firstWhere(
+          if (selectedLog != null) {
+            final logged = selectedLog.hrtIntakes.firstWhere(
               (h) => h.medicationId == med.id || h.name.toLowerCase() == med.name.toLowerCase(),
               orElse: () => HrtIntakeLog(medicationId: med.id, name: med.name, dose: med.dose, unit: med.unit, time: '', isTaken: false),
             );
@@ -1104,6 +1117,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     final List<Map<String, dynamic>> activities = [];
 
     _monthlyLogs.forEach((day, log) {
+      if (day != _selectedDay) return;
       final loggedMeds = log.hrtIntakes.where((h) => h.isTaken).map((h) => h.name).toList();
       if (loggedMeds.isNotEmpty) {
         final date = DateTime(_focusedMonth.year, _focusedMonth.month, day);
@@ -1121,6 +1135,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
 
     for (final change in _monthlyDoseChanges) {
       final day = change.changeDate.day;
+      if (day != _selectedDay) continue;
       final date = change.changeDate;
       final dateLabel = "${_weekdays[date.weekday - 1]}, ${_monthsNames[_focusedMonth.month - 1].substring(0, 3)} $day";
       final direction = change.newDose > change.oldDose ? 'increased' : 'decreased';
@@ -1141,7 +1156,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 16),
           child: Text(
-            'No active logs for this month.',
+            'No active logs for this day.',
             style: GoogleFonts.manrope(
               fontSize: 12,
               color: const Color(0xFF9B8B7E),

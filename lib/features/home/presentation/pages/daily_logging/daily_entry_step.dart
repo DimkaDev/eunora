@@ -10,7 +10,9 @@ import 'package:eunora/features/onboarding/presentation/widgets/add_medication_m
 import 'package:eunora/features/onboarding/presentation/pages/other_medications_page.dart';
 import 'package:eunora/features/onboarding/presentation/providers/other_medications_provider.dart';
 import 'package:eunora/features/home/presentation/widgets/dose_change_alert.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:eunora/core/services/firestore_service.dart';
+import 'package:eunora/features/home/domain/entities/daily_log.dart';
 enum HrtLogStatus { pending, taken, skipped }
 
 class SuccessCheckmark extends StatefulWidget {
@@ -151,14 +153,63 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
   @override
   void initState() {
     super.initState();
-    final medications = ref.read(medicationsProvider).medications;
-    for (final med in medications) {
-      final name = med.name.toLowerCase();
-      if (name.contains('estradiol') || name.contains('estrogen') || name.contains('estradot')) {
-        _medLastTaken[med.id] = DateTime.now().subtract(const Duration(days: 2));
-      } else {
-        _medLastTaken[med.id] = DateTime.now().subtract(const Duration(days: 1));
+    _loadRealLastTakenDates();
+  }
+
+  Future<void> _loadRealLastTakenDates() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    try {
+      final firestore = ref.read(firestoreServiceProvider);
+      // Fetch past 90 days to find last taken intakes
+      final start = DateTime.now().subtract(const Duration(days: 90));
+      final logs = await firestore.getDailyLogsHistory(user.uid, start, DateTime.now());
+      // Sort oldest first to chronologically process intake logs
+      logs.sort((a, b) => a.date.compareTo(b.date));
+
+      final Map<String, DateTime> realLastTaken = {};
+      for (final log in logs) {
+        // check if this is not today's log draft we are currently editing
+        final logDateStr = "${log.date.year}-${log.date.month.toString().padLeft(2, '0')}-${log.date.day.toString().padLeft(2, '0')}";
+        final todayDateStr = "${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().day.toString().padLeft(2, '0')}";
+        if (logDateStr == todayDateStr) {
+          continue;
+        }
+
+        if (log.hrtIntakes.isNotEmpty) {
+          for (final intake in log.hrtIntakes) {
+            if (intake.isTaken) {
+              realLastTaken[intake.medicationId] = log.date;
+            }
+          }
+        } else {
+          // Fallback parsing estradiol / progesterone flat fields
+          if (log.estradiolChecked) {
+            final meds = ref.read(medicationsProvider).medications;
+            for (final med in meds) {
+              if (med.name.toLowerCase().contains('estradiol') || med.name.toLowerCase().contains('estrogen')) {
+                realLastTaken[med.id] = log.date;
+              }
+            }
+          }
+          if (log.progesteroneChecked) {
+            final meds = ref.read(medicationsProvider).medications;
+            for (final med in meds) {
+              if (med.name.toLowerCase().contains('progesterone') || med.name.toLowerCase().contains('utrogestan')) {
+                realLastTaken[med.id] = log.date;
+              }
+            }
+          }
+        }
       }
+
+      if (mounted) {
+        setState(() {
+          _medLastTaken.addAll(realLastTaken);
+        });
+      }
+    } catch (e) {
+      debugPrint("Error loading real last taken hrt dates: $e");
     }
   }
 
@@ -598,7 +649,7 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                       const SizedBox(height: 2),
                       Text(
                         lastTaken == null
-                            ? 'No last taken date recorded'
+                            ? 'No information'
                             : 'Last taken: ${_formatDateTime(lastTaken, context)} (${_daysAgo(lastTaken)})',
                         style: GoogleFonts.manrope(fontSize: 11, color: AppTheme.outline),
                       ),
@@ -854,7 +905,7 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                         subtitle: checked
                             ? '${dose.toStringAsFixed(dose == dose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $unit • $time'
                             : (lastTaken == null
-                                ? 'Not scheduled today'
+                                ? 'No information'
                                 : 'Last taken: ${_formatDate(lastTaken)}'),
                         icon: med.type == MedicationType.gel
                             ? Icons.opacity

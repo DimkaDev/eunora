@@ -38,7 +38,11 @@ class OnboardingHeader extends StatelessWidget {
                 children: [
                   if (showBackButton)
                     IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Color(0xFF9B8B7E), size: 24),
+                      icon: Icon(
+                        currentStep == 0 ? Icons.close : Icons.arrow_back,
+                        color: const Color(0xFF9B8B7E),
+                        size: 24,
+                      ),
                       onPressed: onBack ?? () => context.pop(),
                     )
                   else

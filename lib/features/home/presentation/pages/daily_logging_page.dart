@@ -791,8 +791,8 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
               totalSteps: 5,
               title: _getStepTitle(),
               showStepPill: true,
-              showBackButton: _currentStep != 0,
-              onBack: _currentStep == 0 ? () => context.pop() : _prevStep,
+              showBackButton: true,
+              onBack: _currentStep == 0 ? () => Navigator.pop(context) : _prevStep,
               onSkip: () => _showInfoBottomSheet(context, _currentStep),
             ),
             Expanded(

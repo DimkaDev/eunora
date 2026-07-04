@@ -198,21 +198,33 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         }).toList();
 
         final List<Map<String, String>> hrtList = [];
-        if (log.estradiolChecked) {
-          hrtList.add({
-            'name': 'Estradiol',
-            'details': '${log.estradiolDose.toStringAsFixed(0)} ${log.estradiolUnit} · Patch',
-            'status': 'Taken ${log.estradiolTime}',
-            'isTaken': 'true',
-          });
-        }
-        if (log.progesteroneChecked) {
-          hrtList.add({
-            'name': 'Progesterone',
-            'details': '${log.progesteroneDose.toStringAsFixed(0)} ${log.progesteroneUnit} · Tablet',
-            'status': 'Taken ${log.progesteroneTime}',
-            'isTaken': 'true',
-          });
+        if (log.hrtIntakes.isNotEmpty) {
+          for (final intake in log.hrtIntakes) {
+            hrtList.add({
+              'id': intake.medicationId,
+              'name': intake.name,
+              'details': '${intake.dose.toStringAsFixed(0)} ${intake.unit}',
+              'status': intake.isTaken ? 'Taken ${intake.time}' : 'Not taken',
+              'isTaken': intake.isTaken.toString(),
+            });
+          }
+        } else {
+          if (log.estradiolChecked) {
+            hrtList.add({
+              'name': 'Estradiol',
+              'details': '${log.estradiolDose.toStringAsFixed(0)} ${log.estradiolUnit} · Patch',
+              'status': 'Taken ${log.estradiolTime}',
+              'isTaken': 'true',
+            });
+          }
+          if (log.progesteroneChecked) {
+            hrtList.add({
+              'name': 'Progesterone',
+              'details': '${log.progesteroneDose.toStringAsFixed(0)} ${log.progesteroneUnit} · Tablet',
+              'status': 'Taken ${log.progesteroneTime}',
+              'isTaken': 'true',
+            });
+          }
         }
 
         fetchedMap[day] = MockDailyLog(
@@ -755,6 +767,8 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      isDismissible: true,
+      enableDrag: true,
       backgroundColor: Colors.transparent,
       builder: (_) => DraggableScrollableSheet(
         initialChildSize: 0.75,
@@ -763,6 +777,15 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         builder: (_, scrollController) => CalendarHrtEditSheet(
           initialHrt: log.hrt.map((e) => Map<String, String>.from(e)).toList(),
           onSave: (updated) {
+            // Delete removed medications first
+            final updatedIds = updated.map((e) => e['id']).where((id) => id != null).toSet();
+            final medications = ref.read(medicationsProvider).medications;
+            for (final med in medications) {
+              if (!updatedIds.contains(med.id)) {
+                ref.read(medicationsProvider.notifier).removeMedication(med.id);
+              }
+            }
+
             setState(() {
               log.hrt.clear();
               log.hrt.addAll(updated);

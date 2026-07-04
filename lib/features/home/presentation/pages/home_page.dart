@@ -419,6 +419,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       final appType = med.type.displayName;
       
       return {
+        'id': med.id,
         'name': med.name,
         'details': '${med.dose.toStringAsFixed(0)} ${med.unit} · $appType',
         'status': isTaken ? 'Taken $time' : 'Not taken',
@@ -429,6 +430,8 @@ class _HomePageState extends ConsumerState<HomePage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      isDismissible: true,
+      enableDrag: true,
       backgroundColor: Colors.transparent,
       builder: (_) => DraggableScrollableSheet(
         initialChildSize: 0.75,
@@ -438,6 +441,17 @@ class _HomePageState extends ConsumerState<HomePage> {
           initialHrt: hrtList,
           onSave: (updatedList) {
             setState(() {
+              // 1. Identify and delete medications deleted in the modal list
+              final updatedIds = updatedList.map((e) => e['id']).where((id) => id != null).toSet();
+              for (final med in medications) {
+                if (!updatedIds.contains(med.id)) {
+                  ref.read(medicationsProvider.notifier).removeMedication(med.id);
+                  _takenStatus.remove(med.name);
+                  _takenTime.remove(med.name);
+                }
+              }
+
+              // 2. Update status and time for remaining medications
               for (final updated in updatedList) {
                 final name = updated['name'] ?? '';
                 final isTaken = updated['isTaken'] == 'true';
@@ -581,6 +595,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   child: MedicationHrtCard(
                     medications: medications,
                     takenStatus: _takenStatus,
+                    takenTime: _takenTime,
                     onTakenStatusChanged: (newStatus) {
                       setState(() {
                         _takenStatus.clear();

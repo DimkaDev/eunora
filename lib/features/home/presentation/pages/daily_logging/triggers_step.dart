@@ -140,32 +140,8 @@ class TriggersStep extends ConsumerWidget {
             ),
           );
         }),
-        const SizedBox(height: 24),
-        // custom trigger button
-        SizedBox(
-          width: double.infinity,
-          height: 60,
-          child: OutlinedButton(
-            onPressed: () => context.push('/trigger-library'),
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Color(0xFFD0C4BC)),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.add, color: AppTheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Add Custom Influence',
-                  style: GoogleFonts.manrope(fontWeight: FontWeight.bold, color: AppTheme.primary, fontSize: 13, letterSpacing: 1),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 24),
-      ],
-    );
-  }
-}
+         const SizedBox(height: 24),
+       ],
+     );
+   }
+ }

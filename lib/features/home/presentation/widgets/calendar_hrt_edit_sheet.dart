@@ -4,6 +4,10 @@ import 'dart:ui';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/features/home/presentation/widgets/dose_change_alert.dart';
+import 'package:eunora/features/onboarding/presentation/widgets/add_medication_modal.dart';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
 
 enum HrtLogStatus { pending, taken, skipped }
 
@@ -59,8 +63,8 @@ class _SuccessCheckmarkState extends State<SuccessCheckmark> with SingleTickerPr
   }
 }
 
-/// A mutable copy of an HRT entry for editing within the sheet.
 class HrtEditEntry {
+  String? id;
   String name;
   String details;
   String status;
@@ -71,6 +75,7 @@ class HrtEditEntry {
   String timeTaken; // e.g. '08:30'
 
   HrtEditEntry({
+    this.id,
     required this.name,
     required this.details,
     required this.status,
@@ -111,6 +116,7 @@ class HrtEditEntry {
     }
 
     return HrtEditEntry(
+      id: map['id'],
       name: map['name'] ?? '',
       details: details,
       status: statusStr,
@@ -124,6 +130,7 @@ class HrtEditEntry {
 
   Map<String, String> toMap() {
     return {
+      if (id != null) 'id': id!,
       'name': name,
       'details': '$dose $unit · $applicationType',
       'status': isTaken ? 'Taken $timeTaken' : 'Not taken',
@@ -132,7 +139,7 @@ class HrtEditEntry {
   }
 }
 
-class CalendarHrtEditSheet extends StatefulWidget {
+class CalendarHrtEditSheet extends ConsumerStatefulWidget {
   final List<Map<String, String>> initialHrt;
   final void Function(List<Map<String, String>> updated) onSave;
 
@@ -143,10 +150,10 @@ class CalendarHrtEditSheet extends StatefulWidget {
   });
 
   @override
-  State<CalendarHrtEditSheet> createState() => _CalendarHrtEditSheetState();
+  ConsumerState<CalendarHrtEditSheet> createState() => _CalendarHrtEditSheetState();
 }
 
-class _CalendarHrtEditSheetState extends State<CalendarHrtEditSheet> {
+class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
   late List<HrtEditEntry> _entries;
   int? _expandedIndex; // which card is expanded for editing
   late Map<int, DateTime> _lastTakenDates;
@@ -441,6 +448,32 @@ class _CalendarHrtEditSheetState extends State<CalendarHrtEditSheet> {
 
   @override
   Widget build(BuildContext context) {
+    // Dynamically listen to medicationsProvider updates
+    ref.listen(medicationsProvider, (previous, next) {
+      if (previous != null) {
+        // Detect newly added medications not already present in _entries
+        for (final med in next.medications) {
+          final exists = _entries.any((entry) => entry.name.toLowerCase() == med.name.toLowerCase());
+          if (!exists) {
+            final appType = med.type.displayName;
+            setState(() {
+              _entries.add(HrtEditEntry(
+                name: med.name,
+                details: '${med.dose.toStringAsFixed(0)} ${med.unit} · $appType',
+                status: 'Not taken',
+                isTaken: false,
+                dose: med.dose.toStringAsFixed(0),
+                unit: med.unit,
+                applicationType: appType,
+                timeTaken: '08:00',
+              ));
+              _lastTakenDates[_entries.length - 1] = DateTime.now().subtract(const Duration(days: 1));
+            });
+          }
+        }
+      }
+    });
+
     return Container(
       decoration: const BoxDecoration(
         color: Color(0xFFFEF8F6),
@@ -533,7 +566,52 @@ class _CalendarHrtEditSheetState extends State<CalendarHrtEditSheet> {
                     return _buildMedicationCard(e.key, e.value);
                   }),
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
+
+                  // Button to add custom HRT medications
+                  InkWell(
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => const AddMedicationModal(),
+                      );
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppTheme.primary.withOpacity(0.2), width: 1.5),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.02),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.add_circle_outline, color: AppTheme.primary, size: 18),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Add HRT Medication',
+                            style: GoogleFonts.manrope(
+                              color: AppTheme.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
 
                   // Wellness tip box
                   _buildTipCard(),
@@ -708,35 +786,102 @@ class _CalendarHrtEditSheetState extends State<CalendarHrtEditSheet> {
       ),
     );
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isExpanded
-              ? AppTheme.primary.withValues(alpha: 0.3)
-              : const Color(0xFFEAE6E0),
-          width: isExpanded ? 1.5 : 1.0,
+    return Dismissible(
+      key: Key('med_${entry.name}_$index'),
+      direction: DismissDirection.horizontal,
+      confirmDismiss: (direction) async {
+        if (direction == DismissDirection.endToStart) {
+          // Swipe left (endToStart): Mark HRT as not taken
+          setState(() {
+            _entries[index].isTaken = false;
+            _entries[index].status = 'Not taken';
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${entry.name} marked as not taken'),
+              duration: const Duration(seconds: 1),
+            ),
+          );
+          return false; // Don't actually dismiss (delete) the widget
+        } else if (direction == DismissDirection.startToEnd) {
+          // Swipe right (startToEnd): Delete HRT medication
+          final medName = entry.name;
+          setState(() {
+            _entries.removeAt(index);
+            // Re-index remaining dates keys
+            final Map<int, DateTime> newDates = {};
+            _lastTakenDates.forEach((key, val) {
+              if (key < index) {
+                newDates[key] = val;
+              } else if (key > index) {
+                newDates[key - 1] = val;
+              }
+            });
+            _lastTakenDates = newDates;
+            if (_expandedIndex == index) {
+              _expandedIndex = null;
+            } else if (_expandedIndex != null && _expandedIndex! > index) {
+              _expandedIndex = _expandedIndex! - 1;
+            }
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('$medName deleted'),
+              duration: const Duration(seconds: 1),
+            ),
+          );
+          return true; // Dismiss (delete) the widget
+        }
+        return false;
+      },
+      background: Container(
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.only(left: 20),
+        decoration: BoxDecoration(
+          color: Colors.redAccent.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(20),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        child: const Icon(Icons.delete, color: Colors.white),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(19),
-        child: Column(
-          children: [
-            baseTile,
-            if (isExpanded) ...[
-              _buildExpandedPanel(index, entry),
-            ],
+      secondaryBackground: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        decoration: BoxDecoration(
+          color: Colors.orangeAccent.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Icon(Icons.close, color: Colors.white),
+      ),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isExpanded
+                ? AppTheme.primary.withValues(alpha: 0.3)
+                : const Color(0xFFEAE6E0),
+            width: isExpanded ? 1.5 : 1.0,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
           ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(19),
+          child: Column(
+            children: [
+              baseTile,
+              if (isExpanded) ...[
+                _buildExpandedPanel(index, entry),
+              ],
+            ],
+          ),
         ),
       ),
     );

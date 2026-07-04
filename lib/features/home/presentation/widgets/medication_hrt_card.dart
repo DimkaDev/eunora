@@ -6,6 +6,7 @@ import 'package:eunora/features/onboarding/domain/models/medication.dart';
 class MedicationHrtCard extends StatelessWidget {
   final List<Medication> medications;
   final Map<String, bool> takenStatus;
+  final Map<String, String> takenTime;
   final ValueChanged<Map<String, bool>> onTakenStatusChanged;
   final VoidCallback? onManageTap;
 
@@ -13,6 +14,7 @@ class MedicationHrtCard extends StatelessWidget {
     super.key,
     required this.medications,
     required this.takenStatus,
+    required this.takenTime,
     required this.onTakenStatusChanged,
     this.onManageTap,
   });
@@ -114,6 +116,8 @@ class MedicationHrtCard extends StatelessWidget {
                                 med.frequency.toLowerCase().contains('bedtime');
                 final pendingText = isDaily ? 'PENDING' : 'OPTIONAL';
 
+                final timeStr = takenTime[med.name] != null ? ' • ${takenTime[med.name]}' : '';
+
                 return Padding(
                   padding: EdgeInsets.only(bottom: idx == medications.length - 1 ? 0 : 12),
                   child: _buildMedicationRow(
@@ -121,7 +125,7 @@ class MedicationHrtCard extends StatelessWidget {
                     icon: icon,
                     iconColor: iconColor,
                     name: med.name,
-                    schedule: med.doseAndFrequency,
+                    schedule: isTaken ? '${med.doseAndFrequency}$timeStr' : med.doseAndFrequency,
                     isTaken: isTaken,
                     pendingText: pendingText,
                     onChanged: (val) {
