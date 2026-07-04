@@ -568,17 +568,21 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   }
 
   void _previousMonth() {
-    _pageController.previousPage(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
+    setState(() {
+      _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
+    });
+    _fetchLogsForMonth(_focusedMonth);
+    _fetchLogsForMonth(DateTime(_focusedMonth.year, _focusedMonth.month - 1));
+    _fetchLogsForMonth(DateTime(_focusedMonth.year, _focusedMonth.month + 1));
   }
 
   void _nextMonth() {
-    _pageController.nextPage(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
+    setState(() {
+      _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1);
+    });
+    _fetchLogsForMonth(_focusedMonth);
+    _fetchLogsForMonth(DateTime(_focusedMonth.year, _focusedMonth.month - 1));
+    _fetchLogsForMonth(DateTime(_focusedMonth.year, _focusedMonth.month + 1));
   }
 
   void _onPageChanged(int page) {
@@ -797,66 +801,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     );
   }
 
-  Widget _buildCalendarCard() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final cellSize = constraints.maxWidth / 7;
-        
-        // Calculate max rows for visible months in the swipe window (focused, prev, next)
-        // to keep transition container height perfectly sized and stable during animations.
-        int getRowsForMonth(DateTime m) {
-          final totalDays = DateUtils.getDaysInMonth(m.year, m.month);
-          final firstDay = DateTime(m.year, m.month, 1);
-          final prefix = firstDay.weekday - 1;
-          return ((prefix + totalDays) / 7).ceil();
-        }
 
-        final currentRows = getRowsForMonth(_focusedMonth);
-        final gridHeight = cellSize * currentRows;
-        
-        // Header height (20) + gap (10) + vertical padding (32) + safe margin (16)
-        final totalCardHeight = gridHeight + 20 + 10 + 32 + 16;
-        
-        return SizedBox(
-          height: totalCardHeight,
-          child: ClipRect(
-            child: GestureDetector(
-              onHorizontalDragEnd: (details) {
-                if (details.primaryVelocity != null) {
-                  if (details.primaryVelocity! < 0) {
-                    _nextMonth();
-                  } else if (details.primaryVelocity! > 0) {
-                    _previousMonth();
-                  }
-                }
-              },
-              child: PageView.builder(
-                controller: _pageController,
-                onPageChanged: _onPageChanged,
-                itemBuilder: (context, page) {
-                  final delta = page - _initialPage;
-                  final now = DateTime.now();
-                  final monthForPage = DateTime(now.year, now.month + delta);
-                  final isApril = monthForPage.year == 2026 && monthForPage.month == 4;
-                  final isCached = _monthLogsCache.containsKey(_monthKey(monthForPage));
-                  
-                  return AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    child: ClipRect(
-                      key: ValueKey(monthForPage),
-                      child: isCached
-                          ? _buildCalendarCardForMonth(monthForPage, isApril)
-                          : _buildCalendarSkeleton(),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
 
   Widget _buildCalendarSkeleton() {
     return Container(
@@ -1127,7 +1072,10 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         GestureDetector(
-          onTap: _previousMonth,
+          onTap: () {
+            setState(() { _focusedMonth = prevMonth; });
+            _fetchLogsForFocusedMonth();
+          },
           child: Row(
             children: [
               const Icon(Icons.chevron_left, size: 20, color: AppTheme.primary),
@@ -1174,7 +1122,10 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           ),
         ),
         GestureDetector(
-          onTap: _nextMonth,
+          onTap: () {
+            setState(() { _focusedMonth = nextMonth; });
+            _fetchLogsForFocusedMonth();
+          },
           child: Row(
             children: [
               Text(
@@ -1195,7 +1146,8 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     );
   }
 
-  Widget _buildCalendarCardForMonth(DateTime month, bool isApril) {
+  Widget _buildCalendarCard() {
+    final isApril = _focusedMonth.year == 2026 && _focusedMonth.month == 4;
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.surfaceContainerLowest,
@@ -1232,15 +1184,15 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             }).toList(),
           ),
           const SizedBox(height: 10),
-          _buildDaysGrid(month, isApril),
+          _buildDaysGrid(isApril),
         ],
       ),
     );
   }
 
-  Widget _buildDaysGrid(DateTime month, bool isApril) {
-    final totalDays = DateUtils.getDaysInMonth(month.year, month.month);
-    final firstDayOfMonth = DateTime(month.year, month.month, 1);
+  Widget _buildDaysGrid(bool isApril) {
+    final totalDays = DateUtils.getDaysInMonth(_focusedMonth.year, _focusedMonth.month);
+    final firstDayOfMonth = DateTime(_focusedMonth.year, _focusedMonth.month, 1);
     
     // weekday is 1 (Monday) to 7 (Sunday)
     final startWeekday = firstDayOfMonth.weekday;
@@ -1249,7 +1201,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     final List<Widget> dayWidgets = [];
     
     // Previous month overflow days
-    final prevMonth = DateTime(month.year, month.month - 1);
+    final prevMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
     final prevMonthTotalDays = DateUtils.getDaysInMonth(prevMonth.year, prevMonth.month);
     for (int i = prefixDaysCount - 1; i >= 0; i--) {
       final dayNum = prevMonthTotalDays - i;
@@ -1257,16 +1209,15 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     }
     
     // Current month days
-    final cachedLogsForMonth = _monthLogsCache[_monthKey(month)] ?? {};
-    final isAprilFallback = month.year == 2026 && month.month == 4;
+    final cachedLogsForMonth = _monthLogsCache[_monthKey(_focusedMonth)] ?? {};
     for (int day = 1; day <= totalDays; day++) {
       MockDailyLog? logForDay = cachedLogsForMonth[day];
-      if (logForDay == null && isAprilFallback) {
+      if (logForDay == null && isApril) {
         logForDay = _aprilLogs[day];
       }
       final isSelected = _selectedDate != null &&
-          _selectedDate!.year == month.year &&
-          _selectedDate!.month == month.month &&
+          _selectedDate!.year == _focusedMonth.year &&
+          _selectedDate!.month == _focusedMonth.month &&
           _selectedDate!.day == day;
       final hasData = logForDay != null;
       
@@ -1290,7 +1241,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           isSelected: isSelected,
           hasData: hasData,
           backgroundColor: backgroundIntensity,
-          onTap: () => _selectDay(day),
+          onTap: () => setState(() => _selectedDate = DateTime(_focusedMonth.year, _focusedMonth.month, day)),
         ),
       );
     }
