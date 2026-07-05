@@ -55,6 +55,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   // Track swipe direction for calendar animations (1 for right-to-left/next, -1 for left-to-right/prev)
   int _swipeDirection = 1;
   bool _isSwiping = false;
+  double _dragOffset = 0.0;
 
   String _formatSelectedDate() {
     if (_selectedDate == null) return 'Select a Date';
@@ -575,6 +576,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     setState(() {
       _isSwiping = true;
       _swipeDirection = 1; // Slide in from left to right (natural for going to previous month)
+      _dragOffset = 0.0;
       _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
     });
     _fetchLogsForMonth(_focusedMonth);
@@ -593,6 +595,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     setState(() {
       _isSwiping = true;
       _swipeDirection = -1; // Slide in from right to left (natural for going to next month)
+      _dragOffset = 0.0;
       _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1);
     });
     _fetchLogsForMonth(_focusedMonth);
@@ -1169,23 +1172,43 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   }
 
   Widget _buildCalendarCard() {
-    final isApril = _focusedMonth.year == 2026 && _focusedMonth.month == 4;
     final monthNamesFull = [
       'January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
     final currentMonthLabel = monthNamesFull[_focusedMonth.month - 1];
 
+    final prevMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
+    final nextMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1);
+
+    final isApril = _focusedMonth.year == 2026 && _focusedMonth.month == 4;
+    final isPrevApril = prevMonth.year == 2026 && prevMonth.month == 4;
+    final isNextApril = nextMonth.year == 2026 && nextMonth.month == 4;
+
     return GestureDetector(
+      onHorizontalDragStart: (_) {
+        setState(() {
+          _isSwiping = true;
+          _dragOffset = 0.0;
+        });
+      },
+      onHorizontalDragUpdate: (details) {
+        setState(() {
+          _dragOffset += details.primaryDelta ?? 0.0;
+        });
+      },
       onHorizontalDragEnd: (details) {
-        if (details.primaryVelocity != null) {
-          if (details.primaryVelocity! < 0) {
-            // Swiped Left: Go to next month
+        if (_dragOffset.abs() > 80.0) {
+          if (_dragOffset < 0) {
             _nextMonth();
-          } else if (details.primaryVelocity! > 0) {
-            // Swiped Right: Go to previous month
+          } else {
             _previousMonth();
           }
+        } else {
+          setState(() {
+            _isSwiping = false;
+            _dragOffset = 0.0;
+          });
         }
       },
       child: Stack(
@@ -1227,24 +1250,67 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                   }).toList(),
                 ),
                 const SizedBox(height: 10),
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  transitionBuilder: (Widget child, Animation<double> animation) {
-                    final offsetAnimation = Tween<Offset>(
-                      begin: Offset(_swipeDirection.toDouble(), 0.0),
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut));
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final width = constraints.maxWidth;
+                    final cellWidth = width / 7;
+
+                    // Dynamically calculate row counts for the months to adapt height exactly
+                    int _getRowCountForMonth(DateTime month) {
+                      final totalDays = DateUtils.getDaysInMonth(month.year, month.month);
+                      final firstDay = DateTime(month.year, month.month, 1);
+                      final prefix = firstDay.weekday - 1;
+                      final totalCells = totalDays + prefix;
+                      return (totalCells / 7).ceil();
+                    }
+
+                    final currentRows = _getRowCountForMonth(_focusedMonth);
+                    final prevRows = _getRowCountForMonth(prevMonth);
+                    final nextRows = _getRowCountForMonth(nextMonth);
+
+                    // Interpolate the height smoothly during swipe between current and adjacent month
+                    double targetHeight = currentRows * cellWidth;
+                    if (_isSwiping && _dragOffset != 0.0) {
+                      final progress = (_dragOffset.abs() / width).clamp(0.0, 1.0);
+                      final adjacentRows = _dragOffset > 0 ? prevRows : nextRows;
+                      targetHeight = currentRows * cellWidth + (adjacentRows - currentRows) * cellWidth * progress;
+                    }
+
                     return ClipRect(
-                      child: SlideTransition(
-                        position: offsetAnimation,
-                        child: child,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 100),
+                        height: targetHeight,
+                        child: Stack(
+                          children: [
+                            // Previous Month (Slides in from the left when dragging right)
+                            Transform.translate(
+                              offset: Offset(_dragOffset - width, 0),
+                              child: Container(
+                                width: width,
+                                child: _buildDaysGridForMonth(prevMonth, isPrevApril),
+                              ),
+                            ),
+                            // Current Month
+                            Transform.translate(
+                              offset: Offset(_dragOffset, 0),
+                              child: Container(
+                                width: width,
+                                child: _buildDaysGridForMonth(_focusedMonth, isApril),
+                              ),
+                            ),
+                            // Next Month (Slides in from the right when dragging left)
+                            Transform.translate(
+                              offset: Offset(_dragOffset + width, 0),
+                              child: Container(
+                                width: width,
+                                child: _buildDaysGridForMonth(nextMonth, isNextApril),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
-                  child: Container(
-                    key: ValueKey<String>('${_focusedMonth.year}-${_focusedMonth.month}'),
-                    child: _buildDaysGrid(isApril),
-                  ),
                 ),
               ],
             ),
@@ -1276,8 +1342,12 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   }
 
   Widget _buildDaysGrid(bool isApril) {
-    final totalDays = DateUtils.getDaysInMonth(_focusedMonth.year, _focusedMonth.month);
-    final firstDayOfMonth = DateTime(_focusedMonth.year, _focusedMonth.month, 1);
+    return _buildDaysGridForMonth(_focusedMonth, isApril);
+  }
+
+  Widget _buildDaysGridForMonth(DateTime targetMonth, bool isApril) {
+    final totalDays = DateUtils.getDaysInMonth(targetMonth.year, targetMonth.month);
+    final firstDayOfMonth = DateTime(targetMonth.year, targetMonth.month, 1);
     
     // weekday is 1 (Monday) to 7 (Sunday)
     final startWeekday = firstDayOfMonth.weekday;
@@ -1286,39 +1356,23 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     final List<Widget> dayWidgets = [];
     
     // Previous month overflow days
-    final prevMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
+    final prevMonth = DateTime(targetMonth.year, targetMonth.month - 1);
     final prevMonthTotalDays = DateUtils.getDaysInMonth(prevMonth.year, prevMonth.month);
     for (int i = prefixDaysCount - 1; i >= 0; i--) {
       final dayNum = prevMonthTotalDays - i;
       dayWidgets.add(_buildOverflowDay('$dayNum'));
     }
     
-    // Current month days
-    final cachedLogsForMonth = _monthLogsCache[_monthKey(_focusedMonth)] ?? {};
+    // Target month days
+    final cachedLogsForMonth = _monthLogsCache[_monthKey(targetMonth)] ?? {};
     for (int day = 1; day <= totalDays; day++) {
-      if (_isSwiping) {
-        dayWidgets.add(
-          Center(
-            child: Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: Colors.grey[200]!.withOpacity(0.5),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-        );
-        continue;
-      }
-
       MockDailyLog? logForDay = cachedLogsForMonth[day];
       if (logForDay == null && isApril) {
         logForDay = _aprilLogs[day];
       }
       final isSelected = _selectedDate != null &&
-          _selectedDate!.year == _focusedMonth.year &&
-          _selectedDate!.month == _focusedMonth.month &&
+          _selectedDate!.year == targetMonth.year &&
+          _selectedDate!.month == targetMonth.month &&
           _selectedDate!.day == day;
       final hasData = logForDay != null;
       
@@ -1342,7 +1396,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           isSelected: isSelected,
           hasData: hasData,
           backgroundColor: backgroundIntensity,
-          onTap: () => setState(() => _selectedDate = DateTime(_focusedMonth.year, _focusedMonth.month, day)),
+          onTap: () => setState(() => _selectedDate = DateTime(targetMonth.year, targetMonth.month, day)),
         ),
       );
     }
