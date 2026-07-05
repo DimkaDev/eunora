@@ -1269,11 +1269,13 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                     final nextRows = _getRowCountForMonth(nextMonth);
 
                     // Interpolate the height smoothly during swipe between current and adjacent month
-                    double targetHeight = currentRows * cellWidth;
+                    // Add 1.0 logic pixel safety margin to cellWidth to prevent sub-pixel rounding precision mismatch overflows.
+                    final safetyCellWidth = cellWidth + 1.0;
+                    double targetHeight = currentRows * safetyCellWidth;
                     if (_isSwiping && _dragOffset != 0.0) {
                       final progress = (_dragOffset.abs() / width).clamp(0.0, 1.0);
                       final adjacentRows = _dragOffset > 0 ? prevRows : nextRows;
-                      targetHeight = currentRows * cellWidth + (adjacentRows - currentRows) * cellWidth * progress;
+                      targetHeight = currentRows * safetyCellWidth + (adjacentRows - currentRows) * safetyCellWidth * progress;
                     }
 
                     return ClipRect(
@@ -1287,6 +1289,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                               offset: Offset(_dragOffset - width, 0),
                               child: Container(
                                 width: width,
+                                height: prevRows * safetyCellWidth,
                                 child: _buildDaysGridForMonth(prevMonth, isPrevApril),
                               ),
                             ),
@@ -1295,6 +1298,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                               offset: Offset(_dragOffset, 0),
                               child: Container(
                                 width: width,
+                                height: currentRows * safetyCellWidth,
                                 child: _buildDaysGridForMonth(_focusedMonth, isApril),
                               ),
                             ),
@@ -1303,6 +1307,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                               offset: Offset(_dragOffset + width, 0),
                               child: Container(
                                 width: width,
+                                height: nextRows * safetyCellWidth,
                                 child: _buildDaysGridForMonth(nextMonth, isNextApril),
                               ),
                             ),
@@ -1412,15 +1417,19 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     
     // Grid layout with 7 items per row
     final rowsCount = (dayWidgets.length / 7).ceil();
-    return Column(
-      children: List.generate(rowsCount, (rowIndex) {
-        final start = rowIndex * 7;
-        final end = start + 7;
-        final rowWidgets = dayWidgets.sublist(start, end);
-        return Row(
-          children: rowWidgets.map((w) => Expanded(child: AspectRatio(aspectRatio: 1, child: w))).toList(),
-        );
-      }),
+    return SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(rowsCount, (rowIndex) {
+          final start = rowIndex * 7;
+          final end = start + 7;
+          final rowWidgets = dayWidgets.sublist(start, end);
+          return Row(
+            children: rowWidgets.map((w) => Expanded(child: AspectRatio(aspectRatio: 1, child: w))).toList(),
+          );
+        }),
+      ),
     );
   }
 
