@@ -27,6 +27,14 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
   List<HrtDoseChange> _monthlyDoseChanges = [];
   bool _isLoadingLogs = false;
 
+  // Swipe transition states
+  bool _isSwiping = false;
+  double _dragOffset = 0.0;
+
+  // Cache for pre-fetched logs to ensure smooth side-by-side swipes
+  final Map<String, Map<int, DailyLog>> _monthLogsCache = {};
+  final Map<String, List<HrtDoseChange>> _monthDoseChangesCache = {};
+
   final List<String> _monthsNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
@@ -46,18 +54,34 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     });
   }
 
+  String _monthKey(DateTime dt) => "${dt.year}-${dt.month}";
+
   Future<void> _fetchLogsForFocusedMonth() async {
+    await _fetchLogsForMonth(_focusedMonth);
+    // Prefetch surrounding months for seamless swiping
+    _fetchLogsForMonth(DateTime(_focusedMonth.year, _focusedMonth.month - 1));
+    _fetchLogsForMonth(DateTime(_focusedMonth.year, _focusedMonth.month + 1));
+  }
+
+  Future<void> _fetchLogsForMonth(DateTime targetMonth) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    setState(() {
-      _isLoadingLogs = true;
-    });
+    final key = _monthKey(targetMonth);
+    if (_monthLogsCache.containsKey(key)) {
+      if (targetMonth.year == _focusedMonth.year && targetMonth.month == _focusedMonth.month) {
+        setState(() {
+          _monthlyLogs = _monthLogsCache[key] ?? {};
+          _monthlyDoseChanges = _monthDoseChangesCache[key] ?? [];
+        });
+      }
+      return;
+    }
 
     try {
-      final daysInMonth = DateUtils.getDaysInMonth(_focusedMonth.year, _focusedMonth.month);
-      final start = DateTime(_focusedMonth.year, _focusedMonth.month, 1);
-      final end = DateTime(_focusedMonth.year, _focusedMonth.month, daysInMonth, 23, 59, 59);
+      final daysInMonth = DateUtils.getDaysInMonth(targetMonth.year, targetMonth.month);
+      final start = DateTime(targetMonth.year, targetMonth.month, 1);
+      final end = DateTime(targetMonth.year, targetMonth.month, daysInMonth, 23, 59, 59);
 
       final dbLogs = await ref.read(firestoreServiceProvider).getDailyLogsHistory(user.uid, start, end);
       final allDoseChanges = await ref.read(firestoreServiceProvider).getHrtDoseChanges(user.uid);
@@ -68,37 +92,56 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
       }
 
       final monthlyChanges = allDoseChanges.where((change) {
-        return change.changeDate.year == _focusedMonth.year &&
-               change.changeDate.month == _focusedMonth.month;
+        return change.changeDate.year == targetMonth.year &&
+               change.changeDate.month == targetMonth.month;
       }).toList();
 
-      setState(() {
-        _monthlyLogs = fetchedLogs;
-        _monthlyDoseChanges = monthlyChanges;
-        _isLoadingLogs = false;
-      });
+      _monthLogsCache[key] = fetchedLogs;
+      _monthDoseChangesCache[key] = monthlyChanges;
+
+      if (mounted && targetMonth.year == _focusedMonth.year && targetMonth.month == _focusedMonth.month) {
+        setState(() {
+          _monthlyLogs = fetchedLogs;
+          _monthlyDoseChanges = monthlyChanges;
+        });
+      }
     } catch (e) {
-      debugPrint("Error fetching HRT logs: $e");
-      setState(() {
-        _isLoadingLogs = false;
-      });
+      debugPrint("Error fetching HRT logs for $key: $e");
     }
   }
 
   void _previousMonth() {
     setState(() {
+      _isSwiping = true;
+      _dragOffset = 0.0;
       _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
       _selectedDay = 1;
     });
     _fetchLogsForFocusedMonth();
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        setState(() {
+          _isSwiping = false;
+        });
+      }
+    });
   }
 
   void _nextMonth() {
     setState(() {
+      _isSwiping = true;
+      _dragOffset = 0.0;
       _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1);
       _selectedDay = 1;
     });
     _fetchLogsForFocusedMonth();
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        setState(() {
+          _isSwiping = false;
+        });
+      }
+    });
   }
 
   void _selectDay(int day) {
@@ -841,6 +884,9 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
   }
 
   Widget _buildMonthlyScheduleSection(String currentMonth) {
+    final prevMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
+    final nextMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -910,16 +956,29 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
         ),
         const SizedBox(height: 12),
         GestureDetector(
+          onHorizontalDragStart: (_) {
+            setState(() {
+              _isSwiping = true;
+              _dragOffset = 0.0;
+            });
+          },
+          onHorizontalDragUpdate: (details) {
+            setState(() {
+              _dragOffset += details.primaryDelta ?? 0.0;
+            });
+          },
           onHorizontalDragEnd: (details) {
-            // Detect swipe direction
-            if (details.primaryVelocity != null) {
-              if (details.primaryVelocity! < 0) {
-                // Swiped Left: Go to next month
+            if (_dragOffset.abs() > 80.0) {
+              if (_dragOffset < 0) {
                 _nextMonth();
-              } else if (details.primaryVelocity! > 0) {
-                // Swiped Right: Go to previous month
+              } else {
                 _previousMonth();
               }
+            } else {
+              setState(() {
+                _isSwiping = false;
+                _dragOffset = 0.0;
+              });
             }
           },
           child: Container(
@@ -956,7 +1015,96 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                   }).toList(),
                 ),
                 const SizedBox(height: 12),
-                _buildCalendarDaysGrid(),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final width = constraints.maxWidth;
+                    // The actual cell size of a calendar day in HrtTrackerPage is 34px container + 8px vertical padding (4px top and 4px bottom)
+                    const safetyCellHeight = 42.0;
+
+                    int _getRowCountForMonth(DateTime month) {
+                      final totalDays = DateUtils.getDaysInMonth(month.year, month.month);
+                      final firstDay = DateTime(month.year, month.month, 1);
+                      final prefix = firstDay.weekday - 1;
+                      final totalCells = totalDays + prefix;
+                      return (totalCells / 7).ceil();
+                    }
+
+                    final currentRows = _getRowCountForMonth(_focusedMonth);
+                    final prevRows = _getRowCountForMonth(prevMonth);
+                    final nextRows = _getRowCountForMonth(nextMonth);
+
+                    double targetHeight = currentRows * safetyCellHeight;
+                    if (_isSwiping && _dragOffset != 0.0) {
+                      final progress = (_dragOffset.abs() / width).clamp(0.0, 1.0);
+                      final adjacentRows = _dragOffset > 0 ? prevRows : nextRows;
+                      targetHeight = currentRows * safetyCellHeight + (adjacentRows - currentRows) * safetyCellHeight * progress;
+                    }
+
+                    return ClipRect(
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 100),
+                            height: targetHeight,
+                            child: Stack(
+                              children: [
+                                // Previous Month
+                                Transform.translate(
+                                  offset: Offset(_dragOffset - width, 0),
+                                  child: Container(
+                                    width: width,
+                                    height: prevRows * safetyCellHeight,
+                                    child: _buildCalendarDaysGridForMonth(prevMonth),
+                                  ),
+                                ),
+                                // Current Month
+                                Transform.translate(
+                                  offset: Offset(_dragOffset, 0),
+                                  child: Container(
+                                    width: width,
+                                    height: currentRows * safetyCellHeight,
+                                    child: _buildCalendarDaysGridForMonth(_focusedMonth),
+                                  ),
+                                ),
+                                // Next Month
+                                Transform.translate(
+                                  offset: Offset(_dragOffset + width, 0),
+                                  child: Container(
+                                    width: width,
+                                    height: nextRows * safetyCellHeight,
+                                    child: _buildCalendarDaysGridForMonth(nextMonth),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IgnorePointer(
+                            child: AnimatedOpacity(
+                              opacity: _isSwiping ? 1.0 : 0.0,
+                              duration: const Duration(milliseconds: 150),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.7),
+                                  borderRadius: BorderRadius.circular(24),
+                                ),
+                                child: Text(
+                                  _monthsNames[_focusedMonth.month - 1],
+                                  style: GoogleFonts.manrope(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
                 const SizedBox(height: 16),
                 const Divider(color: Color(0xFFF2EDEA), height: 1),
                 const SizedBox(height: 16),
@@ -1010,10 +1158,14 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
   }
 
   Widget _buildCalendarDaysGrid() {
+    return _buildCalendarDaysGridForMonth(_focusedMonth);
+  }
+
+  Widget _buildCalendarDaysGridForMonth(DateTime targetMonth) {
     final List<Widget> dayWidgets = [];
 
-    final totalDays = DateUtils.getDaysInMonth(_focusedMonth.year, _focusedMonth.month);
-    final firstDayOfMonth = DateTime(_focusedMonth.year, _focusedMonth.month, 1);
+    final totalDays = DateUtils.getDaysInMonth(targetMonth.year, targetMonth.month);
+    final firstDayOfMonth = DateTime(targetMonth.year, targetMonth.month, 1);
     final startWeekday = firstDayOfMonth.weekday;
     final startOffset = startWeekday - 1;
 
@@ -1022,19 +1174,28 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     }
 
     final today = DateTime.now();
+    final targetMonthKey = _monthKey(targetMonth);
+    final targetLogs = _monthLogsCache[targetMonthKey] ?? {};
+    final targetChanges = _monthDoseChangesCache[targetMonthKey] ?? [];
 
     for (int day = 1; day <= totalDays; day++) {
-      final isSelected = _selectedDay == day;
-      final isToday = today.year == _focusedMonth.year && today.month == _focusedMonth.month && today.day == day;
+      final isSelected = _selectedDay == day &&
+          _focusedMonth.year == targetMonth.year &&
+          _focusedMonth.month == targetMonth.month;
+      final isToday = today.year == targetMonth.year && today.month == targetMonth.month && today.day == day;
 
-      final dayLog = _monthlyLogs[day];
+      final dayLog = targetLogs[day];
       final isTaken = dayLog != null && dayLog.hrtIntakes.isNotEmpty && dayLog.hrtIntakes.any((h) => h.isTaken);
 
-      final isDoseChange = _monthlyDoseChanges.any((change) => change.changeDate.day == day);
+      final isDoseChange = targetChanges.any((change) => change.changeDate.day == day);
 
       dayWidgets.add(
         GestureDetector(
-          onTap: () => _selectDay(day),
+          onTap: () {
+            if (targetMonth.year == _focusedMonth.year && targetMonth.month == _focusedMonth.month) {
+              _selectDay(day);
+            }
+          },
           child: Center(
             child: Container(
               width: 34,
@@ -1106,24 +1267,28 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     }
 
     final rowsCount = (dayWidgets.length / 7).ceil();
-    return Column(
-      children: List.generate(rowsCount, (rowIndex) {
-        final start = rowIndex * 7;
-        final end = (start + 7 < dayWidgets.length) ? start + 7 : dayWidgets.length;
-        final rowWidgets = dayWidgets.sublist(start, end);
+    return SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(rowsCount, (rowIndex) {
+          final start = rowIndex * 7;
+          final end = (start + 7 < dayWidgets.length) ? start + 7 : dayWidgets.length;
+          final rowWidgets = dayWidgets.sublist(start, end);
 
-        while (rowWidgets.length < 7) {
-          rowWidgets.add(const SizedBox(width: 32, height: 32));
-        }
+          while (rowWidgets.length < 7) {
+            rowWidgets.add(const SizedBox(width: 32, height: 32));
+          }
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: rowWidgets.map((w) => Expanded(child: w)).toList(),
-          ),
-        );
-      }),
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: rowWidgets.map((w) => Expanded(child: w)).toList(),
+            ),
+          );
+        }),
+      ),
     );
   }
 
