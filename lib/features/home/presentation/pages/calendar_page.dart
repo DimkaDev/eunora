@@ -52,6 +52,10 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   static const _weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   static const _months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
+  // Track swipe direction for calendar animations (1 for right-to-left/next, -1 for left-to-right/prev)
+  int _swipeDirection = 1;
+  bool _isSwiping = false;
+
   String _formatSelectedDate() {
     if (_selectedDate == null) return 'Select a Date';
     return '${_weekdays[_selectedDate!.weekday - 1]}, ${_months[_selectedDate!.month - 1]} ${_selectedDate!.day}';
@@ -569,20 +573,38 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
 
   void _previousMonth() {
     setState(() {
+      _isSwiping = true;
+      _swipeDirection = 1; // Slide in from left to right (natural for going to previous month)
       _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
     });
     _fetchLogsForMonth(_focusedMonth);
     _fetchLogsForMonth(DateTime(_focusedMonth.year, _focusedMonth.month - 1));
     _fetchLogsForMonth(DateTime(_focusedMonth.year, _focusedMonth.month + 1));
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        setState(() {
+          _isSwiping = false;
+        });
+      }
+    });
   }
 
   void _nextMonth() {
     setState(() {
+      _isSwiping = true;
+      _swipeDirection = -1; // Slide in from right to left (natural for going to next month)
       _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1);
     });
     _fetchLogsForMonth(_focusedMonth);
     _fetchLogsForMonth(DateTime(_focusedMonth.year, _focusedMonth.month - 1));
     _fetchLogsForMonth(DateTime(_focusedMonth.year, _focusedMonth.month + 1));
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        setState(() {
+          _isSwiping = false;
+        });
+      }
+    });
   }
 
   void _onPageChanged(int page) {
@@ -1148,6 +1170,12 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
 
   Widget _buildCalendarCard() {
     final isApril = _focusedMonth.year == 2026 && _focusedMonth.month == 4;
+    final monthNamesFull = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    final currentMonthLabel = monthNamesFull[_focusedMonth.month - 1];
+
     return GestureDetector(
       onHorizontalDragEnd: (details) {
         if (details.primaryVelocity != null) {
@@ -1160,45 +1188,89 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           }
         }
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppTheme.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: AppTheme.outlineVariant.withValues(alpha: 0.2),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey[300]!.withValues(alpha: 0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceContainerLowest,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppTheme.outlineVariant.withValues(alpha: 0.2),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey[300]!.withValues(alpha: 0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-          ],
-        ),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((day) {
-                return Expanded(
-                  child: Text(
-                    day,
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.manrope(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.primary.withValues(alpha: 0.6),
-                      letterSpacing: 1.2,
-                    ),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((day) {
+                    return Expanded(
+                      child: Text(
+                        day,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.manrope(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primary.withValues(alpha: 0.6),
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 10),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder: (Widget child, Animation<double> animation) {
+                    final offsetAnimation = Tween<Offset>(
+                      begin: Offset(_swipeDirection.toDouble(), 0.0),
+                      end: Offset.zero,
+                    ).animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut));
+                    return ClipRect(
+                      child: SlideTransition(
+                        position: offsetAnimation,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: Container(
+                    key: ValueKey<String>('${_focusedMonth.year}-${_focusedMonth.month}'),
+                    child: _buildDaysGrid(isApril),
                   ),
-                );
-              }).toList(),
+                ),
+              ],
             ),
-            const SizedBox(height: 10),
-            _buildDaysGrid(isApril),
-          ],
-        ),
+          ),
+          IgnorePointer(
+            child: AnimatedOpacity(
+              opacity: _isSwiping ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 150),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Text(
+                  currentMonthLabel,
+                  style: GoogleFonts.manrope(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1224,6 +1296,22 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     // Current month days
     final cachedLogsForMonth = _monthLogsCache[_monthKey(_focusedMonth)] ?? {};
     for (int day = 1; day <= totalDays; day++) {
+      if (_isSwiping) {
+        dayWidgets.add(
+          Center(
+            child: Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: Colors.grey[200]!.withOpacity(0.5),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+        );
+        continue;
+      }
+
       MockDailyLog? logForDay = cachedLogsForMonth[day];
       if (logForDay == null && isApril) {
         logForDay = _aprilLogs[day];
