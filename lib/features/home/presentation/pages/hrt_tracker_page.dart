@@ -118,7 +118,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
       _selectedDay = 1;
     });
     _fetchLogsForFocusedMonth();
-    Future.delayed(const Duration(milliseconds: 300), () {
+    Future.delayed(const Duration(milliseconds: 450), () {
       if (mounted) {
         setState(() {
           _isSwiping = false;
@@ -135,7 +135,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
       _selectedDay = 1;
     });
     _fetchLogsForFocusedMonth();
-    Future.delayed(const Duration(milliseconds: 300), () {
+    Future.delayed(const Duration(milliseconds: 450), () {
       if (mounted) {
         setState(() {
           _isSwiping = false;
@@ -893,62 +893,83 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "MONTHLY SCHEDULE",
-                  style: GoogleFonts.manrope(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.2,
-                    color: AppTheme.primary,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "MONTHLY SCHEDULE",
+                    style: GoogleFonts.manrope(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.2,
+                      color: AppTheme.primary,
+                    ),
                   ),
-                ),
-                Text(
-                  "Tap dates to view or log past doses",
-                  style: GoogleFonts.manrope(
-                    fontSize: 11,
-                    color: const Color(0xFF9B8B7E),
+                  Text(
+                    "Tap dates to view or log past doses",
+                    style: GoogleFonts.manrope(
+                      fontSize: 11,
+                      color: const Color(0xFF9B8B7E),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
+            const SizedBox(width: 8),
             Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                IconButton(
-                  onPressed: _previousMonth,
-                  icon: const Icon(Icons.chevron_left, size: 20),
-                  color: const Color(0xFF9B8B7E),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-                const SizedBox(width: 8),
-                GestureDetector(
-                  onTap: _showMonthPicker,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        currentMonth,
-                        style: GoogleFonts.manrope(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primary,
-                        ),
-                      ),
-                      const SizedBox(width: 2),
-                      const Icon(Icons.arrow_drop_down, size: 16, color: AppTheme.primary),
-                    ],
+                Container(
+                  width: 36,
+                  height: 36,
+                  child: InkWell(
+                    onTap: _previousMonth,
+                    borderRadius: BorderRadius.circular(18),
+                    child: const Center(
+                      child: Icon(Icons.chevron_left, size: 22, color: Color(0xFF9B8B7E)),
+                    ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                IconButton(
-                  onPressed: _nextMonth,
-                  icon: const Icon(Icons.chevron_right, size: 20),
-                  color: const Color(0xFF9B8B7E),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
+                const SizedBox(width: 4),
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: _showMonthPicker,
+                    borderRadius: BorderRadius.circular(16),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            currentMonth,
+                            style: GoogleFonts.manrope(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 2),
+                          const Icon(Icons.arrow_drop_down, size: 16, color: AppTheme.primary),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Container(
+                  width: 36,
+                  height: 36,
+                  child: InkWell(
+                    onTap: _nextMonth,
+                    borderRadius: BorderRadius.circular(18),
+                    child: const Center(
+                      child: Icon(Icons.chevron_right, size: 22, color: Color(0xFF9B8B7E)),
+                    ),
+                  ),
                 ),
               ],
             ),

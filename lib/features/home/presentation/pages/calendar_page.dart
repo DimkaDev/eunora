@@ -582,7 +582,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     _fetchLogsForMonth(_focusedMonth);
     _fetchLogsForMonth(DateTime(_focusedMonth.year, _focusedMonth.month - 1));
     _fetchLogsForMonth(DateTime(_focusedMonth.year, _focusedMonth.month + 1));
-    Future.delayed(const Duration(milliseconds: 300), () {
+    Future.delayed(const Duration(milliseconds: 450), () {
       if (mounted) {
         setState(() {
           _isSwiping = false;
@@ -601,7 +601,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     _fetchLogsForMonth(_focusedMonth);
     _fetchLogsForMonth(DateTime(_focusedMonth.year, _focusedMonth.month - 1));
     _fetchLogsForMonth(DateTime(_focusedMonth.year, _focusedMonth.month + 1));
-    Future.delayed(const Duration(milliseconds: 300), () {
+    Future.delayed(const Duration(milliseconds: 450), () {
       if (mounted) {
         setState(() {
           _isSwiping = false;
@@ -1096,75 +1096,91 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        GestureDetector(
-          onTap: () {
-            setState(() { _focusedMonth = prevMonth; });
-            _fetchLogsForFocusedMonth();
-          },
-          child: Row(
-            children: [
-              const Icon(Icons.chevron_left, size: 20, color: AppTheme.primary),
-              const SizedBox(width: 4),
-              Text(
-                prevLabel,
-                style: GoogleFonts.manrope(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.outline,
-                  letterSpacing: 1.2,
-                ),
-              ),
-            ],
-          ),
-        ),
-        GestureDetector(
-          onTap: _showMonthPicker,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppTheme.surfaceContainer,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: AppTheme.outlineVariant.withValues(alpha: 0.3),
+        Container(
+          height: 40,
+          child: InkWell(
+            onTap: _previousMonth,
+            borderRadius: BorderRadius.circular(20),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.chevron_left, size: 22, color: AppTheme.primary),
+                  const SizedBox(width: 4),
+                  Text(
+                    prevLabel,
+                    style: GoogleFonts.manrope(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.outline,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ],
               ),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  currentMonthLabel.toUpperCase(),
-                  style: GoogleFonts.manrope(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    color: AppTheme.primary,
-                    letterSpacing: 1.5,
+          ),
+        ),
+        Container(
+          height: 36,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: _showMonthPicker,
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: AppTheme.outlineVariant.withValues(alpha: 0.3),
                   ),
                 ),
-                const SizedBox(width: 4),
-                const Icon(Icons.arrow_drop_down, size: 16, color: AppTheme.primary),
-              ],
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      currentMonthLabel.toUpperCase(),
+                      style: GoogleFonts.manrope(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: AppTheme.primary,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.arrow_drop_down, size: 16, color: AppTheme.primary),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
-        GestureDetector(
-          onTap: () {
-            setState(() { _focusedMonth = nextMonth; });
-            _fetchLogsForFocusedMonth();
-          },
-          child: Row(
-            children: [
-              Text(
-                nextLabel,
-                style: GoogleFonts.manrope(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.outline,
-                  letterSpacing: 1.2,
-                ),
+        Container(
+          height: 40,
+          child: InkWell(
+            onTap: _nextMonth,
+            borderRadius: BorderRadius.circular(20),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    nextLabel,
+                    style: GoogleFonts.manrope(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.outline,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.chevron_right, size: 22, color: AppTheme.primary),
+                ],
               ),
-              const SizedBox(width: 4),
-              const Icon(Icons.chevron_right, size: 20, color: AppTheme.primary),
-            ],
+            ),
           ),
         ),
       ],
