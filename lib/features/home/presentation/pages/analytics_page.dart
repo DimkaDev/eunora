@@ -16,6 +16,15 @@ import 'package:eunora/features/passport/providers/passport_provider.dart';
 import 'package:eunora/features/passport/providers/passport_screen_controller.dart';
 import 'package:eunora/core/services/premium_guard_provider.dart';
 
+// Modular sub-widgets
+import 'package:eunora/features/home/presentation/widgets/analytics/state_switcher_widget.dart';
+import 'package:eunora/features/home/presentation/widgets/analytics/period_selector_widget.dart';
+import 'package:eunora/features/home/presentation/widgets/analytics/symptom_frequency_card.dart';
+import 'package:eunora/features/home/presentation/widgets/analytics/most_frequent_symptoms_card.dart';
+import 'package:eunora/features/home/presentation/widgets/analytics/severity_trend_card.dart';
+import 'package:eunora/features/home/presentation/widgets/analytics/recommendation_item_widget.dart';
+import 'package:eunora/features/home/presentation/widgets/analytics/recommendation_section_widget.dart';
+
 class AnalyticsPage extends ConsumerStatefulWidget {
   const AnalyticsPage({super.key});
 
@@ -29,10 +38,6 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
 
   List<DailyLog> _allLogs = [];
   bool _isLoadingData = true;
-
-  // Selected interactive point index and value for Severity Trend chart
-  int? _selectedTrendDayIndex;
-  double? _selectedTrendValue;
 
   // Personalized Heatmap thresholds computed dynamically
   double _q1 = 1.66;
@@ -161,7 +166,10 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // State Switcher (Sticky/Interactive for review)
-              _buildStateSwitcher(),
+              StateSwitcherWidget(
+                isSufficient: _isSufficient,
+                onStateChanged: (val) => setState(() => _isSufficient = val),
+              ),
               const SizedBox(height: 24),
 
               // Header Section
@@ -185,19 +193,31 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
               const SizedBox(height: 24),
 
               // Time Period Selector
-              _buildPeriodSelector(),
+              PeriodSelectorWidget(
+                selectedPeriodIndex: _selectedPeriodIndex,
+                onPeriodChanged: (idx) => setState(() => _selectedPeriodIndex = idx),
+              ),
               const SizedBox(height: 24),
 
               // Section 1: Symptom Frequency
-              _buildSymptomFrequencyCard(),
+              SymptomFrequencyCard(
+                allLogs: _allLogs,
+                q1: _q1,
+                q2: _q2,
+              ),
               const SizedBox(height: 24),
 
               // Section 2: Most Frequent Symptoms
-              _buildMostFrequentSymptomsCard(),
+              MostFrequentSymptomsCard(
+                filteredLogs: _getFilteredLogs(),
+              ),
               const SizedBox(height: 24),
 
               // Section 3: Severity Trend
-              _buildSeverityTrendCard(),
+              SeverityTrendCard(
+                filteredLogs: _getFilteredLogs(),
+                periodDays: _getPeriodDays(),
+              ),
               const SizedBox(height: 24),
 
               // Section 4: What Affects Your Symptoms / AI Insights
@@ -233,725 +253,6 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
   // ---------------------------------------------------------------------------
   // Widget Builders
   // ---------------------------------------------------------------------------
-
-  Widget _buildStateSwitcher() {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppTheme.primary.withOpacity(0.05),
-        border: Border.all(color: AppTheme.primary.withOpacity(0.1)),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'DASHBOARD STATE',
-                style: GoogleFonts.manrope(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
-                  color: AppTheme.primary,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: _isSufficient
-                      ? const Color(0xFFE8F5E9)
-                      : const Color(0xFFFFDAD6),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  _isSufficient ? 'SUFFICIENT DATA' : 'INSUFFICIENT DATA',
-                  style: GoogleFonts.manrope(
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold,
-                    color: _isSufficient
-                        ? const Color(0xFF2E7D32)
-                        : const Color(0xFFBA1A1A),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => setState(() => _isSufficient = false),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: !_isSufficient ? AppTheme.primary : Colors.transparent,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Insufficient (Empty)',
-                        style: GoogleFonts.manrope(
-                          fontSize: 12,
-                          fontWeight: !_isSufficient ? FontWeight.bold : FontWeight.normal,
-                          color: !_isSufficient ? Colors.white : AppTheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => setState(() => _isSufficient = true),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: _isSufficient ? AppTheme.primary : Colors.transparent,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Sufficient (Active)',
-                        style: GoogleFonts.manrope(
-                          fontSize: 12,
-                          fontWeight: _isSufficient ? FontWeight.bold : FontWeight.normal,
-                          color: _isSufficient ? Colors.white : AppTheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPeriodSelector() {
-    final periods = ['7 days', '30 days', '90 days'];
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Row(
-        children: List.generate(periods.length, (index) {
-          final isSelected = _selectedPeriodIndex == index;
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => _selectedPeriodIndex = index),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                decoration: BoxDecoration(
-                  color: isSelected ? AppTheme.primary : Colors.transparent,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ]
-                      : null,
-                ),
-                child: Center(
-                  child: Text(
-                    periods[index],
-                    style: GoogleFonts.manrope(
-                      fontSize: 12,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                      color: isSelected ? Colors.white : AppTheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
-
-  Widget _buildSymptomFrequencyCard() {
-    // Fixed 28-day window (4 rows x 7 cols)
-    final DateTime today = DateTime.now();
-    final DateTime startDate = today.subtract(const Duration(days: 27));
-
-    final Map<String, double?> dailyLoads = {};
-    for (int i = 0; i < 28; i++) {
-      final date = startDate.add(Duration(days: i));
-      final dateKey = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-      dailyLoads[dateKey] = null;
-    }
-
-    int loggedDaysCount = 0;
-    for (final log in _allLogs) {
-      if (log.date.isAfter(startDate.subtract(const Duration(days: 1))) && log.date.isBefore(today.add(const Duration(days: 1)))) {
-        final dateKey = "${log.date.year}-${log.date.month.toString().padLeft(2, '0')}-${log.date.day.toString().padLeft(2, '0')}";
-        if (log.symptoms.isNotEmpty) {
-          double sumIntensity = 0.0;
-          for (final s in log.symptoms) {
-            sumIntensity += s.intensity?.toDouble() ?? (s.severity == 'Mild' ? 1.0 : s.severity == 'Moderate' ? 3.0 : 5.0);
-          }
-          dailyLoads[dateKey] = sumIntensity / log.symptoms.length;
-        } else {
-          dailyLoads[dateKey] = 0.0;
-        }
-        loggedDaysCount++;
-      }
-    }
-
-    final periodLabel = "Last 28 Days";
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'SYMPTOM FREQUENCY',
-                    style: GoogleFonts.manrope(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.1,
-                      color: AppTheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    periodLabel,
-                    style: GoogleFonts.manrope(
-                      fontSize: 11,
-                      color: AppTheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '$loggedDaysCount/28',
-                    style: GoogleFonts.manrope(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.primary,
-                    ),
-                  ),
-                  Text(
-                    'DAYS LOGGED',
-                    style: GoogleFonts.manrope(
-                      fontSize: 8,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.0,
-                      color: AppTheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          // Heatmap grid (4 rows x 7 cols)
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 7,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-            ),
-            itemCount: 28,
-            itemBuilder: (context, index) {
-              final cellDate = startDate.add(Duration(days: index));
-              final cellKey = "${cellDate.year}-${cellDate.month.toString().padLeft(2, '0')}-${cellDate.day.toString().padLeft(2, '0')}";
-              final dailyLoad = dailyLoads[cellKey];
-
-              Color color = const Color(0xFFF7F5F0); // Default cream no-data
-              Border? border = Border.all(color: AppTheme.outlineVariant.withOpacity(0.3));
-
-              if (dailyLoad != null) {
-                border = null;
-                if (dailyLoad <= _q1) {
-                  color = const Color(0xFFD8C9E0).withOpacity(0.4); // Soft lavender 40%
-                } else if (dailyLoad <= _q2) {
-                  color = const Color(0xFFE8A89B).withOpacity(0.55); // Peachy Rose 55%
-                } else {
-                  color = const Color(0xFFE8A89B); // Peachy Rose 100%
-                }
-              }
-
-              return Container(
-                decoration: BoxDecoration(
-                  color: color,
-                  border: border,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-
-          // Legend Bar
-          Row(
-            children: [
-              Text(
-                'FEW',
-                style: GoogleFonts.manrope(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.outline,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Container(
-                  height: 6,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(3),
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFFD8C9E0),
-                        Color(0xFFE8A89B),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'MANY',
-                style: GoogleFonts.manrope(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.outline,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMostFrequentSymptomsCard() {
-    final filteredLogs = _getFilteredLogs();
-
-    final Map<String, int> symptomDays = {};
-    final Map<String, double> symptomIntensitySum = {};
-    final Map<String, String> symptomNames = {};
-
-    for (final log in filteredLogs) {
-      final Set<String> symptomsLoggedToday = {};
-      for (final s in log.symptoms) {
-        final id = s.symptom.id;
-        symptomsLoggedToday.add(id);
-        symptomNames[id] = s.symptom.name;
-        final intensity = s.intensity?.toDouble() ?? (s.severity == 'Mild' ? 1.0 : s.severity == 'Moderate' ? 3.0 : 5.0);
-        symptomIntensitySum[id] = (symptomIntensitySum[id] ?? 0.0) + intensity;
-      }
-
-      for (final id in symptomsLoggedToday) {
-        symptomDays[id] = (symptomDays[id] ?? 0) + 1;
-      }
-    }
-
-    final List<Map<String, dynamic>> ranks = [];
-    symptomDays.forEach((id, days) {
-      final avgIntensity = symptomIntensitySum[id]! / days;
-      ranks.add({
-        'id': id,
-        'name': symptomNames[id] ?? id,
-        'days_logged': days,
-        'avg_intensity': avgIntensity,
-      });
-    });
-
-    // Sort: days_logged DESC, tie-break avg_intensity DESC
-    ranks.sort((a, b) {
-      final int daysCompare = (b['days_logged'] as int).compareTo(a['days_logged'] as int);
-      if (daysCompare != 0) return daysCompare;
-      return (b['avg_intensity'] as double).compareTo(a['avg_intensity'] as double);
-    });
-
-    final top5 = ranks.take(5).toList();
-    final topDaysCount = top5.isNotEmpty ? (top5.first['days_logged'] as int) : 1;
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'MOST FREQUENT SYMPTOMS',
-            style: GoogleFonts.manrope(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.1,
-              color: AppTheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          if (top5.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              child: Center(
-                child: Text(
-                  'No symptoms logged in this period.',
-                  style: GoogleFonts.manrope(
-                    fontSize: 13,
-                    color: AppTheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            )
-          else
-            ...List.generate(top5.length, (index) {
-              final item = top5[index];
-              final String name = item['name'] as String;
-              final int days = item['days_logged'] as int;
-              final double factor = days / topDaysCount;
-
-              Color color = AppTheme.primary;
-              if (index == 1) {
-                color = const Color(0xFF814F45);
-              } else if (index == 2) {
-                color = const Color(0xFFD0C1D8);
-              } else if (index >= 3) {
-                color = AppTheme.outline;
-              }
-
-              return Padding(
-                padding: EdgeInsets.only(bottom: index == top5.length - 1 ? 0 : 16),
-                child: _buildSymptomBar(
-                  name,
-                  '$days day${days == 1 ? '' : 's'}',
-                  factor,
-                  color,
-                ),
-              );
-            }),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSymptomBar(String label, String value, double factor, Color color) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              label,
-              style: GoogleFonts.manrope(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.onSurface,
-              ),
-            ),
-            Text(
-              value,
-              style: GoogleFonts.manrope(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        Container(
-          width: double.infinity,
-          height: 10,
-          decoration: BoxDecoration(
-            color: AppTheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(5),
-          ),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: FractionallySizedBox(
-              widthFactor: factor.clamp(0.01, 1.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(5),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSeverityTrendCard() {
-    final filteredLogs = _getFilteredLogs();
-    final int days = _getPeriodDays();
-
-    // Map logs by date (midnight) for quick lookup
-    final Map<String, double> dailyLoads = {};
-    for (final log in filteredLogs) {
-      final key = "${log.date.year}-${log.date.month.toString().padLeft(2, '0')}-${log.date.day.toString().padLeft(2, '0')}";
-      if (log.symptoms.isNotEmpty) {
-        double sumIntensity = 0.0;
-        for (final s in log.symptoms) {
-          sumIntensity += s.intensity?.toDouble() ?? (s.severity == 'Mild' ? 1.0 : s.severity == 'Moderate' ? 3.0 : 5.0);
-        }
-        dailyLoads[key] = sumIntensity / log.symptoms.length;
-      }
-    }
-
-    // Build timeline points: Gaps (no-log days) are kept as null
-    final DateTime today = DateTime.now();
-    final DateTime startDate = today.subtract(Duration(days: days - 1));
-
-    final List<double?> rawPoints = [];
-    for (int i = 0; i < days; i++) {
-      final d = startDate.add(Duration(days: i));
-      final key = "${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}";
-      rawPoints.add(dailyLoads[key]);
-    }
-
-    // Process points according to X-axis density:
-    // 7-day view -> one point per day, raw values
-    // 30/90-day view -> 3-day rolling average per point
-    final List<double?> processedPoints = [];
-    if (days == 7) {
-      processedPoints.addAll(rawPoints);
-    } else {
-      // 3-day rolling average
-      for (int i = 0; i < rawPoints.length; i++) {
-        final List<double> window = [];
-        for (int offset = -2; offset <= 0; offset++) {
-          final idx = i + offset;
-          if (idx >= 0 && rawPoints[idx] != null) {
-            window.add(rawPoints[idx]!);
-          }
-        }
-        if (window.isNotEmpty) {
-          processedPoints.add(window.reduce((a, b) => a + b) / window.length);
-        } else {
-          processedPoints.add(null);
-        }
-      }
-    }
-
-    // Calculate trend percentage: split period at its midpoint
-    final int halfIndex = days ~/ 2;
-    final List<double> firstHalf = [];
-    final List<double> secondHalf = [];
-
-    for (int i = 0; i < rawPoints.length; i++) {
-      final val = rawPoints[i];
-      if (val != null) {
-        if (i < halfIndex) {
-          firstHalf.add(val);
-        } else {
-          secondHalf.add(val);
-        }
-      }
-    }
-
-    bool showTrend = firstHalf.length >= 4 && secondHalf.length >= 4;
-    String trendText = "Keep logging to see your trend";
-    Color trendColor = AppTheme.outline;
-    IconData trendIcon = Icons.trending_flat;
-
-    if (showTrend) {
-      final double avgFirst = firstHalf.reduce((a, b) => a + b) / firstHalf.length;
-      final double avgSecond = secondHalf.reduce((a, b) => a + b) / secondHalf.length;
-
-      if (avgFirst > 0.0) {
-        final double pct = (avgFirst - avgSecond) / avgFirst * 100;
-        if (pct >= 0) {
-          trendText = "${pct.toStringAsFixed(0)}% improvement";
-          trendColor = const Color(0xFF2E7D32); // Success Green
-          trendIcon = Icons.trending_down;
-        } else {
-          trendText = "${pct.abs().toStringAsFixed(0)}% increase";
-          trendColor = const Color(0xFFE8A89B); // Neutral Peachy Rose
-          trendIcon = Icons.trending_up;
-        }
-      }
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'SEVERITY TREND',
-                style: GoogleFonts.manrope(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.1,
-                  color: AppTheme.onSurface,
-                ),
-              ),
-              Row(
-                children: [
-                  Icon(trendIcon, size: 14, color: trendColor),
-                  const SizedBox(width: 4),
-                  Text(
-                    trendText,
-                    style: GoogleFonts.manrope(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: trendColor,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          // Dynamic interactive trend painter
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final double width = constraints.maxWidth;
-              final double stepX = width / (processedPoints.length - 1);
-
-              return GestureDetector(
-                onPanUpdate: (details) {
-                  final double localX = details.localPosition.dx.clamp(0.0, width);
-                  final int index = (localX / stepX).round().clamp(0, processedPoints.length - 1);
-                  final double? val = processedPoints[index];
-                  if (val != null && mounted) {
-                    setState(() {
-                      _selectedTrendDayIndex = index;
-                      _selectedTrendValue = val;
-                    });
-                  }
-                },
-                onTapUp: (details) {
-                  final double localX = details.localPosition.dx.clamp(0.0, width);
-                  final int index = (localX / stepX).round().clamp(0, processedPoints.length - 1);
-                  final double? val = processedPoints[index];
-                  if (val != null && mounted) {
-                    setState(() {
-                      _selectedTrendDayIndex = index;
-                      _selectedTrendValue = val;
-                    });
-                  }
-                },
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: 112,
-                      width: double.infinity,
-                      child: CustomPaint(
-                        painter: DynamicTrendPainter(
-                          points: processedPoints,
-                          selectedIndex: _selectedTrendDayIndex,
-                        ),
-                      ),
-                    ),
-                    if (_selectedTrendDayIndex != null && _selectedTrendValue != null) ...[
-                      const SizedBox(height: 10),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: AppTheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          '${days - 1 - _selectedTrendDayIndex!} days ago: Severity Load ${_selectedTrendValue!.toStringAsFixed(1)} (Average out of 5)',
-                          style: GoogleFonts.manrope(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 8),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '$days days ago',
-                style: GoogleFonts.manrope(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.outline,
-                ),
-              ),
-              Text(
-                'Today',
-                style: GoogleFonts.manrope(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.outline,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildAiInsightsSection(bool isPremium) {
     if (!_isSufficient) {
@@ -1322,62 +623,14 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
   }
 
   Widget _buildRecommendationsSection() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF2F8F2),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE0ECE0).withOpacity(0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'RECOMMENDED FOR YOU',
-            style: GoogleFonts.manrope(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.1,
-              color: AppTheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 16),
-          _buildRecommendationItem('Try evening exercises'),
-          const SizedBox(height: 8),
-          _buildRecommendationItem('Track water intake'),
-          const SizedBox(height: 8),
-          _buildRecommendationItem('Stress management tips'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRecommendationItem(String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.6),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: GoogleFonts.manrope(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.onSurface,
-            ),
-          ),
-          const Icon(
-            Icons.north_east,
-            size: 14,
-            color: AppTheme.primary,
-          ),
-        ],
-      ),
+    return const RecommendationSectionWidget(
+      children: [
+        RecommendationItemWidget(label: 'Try evening exercises'),
+        SizedBox(height: 8),
+        RecommendationItemWidget(label: 'Track water intake'),
+        SizedBox(height: 8),
+        RecommendationItemWidget(label: 'Stress management tips'),
+      ],
     );
   }
 

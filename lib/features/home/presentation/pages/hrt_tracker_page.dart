@@ -12,6 +12,8 @@ import 'package:eunora/core/services/firestore_service.dart';
 import 'package:eunora/features/home/domain/entities/daily_log.dart';
 import 'package:eunora/features/home/domain/entities/hrt_dose_change.dart';
 
+import 'package:eunora/features/home/presentation/widgets/hrt_tracker/hrt_adherence_card.dart';
+
 class HrtTrackerPage extends ConsumerStatefulWidget {
   const HrtTrackerPage({super.key});
 
@@ -599,7 +601,10 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
             const SizedBox(height: 24),
 
             // Adherence Section
-            _buildAdherenceCard(),
+            HrtAdherenceCard(
+              focusedMonth: _focusedMonth,
+              monthlyLogs: _monthlyLogs,
+            ),
             const SizedBox(height: 32),
 
             // Quick tester reset option (Helper for reviewers)
@@ -1431,97 +1436,6 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAdherenceCard() {
-    final totalDays = DateUtils.getDaysInMonth(_focusedMonth.year, _focusedMonth.month);
-
-    final today = DateTime.now();
-    final isCurrentMonth = today.year == _focusedMonth.year && today.month == _focusedMonth.month;
-    final limitDay = isCurrentMonth ? today.day : totalDays;
-
-    int totalScheduled = 0;
-    int totalLogged = 0;
-
-    for (int day = 1; day <= limitDay; day++) {
-      final log = _monthlyLogs[day];
-      if (log != null) {
-        totalScheduled += log.hrtIntakes.length;
-        totalLogged += log.hrtIntakes.where((h) => h.isTaken).length;
-      }
-    }
-
-    int rate = 100;
-    if (totalScheduled > 0) {
-      rate = ((totalLogged / totalScheduled) * 100).round();
-    } else {
-      final hasMeds = ref.read(medicationsProvider).medications.isNotEmpty;
-      rate = hasMeds ? 100 : 0;
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFFE8F0E8),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: const Color(0xFF2D5A3E).withOpacity(0.08)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.6),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.trending_up,
-              color: Color(0xFF2D5A3E),
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Adherence this month: $rate%',
-                  style: GoogleFonts.manrope(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.primary,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  rate >= 80
-                      ? "You're staying consistent! Keep it up."
-                      : "Try checking your reminders to log doses daily.",
-                  style: GoogleFonts.manrope(
-                    fontSize: 11,
-                    color: const Color(0xFF2D5A3E).withOpacity(0.8),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Icon(
-            Icons.analytics_outlined,
-            color: const Color(0xFF2D5A3E).withOpacity(0.3),
-            size: 22,
           ),
         ],
       ),

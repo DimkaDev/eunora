@@ -16,6 +16,9 @@ import 'package:eunora/features/onboarding/domain/models/medication.dart';
 import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
 
 
+import 'package:eunora/features/home/presentation/widgets/calendar/calendar_weekly_trends_card.dart';
+import 'package:eunora/features/home/presentation/widgets/calendar/calendar_insights_banner.dart';
+
 class MockDailyLog {
   List<String> symptoms;
   final String sleepInfo;
@@ -277,6 +280,104 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       return _aprilLogs[_selectedDate!.day];
     }
     return null;
+  }
+
+  MockDailyLog? _getLogForDayAndMonth(DateTime date) {
+    final cached = _monthLogsCache[_monthKey(date)];
+    if (cached != null && cached.containsKey(date.day)) {
+      return cached[date.day];
+    }
+    final isApril = date.year == 2026 && date.month == 4;
+    if (isApril && _aprilLogs.containsKey(date.day)) {
+      return _aprilLogs[date.day];
+    }
+    return null;
+  }
+
+  Map<String, dynamic> _getWeeklyTrendsData() {
+    if (_selectedDate == null) {
+      return {
+        'avgIntensity': 0.0,
+        'avgSleep': 0.0,
+        'intensityHeights': <double>[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        'sleepHeights': <double>[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        'intensityChange': '↓ 0%',
+        'sleepChange': '↓ 0%',
+        'isIntensityGood': true,
+        'isSleepGood': true,
+      };
+    }
+
+    // Find the Monday of the week containing _selectedDate
+    final weekday = _selectedDate!.weekday;
+    final monday = _selectedDate!.subtract(Duration(days: weekday - 1));
+
+    final List<double> intensities = [];
+    final List<double> sleepHours = [];
+
+    for (int i = 0; i < 7; i++) {
+      final date = monday.add(Duration(days: i));
+      final log = _getLogForDayAndMonth(date);
+
+      if (log != null) {
+        // Parse sleep
+        double sleepVal = 0.0;
+        if (log.originalLog != null) {
+          sleepVal = log.originalLog!.sleepDuration;
+        } else {
+          final match = RegExp(r'(\d+(\.\d+)?)').firstMatch(log.sleepInfo);
+          if (match != null) {
+            sleepVal = double.tryParse(match.group(1) ?? '0.0') ?? 0.0;
+          }
+        }
+        if (sleepVal > 0.0) {
+          sleepHours.add(sleepVal);
+        } else {
+          sleepHours.add(0.0);
+        }
+
+        // Parse intensity
+        double maxIntensity = 0.0;
+        for (final s in log.symptoms) {
+          final parts = s.split(' · ');
+          if (parts.length > 1) {
+            final scoreStr = parts[1].split('/').first.trim();
+            final score = double.tryParse(scoreStr) ?? 0.0;
+            if (score > maxIntensity) {
+              maxIntensity = score;
+            }
+          }
+        }
+        intensities.add(maxIntensity);
+      } else {
+        sleepHours.add(0.0);
+        intensities.add(0.0);
+      }
+    }
+
+    final totalIntensity = intensities.reduce((a, b) => a + b);
+    final totalSleep = sleepHours.reduce((a, b) => a + b);
+
+    final loggedDaysIntensity = intensities.where((v) => v > 0).length;
+    final loggedDaysSleep = sleepHours.where((v) => v > 0).length;
+
+    final avgIntensity = loggedDaysIntensity > 0 ? totalIntensity / loggedDaysIntensity : 0.0;
+    final avgSleep = loggedDaysSleep > 0 ? totalSleep / loggedDaysSleep : 0.0;
+
+    // Scale heights to [0.0, 1.0] for sparklines (intensity scale max is 5, sleep max is 10)
+    final intensityHeights = intensities.map((v) => (v / 5.0).clamp(0.0, 1.0)).toList();
+    final sleepHeights = sleepHours.map((v) => (v / 10.0).clamp(0.0, 1.0)).toList();
+
+    return {
+      'avgIntensity': avgIntensity,
+      'avgSleep': avgSleep,
+      'intensityHeights': intensityHeights,
+      'sleepHeights': sleepHeights,
+      'intensityChange': avgIntensity > 3.0 ? '↑ 14%' : '↓ 12%',
+      'sleepChange': avgSleep < 6.0 ? '↓ 8%' : '↑ 4%',
+      'isIntensityGood': avgIntensity <= 3.0,
+      'isSleepGood': avgSleep >= 7.0,
+    };
   }
 
 
@@ -925,10 +1026,11 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                   color: AppTheme.onSurfaceVariant,
                 ),
               ),
-              const SizedBox(height: 24),
               _buildMonthNavigation(),
               const SizedBox(height: 16),
               _buildCalendarCard(),
+              const SizedBox(height: 16),
+              _buildLegendAccordion(),
               const SizedBox(height: 24),
               // Show skeleton while initial load or current month fetching, logged state otherwise
               AnimatedSwitcher(
@@ -1285,13 +1387,16 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                     final nextRows = _getRowCountForMonth(nextMonth);
 
                     // Interpolate the height smoothly during swipe between current and adjacent month
-                    // Add 1.0 logic pixel safety margin to cellWidth to prevent sub-pixel rounding precision mismatch overflows.
-                    final safetyCellWidth = cellWidth + 1.0;
-                    double targetHeight = currentRows * safetyCellWidth;
+                    // Each row cell is a square (aspectRatio: 1) with height equal to cellWidth.
+                    // Each row has a vertical padding of 4.0 (symmetric 2.0). 
+                    // The selected week container introduces a 1.0px border (top/bottom = 2.0px).
+                    // We add a safety margin of 6.0px per row dynamically to prevent clipping across all screen sizes.
+                    final safetyCellHeight = cellWidth + 6.0;
+                    double targetHeight = currentRows * safetyCellHeight;
                     if (_isSwiping && _dragOffset != 0.0) {
                       final progress = (_dragOffset.abs() / width).clamp(0.0, 1.0);
                       final adjacentRows = _dragOffset > 0 ? prevRows : nextRows;
-                      targetHeight = currentRows * safetyCellWidth + (adjacentRows - currentRows) * safetyCellWidth * progress;
+                      targetHeight = (currentRows * safetyCellHeight) + (adjacentRows - currentRows) * safetyCellHeight * progress;
                     }
 
                     return ClipRect(
@@ -1305,7 +1410,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                               offset: Offset(_dragOffset - width, 0),
                               child: Container(
                                 width: width,
-                                height: prevRows * safetyCellWidth,
+                                height: prevRows * safetyCellHeight,
                                 child: _buildDaysGridForMonth(prevMonth, isPrevApril),
                               ),
                             ),
@@ -1314,7 +1419,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                               offset: Offset(_dragOffset, 0),
                               child: Container(
                                 width: width,
-                                height: currentRows * safetyCellWidth,
+                                height: currentRows * safetyCellHeight,
                                 child: _buildDaysGridForMonth(_focusedMonth, isApril),
                               ),
                             ),
@@ -1323,7 +1428,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                               offset: Offset(_dragOffset + width, 0),
                               child: Container(
                                 width: width,
-                                height: nextRows * safetyCellWidth,
+                                height: nextRows * safetyCellHeight,
                                 child: _buildDaysGridForMonth(nextMonth, isNextApril),
                               ),
                             ),
@@ -1433,6 +1538,16 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     
     // Grid layout with 7 items per row
     final rowsCount = (dayWidgets.length / 7).ceil();
+    
+    // Find the row index of the selected date
+    int? selectedRowIndex;
+    if (_selectedDate != null &&
+        _selectedDate!.year == targetMonth.year &&
+        _selectedDate!.month == targetMonth.month) {
+      final selectedDayIndex = prefixDaysCount + _selectedDate!.day - 1;
+      selectedRowIndex = selectedDayIndex ~/ 7;
+    }
+
     return SingleChildScrollView(
       physics: const NeverScrollableScrollPhysics(),
       child: Column(
@@ -1441,8 +1556,29 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           final start = rowIndex * 7;
           final end = start + 7;
           final rowWidgets = dayWidgets.sublist(start, end);
-          return Row(
+          final isWeekSelected = selectedRowIndex == rowIndex;
+
+          Widget rowContent = Row(
             children: rowWidgets.map((w) => Expanded(child: AspectRatio(aspectRatio: 1, child: w))).toList(),
+          );
+
+          if (isWeekSelected) {
+            rowContent = Container(
+              decoration: BoxDecoration(
+                color: AppTheme.primaryFixed.withValues(alpha: 0.35),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: AppTheme.primaryFixed,
+                  width: 1,
+                ),
+              ),
+              child: rowContent,
+            );
+          }
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: rowContent,
           );
         }),
       ),
@@ -1787,217 +1923,24 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           ),
         ),
         const SizedBox(height: 24),
-        _buildWeeklyTrendsCard(),
+        Builder(
+          builder: (context) {
+            final trends = _getWeeklyTrendsData();
+            return CalendarWeeklyTrendsCard(
+              averageIntensity: trends['avgIntensity'],
+              averageSleep: trends['avgSleep'],
+              intensityHeights: trends['intensityHeights'],
+              sleepHeights: trends['sleepHeights'],
+              intensityChangeLabel: trends['intensityChange'],
+              sleepChangeLabel: trends['sleepChange'],
+              isIntensityChangeGood: trends['isIntensityGood'],
+              isSleepChangeGood: trends['isSleepGood'],
+            );
+          },
+        ),
         const SizedBox(height: 24),
-        _buildInsightsBanner(),
-        const SizedBox(height: 16),
-        _buildLegendAccordion(),
+        const CalendarInsightsBanner(),
       ],
-    );
-  }
-
-  Widget _buildWeeklyTrendsCard() {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppTheme.outlineVariant.withValues(alpha: 0.2),
-        ),
-      ),
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Weekly Trends',
-            style: GoogleFonts.notoSerif(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.primary,
-            ),
-          ),
-          const SizedBox(height: 16),
-          _buildTrendRow(
-            title: 'Symptom Intensity',
-            value: 'Avg 4.2',
-            change: '↓ 12%',
-            isGood: true,
-            sparklineHeights: [0.4, 0.6, 0.8, 0.3, 0.5, 0.45, 0.0],
-          ),
-          const Divider(height: 24, color: Color(0xFFF2EDEA)),
-          _buildTrendRow(
-            title: 'Sleep Quality',
-            value: '6.5 hrs',
-            change: '↓ 4%',
-            isGood: false,
-            sparklineHeights: [0.7, 0.65, 0.9, 0.55, 0.6, 0.4, 0.0],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTrendRow({
-    required String title,
-    required String value,
-    required String change,
-    required bool isGood,
-    required List<double> sparklineHeights,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppTheme.outlineVariant.withValues(alpha: 0.1),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title.toUpperCase(),
-                style: GoogleFonts.manrope(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.outline,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Row(
-                children: [
-                  Text(
-                    value,
-                    style: GoogleFonts.manrope(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    change,
-                    style: GoogleFonts.manrope(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: isGood ? Colors.green[600] : Colors.red[500],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          _buildSparkline(sparklineHeights),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSparkline(List<double> heights) {
-    return SizedBox(
-      height: 24,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: List.generate(heights.length, (index) {
-          final h = heights[index];
-          // Sparkline highlights active column (index 5)
-          final isHighlighted = index == 5;
-          return Container(
-            width: 4,
-            height: 24 * h,
-            margin: const EdgeInsets.symmetric(horizontal: 1.5),
-            decoration: BoxDecoration(
-              color: h == 0
-                  ? Colors.transparent
-                  : (isHighlighted ? AppTheme.primary : const Color(0xFFD0C1D8)),
-              borderRadius: BorderRadius.circular(1),
-            ),
-          );
-        }),
-      ),
-    );
-  }
-
-  Widget _buildInsightsBanner() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(16),
-        border: Border(
-          left: const BorderSide(color: AppTheme.tertiaryFixed, width: 4),
-          top: BorderSide(color: AppTheme.outlineVariant.withValues(alpha: 0.2)),
-          right: BorderSide(color: AppTheme.outlineVariant.withValues(alpha: 0.2)),
-          bottom: BorderSide(color: AppTheme.outlineVariant.withValues(alpha: 0.2)),
-        ),
-      ),
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.psychology_alt,
-                color: Color(0xFF814F45),
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Personalized Insights',
-                style: GoogleFonts.notoSerif(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.primary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Your hot flashes correlate with caffeine intake recorded 4 hours prior. Consider switching to herbal tea after 12 PM.',
-            style: GoogleFonts.manrope(
-              fontSize: 14,
-              color: AppTheme.onSurfaceVariant,
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Divider(height: 1, color: Color(0xFFE7E1DF)),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Actionable takeaway',
-                style: GoogleFonts.manrope(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: AppTheme.outline,
-                ),
-              ),
-              TextButton.icon(
-                onPressed: () {},
-                icon: const Text('LEARN MORE'),
-                label: const Icon(Icons.open_in_new, size: 14),
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF814F45),
-                  padding: EdgeInsets.zero,
-                  textStyle: GoogleFonts.manrope(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 
@@ -2136,6 +2079,24 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         _buildPremiumPatternsCard(),
         const SizedBox(height: 20),
         _buildTrendsChartCard(),
+        const SizedBox(height: 24),
+        Builder(
+          builder: (context) {
+            final trends = _getWeeklyTrendsData();
+            return CalendarWeeklyTrendsCard(
+              averageIntensity: trends['avgIntensity'],
+              averageSleep: trends['avgSleep'],
+              intensityHeights: trends['intensityHeights'],
+              sleepHeights: trends['sleepHeights'],
+              intensityChangeLabel: trends['intensityChange'],
+              sleepChangeLabel: trends['sleepChange'],
+              isIntensityChangeGood: trends['isIntensityGood'],
+              isSleepChangeGood: trends['isSleepGood'],
+            );
+          },
+        ),
+        const SizedBox(height: 24),
+        const CalendarInsightsBanner(),
       ],
     );
   }
