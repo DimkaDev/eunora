@@ -86,7 +86,7 @@ class HrtEditEntry {
     required this.timeTaken,
   });
 
-  /// Parse from the `Map<String, String>` format used in MockDailyLog.
+  /// Parse from the `Map<String, String>` format.
   factory HrtEditEntry.fromMap(Map<String, String> map) {
     final isTaken = map['isTaken'] == 'true';
     final details = map['details'] ?? '';
