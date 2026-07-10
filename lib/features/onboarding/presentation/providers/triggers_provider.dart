@@ -1,21 +1,55 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/models/trigger.dart';
+import 'package:eunora/features/symptom_log/data/trigger_library.dart';
 
-final baseTriggerLibrary = [
-  const TriggerOption(id: 't_caffeine', name: 'Caffeine', description: 'Coffee, tea, energy drinks, or soda consumed throughout the day.', iconName: 'coffee', category: 'Lifestyle & Habits'),
-  const TriggerOption(id: 't_alcohol', name: 'Alcohol', description: 'Wine, beer, or cocktails, especially late in the evening.', iconName: 'local_bar', category: 'Lifestyle & Habits'),
-  const TriggerOption(id: 't_stress', name: 'Stress', description: 'High mental or emotional pressure from work, home, or personal life.', iconName: 'psychology', category: 'Emotional & Environmental'),
-  const TriggerOption(id: 't_exercise', name: 'Exercise', description: 'Physical exertion, intense workouts, or new activity levels.', iconName: 'fitness_center', category: 'Lifestyle & Habits'),
-  const TriggerOption(id: 't_weather', name: 'Weather', description: 'Extreme heat, high humidity, or sudden temperature shifts.', iconName: 'thermostat', category: 'Emotional & Environmental'),
-  const TriggerOption(id: 't_foods', name: 'Foods', description: 'Spicy foods, sugary snacks, or heavy meals before bed.', iconName: 'restaurant', category: 'Diet & Nutrition'),
-  const TriggerOption(id: 't_smoking', name: 'Smoking/Tobacco', description: 'Cigarettes, vaping, or exposure to tobacco smoke.', iconName: 'smoking', category: 'Lifestyle & Habits'),
-  const TriggerOption(id: 't_sleep', name: 'Poor Sleep', description: 'Lack of sleep, disrupted rest, or irregular bedtime hours.', iconName: 'bedtime', category: 'Lifestyle & Habits'),
-  const TriggerOption(id: 't_dehydration', name: 'Dehydration', description: 'Not drinking enough water throughout the day.', iconName: 'water_drop', category: 'Diet & Nutrition'),
-  const TriggerOption(id: 't_travel', name: 'Travel', description: 'Long trips, jetlag, or changing climates and timezones.', iconName: 'flight', category: 'Lifestyle & Habits'),
-  const TriggerOption(id: 't_work', name: 'Overworking', description: 'Long working hours, physical strain, or intense workplace pressure.', iconName: 'work', category: 'Emotional & Environmental'),
-  const TriggerOption(id: 't_sugar', name: 'Sugar & Sweets', description: 'High-sugar foods, chocolate, or processed desserts.', iconName: 'restaurant', category: 'Diet & Nutrition'),
-  const TriggerOption(id: 't_relaxation', name: 'Lack of Rest', description: 'Insufficient time for relaxation, mindfulness, or self-care.', iconName: 'spa', category: 'Emotional & Environmental'),
-];
+String _mapTriggerIcon(String id) {
+  switch (id) {
+    case 'coffee': return 'coffee';
+    case 'alcohol': return 'local_bar';
+    case 'stress': return 'psychology';
+    case 'exercise': return 'fitness_center';
+    case 'weather': return 'thermostat';
+    case 'spicy_food':
+    case 'sugar_processed_food':
+    case 'hot_drinks_food':
+    case 'skipped_meals':
+      return 'restaurant';
+    case 'smoking': return 'smoking';
+    case 'tight_clothing': return 'spa';
+    case 'warm_bedroom': return 'bedtime';
+    default: return 'spa';
+  }
+}
+
+String _mapTriggerDesc(String id) {
+  switch (id) {
+    case 'coffee': return 'Coffee, tea, energy drinks, or soda consumed throughout the day.';
+    case 'alcohol': return 'Wine, beer, or cocktails, especially late in the evening.';
+    case 'stress': return 'High mental or emotional pressure from work, home, or personal life.';
+    case 'exercise': return 'Physical exertion, intense workouts, or new activity levels.';
+    case 'weather': return 'Extreme heat, high humidity, or sudden temperature shifts.';
+    default: return 'Dietary, lifestyle, or environmental trigger.';
+  }
+}
+
+String _mapTriggerCategory(TriggerCategory cat) {
+  switch (cat) {
+    case TriggerCategory.dietary: return 'Diet & Nutrition';
+    case TriggerCategory.lifestyle: return 'Lifestyle & Habits';
+    case TriggerCategory.environmental: return 'Emotional & Environmental';
+  }
+}
+
+// --- Static Base Library of Triggers mapped from kTriggerLibrary ---
+final baseTriggerLibrary = kTriggerLibrary.map((def) {
+  return TriggerOption(
+    id: 't_${def.id}',
+    name: def.label,
+    description: _mapTriggerDesc(def.id),
+    iconName: _mapTriggerIcon(def.id),
+    category: _mapTriggerCategory(def.category),
+  );
+}).toList();
 
 class TriggersState {
   final List<TriggerOption> customTriggers;
@@ -25,19 +59,11 @@ class TriggersState {
   TriggersState({
     this.customTriggers = const [],
     this.activeTriggerIds = const [
-      't_caffeine',
+      't_coffee',
       't_alcohol',
       't_stress',
       't_exercise',
       't_weather',
-      't_foods',
-      't_smoking',
-      't_sleep',
-      't_dehydration',
-      't_travel',
-      't_work',
-      't_sugar',
-      't_relaxation'
     ],
     this.error,
   });

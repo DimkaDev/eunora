@@ -65,6 +65,7 @@ class _ActiveSetupPageState extends ConsumerState<ActiveSetupPage> {
               children: [
                 OnboardingHeader(
                   currentStep: 9,
+                  subtitle: 'REMINDERS',
                   onBack: widget.onBack,
                   onSkip: () => _showInfoDialog(context),
                 ),

@@ -6,6 +6,8 @@ import '../../../../core/theme/app_theme.dart';
 import '../providers/symptoms_provider.dart';
 import '../../domain/models/symptom.dart';
 import '../widgets/onboarding_header.dart';
+import 'package:eunora/features/onboarding/presentation/providers/menopause_stage_provider.dart';
+import 'package:eunora/features/onboarding/presentation/providers/onboarding_profile_provider.dart';
 
 class FrequentSymptomsPage extends ConsumerWidget {
   final VoidCallback? onNext;
@@ -18,10 +20,54 @@ class FrequentSymptomsPage extends ConsumerWidget {
     final notifier = ref.read(symptomsProvider.notifier);
     final library = ref.watch(symptomLibraryProvider);
 
-    // Get symptoms currently marked as "Frequent" (even if deselected)
-    final frequentSymptoms = state.frequentSymptomIds.map((id) {
-      return library.firstWhere((s) => s.id == id);
-    }).toList();
+    final stage = ref.watch(menopauseStageProvider).selectedStage ?? 
+        ref.watch(onboardingProfileProvider)?.menopauseStage;
+    final isPerimenopause = stage == MenopauseStage.irregular;
+
+    final List<Symptom> frequentSymptoms;
+    if (isPerimenopause) {
+      final List<String> periIds = [
+        'hot_flash',
+        'night_sweats',
+        'mood_swings',
+        'difficulty_falling_asleep',
+        'brain_fog',
+        'irregular_spotting',
+      ];
+      final List<Symptom> list = [];
+      for (final id in periIds) {
+        final base = library.firstWhere(
+          (s) => s.id == id,
+          orElse: () => Symptom(id: id, name: id, iconName: 'medical_services'),
+        );
+        String name = base.name;
+        if (id == 'mood_swings') name = 'Mood changes';
+        if (id == 'difficulty_falling_asleep') name = 'Sleep problems';
+        if (id == 'irregular_spotting') name = 'Irregular bleeding';
+        list.add(base.copyWith(name: name));
+      }
+      for (final s in library) {
+        if ((notifier.isLogged(s.id) || state.frequentSymptomIds.contains(s.id)) && !periIds.contains(s.id)) {
+          list.add(s);
+        }
+      }
+      frequentSymptoms = list;
+    } else {
+      final List<Symptom> list = [];
+      for (final id in state.frequentSymptomIds) {
+        final base = library.firstWhere(
+          (s) => s.id == id,
+          orElse: () => Symptom(id: id, name: id, iconName: 'medical_services'),
+        );
+        list.add(base);
+      }
+      for (final s in library) {
+        if ((notifier.isLogged(s.id) || state.frequentSymptomIds.contains(s.id)) && !state.frequentSymptomIds.contains(s.id)) {
+          list.add(s);
+        }
+      }
+      frequentSymptoms = list;
+    }
 
     return Scaffold(
       backgroundColor: const Color(
@@ -143,18 +189,18 @@ class FrequentSymptomsPage extends ConsumerWidget {
     required VoidCallback onTap,
   }) {
     final Color iconColor = symptom.getIconColor();
-    final Color iconBgColor = iconColor.withOpacity(0.1);
+    final Color iconBgColor = iconColor.withOpacity(0.15);
 
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white : const Color(0xFFFFFFFF),
+          color: isSelected ? iconColor.withOpacity(0.12) : iconColor.withOpacity(0.04),
           borderRadius: BorderRadius.circular(40),
           border: Border.all(
-            color: isSelected ? const Color(0xFF9B8B7E) : Colors.transparent,
-            width: isSelected ? 2 : 0,
+            color: isSelected ? iconColor : iconColor.withOpacity(0.1),
+            width: isSelected ? 2 : 1,
           ),
           boxShadow: [
             BoxShadow(
@@ -171,7 +217,7 @@ class FrequentSymptomsPage extends ConsumerWidget {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: isSelected ? iconColor.withOpacity(0.2) : iconBgColor,
+                color: isSelected ? iconColor.withOpacity(0.25) : iconBgColor,
                 shape: BoxShape.circle,
               ),
               child: Icon(

@@ -6,7 +6,12 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/models/medication.dart';
 import '../providers/medications_provider.dart';
+import '../providers/onboarding_profile_provider.dart';
 import 'package:eunora/features/home/presentation/widgets/dose_change_alert.dart';
+import 'package:eunora/features/hrt_tracker/data/hrt_drug_library.dart';
+import 'package:eunora/features/hrt_tracker/data/hrt_quick_add_service.dart';
+import 'package:eunora/features/hrt_tracker/providers/hrt_quick_add_provider.dart';
+import 'package:eunora/features/hrt_tracker/presentation/widgets/hrt_quick_add_card.dart';
 
 class AddMedicationModal extends ConsumerStatefulWidget {
   final dynamic initialData; // Can be Medication for edit or String for prefill name
@@ -28,9 +33,18 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
   String _selectedFrequency = 'Daily';
   
   bool _showDropdown = false;
-  final List<String> _commonHRT = ['Estradiol', 'Estradot', 'Estrogen Gel', 'Utrogestan', 'Femoston'];
   List<String> _filteredMeds = [];
   bool _isCustomDose = false;
+
+  // --- HRT Drug Library v2 state ---
+  bool _isCombined = false;
+  String? _combinedComponents;
+  String _drugCategory = 'systemicEstrogen';
+  String _drugMarket = 'uk';
+
+  /// Full library names for autocomplete (all 33 entries).
+  static final List<String> _allLibraryNames =
+      kHrtDrugLibrary.map((d) => d.name).toList();
 
   @override
   void initState() {
@@ -58,6 +72,77 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
     }
 
     _nameController.addListener(_onNameChanged);
+
+    // --- HRT Drug Library v2: restore combined state when editing ---
+    if (widget.initialData is Medication) {
+      final med = widget.initialData as Medication;
+      _isCombined = med.isCombinedProduct;
+      _combinedComponents = med.combinedComponents;
+      _drugCategory = med.drugCategory;
+      _drugMarket = med.market;
+    }
+  }
+
+  /// Pre-fills the modal from a Quick-Add card selection.
+  void _applyQuickAdd(HrtDrugOption drug) {
+    setState(() {
+      _nameController.text = drug.name;
+      _showDropdown = false;
+      _filteredMeds = [];
+      _isCombined = drug.isCombinedProduct;
+      _drugCategory = drug.category.name;
+      _drugMarket = drug.market.name;
+      // Derive combinedComponents from library (display-only)
+      final def = HrtQuickAddService.findByName(drug.name);
+      _combinedComponents = def != null && def.isCombinedProduct
+          ? _defaultComponentsForDrug(drug.name)
+          : null;
+      // Map first common form to MedicationType
+      final form = drug.commonForms.isNotEmpty ? drug.commonForms.first : 'tablet';
+      _selectedType = _formToMedicationType(form);
+      if (_selectedType == MedicationType.gel) {
+        _selectedUnit = 'pumps';
+        _doseController.text = '1';
+      } else if (_selectedType == MedicationType.patch) {
+        _selectedUnit = 'mcg';
+        _doseController.text = '50';
+      } else {
+        _selectedUnit = 'mg';
+        _doseController.text = '1';
+      }
+      _isCustomDose = false;
+    });
+  }
+
+  static MedicationType _formToMedicationType(String form) {
+    switch (form) {
+      case 'patch': return MedicationType.patch;
+      case 'gel':
+      case 'spray': return MedicationType.gel;
+      case 'tablet': return MedicationType.pill;
+      default: return MedicationType.other;
+    }
+  }
+
+  /// Returns a sensible default component description for known combined products.
+  static String? _defaultComponentsForDrug(String name) {
+    const map = <String, String>{
+      'Evorel Conti': 'estradiol+norethindrone',
+      'Evorel Sequi': 'estradiol+norethindrone',
+      'Femoston': 'estradiol+dydrogesterone',
+      'Femoston Conti': 'estradiol+dydrogesterone',
+      'FemSeven Conti': 'estradiol+levonorgestrel',
+      'FemSeven Sequi': 'estradiol+levonorgestrel',
+      'Kliovance': 'estradiol+norethindrone',
+      'Kliofem': 'estradiol+norethindrone',
+      'Elleste Duet': 'estradiol+norethindrone',
+      'Novofem': 'estradiol+norethindrone',
+      'Prempro': 'conjugated estrogens+medroxyprogesterone',
+      'Combipatch': 'estradiol+norethindrone',
+      'Climara Pro': 'estradiol+levonorgestrel',
+      'Bijuve': 'estradiol+micronized progesterone',
+    };
+    return map[name];
   }
 
   void _onNameChanged() {
@@ -70,7 +155,10 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
       return;
     }
 
-    final filtered = _commonHRT.where((m) => m.toLowerCase().contains(query)).toList();
+    // Search the full 33-entry library (not the old 5-item hardcoded list)
+    final filtered = _allLibraryNames
+        .where((m) => m.toLowerCase().contains(query))
+        .toList();
     setState(() {
       _filteredMeds = filtered;
       _showDropdown = filtered.isNotEmpty;
@@ -173,7 +261,8 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
                         initialDose = (widget.initialData as Medication).dose;
                       }
 
-                      if (initialDose > 0 && (tempDose - initialDose).abs() > 0.01) {
+                      final isOnboardingCompleted = ref.read(onboardingProfileProvider)?.isOnboardingCompleted ?? false;
+                      if (isOnboardingCompleted && initialDose > 0 && (tempDose - initialDose).abs() > 0.01) {
                         showDialog(
                           context: this.context,
                           barrierDismissible: false,
@@ -240,6 +329,15 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
 
   void _save() {
     if (_formKey.currentState!.validate()) {
+      // Auto-detect drug category from library if user typed the name manually
+      final def = HrtQuickAddService.findByName(_nameController.text.trim());
+      final finalCategory = def != null ? def.category.name : _drugCategory;
+      final finalMarket = def != null ? def.market.name : _drugMarket;
+      final finalIsCombined = def != null ? def.isCombinedProduct : _isCombined;
+      final finalComponents = finalIsCombined
+          ? (_combinedComponents ?? _defaultComponentsForDrug(_nameController.text.trim()))
+          : null;
+
       final medication = Medication(
         id: widget.initialData is Medication ? (widget.initialData as Medication).id : null,
         name: _nameController.text,
@@ -248,6 +346,10 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
         unit: _selectedUnit,
         frequency: _selectedFrequency,
         notes: _notesController.text.isEmpty ? null : _notesController.text,
+        drugCategory: finalCategory,
+        isCombinedProduct: finalIsCombined,
+        combinedComponents: finalComponents,
+        market: finalMarket,
       );
 
       if (widget.initialData is Medication) {
@@ -312,8 +414,12 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
                       'Keep track of your hormone therapy to help identify cycle wellness patterns.',
                       style: TextStyle(fontSize: 14, color: Color(0xFF4D453F)),
                     ),
-                    const SizedBox(height: 32),
-                    
+                    // --- Quick-Add Row (shown only on add, not edit) ---
+                    if (widget.initialData is! Medication) ...[
+                      _buildQuickAddRow(),
+                      const SizedBox(height: 24),
+                    ],
+
                     // Name Input
                     _buildSectionHeader('Medication Name'),
                     const SizedBox(height: 8),
@@ -322,6 +428,12 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
                     if (_showDropdown) ...[
                       const SizedBox(height: 8),
                       _buildSearchDropdown(),
+                    ],
+
+                    // Combined product info note
+                    if (_isCombined) ...[
+                      const SizedBox(height: 12),
+                      _buildCombinedProductNote(),
                     ],
                     
                     const SizedBox(height: 24),
@@ -480,7 +592,136 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
     );
   }
 
+  bool _isFormSupported(MedicationType type) {
+    final name = _nameController.text.trim().toLowerCase();
+    if (name.isEmpty) return true;
+    
+    // Find definition in kHrtDrugLibrary
+    final def = kHrtDrugLibrary.firstWhere(
+      (d) => d.name.toLowerCase() == name,
+      orElse: () => const HrtDrugDefinition(
+        name: '',
+        category: HrtDrugCategory.systemicEstrogen,
+        commonForms: [],
+        market: HrtMarket.both,
+      ),
+    );
+    
+    if (def.name.isEmpty) {
+      // Custom drug not in library: all forms remain selectable
+      return true;
+    }
+    
+    // Map commonForms to MedicationType values
+    return def.commonForms.any((form) {
+      final cleanForm = form.toLowerCase();
+      switch (type) {
+        case MedicationType.patch:
+          return cleanForm == 'patch';
+        case MedicationType.pill:
+          return cleanForm == 'tablet' || cleanForm == 'pill';
+        case MedicationType.gel:
+          return cleanForm == 'gel';
+        case MedicationType.cream:
+          return cleanForm == 'cream';
+        case MedicationType.other:
+          return cleanForm != 'patch' && cleanForm != 'tablet' && cleanForm != 'pill' && cleanForm != 'gel' && cleanForm != 'cream';
+      }
+    });
+  }
+
   Widget _buildSearchDropdown() {
+    // Group _filteredMeds by actual category
+    final Map<String, List<String>> grouped = {};
+    for (final name in _filteredMeds) {
+      final def = kHrtDrugLibrary.firstWhere(
+        (d) => d.name.toLowerCase() == name.toLowerCase(),
+        orElse: () => HrtDrugDefinition(
+          name: name,
+          category: HrtDrugCategory.systemicEstrogen,
+          commonForms: [],
+          market: HrtMarket.both,
+        ),
+      );
+      
+      final String catHeader;
+      final inLibrary = kHrtDrugLibrary.any((d) => d.name.toLowerCase() == name.toLowerCase());
+      if (inLibrary) {
+        switch (def.category) {
+          case HrtDrugCategory.systemicEstrogen:
+            catHeader = 'SYSTEMIC ESTROGEN';
+            break;
+          case HrtDrugCategory.combined:
+            catHeader = 'COMBINED';
+            break;
+          case HrtDrugCategory.progestogenOnly:
+            catHeader = 'PROGESTOGEN ONLY';
+            break;
+          case HrtDrugCategory.vaginalLocal:
+            catHeader = 'VAGINAL/LOCAL';
+            break;
+        }
+      } else {
+        catHeader = 'OTHER';
+      }
+      grouped.putIfAbsent(catHeader, () => []).add(name);
+    }
+
+    final List<Widget> children = [];
+    grouped.forEach((category, meds) {
+      children.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Text(
+            category,
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFFA8A29E),
+              letterSpacing: 1.0,
+            ),
+          ),
+        ),
+      );
+      children.addAll(meds.map((name) {
+        final def = kHrtDrugLibrary.firstWhere(
+          (d) => d.name.toLowerCase() == name.toLowerCase(),
+          orElse: () => HrtDrugDefinition(
+            name: name,
+            category: HrtDrugCategory.systemicEstrogen,
+            commonForms: [],
+            market: HrtMarket.both,
+          ),
+        );
+        return ListTile(
+          leading: Icon(Icons.medication, color: AppTheme.primary.withOpacity(0.4)),
+          title: Text(name, style: const TextStyle(fontSize: 14)),
+          onTap: () {
+            _nameController.text = name;
+            setState(() {
+              _showDropdown = false;
+              _isCombined = def.isCombinedProduct;
+              _drugCategory = def.category.name;
+              _drugMarket = def.market.name;
+              _combinedComponents = def.isCombinedProduct
+                  ? _defaultComponentsForDrug(name)
+                  : null;
+              
+              // If the current selected form is not supported, change to the first supported form
+              if (!_isFormSupported(_selectedType) && def.commonForms.isNotEmpty) {
+                final firstForm = def.commonForms.first;
+                _selectedType = _formToMedicationType(firstForm);
+                _selectedUnit = _selectedType == MedicationType.patch
+                    ? 'mcg'
+                    : (_selectedType == MedicationType.gel ? 'pumps' : 'mg');
+                _doseController.text = _selectedType == MedicationType.patch ? '50' : '1';
+              }
+            });
+          },
+        );
+      }));
+    });
+
     return Container(
       constraints: const BoxConstraints(maxHeight: 200),
       decoration: BoxDecoration(
@@ -498,28 +739,7 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
       child: ListView(
         shrinkWrap: true,
         padding: const EdgeInsets.symmetric(vertical: 8),
-        children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Text(
-              'COMMON HRT',
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFFA8A29E),
-                letterSpacing: 1.0,
-              ),
-            ),
-          ),
-          ..._filteredMeds.map((name) => ListTile(
-            leading: Icon(Icons.medication, color: AppTheme.primary.withOpacity(0.4)),
-            title: Text(name, style: const TextStyle(fontSize: 14)),
-            onTap: () {
-              _nameController.text = name;
-              setState(() => _showDropdown = false);
-            },
-          )),
-        ],
+        children: children,
       ),
     );
   }
@@ -546,8 +766,10 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
   Widget _buildTypeTile(MedicationType type) {
     final isSelected = _selectedType == type;
     final isEditing = widget.initialData is Medication;
+    final isSupported = _isFormSupported(type);
+
     return InkWell(
-      onTap: isEditing ? null : () {
+      onTap: (isEditing || !isSupported) ? null : () {
         setState(() {
           _selectedType = type;
           if (type == MedicationType.gel) {
@@ -567,7 +789,7 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
         });
       },
       child: Opacity(
-        opacity: isEditing && !isSelected ? 0.5 : 1.0,
+        opacity: (!isSupported || (isEditing && !isSelected)) ? 0.3 : 1.0,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
@@ -847,6 +1069,87 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
           contentPadding: EdgeInsets.all(16),
           border: InputBorder.none,
         ),
+      ),
+    );
+  }
+
+  /// Horizontal Quick-Add row showing top 4 recommended drugs.
+  Widget _buildQuickAddRow() {
+    final quickAddDrugs = ref.watch(hrtQuickAddProvider);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        Text(
+          'Quick add',
+          style: GoogleFonts.manrope(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF1D1B1A),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: quickAddDrugs.map((drug) {
+            return GestureDetector(
+              onTap: () => _applyQuickAdd(drug),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(100),
+                  border: Border.all(color: const Color(0xFFE8E0F0)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  drug.name,
+                  style: GoogleFonts.manrope(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.primary,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  /// Info note shown when a combined product is selected.
+  Widget _buildCombinedProductNote() {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF67594E).withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF67594E).withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.info_outline, color: Color(0xFF67594E), size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'This product contains both oestrogen and progestogen — no separate progestogen entry needed.',
+              style: GoogleFonts.manrope(
+                fontSize: 12,
+                color: const Color(0xFF4D453F),
+                height: 1.5,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

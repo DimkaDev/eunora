@@ -8,6 +8,9 @@ import 'package:eunora/features/onboarding/presentation/providers/symptoms_provi
 import 'package:eunora/features/home/presentation/widgets/shared_logging/logging_card_wrapper.dart';
 import 'package:eunora/features/home/presentation/widgets/shared_logging/gradient_slider_selector.dart';
 import 'package:eunora/features/home/presentation/widgets/shared_logging/quantity_counter_selector.dart';
+import 'package:eunora/features/symptom_log/data/symptom_library.dart';
+import 'package:eunora/features/onboarding/presentation/providers/menopause_stage_provider.dart';
+import 'package:eunora/features/onboarding/presentation/providers/onboarding_profile_provider.dart';
 
 class SymptomLoggingSheet extends ConsumerStatefulWidget {
   final List<Map<String, String>> loggedSymptoms;
@@ -30,23 +33,49 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
   int _selectedDuration = 15;
   
   String _searchQuery = '';
+  bool _showAllSymptoms = false;
 
   @override
   Widget build(BuildContext context) {
     final library = ref.watch(symptomLibraryProvider);
     final loggedNames = widget.loggedSymptoms.map((s) => s['name']?.toLowerCase()).toSet();
 
-    // Filter out already logged symptoms, and apply search query if active
+    final stage = ref.watch(menopauseStageProvider).selectedStage ?? 
+        ref.watch(onboardingProfileProvider)?.menopauseStage;
+    final isPerimenopause = stage == MenopauseStage.irregular;
+
+    // Filter display symptoms
     final displaySymptoms = library.where((symptom) {
       final matchesLogged = !loggedNames.contains(symptom.name.toLowerCase());
       final matchesSearch = _searchQuery.isEmpty ||
           symptom.name.toLowerCase().contains(_searchQuery.toLowerCase());
-      return matchesLogged && matchesSearch;
+      
+      if (!matchesSearch) return false;
+
+      // Find definition in the new kSymptomLibrary
+      final def = kSymptomLibrary.where((d) => d.id == symptom.id).firstOrNull;
+      if (def == null) return matchesLogged; // fallback for custom/unknown
+
+      // Gating for Cycle / PerimenopauseOnly
+      if (def.perimenopauseOnly && !isPerimenopause) return false;
+
+      // Search ignores tier filtering
+      if (_searchQuery.isNotEmpty) return matchesLogged;
+
+      // Tier filtering: if not showing all, show core or cycle (if perimenopause)
+      final isCore = def.tier == SymptomTier.core;
+      final isCycle = def.category == SymptomCategory.cycle;
+      
+      if (_showAllSymptoms) {
+        return matchesLogged;
+      } else {
+        return matchesLogged && (isCore || (isCycle && isPerimenopause));
+      }
     }).toList();
 
     return Container(
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.70,
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
       ),
       padding: const EdgeInsets.only(bottom: 24),
       decoration: const BoxDecoration(
@@ -110,7 +139,7 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
           ),
           const SizedBox(height: 24),
 
-          // Body without animation, fixed search bar at the top of step 0
+          // Body
           Flexible(
             child: _currentStep == 0
                 ? Column(
@@ -142,7 +171,7 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
                       Expanded(
                         child: SingleChildScrollView(
                           padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: _buildSymptomSelection(displaySymptoms),
+                          child: _buildSymptomSelection(displaySymptoms, isPerimenopause),
                         ),
                       ),
                     ],
@@ -153,7 +182,7 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
                   ),
           ),
 
-          // Action button (Only in Step 2)
+          // Action button
           if (_currentStep == 1)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -191,100 +220,186 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
     );
   }
 
-  Widget _buildSymptomSelection(List<Symptom> displaySymptoms) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (displaySymptoms.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 40),
-            child: Center(
-              child: Text(
-                'No symptoms found',
+  Widget _buildSymptomSelection(List<Symptom> displaySymptoms, bool isPerimenopause) {
+    if (displaySymptoms.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 40),
+        child: Center(
+          child: Text(
+            'No symptoms found',
+            style: GoogleFonts.manrope(
+              color: AppTheme.onSurfaceVariant,
+              fontSize: 14,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Grouping logic (only when not searching)
+    if (_searchQuery.isEmpty) {
+      // Grouping order: Vasomotor, Sleep, Mood & Cognitive, Physical, Urogenital, Cycle (if perimenopause)
+      final categories = [
+        SymptomCategory.vasomotor,
+        SymptomCategory.sleep,
+        SymptomCategory.moodCognitive,
+        SymptomCategory.physical,
+        SymptomCategory.urogenital,
+        if (isPerimenopause) SymptomCategory.cycle,
+      ];
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final cat in categories) ...[
+            _buildCategoryGroup(cat, displaySymptoms),
+          ],
+          const SizedBox(height: 24),
+          Center(
+            child: TextButton.icon(
+              onPressed: () {
+                setState(() {
+                  _showAllSymptoms = !_showAllSymptoms;
+                });
+              },
+              icon: Icon(
+                _showAllSymptoms ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                color: AppTheme.primary,
+              ),
+              label: Text(
+                _showAllSymptoms ? 'Show less' : 'More symptoms',
                 style: GoogleFonts.manrope(
-                  color: AppTheme.onSurfaceVariant,
-                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primary,
                 ),
               ),
             ),
-          )
-        else
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 1.1,
-            ),
-            itemCount: displaySymptoms.length,
-            itemBuilder: (context, index) {
-              final symptom = displaySymptoms[index];
-              final symColor = symptom.getIconColor();
-              final symBg = symColor.withValues(alpha: 0.1);
-
-              return Bounceable(
-                onTap: () {
-                  setState(() {
-                    _selectedSymptom = symptom;
-                    _currentStep = 1;
-                  });
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(40),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          color: symBg,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          symptom.getIconData(),
-                          color: symColor,
-                          size: 36,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(
-                          symptom.name,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.manrope(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF9B8B7E),
-                            height: 1.1,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
           ),
-        const SizedBox(height: 24),
+          const SizedBox(height: 24),
+        ],
+      );
+    }
+
+    // Flat view during active search
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+        childAspectRatio: 1.1,
+      ),
+      itemCount: displaySymptoms.length,
+      itemBuilder: (context, index) {
+        return _buildSymptomCard(displaySymptoms[index]);
+      },
+    );
+  }
+
+  Widget _buildCategoryGroup(SymptomCategory category, List<Symptom> symptoms) {
+    final catSymptoms = symptoms.where((s) {
+      final def = kSymptomLibrary.where((d) => d.id == s.id).firstOrNull;
+      return def != null && def.category == category;
+    }).toList();
+
+    if (catSymptoms.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Text(
+            category.displayName.toUpperCase(),
+            style: GoogleFonts.manrope(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF9B8B7E),
+              letterSpacing: 1.2,
+            ),
+          ),
+        ),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 16,
+            childAspectRatio: 1.1,
+          ),
+          itemCount: catSymptoms.length,
+          itemBuilder: (context, index) {
+            return _buildSymptomCard(catSymptoms[index]);
+          },
+        ),
+        const SizedBox(height: 16),
       ],
     );
   }
+
+  Widget _buildSymptomCard(Symptom symptom) {
+    final symColor = symptom.getIconColor();
+    final symBg = symColor.withValues(alpha: 0.1);
+
+    return Bounceable(
+      onTap: () {
+        setState(() {
+          _selectedSymptom = symptom;
+          _currentStep = 1;
+        });
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(40),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: symBg,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                symptom.getIconData(),
+                color: symColor,
+                size: 36,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text(
+                symptom.name,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.manrope(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF9B8B7E),
+                  height: 1.1,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildSeveritySelection() {
     if (_selectedSymptom == null) return const SizedBox.shrink();
 
@@ -293,7 +408,7 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
     final symIcon = symptom.getIconData();
     final symColor = symptom.getIconColor();
     final symBg = symColor.withValues(alpha: 0.1);
-    final hasDuration = symptom.id == 's_hot_flashes' || symptom.id == 's_night_sweats';
+    final hasDuration = symptom.id == 'hot_flash' || symptom.id == 'night_sweats';
 
     return LoggingCardWrapper(
       name: symName,

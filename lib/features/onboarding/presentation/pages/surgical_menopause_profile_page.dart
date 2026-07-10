@@ -5,22 +5,45 @@ import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/features/onboarding/presentation/widgets/onboarding_header.dart';
 import 'package:eunora/features/onboarding/presentation/widgets/profile_radio_card.dart';
 
-class SurgicalMenopauseProfilePage extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:eunora/features/onboarding/presentation/providers/onboarding_profile_provider.dart';
+import 'package:eunora/features/onboarding/presentation/providers/menopause_stage_provider.dart';
+
+class SurgicalMenopauseProfilePage extends ConsumerStatefulWidget {
   final VoidCallback? onNext;
   final VoidCallback? onBack;
   const SurgicalMenopauseProfilePage({super.key, this.onNext, this.onBack});
 
   @override
-  State<SurgicalMenopauseProfilePage> createState() => _SurgicalMenopauseProfilePageState();
+  ConsumerState<SurgicalMenopauseProfilePage> createState() => _SurgicalMenopauseProfilePageState();
 }
 
-class _SurgicalMenopauseProfilePageState extends State<SurgicalMenopauseProfilePage> {
+class _SurgicalMenopauseProfilePageState extends ConsumerState<SurgicalMenopauseProfilePage> {
   DateTime? _procedureDate;
   String? _procedureType;
   String? _hrtStatus;
   String? _hrtTiming;
   final Set<String> _selectedSymptoms = {};
   double _overallFeeling = 7;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final profile = ref.read(onboardingProfileProvider);
+      if (profile != null && profile.menopauseStage == MenopauseStage.surgical) {
+        setState(() {
+          _procedureDate = profile.procedureDate;
+          _procedureType = profile.procedureType;
+          _hrtStatus = profile.hrtStatus;
+          _hrtTiming = profile.hrtTiming;
+          _selectedSymptoms.clear();
+          _selectedSymptoms.addAll(profile.selectedStageSymptoms);
+          _overallFeeling = (profile.overallFeeling ?? 7).toDouble();
+        });
+      }
+    });
+  }
 
   void _showInfoDialog() {
     showModalBottomSheet(
@@ -568,6 +591,14 @@ class _SurgicalMenopauseProfilePageState extends State<SurgicalMenopauseProfileP
                 ElevatedButton(
                   onPressed: isReady
                       ? () {
+                          ref.read(onboardingProfileProvider.notifier).updateProfile((p) => p.copyWith(
+                            procedureDate: _procedureDate,
+                            procedureType: _procedureType,
+                            hrtStatus: _hrtStatus,
+                            hrtTiming: _hrtTiming,
+                            selectedStageSymptoms: _selectedSymptoms.toList(),
+                            overallFeeling: _overallFeeling.toInt(),
+                          ));
                           if (widget.onNext != null) {
                             widget.onNext!();
                           } else {

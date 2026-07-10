@@ -37,6 +37,16 @@ class Medication {
   final String frequency;
   final String? notes;
 
+  // --- HRT Drug Library v2 fields ---
+  /// Stores HrtDrugCategory.name (e.g. 'systemicEstrogen', 'combined', etc.)
+  final String drugCategory;
+  /// True when a single product contains both oestrogen and progestogen.
+  final bool isCombinedProduct;
+  /// Display-only free text, e.g. "estradiol+norethindrone".
+  final String? combinedComponents;
+  /// Stores HrtMarket.name ('uk', 'us', 'both') — informational only.
+  final String market;
+
   Medication({
     String? id,
     required this.name,
@@ -45,6 +55,10 @@ class Medication {
     required this.unit,
     required this.frequency,
     this.notes,
+    this.drugCategory = 'systemicEstrogen',
+    this.isCombinedProduct = false,
+    this.combinedComponents,
+    this.market = 'uk',
   }) : id = id ?? const Uuid().v4();
 
   Medication copyWith({
@@ -54,6 +68,10 @@ class Medication {
     String? unit,
     String? frequency,
     String? notes,
+    String? drugCategory,
+    bool? isCombinedProduct,
+    String? combinedComponents,
+    String? market,
   }) {
     return Medication(
       id: id,
@@ -63,6 +81,10 @@ class Medication {
       unit: unit ?? this.unit,
       frequency: frequency ?? this.frequency,
       notes: notes ?? this.notes,
+      drugCategory: drugCategory ?? this.drugCategory,
+      isCombinedProduct: isCombinedProduct ?? this.isCombinedProduct,
+      combinedComponents: combinedComponents ?? this.combinedComponents,
+      market: market ?? this.market,
     );
   }
 
@@ -75,6 +97,10 @@ class Medication {
       'unit': unit,
       'frequency': frequency,
       'notes': notes,
+      'drugCategory': drugCategory,
+      'isCombinedProduct': isCombinedProduct,
+      'combinedComponents': combinedComponents,
+      'market': market,
     };
   }
 
@@ -87,8 +113,12 @@ class Medication {
       unit: map['unit'] as String? ?? '',
       frequency: map['frequency'] as String? ?? '',
       notes: map['notes'] as String?,
+      drugCategory: map['drugCategory'] as String? ?? 'systemicEstrogen',
+      isCombinedProduct: map['isCombinedProduct'] as bool? ?? false,
+      combinedComponents: map['combinedComponents'] as String?,
+      market: map['market'] as String? ?? 'uk',
     );
   }
 
-  String get doseAndFrequency => '${dose.toStringAsFixed(dose == dose.toInt() ? 0 : 2)}$unit • $frequency';
+  String get doseAndFrequency => '${dose.toStringAsFixed(dose == dose.toInt() ? 0 : 2)} $unit • $frequency';
 }

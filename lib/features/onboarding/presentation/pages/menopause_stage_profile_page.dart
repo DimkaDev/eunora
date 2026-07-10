@@ -5,19 +5,38 @@ import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/features/onboarding/presentation/widgets/onboarding_header.dart';
 import 'package:eunora/features/onboarding/presentation/widgets/profile_radio_card.dart';
 
-class MenopauseStageProfilePage extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:eunora/features/onboarding/presentation/providers/onboarding_profile_provider.dart';
+import 'package:eunora/features/onboarding/presentation/providers/menopause_stage_provider.dart';
+
+class MenopauseStageProfilePage extends ConsumerStatefulWidget {
   final VoidCallback? onNext;
   final VoidCallback? onBack;
   const MenopauseStageProfilePage({super.key, this.onNext, this.onBack});
 
   @override
-  State<MenopauseStageProfilePage> createState() => _MenopauseStageProfilePageState();
+  ConsumerState<MenopauseStageProfilePage> createState() => _MenopauseStageProfilePageState();
 }
 
-class _MenopauseStageProfilePageState extends State<MenopauseStageProfilePage> {
+class _MenopauseStageProfilePageState extends ConsumerState<MenopauseStageProfilePage> {
   String? _hrtStatus;
   String? _hrtType;
   String? _lastPeriodDuration;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final profile = ref.read(onboardingProfileProvider);
+      if (profile != null && profile.menopauseStage == MenopauseStage.noPeriod12Months) {
+        setState(() {
+          _hrtStatus = profile.hrtStatus;
+          _hrtType = profile.hrtType;
+          _lastPeriodDuration = profile.lastPeriodDuration;
+        });
+      }
+    });
+  }
 
   void _showInfoDialog() {
     showModalBottomSheet(
@@ -283,6 +302,11 @@ class _MenopauseStageProfilePageState extends State<MenopauseStageProfilePage> {
                 ElevatedButton(
                   onPressed: isReady
                       ? () {
+                          ref.read(onboardingProfileProvider.notifier).updateProfile((p) => p.copyWith(
+                            hrtStatus: _hrtStatus,
+                            hrtType: _hrtType,
+                            lastPeriodDuration: _lastPeriodDuration,
+                          ));
                           if (widget.onNext != null) {
                             widget.onNext!();
                           } else {

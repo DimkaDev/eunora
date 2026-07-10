@@ -7,6 +7,7 @@ import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/features/onboarding/presentation/providers/menopause_stage_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:eunora/core/utils/animation_system.dart';
+import 'package:eunora/features/onboarding/presentation/providers/onboarding_profile_provider.dart';
 
 class MenopauseStagePage extends ConsumerStatefulWidget {
   final VoidCallback? onNext;
@@ -393,7 +394,41 @@ class _MenopauseStagePageState extends ConsumerState<MenopauseStagePage> {
               child: _buildPremiumCard(
                 data: data,
                 isSelected: isSelected,
-                onTap: () => notifier.selectStage(data.stage),
+                onTap: () {
+                  final currentProfile = ref.read(onboardingProfileProvider);
+                  final oldStage = currentProfile?.menopauseStage;
+                  final newStage = data.stage;
+
+                  notifier.selectStage(newStage);
+
+                  if (currentProfile != null) {
+                    if (oldStage != newStage) {
+                      // Stage changed! Reset downstream onboarding stage-specific profile data
+                      ref.read(onboardingProfileProvider.notifier).updateProfile((p) => p.copyWith(
+                        menopauseStage: newStage,
+                        irregularDuration: null,
+                        hormoneTreatment: null,
+                        medicationName: null,
+                        startDate: null,
+                        hrtStatus: null,
+                        hrtType: null,
+                        lastPeriodDuration: null,
+                        menopauseDuration: null,
+                        hrtYears: null,
+                        goals: [],
+                        nextAppointment: null,
+                        procedureDate: null,
+                        procedureType: null,
+                        hrtTiming: null,
+                      ));
+                    } else {
+                      // Stage unchanged! Preserve everything
+                      ref.read(onboardingProfileProvider.notifier).updateProfile((p) => p.copyWith(
+                        menopauseStage: newStage,
+                      ));
+                    }
+                  }
+                },
               ),
             ),
           );

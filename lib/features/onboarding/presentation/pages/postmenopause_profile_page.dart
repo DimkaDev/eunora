@@ -5,21 +5,43 @@ import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/features/onboarding/presentation/widgets/onboarding_header.dart';
 import 'package:eunora/features/onboarding/presentation/widgets/profile_radio_card.dart';
 
-class PostmenopauseProfilePage extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:eunora/features/onboarding/presentation/providers/onboarding_profile_provider.dart';
+import 'package:eunora/features/onboarding/presentation/providers/menopause_stage_provider.dart';
+
+class PostmenopauseProfilePage extends ConsumerStatefulWidget {
   final VoidCallback? onNext;
   final VoidCallback? onBack;
   const PostmenopauseProfilePage({super.key, this.onNext, this.onBack});
 
   @override
-  State<PostmenopauseProfilePage> createState() => _PostmenopauseProfilePageState();
+  ConsumerState<PostmenopauseProfilePage> createState() => _PostmenopauseProfilePageState();
 }
 
-class _PostmenopauseProfilePageState extends State<PostmenopauseProfilePage> {
+class _PostmenopauseProfilePageState extends ConsumerState<PostmenopauseProfilePage> {
   String? _menopauseDuration;
   String? _hrtStatus;
   String? _hrtYears;
   final Set<String> _goals = {};
   DateTime? _nextAppointment;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final profile = ref.read(onboardingProfileProvider);
+      if (profile != null && profile.menopauseStage == MenopauseStage.postmenopause) {
+        setState(() {
+          _menopauseDuration = profile.menopauseDuration;
+          _hrtStatus = profile.hrtStatus;
+          _hrtYears = profile.hrtYears;
+          _goals.clear();
+          _goals.addAll(profile.goals);
+          _nextAppointment = profile.nextAppointment;
+        });
+      }
+    });
+  }
 
   void _showInfoDialog() {
     showModalBottomSheet(
@@ -481,6 +503,13 @@ class _PostmenopauseProfilePageState extends State<PostmenopauseProfilePage> {
                 ElevatedButton(
                   onPressed: isReady
                       ? () {
+                          ref.read(onboardingProfileProvider.notifier).updateProfile((p) => p.copyWith(
+                            menopauseDuration: _menopauseDuration,
+                            hrtStatus: _hrtStatus,
+                            hrtYears: _hrtYears,
+                            goals: _goals.toList(),
+                            nextAppointment: _nextAppointment,
+                          ));
                           if (widget.onNext != null) {
                             widget.onNext!();
                           } else {

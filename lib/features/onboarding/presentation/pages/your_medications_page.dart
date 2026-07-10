@@ -82,8 +82,6 @@ class YourMedicationsPage extends ConsumerWidget {
                           _buildMedicationList(context, state.medications, notifier),
                         const SizedBox(height: 24),
                         _buildAddButton(context),
-                        const SizedBox(height: 16),
-                        _buildQuickAddSection(context, notifier),
                         const SizedBox(height: 48),
                         _buildZenScene(),
                         const SizedBox(height: 120), // Space for footer
@@ -255,74 +253,7 @@ class YourMedicationsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildQuickAddSection(BuildContext context, Medications notifier) {
-    final commonMeds = ['Estradiol', 'Utrogestan', 'Femoston'];
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFFE8E0F0).withOpacity(0.6),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFE8E0F0)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'QUICK START COMMON HRT',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF6C6074),
-              letterSpacing: 1.0,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: commonMeds.map((name) => _buildQuickAddChip(context, name, notifier)).toList(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuickAddChip(BuildContext context, String name, Medications notifier) {
-    return InkWell(
-      onTap: () {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (context) => AddMedicationModal(initialData: name),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(999),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Text(
-          name,
-          style: TextStyle(
-            color: AppTheme.primary,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
 
   Widget _buildZenScene() {
     return Center(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/services.dart';
 import 'package:eunora/core/utils/animation_system.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import '../widgets/onboarding_header.dart';
@@ -273,7 +274,14 @@ class _ContraceptionPageState extends ConsumerState<ContraceptionPage> {
           children: [
             Expanded(
               flex: 1,
-              child: _buildTextField(_doseQuantityController, 'Quantity (e.g., 30)'),
+              child: _buildTextField(
+                _doseQuantityController,
+                'Quantity (e.g., 30)',
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                ],
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -371,9 +379,16 @@ class _ContraceptionPageState extends ConsumerState<ContraceptionPage> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String hint) {
+  Widget _buildTextField(
+    TextEditingController controller,
+    String hint, {
+    TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
+  }) {
     return TextField(
       controller: controller,
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       style: const TextStyle(fontSize: 18, fontFamily: 'Manrope'),
       decoration: InputDecoration(
         hintText: hint,

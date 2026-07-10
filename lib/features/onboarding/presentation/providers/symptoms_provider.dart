@@ -1,32 +1,56 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/models/symptom.dart';
+import 'package:eunora/features/symptom_log/data/symptom_library.dart';
 
-// --- Static Base Library of Symptoms ---
-final baseSymptomLibrary = [
-  const Symptom(id: 's_hot_flashes', name: 'Hot flashes', iconName: 'thermostat', category: 'Vasomotor Symptoms'),
-  const Symptom(id: 's_night_sweats', name: 'Night sweats', iconName: 'bedtime', category: 'Vasomotor Symptoms'),
-  const Symptom(id: 's_cold_flashes', name: 'Cold flashes', iconName: 'ac_unit', category: 'Vasomotor Symptoms'),
-  
-  const Symptom(id: 's_anxiety', name: 'Anxiety', iconName: 'psychology', category: 'Emotional & Cognitive'),
-  const Symptom(id: 's_irritability', name: 'Irritability', iconName: 'sentiment_dissatisfied', category: 'Emotional & Cognitive'),
-  const Symptom(id: 's_mood_swings', name: 'Mood swings', iconName: 'reorder', category: 'Emotional & Cognitive'),
-  const Symptom(id: 's_brain_fog', name: 'Brain fog', iconName: 'cloud', category: 'Emotional & Cognitive'),
-  const Symptom(id: 's_memory_lapses', name: 'Memory lapses', iconName: 'settings_backup_restore', category: 'Emotional & Cognitive'),
-  
-  const Symptom(id: 's_joint_pain', name: 'Joint pain', iconName: 'accessibility_new', category: 'Physical Wellbeing'),
-  const Symptom(id: 's_headaches', name: 'Headaches', iconName: 'skull', category: 'Physical Wellbeing'),
-  const Symptom(id: 's_fatigue', name: 'Fatigue', iconName: 'battery_low', category: 'Physical Wellbeing'),
-  const Symptom(id: 's_heart_palpitation', name: 'Heart palpitation', iconName: 'favorite', category: 'Physical Wellbeing'),
-  const Symptom(id: 's_dry_skin', name: 'Dry skin', iconName: 'dry_cleaning', category: 'Physical Wellbeing'),
-  
-  const Symptom(id: 's_difficulty_sleep', name: 'Difficulty sleep', iconName: 'bed', category: 'Sleep & Energy'),
-  const Symptom(id: 's_waking_night', name: 'Waking night', iconName: 'alarm_on', category: 'Sleep & Energy'),
-  const Symptom(id: 's_low_energy', name: 'Low energy', iconName: 'bolt', category: 'Sleep & Energy'),
-  
-  const Symptom(id: 's_mood', name: 'Mood', iconName: 'mood', category: 'Common'),
-  const Symptom(id: 's_sleep', name: 'Sleep', iconName: 'dark_mode', category: 'Common'),
-  const Symptom(id: 's_dryness', name: 'Dryness', iconName: 'opacity', category: 'Common'),
-];
+String _mapIconName(String id) {
+  switch (id) {
+    case 'hot_flash':
+    case 'night_sweats':
+    case 'chills':
+      return 'thermostat';
+    case 'night_wakings':
+    case 'difficulty_falling_asleep':
+      return 'bedtime';
+    case 'brain_fog':
+    case 'memory_problems':
+    case 'irritability':
+    case 'anxiety':
+    case 'low_mood':
+    case 'mood_swings':
+    case 'panic_attacks':
+    case 'feeling_tense':
+    case 'low_confidence':
+      return 'psychology';
+    case 'fatigue':
+      return 'battery_low';
+    case 'joint_pain':
+    case 'muscle_aches':
+      return 'accessibility_new';
+    case 'vaginal_dryness':
+    case 'painful_sex':
+    case 'recurrent_uti':
+    case 'low_libido':
+    case 'urinary_incontinence':
+      return 'opacity';
+    case 'skin_dryness':
+    case 'dry_mouth_eyes':
+      return 'dry_cleaning';
+    case 'headache':
+      return 'skull';
+    default:
+      return 'medical_services';
+  }
+}
+
+// --- Static Base Library of Symptoms mapped from kSymptomLibrary ---
+final baseSymptomLibrary = kSymptomLibrary.map((def) {
+  return Symptom(
+    id: def.id,
+    name: def.label,
+    iconName: _mapIconName(def.id),
+    category: def.category.displayName,
+  );
+}).toList();
 
 class SymptomsState {
   final List<LoggedSymptom> loggedSymptoms; 
@@ -37,7 +61,12 @@ class SymptomsState {
   SymptomsState({
     this.loggedSymptoms = const [],
     this.customSymptoms = const [],
-    this.frequentSymptomIds = const ['s_hot_flashes', 's_mood', 's_sleep', 's_dryness', 's_joint_pain'],
+    this.frequentSymptomIds = const [
+      'fatigue', 'night_wakings', 'hot_flash', 'night_sweats',
+      'memory_problems', 'brain_fog', 'irritability', 'anxiety',
+      'low_mood', 'joint_pain', 'low_libido', 'vaginal_dryness',
+      'urinary_incontinence', 'skin_dryness', 'headache'
+    ],
     this.error,
   });
 

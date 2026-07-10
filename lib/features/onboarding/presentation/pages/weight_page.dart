@@ -43,7 +43,7 @@ class _WeightPageState extends ConsumerState<WeightPage> {
             child: Column(
               children: [
                 OnboardingHeader(
-                  currentStep: 8,
+                  currentStep: 7,
                   subtitle: 'WEIGHT',
                   onBack: widget.onBack,
                   onSkip: () => _showInfoDialog(context),

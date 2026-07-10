@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:eunora/core/services/firestore_service.dart';
 import 'package:eunora/features/home/domain/entities/hrt_dose_change.dart';
 import '../../domain/models/medication.dart';
+import 'onboarding_profile_provider.dart';
 
 part 'medications_provider.g.dart';
 
@@ -82,7 +83,8 @@ class Medications extends _$Medications {
     );
     _syncToFirestore();
 
-    if (oldMed.id == medication.id && oldMed.dose != medication.dose) {
+    final isOnboardingCompleted = ref.read(onboardingProfileProvider)?.isOnboardingCompleted ?? false;
+    if (isOnboardingCompleted && oldMed.id == medication.id && oldMed.dose != medication.dose) {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
         final change = HrtDoseChange(

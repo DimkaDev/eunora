@@ -16,6 +16,22 @@ class Symptom {
     this.isCustom = false,
   });
 
+  Symptom copyWith({
+    String? id,
+    String? name,
+    String? iconName,
+    String? category,
+    bool? isCustom,
+  }) {
+    return Symptom(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      iconName: iconName ?? this.iconName,
+      category: category ?? this.category,
+      isCustom: isCustom ?? this.isCustom,
+    );
+  }
+
   IconData getIconData() {
     switch (iconName) {
       case 'thermostat':
@@ -62,30 +78,36 @@ class Symptom {
   }
 
   Color getIconColor() {
-    switch (name.toLowerCase()) {
-      case 'hot flashes':
-        return const Color(0xFFD4A5A5);
-      case 'mood':
-        return const Color(0xFFA7C5D8);
-      case 'sleep':
-        return const Color(0xFFB8A7C5);
-      case 'dryness':
-        return const Color(0xFF8EB8B5);
-      case 'joint pain':
-        return const Color(0xFFA9B388);
-      default:
-        if (category == 'Emotional & Cognitive') {
-          return const Color(0xFFA7C5D8);
-        } else if (category == 'Physical Wellbeing') {
-          return const Color(0xFFA9B388);
-        } else if (category == 'Vasomotor Symptoms') {
-          return const Color(0xFFD4A5A5);
-        } else if (category == 'Sleep & Energy') {
-          return const Color(0xFFB8A7C5);
-        } else {
-          return const Color(0xFF9B8B7E);
-        }
+    final cleanId = id.toLowerCase();
+    final cleanName = name.toLowerCase();
+    final cleanCat = category?.toLowerCase() ?? '';
+
+    // Vasomotor: Rose/Peach
+    if (cleanId.contains('hot_flash') || cleanId.contains('night_sweats') || cleanId.contains('chills') || cleanCat.contains('vasomotor') || cleanName.contains('hot flash') || cleanName.contains('night sweat') || cleanName.contains('chill')) {
+      return const Color(0xFFD4A5A5);
     }
+    // Sleep: Lavender
+    if (cleanId.contains('sleep') || cleanId.contains('night_waking') || cleanId.contains('insomnia') || cleanCat.contains('sleep') || cleanName.contains('sleep') || cleanName.contains('waking')) {
+      return const Color(0xFFB8A7C5);
+    }
+    // Mood/Cognitive: Blue/Sky
+    if (cleanId.contains('mood') || cleanId.contains('anxiety') || cleanId.contains('fog') || cleanId.contains('irritability') || cleanId.contains('panic') || cleanId.contains('tense') || cleanId.contains('confidence') || cleanId.contains('memory') || cleanCat.contains('mood') || cleanCat.contains('cognitive') || cleanCat.contains('emotional') || cleanName.contains('mood') || cleanName.contains('anxiet') || cleanName.contains('fog') || cleanName.contains('irritab') || cleanName.contains('tension') || cleanName.contains('nervous') || cleanName.contains('confid') || cleanName.contains('memor') || cleanName.contains('panic')) {
+      return const Color(0xFFA7C5D8);
+    }
+    // Physical: Green/Sage
+    if (cleanId.contains('pain') || cleanId.contains('ache') || cleanId.contains('headache') || cleanId.contains('fatigue') || cleanId.contains('dry_skin') || cleanId.contains('skin_dryness') || cleanId.contains('weight') || cleanId.contains('hair') || cleanId.contains('breast') || cleanId.contains('dizziness') || cleanId.contains('bloating') || cleanId.contains('formication') || cleanId.contains('dry_mouth') || cleanCat.contains('physical') || cleanName.contains('pain') || cleanName.contains('ache') || cleanName.contains('head') || cleanName.contains('fatigue') || cleanName.contains('skin') || cleanName.contains('weight') || cleanName.contains('hair') || cleanName.contains('breast') || cleanName.contains('dizz') || cleanName.contains('bloat') || cleanName.contains('formic') || cleanName.contains('mouth') || cleanName.contains('eye')) {
+      return const Color(0xFFA9B388);
+    }
+    // Urogenital: Teal
+    if (cleanId.contains('libido') || cleanId.contains('dryness') || cleanId.contains('incontinence') || cleanId.contains('sex') || cleanId.contains('uti') || cleanCat.contains('urogenital') || cleanName.contains('libido') || cleanName.contains('dryness') || cleanName.contains('incont') || cleanName.contains('sex') || cleanName.contains('uti')) {
+      return const Color(0xFF8EB8B5);
+    }
+    // Cycle: Ochre/Tawny
+    if (cleanId.contains('bleeding') || cleanId.contains('spotting') || cleanId.contains('flow') || cleanCat.contains('cycle') || cleanName.contains('bleed') || cleanName.contains('spot') || cleanName.contains('flow')) {
+      return const Color(0xFFD4B28A);
+    }
+
+    return const Color(0xFF9B8B7E);
   }
 
   factory Symptom.custom(String name) {

@@ -8,6 +8,7 @@ import 'package:eunora/features/onboarding/presentation/providers/triggers_provi
 import 'package:eunora/features/home/presentation/widgets/shared_logging/logging_card_wrapper.dart';
 import 'package:eunora/features/home/presentation/widgets/shared_logging/gradient_slider_selector.dart';
 import 'package:eunora/features/home/presentation/widgets/shared_logging/quantity_counter_selector.dart';
+import 'package:eunora/features/symptom_log/data/trigger_library.dart';
 
 class TriggerLoggingSheet extends ConsumerStatefulWidget {
   final List<Map<String, dynamic>> loggedTriggers;
@@ -28,6 +29,7 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
   TriggerOption? _selectedTrigger;
   String? _selectedValue;
   String _searchQuery = '';
+  bool _showAllTriggers = false;
 
   List<String> _getTriggerValues(String name) {
     switch (name.toLowerCase()) {
@@ -77,7 +79,17 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
       final matchesLogged = !loggedNames.contains(trigger.name.toLowerCase());
       final matchesSearch = _searchQuery.isEmpty ||
           trigger.name.toLowerCase().contains(_searchQuery.toLowerCase());
-      return matchesLogged && matchesSearch;
+      if (!matchesSearch) return false;
+      if (_searchQuery.isNotEmpty) return matchesLogged;
+
+      final def = kTriggerLibrary.where((d) => 't_${d.id}' == trigger.id).firstOrNull;
+      if (def == null) return matchesLogged;
+
+      if (_showAllTriggers) {
+        return matchesLogged;
+      } else {
+        return matchesLogged && def.tier == TriggerTier.core;
+      }
     }).toList();
 
     return Container(
@@ -320,6 +332,29 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
               );
             },
           ),
+          if (_searchQuery.isEmpty) ...[
+            const SizedBox(height: 16),
+            Center(
+              child: TextButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _showAllTriggers = !_showAllTriggers;
+                  });
+                },
+                icon: Icon(
+                  _showAllTriggers ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                  color: AppTheme.primary,
+                ),
+                label: Text(
+                  _showAllTriggers ? 'Show less' : 'More triggers',
+                  style: GoogleFonts.manrope(
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primary,
+                  ),
+                ),
+              ),
+            ),
+          ],
         const SizedBox(height: 24),
       ],
     );
