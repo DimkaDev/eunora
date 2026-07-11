@@ -49,9 +49,20 @@ class OnboardingProfileNotifier extends StateNotifier<UserProfile?> {
 
         // Populate triggers
         ref.read(triggersProvider.notifier).state = ref.read(triggersProvider.notifier).state.copyWith(
-          activeTriggerIds: profile.selectedTriggers.isNotEmpty
-              ? profile.selectedTriggers
-              : ['t_caffeine', 't_alcohol', 't_stress', 't_exercise', 't_weather', 't_foods', 't_smoking', 't_sleep', 't_dehydration', 't_travel', 't_work', 't_sugar', 't_relaxation'],
+          activeTriggerIds: [
+            't_coffee',
+            't_alcohol',
+            't_stress',
+            't_exercise',
+            't_weather',
+            't_spicy_food',
+            't_sugar_processed_food',
+            't_hot_drinks_food',
+            't_skipped_meals',
+            't_smoking',
+            't_tight_clothing',
+            't_warm_bedroom',
+          ],
         );
       } else {
         state = _createDefaultProfile(user.uid, email: user.email ?? '');

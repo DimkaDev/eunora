@@ -28,6 +28,13 @@ String _mapTriggerDesc(String id) {
     case 'stress': return 'High mental or emotional pressure from work, home, or personal life.';
     case 'exercise': return 'Physical exertion, intense workouts, or new activity levels.';
     case 'weather': return 'Extreme heat, high humidity, or sudden temperature shifts.';
+    case 'spicy_food': return 'Spicy ingredients or dishes that can trigger hot flashes or increase body temperature.';
+    case 'sugar_processed_food': return 'Highly processed foods, sweets, or refined sugars that spike blood glucose.';
+    case 'hot_drinks_food': return 'Warm beverages like tea, soup, or coffee that raise core body temperature.';
+    case 'skipped_meals': return 'Irregular eating windows or fasting that can destabilize energy and hormones.';
+    case 'smoking': return 'Cigarettes, e-cigarettes, or tobacco use, which constricts blood vessels.';
+    case 'tight_clothing': return 'Restricting clothes or heavy synthetic fabrics that trap heat.';
+    case 'warm_bedroom': return 'Elevated room temperature during sleep, causing night sweats and waking.';
     default: return 'Dietary, lifestyle, or environmental trigger.';
   }
 }
@@ -64,6 +71,13 @@ class TriggersState {
       't_stress',
       't_exercise',
       't_weather',
+      't_spicy_food',
+      't_sugar_processed_food',
+      't_hot_drinks_food',
+      't_skipped_meals',
+      't_smoking',
+      't_tight_clothing',
+      't_warm_bedroom',
     ],
     this.error,
   });

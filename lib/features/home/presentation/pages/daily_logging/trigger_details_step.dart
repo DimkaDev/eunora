@@ -111,12 +111,18 @@ class TriggerDetailsStep extends ConsumerWidget {
           final trigger = triggerMap[trigId]!;
           final name = trigger.name;
 
-          if (trigId == 't_caffeine') {
+          if (trigId == 't_caffeine' || trigId == 't_coffee') {
             return _buildCaffeineDetailCard();
           } else if (trigId == 't_alcohol') {
             return _buildAlcoholDetailCard();
-          } else if (trigId == 't_foods') {
-            return _buildFoodsDetailCard();
+          } else if (trigId == 't_foods' ||
+              trigId == 't_spicy_food' ||
+              trigId == 't_sugar_processed_food' ||
+              trigId == 't_hot_drinks_food' ||
+              trigId == 't_skipped_meals') {
+            return _buildFoodsDetailCard(trigId, name);
+          } else if (trigId == 't_smoking') {
+            return _buildSmokingDetailCard(trigId);
           } else if (trigId == 't_stress') {
             return _buildStressDetailCard(context);
           } else {
@@ -236,41 +242,73 @@ class TriggerDetailsStep extends ConsumerWidget {
     );
   }
 
-  Widget _buildFoodsDetailCard() {
+  Widget _buildFoodsDetailCard(String trigId, String name) {
     const trigColor = Color(0xFFE5989B);
     final trigBg = trigColor.withValues(alpha: 0.1);
+    
+    // We can use the custom notes map for specific food triggers if trigId is not generic t_foods,
+    // otherwise fallback to the generic foodsNotes.
+    final initialNote = trigId == 't_foods' ? foodsNotes : (customTriggerTexts[trigId] ?? '');
+    
     return LoggingCardWrapper(
-      name: 'Foods',
+      name: name,
       icon: Icons.restaurant,
       color: trigColor,
       backgroundColor: trigBg,
-      trailingAction: AnimatedSwitch(
-        value: foodsTriggered,
-        onChanged: onFoodsTriggeredChanged,
-        activeColor: AppTheme.primary,
-      ),
       children: [
-        if (foodsTriggered) ...[
-          const SizedBox(height: 20),
-          TextFormField(
-            initialValue: foodsNotes,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: AppTheme.surfaceContainerLow,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
-              hintText: 'Spicy foods, heavy dinner...',
+        const SizedBox(height: 12),
+        TextFormField(
+          initialValue: initialNote,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: AppTheme.surfaceContainerLow,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
             ),
-            style: GoogleFonts.notoSerif(
-              fontSize: 14,
-              fontStyle: FontStyle.italic,
-            ),
-            maxLines: 2,
-            onChanged: onFoodsNotesChanged,
+            hintText: trigId == 't_spicy_food'
+                ? 'What spicy food did you eat?'
+                : trigId == 't_hot_drinks_food'
+                    ? 'Hot tea, soup, coffee...'
+                    : trigId == 't_skipped_meals'
+                        ? 'Which meal did you skip?'
+                        : trigId == 't_sugar_processed_food'
+                            ? 'Sweets, soda, processed snacks...'
+                            : 'Spicy foods, heavy dinner...',
           ),
-        ],
+          style: GoogleFonts.manrope(
+            fontSize: 13,
+          ),
+          maxLines: 2,
+          onChanged: (val) {
+            if (trigId == 't_foods') {
+              onFoodsNotesChanged(val);
+            } else {
+              onCustomTriggerTextChanged(trigId, val);
+            }
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSmokingDetailCard(String trigId) {
+    final counter = customTriggerCounters[trigId] ?? 0;
+    const trigColor = Color(0xFF8B9B90);
+    final trigBg = trigColor.withValues(alpha: 0.1);
+    return LoggingCardWrapper(
+      name: 'Smoking / tobacco',
+      icon: Icons.smoke_free,
+      color: trigColor,
+      backgroundColor: trigBg,
+      children: [
+        QuantityCounterSelector(
+          value: counter,
+          label: 'HOW MUCH TODAY?',
+          onChanged: (val) => onCustomTriggerCounterChanged(trigId, val),
+          displayValueBuilder: (val) => '$val time${val != 1 ? 's' : ''}',
+          minValue: 0,
+        ),
       ],
     );
   }

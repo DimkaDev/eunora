@@ -130,16 +130,37 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
           _selectedTriggerIds.clear();
           for (final t in existingLog.triggers) {
             final tLower = t.toLowerCase();
-            if (tLower.contains('caffeine')) {
-              _selectedTriggerIds.add('t_caffeine');
+            if (tLower.contains('caffeine') || tLower.contains('coffee')) {
+              _selectedTriggerIds.add('t_coffee');
             } else if (tLower.contains('alcohol')) {
               _selectedTriggerIds.add('t_alcohol');
             } else if (tLower.contains('stress')) {
               _selectedTriggerIds.add('t_stress');
-            } else if (tLower.contains('foods')) {
-              _selectedTriggerIds.add('t_foods');
+            } else if (tLower.contains('foods') ||
+                tLower.contains('spicy') ||
+                tLower.contains('sugar') ||
+                tLower.contains('meals') ||
+                tLower.contains('drinks') ||
+                tLower.contains('hot')) {
+              if (tLower.contains('spicy')) {
+                _selectedTriggerIds.add('t_spicy_food');
+              } else if (tLower.contains('sugar')) {
+                _selectedTriggerIds.add('t_sugar_processed_food');
+              } else if (tLower.contains('drinks') || tLower.contains('hot')) {
+                _selectedTriggerIds.add('t_hot_drinks_food');
+              } else if (tLower.contains('meals') || tLower.contains('skipped')) {
+                _selectedTriggerIds.add('t_skipped_meals');
+              } else {
+                _selectedTriggerIds.add('t_spicy_food');
+              }
             } else {
-              final matchedId = 't_${t.toLowerCase().replaceAll(' ', '_')}';
+              String namePart = tLower.trim();
+              if (namePart.contains('weather')) namePart = 'weather';
+              if (namePart.contains('smoking')) namePart = 'smoking';
+              if (namePart.contains('clothing') || namePart.contains('layers')) namePart = 'tight_clothing';
+              if (namePart.contains('bedroom') || namePart.contains('night')) namePart = 'warm_bedroom';
+
+              final matchedId = 't_${namePart.replaceAll(' ', '_')}';
               _selectedTriggerIds.add(matchedId);
             }
           }
@@ -277,13 +298,17 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
 
     final List<String> triggerNames = [];
     for (final id in _selectedTriggerIds) {
-      if (id == 't_caffeine') {
+      if (id == 't_caffeine' || id == 't_coffee') {
         triggerNames.add('Caffeine: $_caffeineCups cups');
       } else if (id == 't_alcohol') {
         triggerNames.add('Alcohol: $_alcoholGlasses glasses');
       } else if (id == 't_stress') {
         triggerNames.add('Stress: $_stressLevel');
-      } else if (id == 't_foods') {
+      } else if (id == 't_foods' ||
+          id == 't_spicy_food' ||
+          id == 't_sugar_processed_food' ||
+          id == 't_hot_drinks_food' ||
+          id == 't_skipped_meals') {
         triggerNames.add(_foodsTriggered ? 'Foods: $_foodsNotes' : 'Foods');
       } else {
         triggerNames.add(id.replaceAll('t_', '').toUpperCase());
@@ -551,10 +576,16 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
     final triggerLib = ref.read(triggerLibraryProvider);
     for (final id in _selectedTriggerIds) {
       dynamic val = '';
-      if (id == 't_caffeine') val = '$_caffeineCups cups';
+      if (id == 't_caffeine' || id == 't_coffee') val = '$_caffeineCups cups';
       else if (id == 't_alcohol') val = '$_alcoholGlasses glass';
       else if (id == 't_stress') val = _stressLevel;
-      else if (id == 't_foods') val = _foodsTriggered ? 'Foods: $_foodsNotes' : 'None';
+      else if (id == 't_foods' ||
+          id == 't_spicy_food' ||
+          id == 't_sugar_processed_food' ||
+          id == 't_hot_drinks_food' ||
+          id == 't_skipped_meals') {
+        val = _foodsTriggered ? 'Foods: $_foodsNotes' : 'None';
+      }
       else val = _customTriggerCounters[id]?.toString() ?? _customTriggerTexts[id] ?? 'Logged';
 
       final trigger = triggerLib.firstWhere(
@@ -634,13 +665,17 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
 
       final List<String> triggerNames = [];
       for (final id in _selectedTriggerIds) {
-        if (id == 't_caffeine') {
+        if (id == 't_caffeine' || id == 't_coffee') {
           triggerNames.add('Caffeine: $_caffeineCups cups');
         } else if (id == 't_alcohol') {
           triggerNames.add('Alcohol: $_alcoholGlasses glasses');
         } else if (id == 't_stress') {
           triggerNames.add('Stress: $_stressLevel');
-        } else if (id == 't_foods') {
+        } else if (id == 't_foods' ||
+            id == 't_spicy_food' ||
+            id == 't_sugar_processed_food' ||
+            id == 't_hot_drinks_food' ||
+            id == 't_skipped_meals') {
           triggerNames.add(_foodsTriggered ? 'Foods: $_foodsNotes' : 'Foods');
         } else {
           triggerNames.add(id.replaceAll('t_', '').toUpperCase());
