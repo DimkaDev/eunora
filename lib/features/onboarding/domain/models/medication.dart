@@ -5,6 +5,9 @@ enum MedicationType {
   pill,
   gel,
   cream,
+  spray,
+  pessary,
+  ring,
   other;
 
   String get displayName {
@@ -13,6 +16,9 @@ enum MedicationType {
       case MedicationType.pill: return 'Tablet';
       case MedicationType.gel: return 'Gel';
       case MedicationType.cream: return 'Cream';
+      case MedicationType.spray: return 'Spray';
+      case MedicationType.pessary: return 'Pessary';
+      case MedicationType.ring: return 'Ring';
       case MedicationType.other: return 'Other';
     }
   }
@@ -23,6 +29,9 @@ enum MedicationType {
       case MedicationType.pill: return 'pill';
       case MedicationType.gel:
       case MedicationType.cream: return 'clean_hands';
+      case MedicationType.spray: return 'air';
+      case MedicationType.pessary: return 'vaccines';
+      case MedicationType.ring: return 'radio_button_unchecked';
       case MedicationType.other: return 'medical_services';
     }
   }

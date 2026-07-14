@@ -49,7 +49,7 @@ const List<HrtDrugDefinition> kHrtDrugLibrary = [
   HrtDrugDefinition(
     name: 'Estradiol',
     category: HrtDrugCategory.systemicEstrogen,
-    commonForms: ['gel', 'patch', 'spray', 'tablet'],
+    commonForms: ['gel', 'patch', 'spray'],
     market: HrtMarket.both,
   ),
   HrtDrugDefinition(
@@ -180,7 +180,7 @@ const List<HrtDrugDefinition> kHrtDrugLibrary = [
   HrtDrugDefinition(
     name: 'Mirena',
     category: HrtDrugCategory.progestogenOnly,
-    commonForms: ['other'],
+    commonForms: ['ring'],
     market: HrtMarket.both,
   ),
 
@@ -293,26 +293,26 @@ const List<HrtDrugDefinition> kHrtDrugLibrary = [
   HrtDrugDefinition(
     name: 'Ovestin',
     category: HrtDrugCategory.vaginalLocal,
-    commonForms: ['other'],
+    commonForms: ['pessary'],
     market: HrtMarket.uk,
   ),
   // Also marketed as Yuvafem in the US.
   HrtDrugDefinition(
     name: 'Vagifem',
     category: HrtDrugCategory.vaginalLocal,
-    commonForms: ['other'],
+    commonForms: ['pessary'],
     market: HrtMarket.both,
   ),
   HrtDrugDefinition(
     name: 'Gina',
     category: HrtDrugCategory.vaginalLocal,
-    commonForms: ['other'],
+    commonForms: ['pessary'],
     market: HrtMarket.uk,
   ),
   HrtDrugDefinition(
     name: 'Estring',
     category: HrtDrugCategory.vaginalLocal,
-    commonForms: ['other'],
+    commonForms: ['ring'],
     market: HrtMarket.both,
   ),
   HrtDrugDefinition(

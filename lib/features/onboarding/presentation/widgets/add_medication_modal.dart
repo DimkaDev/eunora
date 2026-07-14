@@ -7,6 +7,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../domain/models/medication.dart';
 import '../providers/medications_provider.dart';
 import '../providers/onboarding_profile_provider.dart';
+import 'package:eunora/core/utils/animation_system.dart';
 import 'package:eunora/features/home/presentation/widgets/dose_change_alert.dart';
 import 'package:eunora/features/hrt_tracker/data/hrt_drug_library.dart';
 import 'package:eunora/features/hrt_tracker/data/hrt_quick_add_service.dart';
@@ -35,6 +36,7 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
   bool _showDropdown = false;
   List<String> _filteredMeds = [];
   bool _isCustomDose = false;
+  String? _selectedQuickAddName;
 
   // --- HRT Drug Library v2 state ---
   bool _isCombined = false;
@@ -86,6 +88,7 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
   /// Pre-fills the modal from a Quick-Add card selection.
   void _applyQuickAdd(HrtDrugOption drug) {
     setState(() {
+      _selectedQuickAddName = drug.name;
       _nameController.text = drug.name;
       _showDropdown = false;
       _filteredMeds = [];
@@ -103,6 +106,9 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
       if (_selectedType == MedicationType.gel) {
         _selectedUnit = 'pumps';
         _doseController.text = '1';
+      } else if (_selectedType == MedicationType.spray) {
+        _selectedUnit = 'sprays';
+        _doseController.text = '1';
       } else if (_selectedType == MedicationType.patch) {
         _selectedUnit = 'mcg';
         _doseController.text = '50';
@@ -117,9 +123,11 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
   static MedicationType _formToMedicationType(String form) {
     switch (form) {
       case 'patch': return MedicationType.patch;
-      case 'gel':
-      case 'spray': return MedicationType.gel;
+      case 'gel': return MedicationType.gel;
+      case 'spray': return MedicationType.spray;
       case 'tablet': return MedicationType.pill;
+      case 'pessary': return MedicationType.pessary;
+      case 'ring': return MedicationType.ring;
       default: return MedicationType.other;
     }
   }
@@ -147,6 +155,11 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
 
   void _onNameChanged() {
     final query = _nameController.text.toLowerCase();
+    if (_selectedQuickAddName != null && _nameController.text != _selectedQuickAddName) {
+      setState(() {
+        _selectedQuickAddName = null;
+      });
+    }
     if (query.isEmpty) {
       setState(() {
         _showDropdown = false;
@@ -624,8 +637,14 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
           return cleanForm == 'gel';
         case MedicationType.cream:
           return cleanForm == 'cream';
+        case MedicationType.spray:
+          return cleanForm == 'spray';
+        case MedicationType.pessary:
+          return cleanForm == 'pessary';
+        case MedicationType.ring:
+          return cleanForm == 'ring';
         case MedicationType.other:
-          return cleanForm != 'patch' && cleanForm != 'tablet' && cleanForm != 'pill' && cleanForm != 'gel' && cleanForm != 'cream';
+          return true;
       }
     });
   }
@@ -697,6 +716,7 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
           leading: Icon(Icons.medication, color: AppTheme.primary.withOpacity(0.4)),
           title: Text(name, style: const TextStyle(fontSize: 14)),
           onTap: () {
+            FocusScope.of(context).unfocus();
             _nameController.text = name;
             setState(() {
               _showDropdown = false;
@@ -711,10 +731,19 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
               if (!_isFormSupported(_selectedType) && def.commonForms.isNotEmpty) {
                 final firstForm = def.commonForms.first;
                 _selectedType = _formToMedicationType(firstForm);
-                _selectedUnit = _selectedType == MedicationType.patch
-                    ? 'mcg'
-                    : (_selectedType == MedicationType.gel ? 'pumps' : 'mg');
-                _doseController.text = _selectedType == MedicationType.patch ? '50' : '1';
+                if (_selectedType == MedicationType.patch) {
+                  _selectedUnit = 'mcg';
+                  _doseController.text = '50';
+                } else if (_selectedType == MedicationType.gel) {
+                  _selectedUnit = 'pumps';
+                  _doseController.text = '1';
+                } else if (_selectedType == MedicationType.spray) {
+                  _selectedUnit = 'sprays';
+                  _doseController.text = '1';
+                } else {
+                  _selectedUnit = 'mg';
+                  _doseController.text = '1';
+                }
               }
             });
           },
@@ -749,6 +778,9 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
       MedicationType.patch,
       MedicationType.pill,
       MedicationType.gel,
+      MedicationType.spray,
+      MedicationType.pessary,
+      MedicationType.ring,
       MedicationType.other,
     ];
 
@@ -775,10 +807,19 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
           if (type == MedicationType.gel) {
             _selectedUnit = 'pumps';
             _doseController.text = '1';
+          } else if (type == MedicationType.spray) {
+            _selectedUnit = 'sprays';
+            _doseController.text = '1';
           } else if (type == MedicationType.patch) {
             _selectedUnit = 'mcg';
             _doseController.text = '50';
           } else if (type == MedicationType.pill) {
+            _selectedUnit = 'mg';
+            _doseController.text = '1';
+          } else if (type == MedicationType.pessary) {
+            _selectedUnit = 'mg';
+            _doseController.text = '1';
+          } else if (type == MedicationType.ring) {
             _selectedUnit = 'mg';
             _doseController.text = '1';
           } else {
@@ -828,6 +869,9 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
       case 'rectangle': return Icons.rectangle_outlined;
       case 'pill': return Icons.medication;
       case 'clean_hands': return Icons.clean_hands;
+      case 'air': return Icons.air;
+      case 'vaccines': return Icons.vaccines;
+      case 'radio_button_unchecked': return Icons.radio_button_unchecked;
       default: return Icons.more_horiz;
     }
   }
@@ -1073,7 +1117,6 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
     );
   }
 
-  /// Horizontal Quick-Add row showing top 4 recommended drugs.
   Widget _buildQuickAddRow() {
     final quickAddDrugs = ref.watch(hrtQuickAddProvider);
     return Column(
@@ -1093,31 +1136,10 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
           spacing: 8,
           runSpacing: 8,
           children: quickAddDrugs.map((drug) {
-            return GestureDetector(
+            return QuickAddChip(
+              label: drug.name,
               onTap: () => _applyQuickAdd(drug),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(100),
-                  border: Border.all(color: const Color(0xFFE8E0F0)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Text(
-                  drug.name,
-                  style: GoogleFonts.manrope(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.primary,
-                  ),
-                ),
-              ),
+              isSelected: _selectedQuickAddName == drug.name,
             );
           }).toList(),
         ),
@@ -1150,6 +1172,54 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class QuickAddChip extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+  final bool isSelected;
+
+  const QuickAddChip({
+    super.key,
+    required this.label,
+    required this.onTap,
+    this.isSelected = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF67594E) : Colors.white,
+          borderRadius: BorderRadius.circular(100),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF67594E) : const Color(0xFFE8E0F0),
+          ),
+          boxShadow: isSelected
+              ? []
+              : [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.manrope(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: isSelected ? Colors.white : AppTheme.primary,
+          ),
+        ),
       ),
     );
   }

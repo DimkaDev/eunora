@@ -126,6 +126,9 @@ class MedicationListItem extends StatelessWidget {
       case 'rectangle': return Icons.rectangle_outlined;
       case 'pill': return Icons.medication;
       case 'clean_hands': return Icons.clean_hands;
+      case 'air': return Icons.air;
+      case 'vaccines': return Icons.vaccines;
+      case 'radio_button_unchecked': return Icons.radio_button_unchecked;
       default: return Icons.medical_services;
     }
   }

@@ -388,6 +388,28 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     final targetDate = DateTime(_focusedMonth.year, _focusedMonth.month, day);
     final dateStr = "${targetDate.year}-${targetDate.month.toString().padLeft(2, '0')}-${targetDate.day.toString().padLeft(2, '0')}";
 
+    int caffeineCups = 0;
+    int alcoholGlasses = 0;
+    String stressLevel = 'Moderate';
+    bool foodsTriggered = false;
+    String foodsNotes = '';
+
+    for (final t in mockLog.triggers) {
+      if (t.startsWith('Caffeine:')) {
+        final val = t.replaceAll('Caffeine:', '').trim();
+        caffeineCups = int.tryParse(val.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+      } else if (t.startsWith('Alcohol:')) {
+        final val = t.replaceAll('Alcohol:', '').trim();
+        alcoholGlasses = int.tryParse(val.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+      } else if (t.startsWith('Stress:')) {
+        final val = t.replaceAll('Stress:', '').trim();
+        stressLevel = val;
+      } else if (t.startsWith('Foods:')) {
+        foodsTriggered = true;
+        foodsNotes = t.replaceAll('Foods:', '').trim();
+      }
+    }
+
     final List<HrtIntakeLog> hrtIntakes = [];
     for (final h in mockLog.hrt) {
       final name = h['name'] ?? '';
@@ -528,6 +550,11 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       dailyLog = orig.copyWith(
         symptoms: loggedSymptoms,
         triggers: mockLog.triggers,
+        caffeineCups: caffeineCups,
+        alcoholGlasses: alcoholGlasses,
+        stressLevel: stressLevel,
+        foodsTriggered: foodsTriggered,
+        foodsNotes: foodsNotes,
         estradiolChecked: estradiolChecked,
         estradiolDose: estradiolDose,
         estradiolUnit: estradiolUnit,
@@ -633,11 +660,11 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         date: targetDate,
         symptoms: loggedSymptoms,
         triggers: mockLog.triggers,
-        caffeineCups: 0,
-        alcoholGlasses: 0,
-        stressLevel: 'Moderate',
-        foodsTriggered: false,
-        foodsNotes: '',
+        caffeineCups: caffeineCups,
+        alcoholGlasses: alcoholGlasses,
+        stressLevel: stressLevel,
+        foodsTriggered: foodsTriggered,
+        foodsNotes: foodsNotes,
         customTriggerCounters: {},
         customTriggerTexts: {},
         estradiolChecked: estradiolChecked,
@@ -788,18 +815,51 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       'Specific Foods': {'icon': Icons.restaurant, 'defaultValue': 'Logged'},
     };
 
-    return list.map((name) {
-      final catalog = triggerCatalog[name] ?? {'icon': Icons.bolt, 'defaultValue': 'Logged'};
+    return list.map((t) {
+      String name = t;
+      dynamic value = 'Logged';
+      IconData icon = Icons.bolt;
+
+      if (t.startsWith('Caffeine:')) {
+        name = 'Caffeine';
+        value = t.replaceAll('Caffeine:', '').trim();
+        icon = Icons.local_cafe;
+      } else if (t.startsWith('Alcohol:')) {
+        name = 'Alcohol';
+        value = t.replaceAll('Alcohol:', '').trim();
+        icon = Icons.wine_bar;
+      } else if (t.startsWith('Stress:')) {
+        name = 'Stress';
+        value = t.replaceAll('Stress:', '').trim();
+        icon = Icons.psychology;
+      } else if (t.startsWith('Foods:')) {
+        name = 'Foods';
+        value = t.replaceAll('Foods:', '').trim();
+        icon = Icons.restaurant;
+      } else {
+        final catalog = triggerCatalog[name] ?? {'icon': Icons.bolt, 'defaultValue': 'Logged'};
+        value = catalog['defaultValue'];
+        icon = catalog['icon'] as IconData;
+      }
+
       return {
         'name': name,
-        'value': catalog['defaultValue'],
-        'icon': catalog['icon'],
+        'value': value,
+        'icon': icon,
       };
     }).toList();
   }
 
   List<String> _convertFromEditTriggers(List<Map<String, dynamic>> list) {
-    return list.map((t) => t['name'] as String).toList();
+    return list.map<String>((t) {
+      final name = t['name'] as String;
+      final val = t['value'] ?? 'Logged';
+      if (name == 'Caffeine') return 'Caffeine: $val';
+      if (name == 'Alcohol') return 'Alcohol: $val';
+      if (name == 'Stress') return 'Stress: $val';
+      if (name == 'Foods') return 'Foods: $val';
+      return name;
+    }).toList();
   }
 
   void _showAddSymptomSheet(MockDailyLog log) {
@@ -2141,51 +2201,41 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     }
   }
 
-  Map<String, Color> _getTriggerColorsForDisplay(String name) {
+  Map<String, Color> _getTriggerColorsForDisplay(String fullName) {
     Color bg;
     Color border;
     Color text;
 
-    switch (name.toLowerCase()) {
-      case 'stress':
-        bg = const Color(0xFFF3E8FF);
-        border = const Color(0xFFE9D5FF);
-        text = const Color(0xFF7E22CE);
-        break;
-      case 'caffeine':
-        bg = const Color(0xFFFDF8F5);
-        border = const Color(0xFFEDD8CE);
-        text = const Color(0xFF854D0E);
-        break;
-      case 'alcohol':
-      case 'red wine':
-        bg = const Color(0xFFFFF1F2);
-        border = const Color(0xFFFECDD3);
-        text = const Color(0xFFBE123C);
-        break;
-      case 'sugar':
-      case 'sugar & sweets':
-        bg = const Color(0xFFF7FEE7);
-        border = const Color(0xFFE2F9B8);
-        text = const Color(0xFF4D7C0F);
-        break;
-      case 'lack of sleep':
-      case 'poor sleep':
-        bg = const Color(0xFFF0F9FF);
-        border = const Color(0xFFBAE6FD);
-        text = const Color(0xFF0369A1);
-        break;
-      case 'spicy food':
-      case 'foods':
-        bg = const Color(0xFFFFF1F0);
-        border = const Color(0xFFFFCCC7);
-        text = const Color(0xFFCF1322);
-        break;
-      default:
-        bg = const Color(0xFFF0FDFA);
-        border = const Color(0xFFCCFBF1);
-        text = const Color(0xFF0F766E);
-        break;
+    final name = fullName.toLowerCase();
+
+    if (name.startsWith('stress')) {
+      bg = const Color(0xFFF3E8FF);
+      border = const Color(0xFFE9D5FF);
+      text = const Color(0xFF7E22CE);
+    } else if (name.startsWith('caffeine') || name.startsWith('coffee')) {
+      bg = const Color(0xFFFDF8F5);
+      border = const Color(0xFFEDD8CE);
+      text = const Color(0xFF854D0E);
+    } else if (name.startsWith('alcohol') || name.startsWith('red wine')) {
+      bg = const Color(0xFFFFF1F2);
+      border = const Color(0xFFFECDD3);
+      text = const Color(0xFFBE123C);
+    } else if (name.startsWith('sugar')) {
+      bg = const Color(0xFFF7FEE7);
+      border = const Color(0xFFE2F9B8);
+      text = const Color(0xFF4D7C0F);
+    } else if (name.startsWith('lack of sleep') || name.startsWith('poor sleep')) {
+      bg = const Color(0xFFF0F9FF);
+      border = const Color(0xFFBAE6FD);
+      text = const Color(0xFF0369A1);
+    } else if (name.startsWith('spicy food') || name.startsWith('foods')) {
+      bg = const Color(0xFFFFF1F0);
+      border = const Color(0xFFFFCCC7);
+      text = const Color(0xFFCF1322);
+    } else {
+      bg = const Color(0xFFF0FDFA);
+      border = const Color(0xFFCCFBF1);
+      text = const Color(0xFF0F766E);
     }
 
     return {

@@ -634,6 +634,7 @@ class _AddOtherMedicationModalState extends ConsumerState<AddOtherMedicationModa
   String? _selectedCategory;
   String? _selectedFrequency;
   bool _hasReminder = false;
+  String? _selectedQuickAddName;
 
   final List<String> _categories = ['Vitamins', 'Minerals', 'Herbal', 'Prescription', 'Other'];
   final List<String> _frequencies = ['Daily', 'Twice daily', 'Weekly', 'As needed'];
@@ -644,6 +645,7 @@ class _AddOtherMedicationModalState extends ConsumerState<AddOtherMedicationModa
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.medication?.name ?? widget.initialName);
+    _nameController.addListener(_onNameChanged);
 
     // Try to parse initial dose and unit
     final rawDose = widget.medication?.dose;
@@ -673,6 +675,14 @@ class _AddOtherMedicationModalState extends ConsumerState<AddOtherMedicationModa
     _hasReminder = widget.medication?.hasReminder ?? false;
   }
 
+  void _onNameChanged() {
+    if (_selectedQuickAddName != null && _nameController.text != _selectedQuickAddName) {
+      setState(() {
+        _selectedQuickAddName = null;
+      });
+    }
+  }
+
   String? _getDefaultCategory(String? name) {
     if (name == null) return null;
     final lowerName = name.toLowerCase();
@@ -683,8 +693,73 @@ class _AddOtherMedicationModalState extends ConsumerState<AddOtherMedicationModa
     return null;
   }
 
+  Widget _buildQuickAddRow() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Quick add',
+          style: GoogleFonts.manrope(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF1D1B1A),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: _suggestions.map((name) {
+            final isSelected = _selectedQuickAddName == name;
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedQuickAddName = name;
+                  _nameController.text = name;
+                  final category = _getDefaultCategory(name);
+                  if (category != null) {
+                    _selectedCategory = category;
+                  }
+                });
+              },
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isSelected ? const Color(0xFF67594E) : Colors.white,
+                  borderRadius: BorderRadius.circular(100),
+                  border: Border.all(
+                    color: isSelected ? const Color(0xFF67594E) : const Color(0xFFE8E0F0),
+                  ),
+                  boxShadow: isSelected
+                      ? []
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.03),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                ),
+                child: Text(
+                  name,
+                  style: GoogleFonts.manrope(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: isSelected ? Colors.white : const Color(0xFF67594E),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
   @override
   void dispose() {
+    _nameController.removeListener(_onNameChanged);
     _nameController.dispose();
     _doseController.dispose();
     super.dispose();
@@ -768,6 +843,11 @@ class _AddOtherMedicationModalState extends ConsumerState<AddOtherMedicationModa
                   ),
                   const SizedBox(height: 32),
                   
+                  if (widget.medication == null) ...[
+                    _buildQuickAddRow(),
+                    const SizedBox(height: 24),
+                  ],
+
                   // Name Input
                   _buildLabel('Medication name'),
                   const SizedBox(height: 8),
@@ -886,20 +966,6 @@ class _AddOtherMedicationModalState extends ConsumerState<AddOtherMedicationModa
                       ],
                     ),
                   ),
-                  
-                  if (widget.medication == null) ...[
-                    const SizedBox(height: 40),
-                    const Text(
-                      'COMMON CHOICES',
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF7F756E), letterSpacing: 1.5),
-                    ),
-                    const SizedBox(height: 16),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: _suggestions.map((s) => _buildSuggestionChip(s)).toList(),
-                    ),
-                  ],
                   
                   const SizedBox(height: 120), // Bottom padding
                 ],
@@ -1027,36 +1093,6 @@ class _AddOtherMedicationModalState extends ConsumerState<AddOtherMedicationModa
             Text(
               frequency,
               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF1D1B1A)),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSuggestionChip(String name) {
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _nameController.text = name;
-        });
-      },
-      borderRadius: BorderRadius.circular(24),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8F2F0),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: const Color(0xFFD0C4BC).withOpacity(0.3)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.add, size: 14, color: Color(0xFF67594E)),
-            const SizedBox(width: 4),
-            Text(
-              name,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF1D1B1A)),
             ),
           ],
         ),

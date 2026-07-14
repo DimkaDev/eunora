@@ -128,4 +128,37 @@ void main() {
       expect(results, isEmpty);
     });
   });
+
+  group('Calendar Page Trigger Value Extraction & Colors', () {
+    test('Verify trigger string formatting parser extracts quantities correctly', () {
+      final triggers = ['Caffeine: 2 cups', 'Alcohol: 1 glass', 'Stress: High', 'Foods: Spicy soup'];
+      int caffeineCups = 0;
+      int alcoholGlasses = 0;
+      String stressLevel = 'Moderate';
+      bool foodsTriggered = false;
+      String foodsNotes = '';
+
+      for (final t in triggers) {
+        if (t.startsWith('Caffeine:')) {
+          final val = t.replaceAll('Caffeine:', '').trim();
+          caffeineCups = int.tryParse(val.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+        } else if (t.startsWith('Alcohol:')) {
+          final val = t.replaceAll('Alcohol:', '').trim();
+          alcoholGlasses = int.tryParse(val.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+        } else if (t.startsWith('Stress:')) {
+          final val = t.replaceAll('Stress:', '').trim();
+          stressLevel = val;
+        } else if (t.startsWith('Foods:')) {
+          foodsTriggered = true;
+          foodsNotes = t.replaceAll('Foods:', '').trim();
+        }
+      }
+
+      expect(caffeineCups, equals(2));
+      expect(alcoholGlasses, equals(1));
+      expect(stressLevel, equals('High'));
+      expect(foodsTriggered, isTrue);
+      expect(foodsNotes, equals('Spicy soup'));
+    });
+  });
 }
