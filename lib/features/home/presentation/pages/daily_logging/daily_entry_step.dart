@@ -94,6 +94,10 @@ class DailyEntryStep extends ConsumerStatefulWidget {
 
   final Map<String, bool> otherMedsChecked;
   final ValueChanged<Map<String, bool>> onOtherMedsChanged;
+  // ignore: unused_field
+
+  /// The date being logged. Null means today. Used for retroactive logging.
+  final DateTime? loggingDate;
 
   const DailyEntryStep({
     super.key,
@@ -119,6 +123,7 @@ class DailyEntryStep extends ConsumerStatefulWidget {
     required this.onSleepDurationChanged,
     required this.onHydrationCupsChanged,
     required this.onAdditionalNotesChanged,
+    this.loggingDate,
   });
 
   @override
@@ -136,10 +141,11 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
     if (lastTaken == null) {
       return true;
     }
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    // Use the actual logging date (for retroactive entries) instead of always DateTime.now()
+    final ref = widget.loggingDate ?? DateTime.now();
+    final refDay = DateTime(ref.year, ref.month, ref.day);
     final thatDay = DateTime(lastTaken.year, lastTaken.month, lastTaken.day);
-    final daysDiff = today.difference(thatDay).inDays;
+    final daysDiff = refDay.difference(thatDay).inDays;
 
     if (frequency.toLowerCase().contains('twice weekly')) {
       return daysDiff >= 3;
@@ -161,25 +167,32 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
     if (user == null) return;
     try {
       final firestore = ref.read(firestoreServiceProvider);
-      // Fetch past 90 days to find last taken intakes
-      final start = DateTime.now().subtract(const Duration(days: 90));
-      final logs = await firestore.getDailyLogsHistory(user.uid, start, DateTime.now());
+      // Use the actual logging date for retroactive entries, otherwise today
+      final loggingDate = widget.loggingDate ?? DateTime.now();
+      final loggingDay = DateTime(loggingDate.year, loggingDate.month, loggingDate.day);
+      // Fetch past 90 days before the logging date to find last taken intakes
+      final start = loggingDay.subtract(const Duration(days: 90));
+      final logs = await firestore.getDailyLogsHistory(user.uid, start, loggingDate);
       // Sort oldest first to chronologically process intake logs
       logs.sort((a, b) => a.date.compareTo(b.date));
 
+      final loggingDateStr = "${loggingDay.year}-${loggingDay.month.toString().padLeft(2, '0')}-${loggingDay.day.toString().padLeft(2, '0')}";
+
       final Map<String, DateTime> realLastTaken = {};
       for (final log in logs) {
-        // check if this is not today's log draft we are currently editing
+        // Exclude the log for the date we are currently editing
         final logDateStr = "${log.date.year}-${log.date.month.toString().padLeft(2, '0')}-${log.date.day.toString().padLeft(2, '0')}";
-        final todayDateStr = "${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().day.toString().padLeft(2, '0')}";
-        if (logDateStr == todayDateStr) {
+        if (logDateStr == loggingDateStr) {
           continue;
         }
 
         if (log.hrtIntakes.isNotEmpty) {
           for (final intake in log.hrtIntakes) {
             if (intake.isTaken) {
-              realLastTaken[intake.medicationId] = log.date;
+              realLastTaken[intake.name.toLowerCase()] = log.date;
+              if (intake.medicationId.isNotEmpty) {
+                realLastTaken[intake.medicationId] = log.date;
+              }
             }
           }
         } else {
@@ -189,6 +202,7 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
             for (final med in meds) {
               if (med.name.toLowerCase().contains('estradiol') || med.name.toLowerCase().contains('estrogen')) {
                 realLastTaken[med.id] = log.date;
+                realLastTaken[med.name.toLowerCase()] = log.date;
               }
             }
           }
@@ -197,6 +211,7 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
             for (final med in meds) {
               if (med.name.toLowerCase().contains('progesterone') || med.name.toLowerCase().contains('utrogestan')) {
                 realLastTaken[med.id] = log.date;
+                realLastTaken[med.name.toLowerCase()] = log.date;
               }
             }
           }
@@ -239,6 +254,26 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
     if (diff <= 0) return 'today';
     if (diff == 1) return 'yesterday';
     return '$diff days ago';
+  }
+
+  /// Like _daysAgo but relative to the actual logging date (for retroactive entries).
+  String _daysAgoRelative(DateTime dt) {
+    final ref = widget.loggingDate ?? DateTime.now();
+    final refDay = DateTime(ref.year, ref.month, ref.day);
+    final thatDay = DateTime(dt.year, dt.month, dt.day);
+    final diff = refDay.difference(thatDay).inDays;
+    if (diff <= 0) return 'same day';
+    if (diff == 1) return '1 day before';
+    return '$diff days before';
+  }
+
+  /// Returns "Taken on [date]?" for retroactive entries, "Taken today?" otherwise.
+  String _takenLabel() {
+    final date = widget.loggingDate;
+    if (date == null) return 'Taken today?';
+    final day = date.day;
+    final month = _getMonthName(date.month);
+    return 'Taken on $day $month?';
   }
 
   List<double> _getAvailableDoses(String unit) {
@@ -499,7 +534,7 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Taken today?',
+                _takenLabel(),
                 style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.onSurface),
               ),
               CupertinoSwitch(
@@ -643,14 +678,14 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Not scheduled for today',
+                        widget.loggingDate != null ? 'Not scheduled for this day' : 'Not scheduled for today',
                         style: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C)),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         lastTaken == null
                             ? 'No information'
-                            : 'Last taken: ${_formatDateTime(lastTaken, context)} (${_daysAgo(lastTaken)})',
+                            : '${widget.loggingDate != null ? 'Last taken before this date' : 'Last taken'}: ${_formatDateTime(lastTaken, context)} (${_daysAgoRelative(lastTaken)})',
                         style: GoogleFonts.manrope(fontSize: 11, color: AppTheme.outline),
                       ),
                     ],
@@ -891,7 +926,7 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                   final dose = widget.hrtDoses[med.id] ?? med.dose;
                   final unit = widget.hrtUnits[med.id] ?? med.unit;
                   final time = widget.hrtTimes[med.id] ?? '08:00 AM';
-                  final lastTaken = _medLastTaken[med.id];
+                  final lastTaken = _medLastTaken[med.id] ?? _medLastTaken[med.name.toLowerCase()];
 
                   final isScheduled = _isScheduledToday(med.frequency, lastTaken);
                   final status = checked
@@ -903,8 +938,8 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                       _buildMedRow(
                         title: med.name,
                         subtitle: checked
-                            ? '${dose.toStringAsFixed(dose == dose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $unit • $time'
-                            : (lastTaken == null
+                            ? '${dose.toStringAsFixed(dose == dose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $unit • $time • ${med.frequency}'
+                            : '${med.frequency} • ' + (lastTaken == null
                                 ? 'No information'
                                 : 'Last taken: ${_formatDate(lastTaken)}'),
                         icon: med.type == MedicationType.gel

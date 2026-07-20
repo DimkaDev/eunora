@@ -11,6 +11,7 @@ class CalendarWeeklyTrendsCard extends StatelessWidget {
   final String sleepChangeLabel;
   final bool isIntensityChangeGood;
   final bool isSleepChangeGood;
+  final bool isInsufficientData;
 
   const CalendarWeeklyTrendsCard({
     super.key,
@@ -22,6 +23,7 @@ class CalendarWeeklyTrendsCard extends StatelessWidget {
     this.sleepChangeLabel = '↓ 4%',
     this.isIntensityChangeGood = true,
     this.isSleepChangeGood = false,
+    this.isInsufficientData = false,
   });
 
   @override
@@ -36,9 +38,11 @@ class CalendarWeeklyTrendsCard extends StatelessWidget {
         ),
       ),
       padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      child: isInsufficientData
+          ? _buildInProgressTrends()
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
           Text(
             'Weekly Trends',
             style: GoogleFonts.notoSerif(
@@ -151,6 +155,62 @@ class CalendarWeeklyTrendsCard extends StatelessWidget {
           );
         }),
       ),
+    );
+  }
+
+  Widget _buildInProgressTrends() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Weekly Trends',
+          style: GoogleFonts.notoSerif(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.primary,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+          decoration: BoxDecoration(
+            color: AppTheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: AppTheme.outlineVariant.withValues(alpha: 0.1),
+            ),
+          ),
+          child: Column(
+            children: [
+              const Icon(
+                Icons.analytics_outlined,
+                color: Color(0xFF9B8B7E),
+                size: 32,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'IN PROGRESS',
+                style: GoogleFonts.manrope(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.1,
+                  color: AppTheme.outline,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Please log at least 3 days this week to generate weekly trends.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.manrope(
+                  fontSize: 13,
+                  color: AppTheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

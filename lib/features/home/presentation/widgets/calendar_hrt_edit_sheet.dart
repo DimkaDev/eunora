@@ -8,6 +8,9 @@ import 'package:eunora/features/onboarding/presentation/widgets/add_medication_m
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
+import 'package:eunora/features/onboarding/domain/models/medication.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:eunora/core/services/firestore_service.dart';
 
 enum HrtLogStatus { pending, taken, skipped }
 
@@ -156,17 +159,75 @@ class CalendarHrtEditSheet extends ConsumerStatefulWidget {
 class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
   late List<HrtEditEntry> _entries;
   int? _expandedIndex; // which card is expanded for editing
-  late Map<int, DateTime> _lastTakenDates;
+  final Map<String, DateTime> _lastTakenDates = {};
 
   @override
   void initState() {
     super.initState();
     _entries = widget.initialHrt.map(HrtEditEntry.fromMap).toList();
-    _lastTakenDates = {
-      0: DateTime.now().subtract(const Duration(days: 2)),
-      1: DateTime.now().subtract(const Duration(days: 1)),
-      2: DateTime.now().subtract(const Duration(days: 1)),
-    };
+    _loadRealLastTakenDates();
+  }
+
+  Future<void> _loadRealLastTakenDates() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    try {
+      final firestore = ref.read(firestoreServiceProvider);
+      // Fetch past 90 days to find last taken intakes
+      final start = DateTime.now().subtract(const Duration(days: 90));
+      final logs = await firestore.getDailyLogsHistory(user.uid, start, DateTime.now());
+      // Sort oldest first to chronologically process intake logs
+      logs.sort((a, b) => a.date.compareTo(b.date));
+
+      final Map<String, DateTime> realLastTaken = {};
+      for (final log in logs) {
+        // check if this is not today's log draft we are currently editing
+        final logDateStr = "${log.date.year}-${log.date.month.toString().padLeft(2, '0')}-${log.date.day.toString().padLeft(2, '0')}";
+        final todayDateStr = "${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().day.toString().padLeft(2, '0')}";
+        if (logDateStr == todayDateStr) {
+          continue;
+        }
+
+        if (log.hrtIntakes.isNotEmpty) {
+          for (final intake in log.hrtIntakes) {
+            if (intake.isTaken) {
+              realLastTaken[intake.name.toLowerCase()] = log.date;
+              if (intake.medicationId.isNotEmpty) {
+                realLastTaken[intake.medicationId] = log.date;
+              }
+            }
+          }
+        } else {
+          // Fallback parsing estradiol / progesterone flat fields
+          if (log.estradiolChecked) {
+            final meds = ref.read(medicationsProvider).medications;
+            for (final med in meds) {
+              if (med.name.toLowerCase().contains('estradiol') || med.name.toLowerCase().contains('estrogen')) {
+                realLastTaken[med.id] = log.date;
+                realLastTaken[med.name.toLowerCase()] = log.date;
+              }
+            }
+          }
+          if (log.progesteroneChecked) {
+            final meds = ref.read(medicationsProvider).medications;
+            for (final med in meds) {
+              if (med.name.toLowerCase().contains('progesterone') || med.name.toLowerCase().contains('utrogestan')) {
+                realLastTaken[med.id] = log.date;
+                realLastTaken[med.name.toLowerCase()] = log.date;
+              }
+            }
+          }
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _lastTakenDates.addAll(realLastTaken);
+        });
+      }
+    } catch (e) {
+      debugPrint("Error loading real last taken hrt dates: $e");
+    }
   }
 
   String _formatDate(DateTime dt) {
@@ -174,14 +235,16 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
   }
 
   bool _isScheduledToday(String name, DateTime? lastTaken) {
-    String freq = 'daily';
-    if (name.toLowerCase().contains('estradiol')) {
-      freq = 'twice weekly';
-    } else if (name.toLowerCase().contains('gel')) {
-      freq = 'every 2 days';
-    }
+    // Resolve frequency from medications provider first
+    final meds = ref.read(medicationsProvider).medications;
+    final matchingMed = meds.firstWhere(
+      (m) => m.name.toLowerCase() == name.toLowerCase() || (m.id == name),
+      orElse: () => Medication(name: name, type: MedicationType.other, dose: 50.0, unit: 'mcg', frequency: 'daily'),
+    );
 
-    if (freq == 'daily') {
+    final freq = matchingMed.frequency;
+
+    if (freq.toLowerCase() == 'daily') {
       return true;
     }
     if (lastTaken == null) {
@@ -192,10 +255,10 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
     final thatDay = DateTime(lastTaken.year, lastTaken.month, lastTaken.day);
     final daysDiff = today.difference(thatDay).inDays;
 
-    if (freq.contains('twice weekly')) {
+    if (freq.toLowerCase().contains('twice weekly')) {
       return daysDiff >= 3;
     }
-    if (freq.contains('every 2 days')) {
+    if (freq.toLowerCase().contains('every 2 days')) {
       return daysDiff >= 2;
     }
     return true;
@@ -212,8 +275,8 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
     if (entry.isTaken) {
       return HrtLogStatus.taken;
     }
-    final lastTaken = _lastTakenDates[index];
-    final isScheduled = _isScheduledToday(entry.name, lastTaken);
+    final lastTaken = _lastTakenDates[entry.id ?? ''] ?? _lastTakenDates[entry.name.toLowerCase()];
+    final isScheduled = _isScheduledToday(entry.id ?? entry.name, lastTaken);
     return isScheduled ? HrtLogStatus.pending : HrtLogStatus.skipped;
   }
 
@@ -467,7 +530,8 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                 applicationType: appType,
                 timeTaken: '08:00',
               ));
-              _lastTakenDates[_entries.length - 1] = DateTime.now().subtract(const Duration(days: 1));
+              _lastTakenDates[med.id] = DateTime.now().subtract(const Duration(days: 1));
+              _lastTakenDates[med.name.toLowerCase()] = DateTime.now().subtract(const Duration(days: 1));
             });
           }
         }
@@ -633,11 +697,19 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
     final status = _getEntryStatus(entry, index);
 
     final icon = _getMedIcon(entry.name);
-    final lastTaken = _lastTakenDates[index];
+    final lastTaken = _lastTakenDates[entry.id ?? ''] ?? _lastTakenDates[entry.name.toLowerCase()];
+    // Resolve frequency from medications provider first
+    final meds = ref.read(medicationsProvider).medications;
+    final matchingMed = meds.firstWhere(
+      (m) => m.name.toLowerCase() == entry.name.toLowerCase() || (m.id == entry.id),
+      orElse: () => Medication(name: entry.name, type: MedicationType.other, dose: 50.0, unit: 'mcg', frequency: 'daily'),
+    );
+    final freq = matchingMed.frequency;
+
     final subtitle = entry.isTaken
-        ? '${entry.dose} ${entry.unit} • ${entry.timeTaken}'
-        : (lastTaken == null
-            ? 'Not scheduled today'
+        ? '${entry.dose} ${entry.unit} • ${entry.timeTaken} • $freq'
+        : '$freq • ' + (lastTaken == null
+            ? 'No information'
             : 'Last taken: ${_formatDate(lastTaken)}');
 
     Color tileBgColor = Colors.white;
@@ -808,16 +880,6 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
           final medName = entry.name;
           setState(() {
             _entries.removeAt(index);
-            // Re-index remaining dates keys
-            final Map<int, DateTime> newDates = {};
-            _lastTakenDates.forEach((key, val) {
-              if (key < index) {
-                newDates[key] = val;
-              } else if (key > index) {
-                newDates[key - 1] = val;
-              }
-            });
-            _lastTakenDates = newDates;
             if (_expandedIndex == index) {
               _expandedIndex = null;
             } else if (_expandedIndex != null && _expandedIndex! > index) {
@@ -888,7 +950,7 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
   }
 
   Widget _buildExpandedPanel(int index, HrtEditEntry entry) {
-    final lastTaken = _lastTakenDates[index];
+    final lastTaken = _lastTakenDates[entry.id ?? ''] ?? _lastTakenDates[entry.name.toLowerCase()];
     final onboardingMeds = _entries;
 
     List<String> unitOptions = ['mg', 'mcg'];

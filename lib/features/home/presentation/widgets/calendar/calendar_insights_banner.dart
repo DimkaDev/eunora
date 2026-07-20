@@ -3,7 +3,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 
 class CalendarInsightsBanner extends StatelessWidget {
-  const CalendarInsightsBanner({super.key});
+  final bool isInsufficientData;
+
+  const CalendarInsightsBanner({
+    super.key,
+    this.isInsufficientData = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -15,12 +20,14 @@ class CalendarInsightsBanner extends StatelessWidget {
           color: AppTheme.outlineVariant.withValues(alpha: 0.2),
         ),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+      child: isInsufficientData
+          ? _buildInProgressInsights()
+          : ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
               Container(
                 width: 4,
                 color: AppTheme.tertiaryFixed,
@@ -95,6 +102,45 @@ class CalendarInsightsBanner extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildInProgressInsights() {
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.psychology_alt,
+                color: Color(0xFF814F45),
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Personalized Insights',
+                style: GoogleFonts.notoSerif(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'We are currently collecting data to find personalized correlations. Please log your symptoms, triggers, and medications for at least 3 days to build correlations.',
+            style: GoogleFonts.manrope(
+              fontSize: 14,
+              color: AppTheme.onSurfaceVariant,
+              height: 1.5,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -25,18 +25,70 @@ class TriggerLoggingSheet extends ConsumerStatefulWidget {
 }
 
 class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
-  int _currentStep = 0; // 0: Select Trigger, 1: Select Level
+  int _currentStep = 0; // 0: Select Trigger, 1: Configure details
   TriggerOption? _selectedTrigger;
-  String? _selectedValue;
+
+  // State for the detail step (mirrors daily logging)
+  String? _selectedValue;   // For slider-based triggers
+  int _counterValue = 1;    // For quantity-counter triggers (caffeine, alcohol, smoking)
+  String _textNote = '';    // For food/text triggers
+
   String _searchQuery = '';
   bool _showAllTriggers = false;
 
+  // ─── helpers (mirrors trigger_details_step.dart) ─────────────────────────
+
+  bool get _isCaffeine =>
+      _selectedTrigger?.id == 't_caffeine' ||
+      _selectedTrigger?.id == 't_coffee' ||
+      _selectedTrigger?.name.toLowerCase() == 'caffeine';
+
+  bool get _isAlcohol =>
+      _selectedTrigger?.id == 't_alcohol' ||
+      _selectedTrigger?.name.toLowerCase() == 'alcohol';
+
+  bool get _isSmoking =>
+      _selectedTrigger?.id == 't_smoking' ||
+      _selectedTrigger?.name.toLowerCase().contains('smoking') == true ||
+      _selectedTrigger?.name.toLowerCase().contains('tobacco') == true;
+
+  bool get _isFood =>
+      _selectedTrigger?.id == 't_foods' ||
+      _selectedTrigger?.id == 't_spicy_food' ||
+      _selectedTrigger?.id == 't_sugar_processed_food' ||
+      _selectedTrigger?.id == 't_hot_drinks_food' ||
+      _selectedTrigger?.id == 't_skipped_meals';
+
+  bool get _isStress =>
+      _selectedTrigger?.id == 't_stress' ||
+      _selectedTrigger?.name.toLowerCase() == 'stress';
+
+  String get _foodHint {
+    switch (_selectedTrigger?.id) {
+      case 't_spicy_food':      return 'What spicy food did you eat?';
+      case 't_hot_drinks_food': return 'Hot tea, soup, coffee...';
+      case 't_skipped_meals':   return 'Which meal did you skip?';
+      case 't_sugar_processed_food': return 'Sweets, soda, processed snacks...';
+      default:                  return 'Spicy foods, heavy dinner...';
+    }
+  }
+
+  /// Build the current saved value string from state, for the onSave callback.
+  String get _resolvedValue {
+    if (_isCaffeine) return '$_counterValue cup${_counterValue != 1 ? 's' : ''}';
+    if (_isAlcohol)  return '$_counterValue glass${_counterValue != 1 ? 'es' : ''}';
+    if (_isSmoking)  return '$_counterValue time${_counterValue != 1 ? 's' : ''}';
+    if (_isFood)     return _textNote.isNotEmpty ? _textNote : 'Noted';
+    return _selectedValue ?? 'Moderate';
+  }
+
+  bool get _canSave {
+    // Food requires something in the note or we allow empty
+    return _selectedTrigger != null;
+  }
+
   List<String> _getTriggerValues(String name) {
     switch (name.toLowerCase()) {
-      case 'caffeine':
-        return ['1 Cup', '2 Cups', '3 Cups'];
-      case 'alcohol':
-        return ['1 Glass', '2 Glasses', '3 Glasses'];
       case 'stress':
         return ['Calm', 'Moderate', 'High'];
       case 'poor sleep':
@@ -47,34 +99,36 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
         return ['Light', 'Moderate', 'Intense'];
       case 'weather':
         return ['Sunny', 'Humid', 'Cold/Change'];
-      case 'foods':
-      case 'spicy food':
-        return ['Low', 'Moderate', 'High'];
-      case 'smoking':
-      case 'smoking/tobacco':
-        return ['Low', 'Moderate', 'High'];
       case 'travel':
         return ['Short', 'Medium', 'Long'];
       case 'work':
       case 'overworking':
         return ['1-2 hours', '3-4 hours', '5+ hours'];
-      case 'sugar':
-      case 'sugar & sweets':
-        return ['Low', 'Moderate', 'High'];
-      case 'relaxation':
-      case 'lack of rest':
-        return ['Low', 'Moderate', 'High'];
       default:
         return ['Low', 'Moderate', 'High'];
     }
   }
 
+  void _selectTrigger(TriggerOption trigger) {
+    final vals = _getTriggerValues(trigger.name);
+    setState(() {
+      _selectedTrigger = trigger;
+      _counterValue = 1;
+      _textNote = '';
+      _selectedValue = vals.isNotEmpty ? vals[vals.length ~/ 2] : 'Moderate';
+      _currentStep = 1;
+    });
+  }
+
+  // ─── build ────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
     final library = ref.watch(triggerLibraryProvider);
-    final loggedNames = widget.loggedTriggers.map((t) => t['name']?.toString().toLowerCase()).toSet();
+    final loggedNames = widget.loggedTriggers
+        .map((t) => t['name']?.toString().toLowerCase())
+        .toSet();
 
-    // Filter out already logged triggers, and apply search query
     final displayTriggers = library.where((trigger) {
       final matchesLogged = !loggedNames.contains(trigger.name.toLowerCase());
       final matchesSearch = _searchQuery.isEmpty ||
@@ -82,20 +136,18 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
       if (!matchesSearch) return false;
       if (_searchQuery.isNotEmpty) return matchesLogged;
 
-      final def = kTriggerLibrary.where((d) => 't_${d.id}' == trigger.id).firstOrNull;
+      final def =
+          kTriggerLibrary.where((d) => 't_${d.id}' == trigger.id).firstOrNull;
       if (def == null) return matchesLogged;
 
-      if (_showAllTriggers) {
-        return matchesLogged;
-      } else {
-        return matchesLogged && def.tier == TriggerTier.core;
-      }
+      return _showAllTriggers
+          ? matchesLogged
+          : matchesLogged && def.tier == TriggerTier.core;
     }).toList();
 
     return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.70,
-      ),
+      constraints:
+          BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.80),
       padding: const EdgeInsets.only(bottom: 24),
       decoration: const BoxDecoration(
         color: AppTheme.surface,
@@ -124,11 +176,7 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
               children: [
                 if (_currentStep == 1)
                   IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _currentStep = 0;
-                      });
-                    },
+                    onPressed: () => setState(() => _currentStep = 0),
                     icon: const Icon(Icons.arrow_back),
                     style: IconButton.styleFrom(
                       backgroundColor: const Color(0xFFF2EDEA),
@@ -138,7 +186,7 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
                 else
                   const SizedBox(width: 40),
                 Text(
-                  _currentStep == 0 ? 'Add Daily Trigger' : 'Rate Trigger',
+                  _currentStep == 0 ? 'Add Daily Trigger' : 'Configure Trigger',
                   style: GoogleFonts.notoSerif(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -158,30 +206,31 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
           ),
           const SizedBox(height: 24),
 
-          // Body without animation, fixed search bar at the top of step 0
+          // Body
           Flexible(
             child: _currentStep == 0
                 ? Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 8),
                         child: TextField(
-                          onChanged: (val) {
-                            setState(() {
-                              _searchQuery = val;
-                            });
-                          },
+                          onChanged: (val) =>
+                              setState(() => _searchQuery = val),
                           decoration: InputDecoration(
                             hintText: 'Search triggers...',
-                            prefixIcon: const Icon(Icons.search, color: Color(0xFF9B8B7E)),
+                            prefixIcon: const Icon(Icons.search,
+                                color: Color(0xFF9B8B7E)),
                             filled: true,
-                            fillColor: const Color(0xFFF2EDEA).withValues(alpha: 0.5),
+                            fillColor: const Color(0xFFF2EDEA)
+                                .withValues(alpha: 0.5),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
                               borderSide: BorderSide.none,
                             ),
-                            contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                            contentPadding:
+                                const EdgeInsets.symmetric(vertical: 14),
                           ),
                           style: GoogleFonts.manrope(),
                         ),
@@ -189,7 +238,8 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
                       const SizedBox(height: 8),
                       Expanded(
                         child: SingleChildScrollView(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 24),
                           child: _buildTriggerSelection(displayTriggers),
                         ),
                       ),
@@ -197,33 +247,36 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
                   )
                 : SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: _buildLevelSelection(),
+                    child: _buildDetailStep(),
                   ),
           ),
 
-          // Action Button (Only in Step 2)
+          // Save button (step 1 only)
           if (_currentStep == 1)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
               child: SizedBox(
                 width: double.infinity,
                 height: 54,
                 child: ElevatedButton(
-                  onPressed: _selectedTrigger == null || _selectedValue == null
-                      ? null
-                      : () {
+                  onPressed: _canSave
+                      ? () {
                           widget.onSave(
                             _selectedTrigger!.name,
-                            _selectedValue!,
+                            _resolvedValue,
                             _selectedTrigger!.getIconData(),
                           );
                           Navigator.pop(context);
-                        },
+                        }
+                      : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primary,
                     foregroundColor: Colors.white,
-                    disabledBackgroundColor: AppTheme.primary.withValues(alpha: 0.4),
-                    disabledForegroundColor: Colors.white.withValues(alpha: 0.6),
+                    disabledBackgroundColor:
+                        AppTheme.primary.withValues(alpha: 0.4),
+                    disabledForegroundColor:
+                        Colors.white.withValues(alpha: 0.6),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(27),
                     ),
@@ -244,6 +297,8 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
       ),
     );
   }
+
+  // ─── Step 0: trigger grid ─────────────────────────────────────────────────
 
   Widget _buildTriggerSelection(List<TriggerOption> displayTriggers) {
     return Column(
@@ -275,20 +330,12 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
             itemCount: displayTriggers.length,
             itemBuilder: (context, index) {
               final trigger = displayTriggers[index];
-              final name = trigger.name;
               final icon = trigger.getIconData();
               final trigColor = trigger.getIconColor();
               final trigBg = trigColor.withValues(alpha: 0.1);
 
               return Bounceable(
-                onTap: () {
-                  setState(() {
-                    _selectedTrigger = trigger;
-                    final vals = _getTriggerValues(name);
-                    _selectedValue = vals.isNotEmpty ? vals[vals.length ~/ 2] : 'Moderate';
-                    _currentStep = 1;
-                  });
-                },
+                onTap: () => _selectTrigger(trigger),
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -311,15 +358,11 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
                           color: trigBg,
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(
-                          icon,
-                          color: trigColor,
-                          size: 32,
-                        ),
+                        child: Icon(icon, color: trigColor, size: 32),
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        name,
+                        trigger.name,
                         style: GoogleFonts.manrope(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
@@ -332,35 +375,36 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
               );
             },
           ),
-          if (_searchQuery.isEmpty) ...[
-            const SizedBox(height: 16),
-            Center(
-              child: TextButton.icon(
-                onPressed: () {
-                  setState(() {
-                    _showAllTriggers = !_showAllTriggers;
-                  });
-                },
-                icon: Icon(
-                  _showAllTriggers ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+        if (_searchQuery.isEmpty) ...[
+          const SizedBox(height: 16),
+          Center(
+            child: TextButton.icon(
+              onPressed: () =>
+                  setState(() => _showAllTriggers = !_showAllTriggers),
+              icon: Icon(
+                _showAllTriggers
+                    ? Icons.keyboard_arrow_up
+                    : Icons.keyboard_arrow_down,
+                color: AppTheme.primary,
+              ),
+              label: Text(
+                _showAllTriggers ? 'Show less' : 'More triggers',
+                style: GoogleFonts.manrope(
+                  fontWeight: FontWeight.bold,
                   color: AppTheme.primary,
-                ),
-                label: Text(
-                  _showAllTriggers ? 'Show less' : 'More triggers',
-                  style: GoogleFonts.manrope(
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.primary,
-                  ),
                 ),
               ),
             ),
-          ],
+          ),
+        ],
         const SizedBox(height: 24),
       ],
     );
   }
 
-  Widget _buildLevelSelection() {
+  // ─── Step 1: trigger detail (matches daily logging UI exactly) ────────────
+
+  Widget _buildDetailStep() {
     if (_selectedTrigger == null) return const SizedBox.shrink();
 
     final name = _selectedTrigger!.name;
@@ -368,142 +412,135 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
     final trigColor = _selectedTrigger!.getIconColor();
     final trigBg = trigColor.withValues(alpha: 0.1);
 
-    final isCaffeine = name.toLowerCase() == 'caffeine';
-    final isAlcohol = name.toLowerCase() == 'alcohol';
-    final isStress = name.toLowerCase() == 'stress';
-
     return LoggingCardWrapper(
       name: name,
       icon: icon,
       color: trigColor,
       backgroundColor: trigBg,
       children: [
-        if (isCaffeine) ...[
+        if (_isCaffeine)
           QuantityCounterSelector(
-            value: int.tryParse((_selectedValue ?? '1').replaceAll(RegExp(r'[^0-9]'), '')) ?? 1,
+            value: _counterValue,
             label: 'HOW MUCH TODAY?',
-            onChanged: (val) {
-              setState(() {
-                _selectedValue = '$val cup${val != 1 ? 's' : ''}';
-              });
-            },
+            onChanged: (val) => setState(() => _counterValue = val),
             displayValueBuilder: (val) => '$val cup${val != 1 ? 's' : ''}',
-            minValue: 1,
-          ),
-        ] else if (isAlcohol) ...[
+            minValue: 0,
+          )
+        else if (_isAlcohol)
           QuantityCounterSelector(
-            value: int.tryParse((_selectedValue ?? '1').replaceAll(RegExp(r'[^0-9]'), '')) ?? 1,
+            value: _counterValue,
             label: 'CONSUMPTION LOG',
-            onChanged: (val) {
-              setState(() {
-                _selectedValue = '$val glass${val != 1 ? 'es' : ''}';
-              });
-            },
-            displayValueBuilder: (val) => '$val glass${val != 1 ? 'es' : ''}',
-            minValue: 1,
+            onChanged: (val) => setState(() => _counterValue = val),
+            displayValueBuilder: (val) =>
+                '$val glass${val != 1 ? 'es' : ''}',
+            minValue: 0,
+          )
+        else if (_isSmoking)
+          QuantityCounterSelector(
+            value: _counterValue,
+            label: 'HOW MUCH TODAY?',
+            onChanged: (val) => setState(() => _counterValue = val),
+            displayValueBuilder: (val) =>
+                '$val time${val != 1 ? 's' : ''}',
+            minValue: 0,
+          )
+        else if (_isFood) ...[
+          const SizedBox(height: 12),
+          TextFormField(
+            initialValue: _textNote,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: AppTheme.surfaceContainerLow,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              hintText: _foodHint,
+            ),
+            style: GoogleFonts.manrope(fontSize: 13),
+            maxLines: 2,
+            onChanged: (val) => setState(() => _textNote = val),
           ),
-        ] else if (isStress) ...[
+        ] else if (_isStress)
           GradientSliderSelector(
             values: const ['Calm', 'Moderate', 'High'],
             currentValue: _selectedValue ?? 'Moderate',
-            onChanged: (val) {
-              setState(() {
-                _selectedValue = val;
-              });
-            },
+            onChanged: (val) => setState(() => _selectedValue = val),
             label: 'INTENSITY LEVEL',
             emojiGetter: (val) => _getEmojiForValue(name, val),
-          ),
-        ] else ...[
+          )
+        else
           GradientSliderSelector(
             values: _getTriggerValues(name),
-            currentValue: _selectedValue ?? (_getTriggerValues(name).isNotEmpty ? _getTriggerValues(name)[_getTriggerValues(name).length ~/ 2] : 'Moderate'),
-            onChanged: (val) {
-              setState(() {
-                _selectedValue = val;
-              });
-            },
+            currentValue: _selectedValue ??
+                (_getTriggerValues(name).isNotEmpty
+                    ? _getTriggerValues(name)[
+                        _getTriggerValues(name).length ~/ 2]
+                    : 'Moderate'),
+            onChanged: (val) => setState(() => _selectedValue = val),
             label: 'TRIGGER LEVEL / QUANTITY',
             emojiGetter: (val) => _getEmojiForValue(name, val),
           ),
-        ],
       ],
     );
   }
 
+  // ─── emoji helper ─────────────────────────────────────────────────────────
+
   String _getEmojiForValue(String name, String value) {
-    final nameLower = name.toLowerCase();
-    final valLower = value.toLowerCase();
+    final n = name.toLowerCase();
+    final v = value.toLowerCase();
 
-    if (nameLower == 'stress') {
-      if (valLower == 'calm') return '😊';
-      if (valLower == 'moderate') return '😐';
-      if (valLower == 'high') return '😟';
+    if (n == 'stress') {
+      if (v == 'calm') return '😊';
+      if (v == 'moderate') return '😐';
+      if (v == 'high') return '😟';
     }
-    if (nameLower == 'poor sleep' || nameLower == 'lack of sleep') {
-      if (valLower == 'mild') return '😊';
-      if (valLower == 'moderate') return '😐';
-      if (valLower == 'severe') return '😟';
+    if (n == 'poor sleep' || n == 'lack of sleep' || n == 'dehydration') {
+      if (v == 'mild') return '😊';
+      if (v == 'moderate') return '😐';
+      if (v == 'severe') return '😟';
     }
-    if (nameLower == 'dehydration') {
-      if (valLower == 'mild') return '😊';
-      if (valLower == 'moderate') return '😐';
-      if (valLower == 'severe') return '😟';
+    if (n == 'exercise') {
+      if (v == 'light') return '🚶';
+      if (v == 'moderate') return '🏃';
+      if (v == 'intense') return '🏋️';
     }
-    if (nameLower == 'exercise') {
-      if (valLower == 'light') return '🚶';
-      if (valLower == 'moderate') return '🏃';
-      if (valLower == 'intense') return '🏋️';
+    if (n == 'weather') {
+      if (v == 'sunny') return '☀️';
+      if (v == 'humid') return '☁️';
+      if (v.contains('cold')) return '❄️';
     }
-    if (nameLower == 'weather') {
-      if (valLower == 'sunny') return '☀️';
-      if (valLower == 'humid') return '☁️';
-      if (valLower == 'cold/change' || valLower.contains('cold')) return '❄️';
+    if (n == 'travel') {
+      if (v == 'short') return '🚗';
+      if (v == 'medium') return '✈️';
+      if (v == 'long') return '🌍';
     }
-    if (nameLower == 'travel') {
-      if (valLower == 'short') return '🚗';
-      if (valLower == 'medium') return '✈️';
-      if (valLower == 'long') return '🌍';
+    if (n == 'work' || n == 'overworking') {
+      if (v == '1-2 hours') return '⌚';
+      if (v == '3-4 hours') return '⏰';
+      if (v == '5+ hours') return '⏳';
     }
-    if (nameLower == 'work' || nameLower == 'overworking') {
-      if (valLower == '1-2 hours') return '⌚';
-      if (valLower == '3-4 hours') return '⏰';
-      if (valLower == '5+ hours') return '⏳';
-    }
-
-    switch (valLower) {
+    switch (v) {
       case 'calm':
       case 'mild':
       case 'low':
         return '😊';
-      case 'moderate':
-        return '😐';
+      case 'moderate': return '😐';
       case 'high':
       case 'severe':
-      case 'intense':
-        return '😟';
-      case 'light':
-        return '🚶';
-      case 'sunny':
-        return '☀️';
-      case 'humid':
-        return '☁️';
-      case 'cold/change':
-        return '❄️';
-      case 'short':
-        return '🚗';
-      case 'medium':
-        return '✈️';
-      case 'long':
-        return '🌍';
-      case '1-2 hours':
-        return '⌚';
-      case '3-4 hours':
-        return '⏰';
-      case '5+ hours':
-        return '⏳';
-      default:
-        return '✨';
+      case 'intense': return '😟';
+      case 'light':   return '🚶';
+      case 'sunny':   return '☀️';
+      case 'humid':   return '☁️';
+      case 'cold/change': return '❄️';
+      case 'short':   return '🚗';
+      case 'medium':  return '✈️';
+      case 'long':    return '🌍';
+      case '1-2 hours': return '⌚';
+      case '3-4 hours': return '⏰';
+      case '5+ hours':  return '⏳';
+      default:        return '✨';
     }
   }
 }

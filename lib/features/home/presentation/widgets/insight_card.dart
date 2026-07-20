@@ -10,14 +10,19 @@ enum InsightType {
 
 class InsightCard extends StatelessWidget {
   final InsightType type;
+  final bool isInsufficientData;
 
   const InsightCard({
     super.key,
     required this.type,
+    this.isInsufficientData = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (isInsufficientData) {
+      return _buildInProgressInsight();
+    }
     switch (type) {
       case InsightType.weekly:
         return _buildWeeklyInsight();
@@ -26,6 +31,73 @@ class InsightCard extends StatelessWidget {
       case InsightType.highSeverity:
         return _buildHighSeverityInsight();
     }
+  }
+
+  Widget _buildInProgressInsight() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF7F5F0), // neutral sand/cream
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFEBE6DF)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Text('📊', style: TextStyle(fontSize: 20)),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Daily Insight',
+                    style: GoogleFonts.manrope(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF67594E),
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDCD6CD),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  'IN PROGRESS',
+                  style: GoogleFonts.manrope(
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.1,
+                    color: const Color(0xFF67594E),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'We are currently collecting data to find personalized correlations. Please log your symptoms, triggers, and medications for at least 3 days to build correlations.',
+            style: GoogleFonts.manrope(
+              fontSize: 13,
+              height: 1.6,
+              color: const Color(0xFF8C7D70),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildWeeklyInsight() {

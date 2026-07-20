@@ -5,6 +5,12 @@ import 'package:eunora/features/home/presentation/widgets/shared_logging/logging
 import 'package:eunora/features/home/presentation/widgets/shared_logging/gradient_slider_selector.dart';
 import 'package:eunora/features/home/presentation/widgets/shared_logging/quantity_counter_selector.dart';
 
+// ---------------------------------------------------------------------------
+// EditTriggersModalSheet
+// Lets the user edit quantities/values of already-logged triggers.
+// UI matches the detail step of daily logging exactly.
+// ---------------------------------------------------------------------------
+
 class EditTriggersModalSheet extends StatefulWidget {
   final List<Map<String, dynamic>> initialTriggers;
   final Function(List<Map<String, dynamic>>) onSave;
@@ -20,115 +26,213 @@ class EditTriggersModalSheet extends StatefulWidget {
 }
 
 class _EditTriggersModalSheetState extends State<EditTriggersModalSheet> {
+  // Each entry in _draftTriggers mirrors the structure of initialTriggers.
+  // We also keep parallel state maps for counter values and text notes so that
+  // QuantityCounterSelector and TextField widgets are properly stateful.
   late List<Map<String, dynamic>> _draftTriggers;
+  final Map<int, int> _counterState = {};    // index → int (for counter triggers)
+  final Map<int, String> _textState = {};    // index → string (for food notes)
+
+  // ─── init ─────────────────────────────────────────────────────────────────
 
   @override
   void initState() {
     super.initState();
-    // Deep copy of initial triggers list
     _draftTriggers = widget.initialTriggers
-        .map((trigger) => Map<String, dynamic>.from(trigger))
+        .map((t) => Map<String, dynamic>.from(t))
         .toList();
+
+    // Pre-populate state maps from existing saved values
+    for (int i = 0; i < _draftTriggers.length; i++) {
+      final name = (_draftTriggers[i]['name'] as String? ?? '').toLowerCase();
+      final value = _draftTriggers[i]['value'] as String? ?? '';
+
+      if (_isCaffeineName(name) || _isAlcoholName(name) || _isSmokingName(name)) {
+        _counterState[i] = int.tryParse(value.replaceAll(RegExp(r'[^0-9]'), '')) ?? 1;
+      } else if (_isFoodName(name)) {
+        // Foods: value may be the note text, or 'Noted' placeholder
+        _textState[i] = (value == 'Noted') ? '' : value;
+      } else {
+        // Slider-based — value is already the readable level string
+      }
+    }
   }
 
-  void _deleteTrigger(String name) {
+  // ─── name-based helpers (same logic as trigger_details_step) ──────────────
+
+  bool _isCaffeineName(String n) =>
+      n == 'caffeine' || n == 'coffee';
+
+  bool _isAlcoholName(String n) =>
+      n == 'alcohol';
+
+  bool _isSmokingName(String n) =>
+      n.contains('smoking') || n.contains('tobacco');
+
+  bool _isFoodName(String n) =>
+      n == 'foods' ||
+      n == 'food' ||
+      n == 'spicy food' ||
+      n == 'sugar & processed food' ||
+      n == 'hot drinks & food' ||
+      n == 'skipped meals' ||
+      n == 'sugar' ||
+      n == 'sugar & sweets';
+
+  bool _isStressName(String n) => n == 'stress';
+
+  String _foodHint(String name) {
+    switch (name.toLowerCase()) {
+      case 'spicy food':            return 'What spicy food did you eat?';
+      case 'hot drinks & food':     return 'Hot tea, soup, coffee...';
+      case 'skipped meals':         return 'Which meal did you skip?';
+      case 'sugar & processed food':return 'Sweets, soda, processed snacks...';
+      default:                      return 'Spicy foods, heavy dinner...';
+    }
+  }
+
+  // ─── mutations ────────────────────────────────────────────────────────────
+
+  void _deleteTrigger(int index) {
     setState(() {
-      _draftTriggers.removeWhere((t) => t['name'] == name);
+      _draftTriggers.removeAt(index);
+      // Remap counter/text state with shifted keys
+      final newCounter = <int, int>{};
+      final newText    = <int, String>{};
+      _counterState.forEach((k, v) {
+        if (k < index) { newCounter[k] = v; }
+        else if (k > index) { newCounter[k - 1] = v; }
+      });
+      _textState.forEach((k, v) {
+        if (k < index) { newText[k] = v; }
+        else if (k > index) { newText[k - 1] = v; }
+      });
+      _counterState
+        ..clear()
+        ..addAll(newCounter);
+      _textState
+        ..clear()
+        ..addAll(newText);
     });
   }
 
-  void _updateCaffeineCups(int index, int cups) {
+  void _setCounter(int index, int val, String unit) {
     setState(() {
-      _draftTriggers[index]['value'] = '$cups cup${cups > 1 ? 's' : ''}';
+      _counterState[index] = val;
+      _draftTriggers[index]['value'] = '$val $unit';
     });
   }
 
-  void _updateAlcoholGlasses(int index, int glasses) {
+  void _setText(int index, String text) {
     setState(() {
-      _draftTriggers[index]['value'] = '$glasses glass${glasses > 1 ? 'es' : ''}';
+      _textState[index] = text;
+      _draftTriggers[index]['value'] = text.isEmpty ? 'Noted' : text;
     });
   }
 
-  void _updateStressLevel(int index, String level) {
+  void _setSliderValue(int index, String val) {
     setState(() {
-      _draftTriggers[index]['value'] = 'Level: $level';
+      _draftTriggers[index]['value'] = val;
     });
   }
 
-  void _updateOtherValue(int index, String newValue) {
-    setState(() {
-      _draftTriggers[index]['value'] = newValue;
-    });
-  }
+  // ─── colors / values ──────────────────────────────────────────────────────
 
   Color _getTriggerColor(String name) {
     switch (name.toLowerCase()) {
-      case 'stress':
-        return const Color(0xFFB8A7C5); // brand-lavender
+      case 'stress':            return const Color(0xFFB8A7C5);
       case 'caffeine':
-        return const Color(0xFF9B8B7E);
-      case 'alcohol':
-        return const Color(0xFFD4A5A5); // brand-rose
+      case 'coffee':            return const Color(0xFF9B8B7E);
+      case 'alcohol':           return const Color(0xFFD4A5A5);
       case 'sugar':
-      case 'sugar & sweets':
-        return const Color(0xFFA9B388);
+      case 'sugar & sweets':    return const Color(0xFFA9B388);
       case 'lack of sleep':
-      case 'poor sleep':
-        return const Color(0xFFA7C5D8);
+      case 'poor sleep':        return const Color(0xFFA7C5D8);
       case 'spicy food':
       case 'foods':
-        return const Color(0xFFE5989B);
-      default:
-        return const Color(0xFF8EB8B5); // brand-teal
+      case 'food':              return const Color(0xFFE5989B);
+      default:                  return const Color(0xFF8EB8B5);
     }
   }
 
-  List<String> _getTriggerValues(String name) {
+  List<String> _getSliderValues(String name) {
     switch (name.toLowerCase()) {
-      case 'caffeine':
-        return ['1 Cup', '2 Cups', '3 Cups'];
-      case 'alcohol':
-        return ['1 Glass', '2 Glasses', '3 Glasses'];
-      case 'stress':
-        return ['Calm', 'Moderate', 'High'];
+      case 'stress':            return ['Calm', 'Moderate', 'High'];
       case 'poor sleep':
       case 'lack of sleep':
-      case 'dehydration':
-        return ['Mild', 'Moderate', 'Severe'];
-      case 'exercise':
-        return ['Light', 'Moderate', 'Intense'];
-      case 'weather':
-        return ['Sunny', 'Humid', 'Cold/Change'];
-      case 'foods':
-      case 'spicy food':
-        return ['Low', 'Moderate', 'High'];
-      case 'smoking':
-      case 'smoking/tobacco':
-        return ['Low', 'Moderate', 'High'];
-      case 'travel':
-        return ['Short', 'Medium', 'Long'];
+      case 'dehydration':       return ['Mild', 'Moderate', 'Severe'];
+      case 'exercise':          return ['Light', 'Moderate', 'Intense'];
+      case 'weather':           return ['Sunny', 'Humid', 'Cold/Change'];
+      case 'travel':            return ['Short', 'Medium', 'Long'];
       case 'work':
-      case 'overworking':
-        return ['1-2 hours', '3-4 hours', '5+ hours'];
-      case 'sugar':
-      case 'sugar & sweets':
-        return ['Low', 'Moderate', 'High'];
-      case 'relaxation':
-      case 'lack of rest':
-        return ['Low', 'Moderate', 'High'];
-      default:
-        return ['Low', 'Moderate', 'High'];
+      case 'overworking':       return ['1-2 hours', '3-4 hours', '5+ hours'];
+      default:                  return ['Low', 'Moderate', 'High'];
     }
   }
+
+  String _getEmojiForValue(String name, String value) {
+    final n = name.toLowerCase();
+    final v = value.toLowerCase();
+
+    if (n == 'stress') {
+      if (v == 'calm') return '😊';
+      if (v == 'moderate') return '😐';
+      if (v == 'high') return '😟';
+    }
+    if (n == 'poor sleep' || n == 'lack of sleep' || n == 'dehydration') {
+      if (v == 'mild') return '😊';
+      if (v == 'moderate') return '😐';
+      if (v == 'severe') return '😟';
+    }
+    if (n == 'exercise') {
+      if (v == 'light') return '🚶';
+      if (v == 'moderate') return '🏃';
+      if (v == 'intense') return '🏋️';
+    }
+    if (n == 'weather') {
+      if (v == 'sunny') return '☀️';
+      if (v == 'humid') return '☁️';
+      if (v.contains('cold')) return '❄️';
+    }
+    if (n == 'travel') {
+      if (v == 'short') return '🚗';
+      if (v == 'medium') return '✈️';
+      if (v == 'long') return '🌍';
+    }
+    if (n == 'work' || n == 'overworking') {
+      if (v == '1-2 hours') return '⌚';
+      if (v == '3-4 hours') return '⏰';
+      if (v == '5+ hours') return '⏳';
+    }
+    switch (v) {
+      case 'calm':
+      case 'mild':
+      case 'low':       return '😊';
+      case 'moderate':  return '😐';
+      case 'high':
+      case 'severe':
+      case 'intense':   return '😟';
+      case 'light':     return '🚶';
+      case 'sunny':     return '☀️';
+      case 'humid':     return '☁️';
+      case 'cold/change': return '❄️';
+      case 'short':     return '🚗';
+      case 'medium':    return '✈️';
+      case 'long':      return '🌍';
+      case '1-2 hours': return '⌚';
+      case '3-4 hours': return '⏰';
+      case '5+ hours':  return '⏳';
+      default:          return '✨';
+    }
+  }
+
+  // ─── build ────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
-    final bool isEmpty = _draftTriggers.isEmpty;
-
     return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.70,
-      ),
+      constraints:
+          BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.80),
       padding: const EdgeInsets.only(bottom: 24),
       decoration: const BoxDecoration(
         color: AppTheme.surface,
@@ -186,14 +290,14 @@ class _EditTriggersModalSheetState extends State<EditTriggersModalSheet> {
           ),
           const SizedBox(height: 24),
 
-          // Content Area
+          // Content
           Flexible(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (isEmpty)
+                  if (_draftTriggers.isEmpty)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 40),
                       child: Center(
@@ -207,69 +311,9 @@ class _EditTriggersModalSheetState extends State<EditTriggersModalSheet> {
                       ),
                     )
                   else
-                    Column(
-                      children: List.generate(_draftTriggers.length, (index) {
-                        final trigger = _draftTriggers[index];
-                        final String name = trigger['name'] ?? '';
-                        final String value = trigger['value'] ?? '';
-                        final IconData icon = trigger['icon'] ?? Icons.bolt;
-
-                        final bool isCaffeine = name.toLowerCase() == 'caffeine';
-                        final bool isAlcohol = name.toLowerCase() == 'alcohol';
-                        final bool isStress = name.toLowerCase() == 'stress';
-
-                        final trigColor = _getTriggerColor(name);
-                        final trigBg = trigColor.withValues(alpha: 0.1);
-
-                        return LoggingCardWrapper(
-                          name: name,
-                          icon: icon,
-                          color: trigColor,
-                          backgroundColor: trigBg,
-                          trailingAction: IconButton(
-                            onPressed: () => _deleteTrigger(name),
-                            icon: const Icon(Icons.delete_outline),
-                            color: AppTheme.error,
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                          ),
-                          children: [
-                            if (isCaffeine) ...[
-                              QuantityCounterSelector(
-                                value: int.tryParse(value.replaceAll(RegExp(r'[^0-9]'), '')) ?? 1,
-                                label: 'HOW MUCH TODAY?',
-                                onChanged: (cups) => _updateCaffeineCups(index, cups),
-                                displayValueBuilder: (cups) => '$cups cup${cups != 1 ? 's' : ''}',
-                                minValue: 1,
-                              ),
-                            ] else if (isAlcohol) ...[
-                              QuantityCounterSelector(
-                                value: int.tryParse(value.replaceAll(RegExp(r'[^0-9]'), '')) ?? 1,
-                                label: 'CONSUMPTION LOG',
-                                onChanged: (glasses) => _updateAlcoholGlasses(index, glasses),
-                                displayValueBuilder: (glasses) => '$glasses glass${glasses != 1 ? 'es' : ''}',
-                                minValue: 1,
-                              ),
-                            ] else if (isStress) ...[
-                              GradientSliderSelector(
-                                values: const ['Calm', 'Moderate', 'High'],
-                                currentValue: value.replaceAll('Level: ', '').trim(),
-                                onChanged: (level) => _updateStressLevel(index, level),
-                                label: 'INTENSITY LEVEL',
-                                emojiGetter: (val) => _getEmojiForValue(name, val),
-                              ),
-                            ] else ...[
-                              GradientSliderSelector(
-                                values: _getTriggerValues(name),
-                                currentValue: value,
-                                onChanged: (newVal) => _updateOtherValue(index, newVal),
-                                label: 'TRIGGER LEVEL / QUANTITY',
-                                emojiGetter: (val) => _getEmojiForValue(name, val),
-                              ),
-                            ],
-                          ],
-                        );
-                      }),
+                    ...List.generate(
+                      _draftTriggers.length,
+                      (index) => _buildTriggerCard(index),
                     ),
                   const SizedBox(height: 24),
                 ],
@@ -277,7 +321,7 @@ class _EditTriggersModalSheetState extends State<EditTriggersModalSheet> {
             ),
           ),
 
-          // Done Button
+          // Save button
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: SizedBox(
@@ -311,79 +355,170 @@ class _EditTriggersModalSheetState extends State<EditTriggersModalSheet> {
     );
   }
 
-  String _getEmojiForValue(String name, String value) {
+  // ─── individual trigger card ───────────────────────────────────────────────
+
+  Widget _buildTriggerCard(int index) {
+    final trigger  = _draftTriggers[index];
+    final String name  = trigger['name'] as String? ?? '';
+    final IconData icon = trigger['icon'] as IconData? ?? Icons.bolt;
     final nameLower = name.toLowerCase();
-    final valLower = value.toLowerCase();
 
-    if (nameLower == 'stress') {
-      if (valLower == 'calm') return '😊';
-      if (valLower == 'moderate') return '😐';
-      if (valLower == 'high') return '😟';
-    }
-    if (nameLower == 'poor sleep' || nameLower == 'lack of sleep') {
-      if (valLower == 'mild') return '😊';
-      if (valLower == 'moderate') return '😐';
-      if (valLower == 'severe') return '😟';
-    }
-    if (nameLower == 'dehydration') {
-      if (valLower == 'mild') return '😊';
-      if (valLower == 'moderate') return '😐';
-      if (valLower == 'severe') return '😟';
-    }
-    if (nameLower == 'exercise') {
-      if (valLower == 'light') return '🚶';
-      if (valLower == 'moderate') return '🏃';
-      if (valLower == 'intense') return '🏋️';
-    }
-    if (nameLower == 'weather') {
-      if (valLower == 'sunny') return '☀️';
-      if (valLower == 'humid') return '☁️';
-      if (valLower == 'cold/change' || valLower.contains('cold')) return '❄️';
-    }
-    if (nameLower == 'travel') {
-      if (valLower == 'short') return '🚗';
-      if (valLower == 'medium') return '✈️';
-      if (valLower == 'long') return '🌍';
-    }
-    if (nameLower == 'work' || nameLower == 'overworking') {
-      if (valLower == '1-2 hours') return '⌚';
-      if (valLower == '3-4 hours') return '⏰';
-      if (valLower == '5+ hours') return '⏳';
+    final trigColor = _getTriggerColor(name);
+    final trigBg    = trigColor.withValues(alpha: 0.1);
+
+    // Delete button shared by all cards
+    final deleteBtn = IconButton(
+      onPressed: () => _deleteTrigger(index),
+      icon: const Icon(Icons.delete_outline),
+      color: AppTheme.error,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(),
+    );
+
+    // ── Caffeine ──
+    if (_isCaffeineName(nameLower)) {
+      final count = _counterState[index] ?? 1;
+      return LoggingCardWrapper(
+        name: name,
+        icon: icon,
+        color: trigColor,
+        backgroundColor: trigBg,
+        trailingAction: deleteBtn,
+        children: [
+          QuantityCounterSelector(
+            value: count,
+            label: 'HOW MUCH TODAY?',
+            onChanged: (val) => _setCounter(
+              index, val, 'cup${val != 1 ? 's' : ''}'),
+            displayValueBuilder: (val) => '$val cup${val != 1 ? 's' : ''}',
+            minValue: 0,
+          ),
+        ],
+      );
     }
 
-    switch (valLower) {
-      case 'calm':
-      case 'mild':
-      case 'low':
-        return '😊';
-      case 'moderate':
-        return '😐';
-      case 'high':
-      case 'severe':
-      case 'intense':
-        return '😟';
-      case 'light':
-        return '🚶';
-      case 'sunny':
-        return '☀️';
-      case 'humid':
-        return '☁️';
-      case 'cold/change':
-        return '❄️';
-      case 'short':
-        return '🚗';
-      case 'medium':
-        return '✈️';
-      case 'long':
-        return '🌍';
-      case '1-2 hours':
-        return '⌚';
-      case '3-4 hours':
-        return '⏰';
-      case '5+ hours':
-        return '⏳';
-      default:
-        return '✨';
+    // ── Alcohol ──
+    if (_isAlcoholName(nameLower)) {
+      final count = _counterState[index] ?? 1;
+      return LoggingCardWrapper(
+        name: name,
+        icon: icon,
+        color: trigColor,
+        backgroundColor: trigBg,
+        trailingAction: deleteBtn,
+        children: [
+          QuantityCounterSelector(
+            value: count,
+            label: 'CONSUMPTION LOG',
+            onChanged: (val) => _setCounter(
+              index, val, 'glass${val != 1 ? 'es' : ''}'),
+            displayValueBuilder: (val) =>
+                '$val glass${val != 1 ? 'es' : ''}',
+            minValue: 0,
+          ),
+        ],
+      );
     }
+
+    // ── Smoking / Tobacco ──
+    if (_isSmokingName(nameLower)) {
+      final count = _counterState[index] ?? 1;
+      return LoggingCardWrapper(
+        name: name,
+        icon: icon,
+        color: const Color(0xFF8B9B90),
+        backgroundColor: const Color(0xFF8B9B90).withValues(alpha: 0.1),
+        trailingAction: deleteBtn,
+        children: [
+          QuantityCounterSelector(
+            value: count,
+            label: 'HOW MUCH TODAY?',
+            onChanged: (val) => _setCounter(
+              index, val, 'time${val != 1 ? 's' : ''}'),
+            displayValueBuilder: (val) =>
+                '$val time${val != 1 ? 's' : ''}',
+            minValue: 0,
+          ),
+        ],
+      );
+    }
+
+    // ── Foods / food variants ──
+    if (_isFoodName(nameLower)) {
+      final note = _textState[index] ?? '';
+      return LoggingCardWrapper(
+        name: name,
+        icon: icon,
+        color: const Color(0xFFE5989B),
+        backgroundColor: const Color(0xFFE5989B).withValues(alpha: 0.1),
+        trailingAction: deleteBtn,
+        children: [
+          const SizedBox(height: 12),
+          TextFormField(
+            initialValue: note,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: AppTheme.surfaceContainerLow,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              hintText: _foodHint(name),
+            ),
+            style: GoogleFonts.manrope(fontSize: 13),
+            maxLines: 2,
+            onChanged: (val) => _setText(index, val),
+          ),
+        ],
+      );
+    }
+
+    // ── Stress ──
+    if (_isStressName(nameLower)) {
+      final currentLevel = (trigger['value'] as String? ?? 'Moderate')
+          .replaceAll('Level: ', '')
+          .trim();
+      final List<String> stressVals = ['Calm', 'Moderate', 'High'];
+      final safeVal = stressVals.contains(currentLevel) ? currentLevel : 'Moderate';
+      return LoggingCardWrapper(
+        name: name,
+        icon: icon,
+        color: trigColor,
+        backgroundColor: trigBg,
+        trailingAction: deleteBtn,
+        children: [
+          GradientSliderSelector(
+            values: stressVals,
+            currentValue: safeVal,
+            onChanged: (val) => _setSliderValue(index, val),
+            label: 'INTENSITY LEVEL',
+            emojiGetter: (val) => _getEmojiForValue(name, val),
+          ),
+        ],
+      );
+    }
+
+    // ── All other triggers (slider) ──
+    final sliderVals = _getSliderValues(name);
+    final currentVal = trigger['value'] as String? ?? '';
+    final safeVal =
+        sliderVals.contains(currentVal) ? currentVal : sliderVals[sliderVals.length ~/ 2];
+
+    return LoggingCardWrapper(
+      name: name,
+      icon: icon,
+      color: trigColor,
+      backgroundColor: trigBg,
+      trailingAction: deleteBtn,
+      children: [
+        GradientSliderSelector(
+          values: sliderVals,
+          currentValue: safeVal,
+          onChanged: (val) => _setSliderValue(index, val),
+          label: 'TRIGGER LEVEL / QUANTITY',
+          emojiGetter: (val) => _getEmojiForValue(name, val),
+        ),
+      ],
+    );
   }
 }

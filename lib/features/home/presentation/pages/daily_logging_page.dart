@@ -17,6 +17,7 @@ import 'package:eunora/features/onboarding/presentation/providers/triggers_provi
 
 import 'package:eunora/features/onboarding/presentation/providers/onboarding_profile_provider.dart';
 import 'package:eunora/features/onboarding/presentation/providers/other_medications_provider.dart';
+import 'package:eunora/core/utils/logging_helpers.dart';
 
 import 'package:eunora/features/home/presentation/pages/daily_logging/symptoms_step.dart';
 import 'package:eunora/features/home/presentation/pages/daily_logging/severity_step.dart';
@@ -87,6 +88,9 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
 
   bool _isMedsInitialized = false;
   bool _isSymptomsInitialized = false;
+  /// True after _loadExistingLog successfully populated state from Firestore.
+  /// Prevents reactive listeners from overwriting the loaded selection.
+  bool _existingLogLoaded = false;
 
   late PageController _pageController;
 
@@ -118,50 +122,50 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
         setState(() {
           _isMedsInitialized = true;
           _isSymptomsInitialized = true;
+          _existingLogLoaded = true;
 
           // Populate symptoms
           _selectedSymptomIds.clear();
-          _selectedSymptomIds.addAll(existingLog.symptoms.map((s) => s.symptom.id));
           for (final s in existingLog.symptoms) {
-            _symptomSeverities[s.symptom.id] = s.severity ?? 'Mild';
+            final sanitizedId = sanitizeSymptomId(s.symptom.id);
+            _selectedSymptomIds.add(sanitizedId);
+            _symptomSeverities[sanitizedId] = s.severity ?? 'Mild';
+            if (s.durationMinutes != null) {
+              _symptomDurations[sanitizedId] = s.durationMinutes!;
+            }
           }
 
           // Populate triggers
           _selectedTriggerIds.clear();
           for (final t in existingLog.triggers) {
-            final tLower = t.toLowerCase();
-            if (tLower.contains('caffeine') || tLower.contains('coffee')) {
-              _selectedTriggerIds.add('t_coffee');
-            } else if (tLower.contains('alcohol')) {
-              _selectedTriggerIds.add('t_alcohol');
-            } else if (tLower.contains('stress')) {
-              _selectedTriggerIds.add('t_stress');
-            } else if (tLower.contains('foods') ||
-                tLower.contains('spicy') ||
-                tLower.contains('sugar') ||
-                tLower.contains('meals') ||
-                tLower.contains('drinks') ||
-                tLower.contains('hot')) {
-              if (tLower.contains('spicy')) {
-                _selectedTriggerIds.add('t_spicy_food');
-              } else if (tLower.contains('sugar')) {
-                _selectedTriggerIds.add('t_sugar_processed_food');
-              } else if (tLower.contains('drinks') || tLower.contains('hot')) {
-                _selectedTriggerIds.add('t_hot_drinks_food');
-              } else if (tLower.contains('meals') || tLower.contains('skipped')) {
-                _selectedTriggerIds.add('t_skipped_meals');
-              } else {
-                _selectedTriggerIds.add('t_spicy_food');
+            final parsed = parseTriggerString(t);
+            final prefixId = 't_${parsed.id}';
+            _selectedTriggerIds.add(prefixId);
+
+            if (parsed.id == 'coffee' || parsed.id == 'caffeine') {
+              if (parsed.value != null) {
+                _caffeineCups = int.tryParse(parsed.value!.replaceAll(RegExp(r'[^0-9]'), '')) ?? 1;
+              }
+            } else if (parsed.id == 'alcohol') {
+              if (parsed.value != null) {
+                _alcoholGlasses = int.tryParse(parsed.value!.replaceAll(RegExp(r'[^0-9]'), '')) ?? 1;
+              }
+            } else if (parsed.id == 'stress') {
+              if (parsed.value != null) {
+                _stressLevel = parsed.value!;
               }
             } else {
-              String namePart = tLower.trim();
-              if (namePart.contains('weather')) namePart = 'weather';
-              if (namePart.contains('smoking')) namePart = 'smoking';
-              if (namePart.contains('clothing') || namePart.contains('layers')) namePart = 'tight_clothing';
-              if (namePart.contains('bedroom') || namePart.contains('night')) namePart = 'warm_bedroom';
-
-              final matchedId = 't_${namePart.replaceAll(' ', '_')}';
-              _selectedTriggerIds.add(matchedId);
+              // Custom trigger text or counter
+              if (parsed.value != null) {
+                final counterVal = int.tryParse(parsed.value!.replaceAll(RegExp(r'[^0-9]'), ''));
+                if (counterVal != null && parsed.value!.contains('times')) {
+                  _customTriggerCounters[prefixId] = counterVal;
+                  _customTriggerCounters[parsed.id] = counterVal;
+                } else {
+                  _customTriggerTexts[prefixId] = parsed.value!;
+                  _customTriggerTexts[parsed.id] = parsed.value!;
+                }
+              }
             }
           }
 
@@ -236,10 +240,9 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
     }
   }
 
-  Future<void> _saveDraft() async {
+  DailyLog _buildDailyLog() {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
+    final uid = user?.uid ?? '';
     final date = widget.initialDate ?? DateTime.now();
     final dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
 
@@ -286,33 +289,32 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
 
     final List<LoggedSymptom> loggedSymptoms = [];
     for (final id in _selectedSymptomIds) {
-      final name = _getSymptomName(id);
-      final severityStr = _symptomSeverities[id] ?? 'Mild';
+      final sanitizedId = sanitizeSymptomId(id);
+      final name = _getSymptomName(sanitizedId);
+      final severityStr = _symptomSeverities[sanitizedId] ?? 'Mild';
+      final duration = _symptomDurations[sanitizedId];
+      
       loggedSymptoms.add(
         LoggedSymptom(
-          symptom: Symptom(id: id, name: name, iconName: 'medical_services', category: 'General'),
+          symptom: Symptom(id: sanitizedId, name: name, iconName: 'medical_services', category: 'General'),
           severity: severityStr,
+          durationMinutes: duration,
         ),
       );
     }
 
     final List<String> triggerNames = [];
     for (final id in _selectedTriggerIds) {
-      if (id == 't_caffeine' || id == 't_coffee') {
-        triggerNames.add('Caffeine: $_caffeineCups cups');
-      } else if (id == 't_alcohol') {
-        triggerNames.add('Alcohol: $_alcoholGlasses glasses');
-      } else if (id == 't_stress') {
-        triggerNames.add('Stress: $_stressLevel');
-      } else if (id == 't_foods' ||
-          id == 't_spicy_food' ||
-          id == 't_sugar_processed_food' ||
-          id == 't_hot_drinks_food' ||
-          id == 't_skipped_meals') {
-        triggerNames.add(_foodsTriggered ? 'Foods: $_foodsNotes' : 'Foods');
-      } else {
-        triggerNames.add(id.replaceAll('t_', '').toUpperCase());
-      }
+      final formatted = formatTriggerString(
+        id,
+        caffeineCups: _caffeineCups,
+        alcoholGlasses: _alcoholGlasses,
+        stressLevel: _stressLevel,
+        foodsNotes: _foodsNotes,
+        customTriggerTexts: _customTriggerTexts,
+        customTriggerCounters: _customTriggerCounters,
+      );
+      triggerNames.add(formatted);
     }
 
     final List<String> loggedOtherMeds = [];
@@ -330,9 +332,9 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
       finalNotes = "${finalNotes.isNotEmpty ? '$finalNotes\n\n' : ''}Supplements taken today: ${loggedOtherMeds.join(', ')}";
     }
 
-    final dailyLog = DailyLog(
+    return DailyLog(
       id: dateStr,
-      userId: user.uid,
+      userId: uid,
       date: date,
       symptoms: loggedSymptoms,
       triggers: triggerNames,
@@ -360,7 +362,12 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
       hrtIntakes: hrtIntakes,
       createdAt: DateTime.now(),
     );
+  }
 
+  Future<void> _saveDraft() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    final dailyLog = _buildDailyLog();
     try {
       await ref.read(firestoreServiceProvider).saveDailyLog(user.uid, dailyLog);
     } catch (e) {
@@ -553,194 +560,46 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   }
 
   void _finishLoggingAndSync() async {
-    // Legacy compatibility variables for result/database tracking
-    bool estradiolChecked = false;
-    double estradiolDose = 50.0;
-    String estradiolUnit = 'mcg';
-    String estradiolTime = '08:30 AM';
-    bool progesteroneChecked = false;
-    double progesteroneDose = 100.0;
-    String progesteroneUnit = 'mg';
-    String progesteroneTime = '08:00 PM';
-
-    // Generate results
-    final List<Map<String, String>> symptomsResult = [];
-    for (final id in _selectedSymptomIds) {
-      symptomsResult.add({
-        'name': _getSymptomName(id),
-        'severity': _symptomSeverities[id] ?? 'Mild',
-      });
-    }
-
-    final List<Map<String, dynamic>> triggersResult = [];
-    final triggerLib = ref.read(triggerLibraryProvider);
-    for (final id in _selectedTriggerIds) {
-      dynamic val = '';
-      if (id == 't_caffeine' || id == 't_coffee') val = '$_caffeineCups cups';
-      else if (id == 't_alcohol') val = '$_alcoholGlasses glass';
-      else if (id == 't_stress') val = _stressLevel;
-      else if (id == 't_foods' ||
-          id == 't_spicy_food' ||
-          id == 't_sugar_processed_food' ||
-          id == 't_hot_drinks_food' ||
-          id == 't_skipped_meals') {
-        val = _foodsTriggered ? 'Foods: $_foodsNotes' : 'None';
-      }
-      else val = _customTriggerCounters[id]?.toString() ?? _customTriggerTexts[id] ?? 'Logged';
-
-      final trigger = triggerLib.firstWhere(
-        (t) => t.id == id,
-        orElse: () => TriggerOption(id: id, name: id.replaceAll('t_', '').toUpperCase(), description: '', iconName: 'spa', category: 'Other'),
-      );
-
-      triggersResult.add({
-        'name': trigger.name.toUpperCase(),
-        'value': val,
-        'icon': trigger.getIconData(),
-      });
-    }
-
+    final dailyLog = _buildDailyLog();
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      final date = widget.initialDate ?? DateTime.now();
-      final dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-
-      final List<HrtIntakeLog> hrtIntakes = [];
-      final meds = ref.read(medicationsProvider).medications;
-
-      for (final med in meds) {
-        final checked = _hrtChecked[med.id] ?? false;
-        final dose = _hrtDoses[med.id] ?? med.dose;
-        final unit = _hrtUnits[med.id] ?? med.unit;
-        final time = _hrtTimes[med.id] ?? '08:00 AM';
-
-        hrtIntakes.add(HrtIntakeLog(
-          medicationId: med.id,
-          name: med.name,
-          dose: dose,
-          unit: unit,
-          time: time,
-          isTaken: checked,
-        ));
-
-        final name = med.name.toLowerCase();
-        if (name.contains('estradiol') || name.contains('estrogen') || name.contains('estradot')) {
-          estradiolChecked = checked;
-          estradiolDose = dose;
-          estradiolUnit = unit;
-          estradiolTime = time;
-        } else if (name.contains('progesterone') || name.contains('utrogestan')) {
-          progesteroneChecked = checked;
-          progesteroneDose = dose;
-          progesteroneUnit = unit;
-          progesteroneTime = time;
-        }
-      }
-
-      final List<LoggedSymptom> loggedSymptoms = [];
-      for (final id in _selectedSymptomIds) {
-        final name = _getSymptomName(id);
-        final severityStr = _symptomSeverities[id] ?? 'Mild';
-
-        loggedSymptoms.add(
-          LoggedSymptom(
-            symptom: Symptom(
-              id: id,
-              name: name,
-              iconName: id == 's_hot_flashes'
-                  ? 'thermostat'
-                  : id == 's_mood'
-                      ? 'mood'
-                      : id == 's_sleep'
-                          ? 'dark_mode'
-                          : id == 's_dryness'
-                              ? 'opacity'
-                              : 'accessibility_new',
-              category: 'General',
-            ),
-            severity: severityStr,
-          ),
-        );
-      }
-
-      final List<String> triggerNames = [];
-      for (final id in _selectedTriggerIds) {
-        if (id == 't_caffeine' || id == 't_coffee') {
-          triggerNames.add('Caffeine: $_caffeineCups cups');
-        } else if (id == 't_alcohol') {
-          triggerNames.add('Alcohol: $_alcoholGlasses glasses');
-        } else if (id == 't_stress') {
-          triggerNames.add('Stress: $_stressLevel');
-        } else if (id == 't_foods' ||
-            id == 't_spicy_food' ||
-            id == 't_sugar_processed_food' ||
-            id == 't_hot_drinks_food' ||
-            id == 't_skipped_meals') {
-          triggerNames.add(_foodsTriggered ? 'Foods: $_foodsNotes' : 'Foods');
-        } else {
-          triggerNames.add(id.replaceAll('t_', '').toUpperCase());
-        }
-      }
-
-      final List<String> loggedOtherMeds = [];
-      _otherMedsChecked.forEach((key, checked) {
-        if (checked) {
-          try {
-            final med = ref.read(otherMedicationsProvider).medications.firstWhere((m) => m.id == key);
-            loggedOtherMeds.add("${med.name}${med.dose != null ? ' (${med.dose})' : ''}");
-          } catch (e) {
-            // handle error
-          }
-        }
-      });
-      
-      String finalNotes = _additionalNotes;
-      if (loggedOtherMeds.isNotEmpty) {
-        finalNotes = "${finalNotes.isNotEmpty ? '$finalNotes\n\n' : ''}Supplements taken today: ${loggedOtherMeds.join(', ')}";
-      }
-
-      final dailyLog = DailyLog(
-        id: dateStr,
-        userId: user.uid,
-        date: date,
-        symptoms: loggedSymptoms,
-        triggers: triggerNames,
-        caffeineCups: _caffeineCups,
-        alcoholGlasses: _alcoholGlasses,
-        stressLevel: _stressLevel,
-        foodsTriggered: _foodsTriggered,
-        foodsNotes: _foodsNotes,
-        customTriggerCounters: _customTriggerCounters,
-        customTriggerTexts: _customTriggerTexts,
-        estradiolChecked: estradiolChecked,
-        estradiolDose: estradiolDose,
-        estradiolUnit: estradiolUnit,
-        estradiolTime: estradiolTime,
-        progesteroneChecked: progesteroneChecked,
-        progesteroneDose: progesteroneDose,
-        progesteroneUnit: progesteroneUnit,
-        progesteroneTime: progesteroneTime,
-        vitaminDChecked: _vitaminDChecked,
-        magnesiumChecked: _magnesiumChecked,
-        sleepDuration: _sleepDuration,
-        hydrationCups: _hydrationCups,
-        weight: null,
-        additionalNotes: finalNotes,
-        hrtIntakes: hrtIntakes,
-        createdAt: DateTime.now(),
-      );
-
-      // Save asynchronously in the background so it does not block navigation
-      ref.read(firestoreServiceProvider).saveDailyLog(user.uid, dailyLog).catchError((e) {
+      try {
+        await ref.read(firestoreServiceProvider).saveDailyLog(user.uid, dailyLog);
+      } catch (e) {
         debugPrint("Error saving daily log to firestore: $e");
-      });
+      }
     }
+
+    final List<Map<String, String>> symptomsResult = dailyLog.symptoms.map((s) => {
+      'name': s.symptom.name,
+      'severity': s.severity ?? 'Mild',
+    }).toList();
+
+    final List<Map<String, dynamic>> triggersResult = dailyLog.triggers.map((t) {
+      final parsed = parseTriggerString(t);
+      final triggerLib = ref.read(triggerLibraryProvider);
+      final trigger = triggerLib.firstWhere(
+        (tr) => tr.id == parsed.id,
+        orElse: () => TriggerOption(
+          id: parsed.id,
+          name: parsed.label.toUpperCase(),
+          description: '',
+          iconName: 'spa',
+          category: 'Other',
+        ),
+      );
+      return {
+        'name': trigger.name.toUpperCase(),
+        'value': parsed.value ?? 'Logged',
+        'icon': trigger.getIconData(),
+      };
+    }).toList();
 
     final result = {
       'symptoms': symptomsResult,
       'triggers': triggersResult,
-      'estradiolTaken': estradiolChecked,
-      'progesteroneTaken': progesteroneChecked,
+      'estradiolTaken': dailyLog.estradiolChecked,
+      'progesteroneTaken': dailyLog.progesteroneChecked,
     };
 
     Navigator.pop(context, result);
@@ -750,13 +609,13 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   Widget build(BuildContext context) {
     // Reactive initialization from profile/providers once loaded
     final profile = ref.watch(onboardingProfileProvider);
-    if (profile != null && !_isMedsInitialized && !_isSymptomsInitialized) {
+    if (profile != null && !_isMedsInitialized && !_isSymptomsInitialized && !_existingLogLoaded) {
       _isMedsInitialized = true;
       _isSymptomsInitialized = true;
 
       // Initialize symptoms from profile
       _selectedSymptomIds.clear();
-      _selectedSymptomIds.addAll(profile.selectedStageSymptoms);
+      _selectedSymptomIds.addAll(profile.selectedStageSymptoms.map(sanitizeSymptomId));
 
       // Triggers start unchecked
       _selectedTriggerIds.clear();
@@ -769,6 +628,12 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
         _hrtTimes[med.id] = '08:00 AM';
         _initialHrtDoses[med.id] = med.dose;
         _initialHrtUnits[med.id] = med.unit;
+      }
+
+      // Initialize other medications from profile
+      _otherMedsChecked.clear();
+      for (final med in profile.otherMedications) {
+        _otherMedsChecked[med.id] = true;
       }
     } else if (profile == null && !_isMedsInitialized && !_isSymptomsInitialized) {
       final meds = ref.watch(medicationsProvider).medications;
@@ -787,22 +652,35 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
       if (symptomsState.frequentSymptomIds.isNotEmpty) {
         _isSymptomsInitialized = true;
         _selectedSymptomIds.clear();
-        _selectedSymptomIds.addAll(symptomsState.frequentSymptomIds);
+        _selectedSymptomIds.addAll(symptomsState.frequentSymptomIds.map(sanitizeSymptomId));
         _selectedTriggerIds.clear();
+      }
+      final otherMeds = ref.watch(otherMedicationsProvider).medications;
+      if (otherMeds.isNotEmpty) {
+        _otherMedsChecked.clear();
+        for (final med in otherMeds) {
+          _otherMedsChecked[med.id] = true;
+        }
       }
     }
 
     // Reactive Symptom & Trigger Listeners
+    // Only update selection if we have NOT yet loaded a real log from Firestore
+    // (prevents overwriting Firestore-loaded symptoms when user re-opens logging)
     ref.listen(symptomsProvider, (previous, next) {
-      setState(() {
-        _selectedSymptomIds.retainAll(next.frequentSymptomIds);
-      });
+      if (!_existingLogLoaded) {
+        setState(() {
+          _selectedSymptomIds.retainAll(next.frequentSymptomIds.map(sanitizeSymptomId));
+        });
+      }
     });
 
     ref.listen(triggersProvider, (previous, next) {
-      setState(() {
-        _selectedTriggerIds.retainAll(next.activeTriggerIds);
-      });
+      if (!_existingLogLoaded) {
+        setState(() {
+          _selectedTriggerIds.retainAll(next.activeTriggerIds);
+        });
+      }
     });
 
     if (_currentStep == 5) {
@@ -951,6 +829,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
                   SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                     child: DailyEntryStep(
+                      loggingDate: widget.initialDate,
                       hrtChecked: _hrtChecked,
                       hrtDoses: _hrtDoses,
                       hrtUnits: _hrtUnits,

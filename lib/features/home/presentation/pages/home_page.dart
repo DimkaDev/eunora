@@ -22,6 +22,7 @@ import 'package:eunora/features/home/presentation/pages/analytics_page.dart';
 import 'package:eunora/features/home/presentation/pages/passport_page.dart';
 import 'package:eunora/features/home/presentation/pages/hrt_tracker_page.dart';
 import 'package:eunora/core/utils/animation_system.dart';
+import 'package:eunora/core/utils/logging_helpers.dart';
 import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
 import 'package:eunora/features/onboarding/domain/models/medication.dart';
 import 'package:eunora/features/home/presentation/widgets/calendar_hrt_edit_sheet.dart';
@@ -33,6 +34,9 @@ import 'package:eunora/features/onboarding/domain/models/user_profile.dart';
 import 'package:eunora/features/onboarding/presentation/providers/menopause_stage_provider.dart';
 import 'package:eunora/features/onboarding/presentation/providers/onboarding_profile_provider.dart';
 import 'package:eunora/core/services/premium_guard_provider.dart';
+import 'package:eunora/features/onboarding/presentation/providers/triggers_provider.dart';
+import 'package:eunora/features/onboarding/domain/models/trigger.dart';
+import 'package:eunora/features/symptom_log/data/trigger_library.dart';
 
 
 
@@ -49,6 +53,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   int _selectedIndex = 0;
   late final InsightType _insightType;
   bool _isLoading = true;
+  int _loggedDaysCountThisWeek = 0;
 
   // Daily Logging States
   final Map<String, bool> _takenStatus = {};
@@ -87,7 +92,17 @@ class _HomePageState extends ConsumerState<HomePage> {
     final dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
 
     try {
+      // Query log count for the last 7 days to evaluate if we have enough data for insights
+      final start = date.subtract(const Duration(days: 7));
+      final logsThisWeek = await ref.read(firestoreServiceProvider).getDailyLogsHistory(user.uid, start, date);
+      
       final log = await ref.read(firestoreServiceProvider).getDailyLog(user.uid, dateStr);
+      if (mounted) {
+        setState(() {
+          _loggedDaysCountThisWeek = logsThisWeek.length;
+        });
+      }
+
       if (log != null && mounted) {
         setState(() {
           _loggedSymptoms.clear();
@@ -100,32 +115,23 @@ class _HomePageState extends ConsumerState<HomePage> {
 
           _loggedTriggers.clear();
           for (final t in log.triggers) {
-            String name = t;
-            dynamic value = 'Logged';
-            IconData icon = Icons.bolt;
-
-            if (t.startsWith('Caffeine:')) {
-              name = 'Caffeine';
-              value = t.replaceAll('Caffeine:', '').trim();
-              icon = Icons.local_cafe;
-            } else if (t.startsWith('Alcohol:')) {
-              name = 'Alcohol';
-              value = t.replaceAll('Alcohol:', '').trim();
-              icon = Icons.wine_bar;
-            } else if (t.startsWith('Stress:')) {
-              name = 'Stress';
-              value = t.replaceAll('Stress:', '').trim();
-              icon = Icons.psychology;
-            } else if (t.startsWith('Foods:')) {
-              name = 'Foods';
-              value = t.replaceAll('Foods:', '').trim();
-              icon = Icons.restaurant;
-            }
+            final parsed = parseTriggerString(t);
+            final triggerLib = ref.read(triggerLibraryProvider);
+            final trigger = triggerLib.firstWhere(
+              (tr) => tr.id == parsed.id,
+              orElse: () => TriggerOption(
+                id: parsed.id,
+                name: parsed.label,
+                description: '',
+                iconName: 'spa',
+                category: 'Other',
+              ),
+            );
 
             _loggedTriggers.add({
-              'name': name,
-              'value': value,
-              'icon': icon,
+              'name': parsed.label,
+              'value': parsed.value ?? 'Logged',
+              'icon': trigger.getIconData(),
             });
           }
 
@@ -161,9 +167,10 @@ class _HomePageState extends ConsumerState<HomePage> {
     final List<LoggedSymptom> symptomsList = _loggedSymptoms.map((s) {
       final name = s['name'] ?? '';
       final severity = s['severity'] ?? 'Moderate';
+      final id = sanitizeSymptomId('s_${name.toLowerCase().replaceAll(' ', '_')}');
       return LoggedSymptom(
         symptom: Symptom(
-          id: 's_${name.toLowerCase().replaceAll(' ', '_')}',
+          id: id,
           name: name,
           iconName: 'medical_services',
           category: 'General',
@@ -175,11 +182,22 @@ class _HomePageState extends ConsumerState<HomePage> {
     final List<String> triggerNames = _loggedTriggers.map<String>((t) {
       final name = t['name'] ?? '';
       final val = t['value'] ?? 'Logged';
-      if (name == 'Caffeine') return 'Caffeine: $val';
-      if (name == 'Alcohol') return 'Alcohol: $val';
-      if (name == 'Stress') return 'Stress: $val';
-      if (name == 'Foods') return 'Foods: $val';
-      return name;
+      
+      final def = kTriggerLibrary.firstWhere(
+        (tr) => tr.label.toLowerCase() == name.toLowerCase() || tr.id.toLowerCase() == name.toLowerCase(),
+        orElse: () => TriggerDefinition(
+          id: name.toLowerCase().replaceAll(' ', '_'),
+          label: name,
+          category: TriggerCategory.lifestyle,
+          tier: TriggerTier.extended,
+        ),
+      );
+      
+      if (val != 'Logged' && val != 'None' && val != '') {
+        return '${def.label}: $val';
+      } else {
+        return def.label;
+      }
     }).toList();
 
     int caffeineCups = 0;
@@ -187,19 +205,36 @@ class _HomePageState extends ConsumerState<HomePage> {
     String stressLevel = 'Moderate';
     bool foodsTriggered = false;
     String foodsNotes = '';
+    final Map<String, int> customTriggerCounters = {};
+    final Map<String, String> customTriggerTexts = {};
 
     for (final t in _loggedTriggers) {
       final name = t['name'] ?? '';
-      final val = (t['value'] ?? '').toString();
-      if (name == 'Caffeine') {
-        caffeineCups = int.tryParse(val.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
-      } else if (name == 'Alcohol') {
-        alcoholGlasses = int.tryParse(val.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
-      } else if (name == 'Stress') {
-        stressLevel = val;
-      } else if (name == 'Foods') {
+      final val = (t['value'] ?? 'Logged').toString();
+      final fullStr = val != 'Logged' ? '$name: $val' : name;
+      final parsed = parseTriggerString(fullStr);
+      final prefixId = 't_${parsed.id}';
+
+      if (parsed.id == 'coffee' || parsed.id == 'caffeine') {
+        caffeineCups = int.tryParse(parsed.value?.replaceAll(RegExp(r'[^0-9]'), '') ?? '') ?? 0;
+      } else if (parsed.id == 'alcohol') {
+        alcoholGlasses = int.tryParse(parsed.value?.replaceAll(RegExp(r'[^0-9]'), '') ?? '') ?? 0;
+      } else if (parsed.id == 'stress') {
+        stressLevel = parsed.value ?? 'Moderate';
+      } else if (parsed.id == 'foods') {
         foodsTriggered = true;
-        foodsNotes = val;
+        foodsNotes = parsed.value ?? '';
+      } else {
+        if (parsed.value != null) {
+          final counterVal = int.tryParse(parsed.value!.replaceAll(RegExp(r'[^0-9]'), ''));
+          if (counterVal != null && parsed.value!.contains('times')) {
+            customTriggerCounters[prefixId] = counterVal;
+            customTriggerCounters[parsed.id] = counterVal;
+          } else {
+            customTriggerTexts[prefixId] = parsed.value!;
+            customTriggerTexts[parsed.id] = parsed.value!;
+          }
+        }
       }
     }
 
@@ -294,6 +329,8 @@ class _HomePageState extends ConsumerState<HomePage> {
       progesteroneDose: progesteroneDose,
       progesteroneUnit: progesteroneUnit,
       progesteroneTime: _takenTime['Progesterone'] ?? '21:00',
+      customTriggerCounters: customTriggerCounters,
+      customTriggerTexts: customTriggerTexts,
       hrtIntakes: hrtIntakes,
       createdAt: DateTime.now(),
     );
@@ -636,7 +673,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                 const SizedBox(height: 24),
                 FadeInEntrance(
                   delay: const Duration(milliseconds: 120),
-                  child: InsightCard(type: _insightType),
+                  child: InsightCard(
+                    type: _insightType,
+                    isInsufficientData: _loggedDaysCountThisWeek < 3,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 FadeInEntrance(

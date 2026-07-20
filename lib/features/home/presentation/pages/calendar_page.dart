@@ -14,10 +14,12 @@ import 'package:eunora/features/home/domain/entities/daily_log.dart';
 import 'package:eunora/features/onboarding/domain/models/symptom.dart';
 import 'package:eunora/features/onboarding/domain/models/medication.dart';
 import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
-
-
+import 'package:eunora/core/utils/logging_helpers.dart';
 import 'package:eunora/features/home/presentation/widgets/calendar/calendar_weekly_trends_card.dart';
 import 'package:eunora/features/home/presentation/widgets/calendar/calendar_insights_banner.dart';
+import 'package:eunora/features/onboarding/presentation/providers/triggers_provider.dart';
+import 'package:eunora/features/onboarding/domain/models/trigger.dart';
+import 'package:eunora/features/symptom_log/data/trigger_library.dart';
 
 class MockDailyLog {
   List<String> symptoms;
@@ -49,7 +51,7 @@ class CalendarPage extends ConsumerStatefulWidget {
 class _CalendarPageState extends ConsumerState<CalendarPage> {
   // Navigation states
   DateTime _focusedMonth = DateTime(DateTime.now().year, DateTime.now().month);
-  DateTime? _selectedDate = DateTime.now();
+  DateTime? _selectedDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   bool _legendExpanded = false;
 
   static const _weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -163,16 +165,35 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         itemsCount: 4,
       ),
     };
+
+    // Invalidate current month cache so re-opening the page always shows fresh data
+    final currentKey = _monthKey(_focusedMonth);
+    _monthLogsCache.remove(currentKey);
+
     // Fetch logs from firestore post build phase and trigger prefetching
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchLogsForMonth(_focusedMonth).then((_) {
-        setState(() {
-          _isFirstPageLoad = false;
-        });
+        if (mounted) {
+          setState(() {
+            _isFirstPageLoad = false;
+          });
+        }
       });
       _fetchLogsForMonth(DateTime(_focusedMonth.year, _focusedMonth.month - 1));
       _fetchLogsForMonth(DateTime(_focusedMonth.year, _focusedMonth.month + 1));
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Re-fetch current month when the page regains focus (e.g., returning from daily logging)
+    final currentKey = _monthKey(_focusedMonth);
+    if (_monthLogsCache.containsKey(currentKey)) {
+      // Invalidate and re-fetch to pick up any newly saved logs
+      _monthLogsCache.remove(currentKey);
+      _fetchLogsForMonth(_focusedMonth);
+    }
   }
 
   String _monthKey(DateTime m) => "${m.year}-${m.month.toString().padLeft(2, '0')}";
@@ -364,6 +385,15 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     final avgIntensity = loggedDaysIntensity > 0 ? totalIntensity / loggedDaysIntensity : 0.0;
     final avgSleep = loggedDaysSleep > 0 ? totalSleep / loggedDaysSleep : 0.0;
 
+    int loggedDaysThisWeek = 0;
+    for (int i = 0; i < 7; i++) {
+      final date = monday.add(Duration(days: i));
+      final log = _getLogForDayAndMonth(date);
+      if (log != null) {
+        loggedDaysThisWeek++;
+      }
+    }
+
     // Scale heights to [0.0, 1.0] for sparklines (intensity scale max is 5, sleep max is 10)
     final intensityHeights = intensities.map((v) => (v / 5.0).clamp(0.0, 1.0)).toList();
     final sleepHeights = sleepHours.map((v) => (v / 10.0).clamp(0.0, 1.0)).toList();
@@ -377,6 +407,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       'sleepChange': avgSleep < 6.0 ? '↓ 8%' : '↑ 4%',
       'isIntensityGood': avgIntensity <= 3.0,
       'isSleepGood': avgSleep >= 7.0,
+      'hasEnoughData': loggedDaysThisWeek >= 3,
     };
   }
 
@@ -803,49 +834,24 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   }
 
   List<Map<String, dynamic>> _convertToEditTriggers(List<String> list) {
-    final triggerCatalog = {
-      'Caffeine': {'icon': Icons.local_cafe, 'defaultValue': '1 cup'},
-      'Stress': {'icon': Icons.psychology, 'defaultValue': 'Level: Moderate'},
-      'Alcohol': {'icon': Icons.wine_bar, 'defaultValue': '1 glass'},
-      'Red wine': {'icon': Icons.wine_bar, 'defaultValue': '1 glass'},
-      'Exercise': {'icon': Icons.fitness_center, 'defaultValue': 'Logged'},
-      'Weather': {'icon': Icons.cloud, 'defaultValue': 'Logged'},
-      'Poor sleep': {'icon': Icons.bedtime, 'defaultValue': 'Logged'},
-      'Poor Sleep': {'icon': Icons.bedtime, 'defaultValue': 'Logged'},
-      'Specific Foods': {'icon': Icons.restaurant, 'defaultValue': 'Logged'},
-    };
-
     return list.map((t) {
-      String name = t;
-      dynamic value = 'Logged';
-      IconData icon = Icons.bolt;
-
-      if (t.startsWith('Caffeine:')) {
-        name = 'Caffeine';
-        value = t.replaceAll('Caffeine:', '').trim();
-        icon = Icons.local_cafe;
-      } else if (t.startsWith('Alcohol:')) {
-        name = 'Alcohol';
-        value = t.replaceAll('Alcohol:', '').trim();
-        icon = Icons.wine_bar;
-      } else if (t.startsWith('Stress:')) {
-        name = 'Stress';
-        value = t.replaceAll('Stress:', '').trim();
-        icon = Icons.psychology;
-      } else if (t.startsWith('Foods:')) {
-        name = 'Foods';
-        value = t.replaceAll('Foods:', '').trim();
-        icon = Icons.restaurant;
-      } else {
-        final catalog = triggerCatalog[name] ?? {'icon': Icons.bolt, 'defaultValue': 'Logged'};
-        value = catalog['defaultValue'];
-        icon = catalog['icon'] as IconData;
-      }
+      final parsed = parseTriggerString(t);
+      final triggerLib = ref.read(triggerLibraryProvider);
+      final trigger = triggerLib.firstWhere(
+        (tr) => tr.id == parsed.id,
+        orElse: () => TriggerOption(
+          id: parsed.id,
+          name: parsed.label,
+          description: '',
+          iconName: 'spa',
+          category: 'Other',
+        ),
+      );
 
       return {
-        'name': name,
-        'value': value,
-        'icon': icon,
+        'name': parsed.label,
+        'value': parsed.value ?? 'Logged',
+        'icon': trigger.getIconData(),
       };
     }).toList();
   }
@@ -854,11 +860,22 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     return list.map<String>((t) {
       final name = t['name'] as String;
       final val = t['value'] ?? 'Logged';
-      if (name == 'Caffeine') return 'Caffeine: $val';
-      if (name == 'Alcohol') return 'Alcohol: $val';
-      if (name == 'Stress') return 'Stress: $val';
-      if (name == 'Foods') return 'Foods: $val';
-      return name;
+
+      final def = kTriggerLibrary.firstWhere(
+        (tr) => tr.label.toLowerCase() == name.toLowerCase() || tr.id.toLowerCase() == name.toLowerCase(),
+        orElse: () => TriggerDefinition(
+          id: name.toLowerCase().replaceAll(' ', '_'),
+          label: name,
+          category: TriggerCategory.lifestyle,
+          tier: TriggerTier.extended,
+        ),
+      );
+
+      if (val != 'Logged' && val != 'None' && val != '') {
+        return '${def.label}: $val';
+      } else {
+        return def.label;
+      }
     }).toList();
   }
 
@@ -1060,51 +1077,54 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   Widget build(BuildContext context) {
     final activeLog = _getLogForSelectedDate();
     final isCurrentMonthLoaded = _monthLogsCache.containsKey(_monthKey(_focusedMonth));
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final isSelectedFuture = _selectedDate != null && _selectedDate!.isAfter(today);
 
     return Container(
       color: AppTheme.background,
-      child: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 120),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Cycle Tracker',
-                style: GoogleFonts.notoSerif(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primary,
-                ),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 24, 20, 120),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Cycle Tracker',
+              style: GoogleFonts.notoSerif(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primary,
               ),
-              const SizedBox(height: 4),
-              Text(
-                "Track your cycle, symptoms, and daily logs.",
-                style: GoogleFonts.manrope(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: AppTheme.onSurfaceVariant,
-                ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              "Track your cycle, symptoms, and daily logs.",
+              style: GoogleFonts.manrope(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppTheme.onSurfaceVariant,
               ),
-              _buildMonthNavigation(),
-              const SizedBox(height: 16),
-              _buildCalendarCard(),
-              const SizedBox(height: 16),
-              _buildLegendAccordion(),
-              const SizedBox(height: 24),
-              // Show skeleton while initial load or current month fetching, logged state otherwise
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: (!isCurrentMonthLoaded && _isFirstPageLoad)
-                    ? _buildDayDetailSkeleton()
-                    : (_selectedDate == null
-                        ? _buildNoDaySelectedState()
-                        : (activeLog == null
-                            ? _buildUnloggedState()
-                            : _buildLoggedDetailsState(activeLog))),
-              ),
-            ],
-          ),
+            ),
+            _buildMonthNavigation(),
+            const SizedBox(height: 16),
+            _buildCalendarCard(),
+            const SizedBox(height: 16),
+            _buildLegendAccordion(),
+            const SizedBox(height: 24),
+            // Show skeleton while initial load or current month fetching, logged state otherwise
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: (!isCurrentMonthLoaded && _isFirstPageLoad)
+                  ? _buildDayDetailSkeleton()
+                  : (_selectedDate == null
+                      ? _buildNoDaySelectedState()
+                      : (isSelectedFuture
+                          ? _buildFutureDateState()
+                          : (activeLog == null
+                              ? _buildUnloggedState()
+                              : _buildLoggedDetailsState(activeLog)))),
+            ),
+          ],
         ),
       ),
     );
@@ -1141,6 +1161,49 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           const SizedBox(height: 6),
           Text(
             'Choose any day on the calendar to view its logged symptoms, triggers, and medications.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.manrope(
+              fontSize: 13,
+              color: AppTheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFutureDateState() {
+    return Container(
+      key: const ValueKey('future_date'),
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppTheme.outlineVariant.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.event_busy_outlined,
+            size: 40,
+            color: Color(0xFFBBB0A8),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Future Date',
+            style: GoogleFonts.notoSerif(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'You cannot log data for a future date. Please select today or a past day.',
             textAlign: TextAlign.center,
             style: GoogleFonts.manrope(
               fontSize: 13,
@@ -1550,12 +1613,17 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     }
     
     // Target month days
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
     final cachedLogsForMonth = _monthLogsCache[_monthKey(targetMonth)] ?? {};
     for (int day = 1; day <= totalDays; day++) {
       MockDailyLog? logForDay = cachedLogsForMonth[day];
       if (logForDay == null && isApril) {
         logForDay = _aprilLogs[day];
       }
+      final dayDate = DateTime(targetMonth.year, targetMonth.month, day);
+      final isFuture = dayDate.isAfter(today);
+      final isToday = dayDate.isAtSameMomentAs(today);
       final isSelected = _selectedDate != null &&
           _selectedDate!.year == targetMonth.year &&
           _selectedDate!.month == targetMonth.month &&
@@ -1567,9 +1635,9 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         if (logForDay.symptoms.isNotEmpty) {
           final firstSymptom = logForDay.symptoms.first.toLowerCase();
           if (firstSymptom.contains('severe') || firstSymptom.contains('5/5') || firstSymptom.contains('4/5')) {
-            backgroundIntensity = const Color(0xFFF9B7A9).withValues(alpha: 0.6); // Reddish orange for severe
+            backgroundIntensity = const Color(0xFFF9B7A9).withValues(alpha: 0.6);
           } else {
-            backgroundIntensity = const Color(0xFFEDDDF5).withValues(alpha: 0.6); // Purple for general logs
+            backgroundIntensity = const Color(0xFFEDDDF5).withValues(alpha: 0.6);
           }
         } else {
           backgroundIntensity = const Color(0xFFEDDDF5).withValues(alpha: 0.4);
@@ -1581,8 +1649,10 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           day: day,
           isSelected: isSelected,
           hasData: hasData,
+          isFuture: isFuture,
+          isToday: isToday,
           backgroundColor: backgroundIntensity,
-          onTap: () => setState(() => _selectedDate = DateTime(targetMonth.year, targetMonth.month, day)),
+          onTap: isFuture ? null : () => setState(() => _selectedDate = dayDate),
         ),
       );
     }
@@ -1663,11 +1733,75 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     required bool isSelected,
     required bool hasData,
     required Color? backgroundColor,
-    required VoidCallback onTap,
+    required VoidCallback? onTap,
+    bool isFuture = false,
+    bool isToday = false,
   }) {
+    // Future dates — non-interactive, visually dimmed
+    if (isFuture) {
+      return Center(
+        child: Container(
+          width: 34,
+          height: 34,
+          alignment: Alignment.center,
+          child: Text(
+            '$day',
+            style: GoogleFonts.manrope(
+              fontSize: 13,
+              fontWeight: FontWeight.w300,
+              color: const Color(0xFFD9D1CB),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Today indicator (small dot below number when not selected)
+    if (isToday && !isSelected) {
+      return GestureDetector(
+        onTap: onTap,
+        child: Center(
+          child: Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: backgroundColor ?? Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: AppTheme.primary.withValues(alpha: 0.4),
+                width: 1.5,
+              ),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '$day',
+                  style: GoogleFonts.manrope(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 1),
+                Container(
+                  width: 4,
+                  height: 4,
+                  decoration: const BoxDecoration(
+                    color: AppTheme.primary,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     if (isSelected) {
       if (hasData) {
-        // Today Selected (Solid circle)
+        // Selected + logged (Solid filled circle)
         return GestureDetector(
           onTap: onTap,
           child: Center(
@@ -1704,7 +1838,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           ),
         );
       } else {
-        // Unlogged day selected (Outline circle + Ring shadow)
+        // Selected + unlogged (Outline circle)
         return GestureDetector(
           onTap: onTap,
           child: Center(
@@ -1738,7 +1872,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       }
     }
 
-    // Default unselected days
+    // Default unselected past/present days
     return GestureDetector(
       onTap: onTap,
       child: Center(
@@ -1917,13 +2051,23 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      'No data recorded for this day.',
-                      style: GoogleFonts.manrope(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: AppTheme.onSurfaceVariant,
-                      ),
+                    Builder(
+                      builder: (context) {
+                        final now = DateTime.now();
+                        final isToday = _selectedDate!.year == now.year &&
+                            _selectedDate!.month == now.month &&
+                            _selectedDate!.day == now.day;
+                        return Text(
+                          isToday
+                              ? 'No data recorded for today.'
+                              : 'No data recorded for this day.',
+                          style: GoogleFonts.manrope(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: AppTheme.onSurfaceVariant,
+                          ),
+                        );
+                      }
                     ),
                     const SizedBox(height: 16),
                     Column(
@@ -1934,7 +2078,12 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                             onPressed: () async {
                               final targetDate = _selectedDate!;
                               await context.push('/daily-logging', extra: targetDate);
-                              _fetchLogsForFocusedMonth();
+                              final targetMonth = DateTime(targetDate.year, targetDate.month);
+                              final key = _monthKey(targetMonth);
+                              setState(() {
+                                _monthLogsCache.remove(key);
+                              });
+                              _fetchLogsForMonth(targetMonth);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppTheme.primary,
@@ -1945,34 +2094,51 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                               ),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
-                            child: Text(
-                              'LOG RETROACTIVELY',
-                              style: GoogleFonts.manrope(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.2,
-                              ),
+                            child: Builder(
+                              builder: (context) {
+                                final now = DateTime.now();
+                                final isToday = _selectedDate!.year == now.year &&
+                                    _selectedDate!.month == now.month &&
+                                    _selectedDate!.day == now.day;
+                                return Text(
+                                  isToday ? 'LOG DAILY ENTRY' : 'LOG RETROACTIVELY',
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.2,
+                                  ),
+                                );
+                              }
                             ),
                           ),
                         ),
                         const SizedBox(height: 8),
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _focusedMonth = DateTime(DateTime.now().year, DateTime.now().month);
-                              _selectedDate = DateTime.now();
-                            });
-                            _fetchLogsForFocusedMonth();
-                          },
-                          child: Text(
-                            'BACK TO TODAY',
-                            style: GoogleFonts.manrope(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.primary,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
+                        Builder(
+                          builder: (context) {
+                            final now = DateTime.now();
+                            final isToday = _selectedDate!.year == now.year &&
+                                _selectedDate!.month == now.month &&
+                                _selectedDate!.day == now.day;
+                            if (isToday) return const SizedBox.shrink();
+                            return TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  _focusedMonth = DateTime(DateTime.now().year, DateTime.now().month);
+                                  _selectedDate = DateTime.now();
+                                });
+                                _fetchLogsForFocusedMonth();
+                              },
+                              child: Text(
+                                'BACK TO TODAY',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.primary,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                            );
+                          }
                         ),
                       ],
                     ),
@@ -1986,6 +2152,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         Builder(
           builder: (context) {
             final trends = _getWeeklyTrendsData();
+            final hasData = trends['hasEnoughData'] as bool? ?? false;
             return CalendarWeeklyTrendsCard(
               averageIntensity: trends['avgIntensity'],
               averageSleep: trends['avgSleep'],
@@ -1995,11 +2162,18 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
               sleepChangeLabel: trends['sleepChange'],
               isIntensityChangeGood: trends['isIntensityGood'],
               isSleepChangeGood: trends['isSleepGood'],
+              isInsufficientData: !hasData,
             );
           },
         ),
         const SizedBox(height: 24),
-        const CalendarInsightsBanner(),
+        Builder(
+          builder: (context) {
+            final trends = _getWeeklyTrendsData();
+            final hasData = trends['hasEnoughData'] as bool? ?? false;
+            return CalendarInsightsBanner(isInsufficientData: !hasData);
+          },
+        ),
       ],
     );
   }
@@ -2143,6 +2317,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         Builder(
           builder: (context) {
             final trends = _getWeeklyTrendsData();
+            final hasData = trends['hasEnoughData'] as bool? ?? false;
             return CalendarWeeklyTrendsCard(
               averageIntensity: trends['avgIntensity'],
               averageSleep: trends['avgSleep'],
@@ -2152,11 +2327,18 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
               sleepChangeLabel: trends['sleepChange'],
               isIntensityChangeGood: trends['isIntensityGood'],
               isSleepChangeGood: trends['isSleepGood'],
+              isInsufficientData: !hasData,
             );
           },
         ),
         const SizedBox(height: 24),
-        const CalendarInsightsBanner(),
+        Builder(
+          builder: (context) {
+            final trends = _getWeeklyTrendsData();
+            final hasData = trends['hasEnoughData'] as bool? ?? false;
+            return CalendarInsightsBanner(isInsufficientData: !hasData);
+          },
+        ),
       ],
     );
   }
