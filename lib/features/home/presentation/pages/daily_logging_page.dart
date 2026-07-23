@@ -230,15 +230,21 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
                 _otherMedsChecked[med.id] = true;
               }
             }
-          } else {
-            _additionalNotes = existingLog.additionalNotes;
+          _additionalNotes = existingLog.additionalNotes;
           }
+          // Cache the original database log so we can restore it if the user cancels
+          _originalLog = existingLog;
         });
+      } else {
+        _originalLog = null;
       }
     } catch (e) {
       debugPrint("Error loading existing daily log: $e");
     }
   }
+
+  // To support restoring on cancel/pop without saving
+  DailyLog? _originalLog;
 
   DailyLog _buildDailyLog() {
     final user = FirebaseAuth.instance.currentUser;
@@ -385,7 +391,6 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   }
 
   void _nextStep() {
-    _saveDraft();
     if (_currentStep < 4) {
       setState(() {
         _currentStep++;
@@ -444,7 +449,6 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   }
 
   void _prevStep() {
-    _saveDraft();
     if (_currentStep > 0 && _currentStep <= 4) {
       setState(() {
         _currentStep--;
@@ -542,9 +546,8 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primary,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 0,
                   ),
                   child: Text(
                     'Got it',
@@ -603,6 +606,30 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
     };
 
     Navigator.pop(context, result);
+  }
+
+  Future<void> _handleCancel() async {
+    final leave = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Discard Changes?', style: GoogleFonts.notoSerif(fontWeight: FontWeight.bold)),
+        content: Text('Are you sure you want to go back? Any changes made during this logging session will not be saved.', style: GoogleFonts.manrope()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('Cancel', style: GoogleFonts.manrope(color: AppTheme.outline)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text('Discard', style: GoogleFonts.manrope(color: AppTheme.primary, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (leave == true && mounted) {
+      Navigator.pop(context);
+    }
   }
 
   @override
@@ -691,10 +718,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        await _saveDraft();
-        if (context.mounted) {
-          Navigator.of(context).pop();
-        }
+        await _handleCancel();
       },
       child: Scaffold(
         backgroundColor: const Color(0xFFFAF9F6), // brand-cream
@@ -707,7 +731,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
               title: _getStepTitle(),
               showStepPill: true,
               showBackButton: true,
-              onBack: _currentStep == 0 ? () => Navigator.pop(context) : _prevStep,
+              onBack: _currentStep == 0 ? _handleCancel : _prevStep,
               onSkip: () => _showInfoBottomSheet(context, _currentStep),
             ),
             Expanded(
