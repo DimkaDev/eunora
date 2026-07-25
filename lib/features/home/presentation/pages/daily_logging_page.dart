@@ -39,6 +39,7 @@ class DailyLoggingPage extends ConsumerStatefulWidget {
 
 class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   int _currentStep = 0; // 0 to 5 (Step 1 to Step 6)
+  int _maxStepReached = 0; // Highest step reached during logging session
 
   // Step 1: Symptoms Selection
   final Set<String> _selectedSymptomIds = {};
@@ -91,6 +92,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   /// True after _loadExistingLog successfully populated state from Firestore.
   /// Prevents reactive listeners from overwriting the loaded selection.
   bool _existingLogLoaded = false;
+  bool _isLoadingLog = true;
 
   late PageController _pageController;
 
@@ -98,9 +100,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _currentStep);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadExistingLog();
-    });
+    _loadExistingLog();
   }
 
   @override
@@ -111,7 +111,14 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
 
   Future<void> _loadExistingLog() async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    if (user == null) {
+      if (mounted) {
+        setState(() {
+          _isLoadingLog = false;
+        });
+      }
+      return;
+    }
 
     final date = widget.initialDate ?? DateTime.now();
     final dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
@@ -234,19 +241,33 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
           }
           // Cache the original database log so we can restore it if the user cancels
           _originalLog = existingLog;
+
+          // If the log is incomplete/draft, set current step to the last completed step
+          if (!existingLog.isCompleted && existingLog.lastCompletedStep > 0 && existingLog.lastCompletedStep <= 5) {
+            _currentStep = existingLog.lastCompletedStep;
+            _maxStepReached = existingLog.lastCompletedStep;
+            _pageController.dispose();
+            _pageController = PageController(initialPage: _currentStep);
+          }
         });
       } else {
         _originalLog = null;
       }
     } catch (e) {
       debugPrint("Error loading existing daily log: $e");
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingLog = false;
+        });
+      }
     }
   }
 
   // To support restoring on cancel/pop without saving
   DailyLog? _originalLog;
 
-  DailyLog _buildDailyLog() {
+  DailyLog _buildDailyLog({bool isCompleted = false, int? lastCompletedStep}) {
     final user = FirebaseAuth.instance.currentUser;
     final uid = user?.uid ?? '';
     final date = widget.initialDate ?? DateTime.now();
@@ -367,13 +388,21 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
       additionalNotes: finalNotes,
       hrtIntakes: hrtIntakes,
       createdAt: DateTime.now(),
+      isCompleted: isCompleted,
+      lastCompletedStep: lastCompletedStep ?? (_maxStepReached > _currentStep ? _maxStepReached : _currentStep),
     );
   }
 
-  Future<void> _saveDraft() async {
+  Future<void> _saveDraft({int? targetStep}) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
-    final dailyLog = _buildDailyLog();
+    final step = targetStep ?? _currentStep;
+    if (step > _maxStepReached) {
+      _maxStepReached = step;
+    }
+    // Drafts are only saved if the user has completed at least Step 1 (which means targetStep or _maxStepReached is >= 1)
+    if (_maxStepReached < 1) return;
+    final dailyLog = _buildDailyLog(isCompleted: false, lastCompletedStep: _maxStepReached);
     try {
       await ref.read(firestoreServiceProvider).saveDailyLog(user.uid, dailyLog);
     } catch (e) {
@@ -392,8 +421,10 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
 
   void _nextStep() {
     if (_currentStep < 4) {
+      final nextStepIndex = _currentStep + 1;
+      _saveDraft(targetStep: nextStepIndex);
       setState(() {
-        _currentStep++;
+        _currentStep = nextStepIndex;
       });
       _pageController.animateToPage(
         _currentStep,
@@ -430,6 +461,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
               change: primaryChange!,
               onConfirm: () {
                 Navigator.pop(context);
+                _saveDraft(targetStep: 5);
                 setState(() {
                   _currentStep = 5;
                 });
@@ -441,6 +473,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
           },
         );
       } else {
+        _saveDraft(targetStep: 5);
         setState(() {
           _currentStep = 5;
         });
@@ -450,8 +483,10 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
 
   void _prevStep() {
     if (_currentStep > 0 && _currentStep <= 4) {
+      final prevStepIndex = _currentStep - 1;
+      _saveDraft(targetStep: prevStepIndex);
       setState(() {
-        _currentStep--;
+        _currentStep = prevStepIndex;
       });
       _pageController.animateToPage(
         _currentStep,
@@ -459,6 +494,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
         curve: Curves.easeInOutCubic,
       );
     } else if (_currentStep == 5) {
+      _saveDraft(targetStep: 4);
       setState(() {
         _currentStep = 4;
       });
@@ -563,7 +599,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   }
 
   void _finishLoggingAndSync() async {
-    final dailyLog = _buildDailyLog();
+    final dailyLog = _buildDailyLog(isCompleted: true, lastCompletedStep: 5);
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
@@ -634,6 +670,17 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoadingLog) {
+      return const Scaffold(
+        backgroundColor: Color(0xFFFAF9F6),
+        body: Center(
+          child: CircularProgressIndicator(
+            color: AppTheme.primary,
+          ),
+        ),
+      );
+    }
+
     // Reactive initialization from profile/providers once loaded
     final profile = ref.watch(onboardingProfileProvider);
     if (profile != null && !_isMedsInitialized && !_isSymptomsInitialized && !_existingLogLoaded) {
@@ -663,8 +710,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
         _otherMedsChecked[med.id] = true;
       }
     } else if (profile == null && !_isMedsInitialized && !_isSymptomsInitialized) {
-      final meds = ref.watch(medicationsProvider).medications;
-      if (meds.isNotEmpty) {
+      final meds = ref.watch(medicationsProvider).medications.where((m) => m.endedAt == null).toList();      if (meds.isNotEmpty) {
         _isMedsInitialized = true;
         for (final med in meds) {
           _hrtChecked[med.id] = false;

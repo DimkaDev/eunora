@@ -69,6 +69,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
 
   // Cache of logs keyed by "yyyy-MM" string to avoid re-fetching
   final Map<String, Map<int, MockDailyLog>> _monthLogsCache = {};
+  final Map<String, Map<int, DailyLog>> _monthDraftsCache = {};
   bool _isLoadingDbLogs = false;
   
   // Track whether we have loaded at least once, or if currently loading.
@@ -169,6 +170,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     // Invalidate current month cache so re-opening the page always shows fresh data
     final currentKey = _monthKey(_focusedMonth);
     _monthLogsCache.remove(currentKey);
+    _monthDraftsCache.remove(currentKey);
 
     // Fetch logs from firestore post build phase and trigger prefetching
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -189,9 +191,10 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     super.didChangeDependencies();
     // Re-fetch current month when the page regains focus (e.g., returning from daily logging)
     final currentKey = _monthKey(_focusedMonth);
-    if (_monthLogsCache.containsKey(currentKey)) {
+    if (_monthLogsCache.containsKey(currentKey) || _monthDraftsCache.containsKey(currentKey)) {
       // Invalidate and re-fetch to pick up any newly saved logs
       _monthLogsCache.remove(currentKey);
+      _monthDraftsCache.remove(currentKey);
       _fetchLogsForMonth(_focusedMonth);
     }
   }
@@ -201,7 +204,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   Future<void> _fetchLogsForMonth(DateTime targetMonth) async {
     final key = _monthKey(targetMonth);
     // If already loading or cached, skip double fetching
-    if (_monthLogsCache.containsKey(key)) return;
+    if (_monthLogsCache.containsKey(key) && _monthDraftsCache.containsKey(key)) return;
 
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -211,9 +214,15 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       final start = DateTime(targetMonth.year, targetMonth.month, 1);
       final end = DateTime(targetMonth.year, targetMonth.month, daysInMonth, 23, 59, 59);
 
-      final dbLogs = await ref.read(firestoreServiceProvider).getDailyLogsHistory(user.uid, start, end);
+      final rawDbLogs = await ref.read(firestoreServiceProvider).getDailyLogsHistory(user.uid, start, end);
+      // Completed logs
+      final dbLogs = rawDbLogs.where((l) => l.isCompleted).toList();
+      // Draft logs (incomplete with step progress)
+      final draftLogs = rawDbLogs.where((l) => !l.isCompleted && l.lastCompletedStep > 0).toList();
 
       final Map<int, MockDailyLog> fetchedMap = {};
+      final Map<int, DailyLog> fetchedDraftsMap = {};
+
       for (final log in dbLogs) {
         final day = log.date.day;
 
@@ -267,8 +276,13 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         );
       }
 
+      for (final draft in draftLogs) {
+        fetchedDraftsMap[draft.date.day] = draft;
+      }
+
       setState(() {
         _monthLogsCache[key] = fetchedMap;
+        _monthDraftsCache[key] = fetchedDraftsMap;
       });
     } catch (e) {
       debugPrint("Error fetching logs for $key: $e");
@@ -276,7 +290,14 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   }
 
   // Legacy wrapper used by existing save calls
-  Future<void> _fetchLogsForFocusedMonth() => _fetchLogsForMonth(_focusedMonth);
+  Future<void> _fetchLogsForFocusedMonth() {
+    final key = _monthKey(_focusedMonth);
+    setState(() {
+      _monthLogsCache.remove(key);
+      _monthDraftsCache.remove(key);
+    });
+    return _fetchLogsForMonth(_focusedMonth);
+  }
 
   MockDailyLog? _getLogForDay(int day) {
     final cached = _monthLogsCache[_monthKey(_focusedMonth)];
@@ -299,6 +320,15 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     final isApril = _selectedDate!.year == 2026 && _selectedDate!.month == 4;
     if (isApril && _aprilLogs.containsKey(_selectedDate!.day)) {
       return _aprilLogs[_selectedDate!.day];
+    }
+    return null;
+  }
+
+  DailyLog? _getDraftForSelectedDate() {
+    if (_selectedDate == null) return null;
+    final cached = _monthDraftsCache[_monthKey(_selectedDate!)];
+    if (cached != null && cached.containsKey(_selectedDate!.day)) {
+      return cached[_selectedDate!.day];
     }
     return null;
   }
@@ -1076,6 +1106,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   @override
   Widget build(BuildContext context) {
     final activeLog = _getLogForSelectedDate();
+    final activeDraft = _getDraftForSelectedDate();
     final isCurrentMonthLoaded = _monthLogsCache.containsKey(_monthKey(_focusedMonth));
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -1120,9 +1151,11 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                       ? _buildNoDaySelectedState()
                       : (isSelectedFuture
                           ? _buildFutureDateState()
-                          : (activeLog == null
-                              ? _buildUnloggedState()
-                              : _buildLoggedDetailsState(activeLog)))),
+                          : (activeLog != null
+                              ? _buildLoggedDetailsState(activeLog)
+                              : (activeDraft != null
+                                  ? _buildDraftInProgressState(activeDraft)
+                                  : _buildUnloggedState())))),
             ),
           ],
         ),
@@ -1208,6 +1241,143 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             style: GoogleFonts.manrope(
               fontSize: 13,
               color: AppTheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDraftInProgressState(DailyLog draftLog) {
+    final step = draftLog.lastCompletedStep.clamp(1, 5);
+    final progress = step / 5.0;
+    final percent = (progress * 100).toInt();
+
+    return Container(
+      key: ValueKey('draft_${draftLog.id}_$step'),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppTheme.outlineVariant.withValues(alpha: 0.2),
+        ),
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Daily Log: ${_months[_selectedDate!.month - 1]} ${_selectedDate!.day}',
+                style: GoogleFonts.notoSerif(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.primary,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF2DFD0),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  'IN PROGRESS',
+                  style: GoogleFonts.manrope(
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: Column(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF2DFD0).withValues(alpha: 0.6),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.pending_actions,
+                    color: AppTheme.primary,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Logging in Progress',
+                  style: GoogleFonts.notoSerif(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF51443A),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '$step/5 pages logged ($percent%)',
+                  style: GoogleFonts.manrope(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: 200,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      minHeight: 8,
+                      backgroundColor: const Color(0xFFEADBCE),
+                      valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primary),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: 200,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      final targetDate = _selectedDate!;
+                      await context.push('/daily-logging', extra: targetDate);
+                      final targetMonth = DateTime(targetDate.year, targetDate.month);
+                      final key = _monthKey(targetMonth);
+                      setState(() {
+                        _monthLogsCache.remove(key);
+                        _monthDraftsCache.remove(key);
+                      });
+                      _fetchLogsForMonth(targetMonth);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primary,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Text(
+                      'CONTINUE',
+                      style: GoogleFonts.manrope(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -1616,8 +1786,10 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final cachedLogsForMonth = _monthLogsCache[_monthKey(targetMonth)] ?? {};
+    final cachedDraftsForMonth = _monthDraftsCache[_monthKey(targetMonth)] ?? {};
     for (int day = 1; day <= totalDays; day++) {
       MockDailyLog? logForDay = cachedLogsForMonth[day];
+      DailyLog? draftForDay = cachedDraftsForMonth[day];
       if (logForDay == null && isApril) {
         logForDay = _aprilLogs[day];
       }
@@ -1629,6 +1801,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           _selectedDate!.month == targetMonth.month &&
           _selectedDate!.day == day;
       final hasData = logForDay != null;
+      final hasDraft = !hasData && draftForDay != null;
       
       Color? backgroundIntensity;
       if (hasData && logForDay != null) {
@@ -1642,6 +1815,8 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         } else {
           backgroundIntensity = const Color(0xFFEDDDF5).withValues(alpha: 0.4);
         }
+      } else if (hasDraft) {
+        backgroundIntensity = const Color(0xFFF2DFD0).withValues(alpha: 0.6);
       }
       
       dayWidgets.add(
@@ -2082,6 +2257,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                               final key = _monthKey(targetMonth);
                               setState(() {
                                 _monthLogsCache.remove(key);
+                                _monthDraftsCache.remove(key);
                               });
                               _fetchLogsForMonth(targetMonth);
                             },

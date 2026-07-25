@@ -21,7 +21,8 @@ class PassportDataRepository {
     required UserProfile userProfile,
   }) async {
     // 1. Fetch raw logs history
-    final List<DailyLog> allLogs = await _firestoreService.getDailyLogsHistory(uid, startDate, endDate);
+    final List<DailyLog> rawLogs = await _firestoreService.getDailyLogsHistory(uid, startDate, endDate);
+    final List<DailyLog> allLogs = rawLogs.where((l) => l.isCompleted).toList();
     
     // Sort logs oldest first
     allLogs.sort((a, b) => a.date.compareTo(b.date));

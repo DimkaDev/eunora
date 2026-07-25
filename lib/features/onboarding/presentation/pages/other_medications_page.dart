@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -641,6 +642,136 @@ class _AddOtherMedicationModalState extends ConsumerState<AddOtherMedicationModa
   final List<String> _suggestions = ['Vitamin D', 'Calcium', 'Magnesium', 'Ibuprofen', 'Antidepressant'];
   final List<String> _units = ['mg', 'mcg', 'g', 'ml', 'drops', 'pumps', 'tablets', 'capsules'];
 
+  String _formatDoseNumber(double val) {
+    if (val % 1 == 0) {
+      return val.toInt().toString();
+    }
+    return val.toString();
+  }
+
+  List<double> _getAvailableDoses(String unit) {
+    final u = unit.toLowerCase();
+    if (u == 'mcg') {
+      return [5.0, 10.0, 12.5, 25.0, 50.0, 75.0, 100.0, 125.0, 150.0, 200.0, 250.0, 400.0, 500.0, 800.0, 1000.0];
+    } else if (u == 'mg') {
+      return [0.5, 1.0, 2.0, 2.5, 5.0, 10.0, 25.0, 50.0, 75.0, 100.0, 150.0, 200.0, 250.0, 300.0, 400.0, 500.0, 600.0, 750.0, 1000.0, 1200.0, 1500.0, 2000.0];
+    } else if (u == 'g') {
+      return [0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0, 7.5, 10.0, 15.0, 20.0];
+    } else if (u == 'capsules') {
+      return [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+    } else if (u == 'tablets') {
+      return [0.5, 1.0, 1.5, 2.0, 3.0, 4.0];
+    } else if (u == 'ml') {
+      return [0.5, 1.0, 2.5, 5.0, 7.5, 10.0, 15.0, 20.0, 25.0, 30.0, 50.0];
+    } else if (u == 'drops') {
+      return [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 12.0, 15.0, 20.0];
+    } else if (u == 'pumps') {
+      return [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
+    } else {
+      return List.generate(20, (i) => (i + 1).toDouble());
+    }
+  }
+
+  void _openDosePicker() {
+    final doses = _getAvailableDoses(_selectedUnit);
+    final currentDoseVal = double.tryParse(_doseController.text) ?? doses.first;
+    int initialIndex = doses.indexWhere((d) => (d - currentDoseVal).abs() < 0.01);
+    if (initialIndex == -1) initialIndex = 0;
+
+    double tempDose = doses[initialIndex];
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (bottomSheetContext) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFFFEF8F6),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Container(
+                  width: 48,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD0C4BC).withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(bottomSheetContext),
+                    child: Text(
+                      'Cancel',
+                      style: GoogleFonts.manrope(
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF8A817C),
+                      ),
+                    ),
+                  ),
+                  Text(
+                    'Select Dose',
+                    style: GoogleFonts.notoSerif(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primary,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _doseController.text = _formatDoseNumber(tempDose);
+                      });
+                      Navigator.pop(bottomSheetContext);
+                    },
+                    child: Text(
+                      'Done',
+                      style: GoogleFonts.manrope(
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 200,
+                child: CupertinoPicker(
+                  scrollController: FixedExtentScrollController(initialItem: initialIndex),
+                  itemExtent: 44,
+                  onSelectedItemChanged: (index) {
+                    tempDose = doses[index];
+                  },
+                  children: doses.map((d) {
+                    return Center(
+                      child: Text(
+                        '${_formatDoseNumber(d)} $_selectedUnit',
+                        style: GoogleFonts.manrope(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.onSurface,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -873,17 +1004,35 @@ class _AddOtherMedicationModalState extends ConsumerState<AddOtherMedicationModa
                   Row(
                     children: [
                       Expanded(
-                        flex: 2,
-                        child: TextField(
-                          controller: _doseController,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          decoration: InputDecoration(
-                            hintText: 'e.g., 400, 2',
-                            hintStyle: TextStyle(color: const Color(0xFF4D453F).withOpacity(0.4)),
-                            filled: true,
-                            fillColor: const Color(0xFFF2EDE9),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                        child: GestureDetector(
+                          onTap: _openDosePicker,
+                          child: Container(
+                            height: 56,
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF2EDE9),
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  _doseController.text.isNotEmpty
+                                      ? '${_doseController.text} $_selectedUnit'
+                                      : 'Select dose',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: _doseController.text.isNotEmpty
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                    color: _doseController.text.isNotEmpty
+                                        ? const Color(0xFF1D1B1A)
+                                        : const Color(0xFF4D453F).withOpacity(0.4),
+                                  ),
+                                ),
+                                const Icon(Icons.unfold_more, color: Color(0xFF4D453F)),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -899,8 +1048,11 @@ class _AddOtherMedicationModalState extends ConsumerState<AddOtherMedicationModa
                           child: DropdownButton<String>(
                             value: _selectedUnit,
                             onChanged: (val) {
-                              if (val != null) {
-                                setState(() => _selectedUnit = val);
+                              if (val != null && val != _selectedUnit) {
+                                setState(() {
+                                  _selectedUnit = val;
+                                  _doseController.clear();
+                                });
                               }
                             },
                             icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF4D453F)),

@@ -220,7 +220,7 @@ class DailyLogCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "${(progress * 100).toInt()}% of daily data captured",
+                  "${(progress * 5).round()}/5 pages logged (${(progress * 100).toInt()}%)",
                   style: GoogleFonts.manrope(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
@@ -249,7 +249,7 @@ class DailyLogCard extends StatelessWidget {
                     elevation: 2,
                   ),
                   child: Text(
-                    'Resume Log',
+                    'Continue',
                     style: GoogleFonts.manrope(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,

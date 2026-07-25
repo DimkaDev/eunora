@@ -56,6 +56,8 @@ class _HomePageState extends ConsumerState<HomePage> {
   int _loggedDaysCountThisWeek = 0;
 
   // Daily Logging States
+  bool _isLogCompleted = false;
+  int _todayDraftStep = 0;
   final Map<String, bool> _takenStatus = {};
   final Map<String, String> _takenTime = {};
   final List<Map<String, String>> _loggedSymptoms = [];
@@ -99,54 +101,74 @@ class _HomePageState extends ConsumerState<HomePage> {
       final log = await ref.read(firestoreServiceProvider).getDailyLog(user.uid, dateStr);
       if (mounted) {
         setState(() {
-          _loggedDaysCountThisWeek = logsThisWeek.length;
+          _loggedDaysCountThisWeek = logsThisWeek.where((l) => l.isCompleted).length;
         });
       }
 
       if (log != null && mounted) {
         setState(() {
-          _loggedSymptoms.clear();
-          for (final s in log.symptoms) {
-            _loggedSymptoms.add({
-              'name': s.symptom.name,
-              'severity': s.severity ?? 'Moderate',
-            });
-          }
+          _isLogCompleted = log.isCompleted;
+          _todayDraftStep = log.isCompleted ? 5 : log.lastCompletedStep;
 
-          _loggedTriggers.clear();
-          for (final t in log.triggers) {
-            final parsed = parseTriggerString(t);
-            final triggerLib = ref.read(triggerLibraryProvider);
-            final trigger = triggerLib.firstWhere(
-              (tr) => tr.id == parsed.id,
-              orElse: () => TriggerOption(
-                id: parsed.id,
-                name: parsed.label,
-                description: '',
-                iconName: 'spa',
-                category: 'Other',
-              ),
-            );
+          // Only populate home page cards with data from COMPLETED logs.
+          // Draft/incomplete logs should NOT leak data into symptoms, triggers, or HRT cards.
+          if (log.isCompleted) {
+            _loggedSymptoms.clear();
+            for (final s in log.symptoms) {
+              _loggedSymptoms.add({
+                'name': s.symptom.name,
+                'severity': s.severity ?? 'Moderate',
+              });
+            }
 
-            _loggedTriggers.add({
-              'name': parsed.label,
-              'value': parsed.value ?? 'Logged',
-              'icon': trigger.getIconData(),
-            });
-          }
+            _loggedTriggers.clear();
+            for (final t in log.triggers) {
+              final parsed = parseTriggerString(t);
+              final triggerLib = ref.read(triggerLibraryProvider);
+              final trigger = triggerLib.firstWhere(
+                (tr) => tr.id == parsed.id,
+                orElse: () => TriggerOption(
+                  id: parsed.id,
+                  name: parsed.label,
+                  description: '',
+                  iconName: 'spa',
+                  category: 'Other',
+                ),
+              );
 
-          _takenStatus['Estradiol Patch'] = log.estradiolChecked;
-          _takenStatus['Estradiol'] = log.estradiolChecked;
-          _takenTime['Estradiol Patch'] = log.estradiolTime.isEmpty ? '08:30' : log.estradiolTime;
-          _takenStatus['Progesterone'] = log.progesteroneChecked;
-          _takenStatus['Utrogestan'] = log.progesteroneChecked;
-          _takenTime['Progesterone'] = log.progesteroneTime.isEmpty ? '21:00' : log.progesteroneTime;
+              _loggedTriggers.add({
+                'name': parsed.label,
+                'value': parsed.value ?? 'Logged',
+                'icon': trigger.getIconData(),
+              });
+            }
 
-          for (final intake in log.hrtIntakes) {
-            _takenStatus[intake.name] = intake.isTaken;
-            _takenTime[intake.name] = intake.time;
+            _takenStatus['Estradiol Patch'] = log.estradiolChecked;
+            _takenStatus['Estradiol'] = log.estradiolChecked;
+            _takenTime['Estradiol Patch'] = log.estradiolTime.isEmpty ? '08:30' : log.estradiolTime;
+            _takenStatus['Progesterone'] = log.progesteroneChecked;
+            _takenStatus['Utrogestan'] = log.progesteroneChecked;
+            _takenTime['Progesterone'] = log.progesteroneTime.isEmpty ? '21:00' : log.progesteroneTime;
+
+            for (final intake in log.hrtIntakes) {
+              _takenStatus[intake.name] = intake.isTaken;
+              _takenTime[intake.name] = intake.time;
+            }
+          } else {
+            // Draft exists but is not completed — clear displayed data
+            _loggedSymptoms.clear();
+            _loggedTriggers.clear();
           }
         });
+      } else {
+        if (mounted) {
+          setState(() {
+            _isLogCompleted = false;
+            _todayDraftStep = 0;
+            _loggedSymptoms.clear();
+            _loggedTriggers.clear();
+          });
+        }
       }
     } catch (e) {
       debugPrint("Error fetching daily log: $e");
@@ -332,6 +354,8 @@ class _HomePageState extends ConsumerState<HomePage> {
       customTriggerCounters: customTriggerCounters,
       customTriggerTexts: customTriggerTexts,
       hrtIntakes: hrtIntakes,
+      isCompleted: true,
+      lastCompletedStep: 5,
       createdAt: DateTime.now(),
     );
 
@@ -547,8 +571,8 @@ class _HomePageState extends ConsumerState<HomePage> {
         _takenStatus['Progesterone'] = prog;
         _takenStatus['Utrogestan'] = prog;
       });
-      _fetchTodayLog();
     }
+    await _fetchTodayLog();
   }
 
   Widget _buildHomeDashboard(double progress, List<Medication> medications) {
@@ -719,7 +743,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
     final medicationsState = ref.watch(medicationsProvider);
-    final medications = medicationsState.medications;
+    final medications = medicationsState.medications.where((m) => m.endedAt == null).toList();
 
     // Auto-populate default medications if completely empty
     if (medications.isEmpty) {
@@ -744,7 +768,14 @@ class _HomePageState extends ConsumerState<HomePage> {
       });
     }
 
-    final progress = _getLoggingProgress(medications);
+    final double progress;
+    if (_isLogCompleted) {
+      progress = 1.0;
+    } else if (_todayDraftStep > 0) {
+      progress = (_todayDraftStep / 5.0).clamp(0.1, 0.99);
+    } else {
+      progress = _getLoggingProgress(medications);
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7F5F0),
@@ -802,7 +833,12 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget _buildNavItem(int index, IconData icon, String label) {
     final isSelected = _selectedIndex == index;
     return Bounceable(
-      onTap: () => setState(() => _selectedIndex = index),
+      onTap: () {
+        setState(() => _selectedIndex = index);
+        if (index == 0) {
+          _fetchTodayLog();
+        }
+      },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         child: Column(

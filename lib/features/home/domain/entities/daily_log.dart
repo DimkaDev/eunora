@@ -29,6 +29,8 @@ class DailyLog {
   final String additionalNotes;
   final List<HrtIntakeLog> hrtIntakes;
   final DateTime createdAt;
+  final bool isCompleted;
+  final int lastCompletedStep;
 
   DailyLog({
     required this.id,
@@ -59,6 +61,8 @@ class DailyLog {
     this.additionalNotes = '',
     this.hrtIntakes = const [],
     required this.createdAt,
+    this.isCompleted = false,
+    this.lastCompletedStep = 0,
   });
 
   DailyLog copyWith({
@@ -90,6 +94,8 @@ class DailyLog {
     String? additionalNotes,
     List<HrtIntakeLog>? hrtIntakes,
     DateTime? createdAt,
+    bool? isCompleted,
+    int? lastCompletedStep,
   }) {
     return DailyLog(
       id: id ?? this.id,
@@ -120,6 +126,8 @@ class DailyLog {
       additionalNotes: additionalNotes ?? this.additionalNotes,
       hrtIntakes: hrtIntakes ?? this.hrtIntakes,
       createdAt: createdAt ?? this.createdAt,
+      isCompleted: isCompleted ?? this.isCompleted,
+      lastCompletedStep: lastCompletedStep ?? this.lastCompletedStep,
     );
   }
 
@@ -153,6 +161,8 @@ class DailyLog {
       'additionalNotes': additionalNotes,
       'hrtIntakes': hrtIntakes.map((h) => h.toMap()).toList(),
       'createdAt': createdAt.toIso8601String(),
+      'isCompleted': isCompleted,
+      'lastCompletedStep': lastCompletedStep,
     };
   }
 
@@ -190,6 +200,8 @@ class DailyLog {
           .map((h) => HrtIntakeLog.fromMap(Map<String, dynamic>.from(h as Map)))
           .toList(),
       createdAt: _parseDateTime(map['createdAt']) ?? DateTime.now(),
+      isCompleted: map['isCompleted'] as bool? ?? false,
+      lastCompletedStep: map['lastCompletedStep'] as int? ?? 0,
     );
   }
 

@@ -30,7 +30,8 @@ class PassportScreenController extends _$PassportScreenController {
     final start = DateTime.now().subtract(const Duration(days: 180));
     final logs = await firestore.getDailyLogsHistory(user.uid, start, DateTime.now());
 
-    final totalDays = logs.length;
+    final completedLogs = logs.where((l) => l.isCompleted).toList();
+    final totalDays = completedLogs.length;
     return PassportEligibility(
       hasMinimumData: totalDays >= 30,
       daysRemaining: max(0, 30 - totalDays),

@@ -75,6 +75,13 @@ class Medications extends _$Medications {
     _syncToFirestore();
   }
 
+  void endMedication(String id) {
+    state = state.copyWith(
+      medications: state.medications.map((m) => m.id == id ? m.copyWith(endedAt: DateTime.now()) : m).toList(),
+    );
+    _syncToFirestore();
+  }
+
   void updateMedication(Medication medication) {
     final oldMed = state.medications.firstWhere((m) => m.id == medication.id, orElse: () => medication);
 

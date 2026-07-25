@@ -202,9 +202,15 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
   List<double> _getAvailableDoses(String unit) {
     final u = unit.toLowerCase();
     if (u == 'mcg') {
-      return [12.5, 25.0, 37.5, 50.0, 62.5, 75.0, 87.5, 100.0, 112.5, 125.0, 150.0, 175.0, 200.0, 250.0];
+      return [5.0, 10.0, 12.5, 25.0, 50.0, 75.0, 100.0, 125.0, 150.0, 200.0, 250.0, 400.0, 500.0, 800.0, 1000.0];
     } else if (u == 'mg') {
       return [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 10.0, 20.0, 50.0, 100.0, 150.0, 200.0, 300.0, 400.0];
+    } else if (u == 'g') {
+      return [0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0, 7.5, 10.0, 15.0, 20.0];
+    } else if (u == 'capsules') {
+      return [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+    } else if (u == 'tablets') {
+      return [0.5, 1.0, 1.5, 2.0, 3.0, 4.0];
     } else if (u == 'pumps') {
       return [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
     } else if (u == 'applicator') {
@@ -982,8 +988,11 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
             child: DropdownButton<String>(
               value: _selectedUnit,
               onChanged: (val) {
-                if (val != null) {
-                  setState(() => _selectedUnit = val);
+                if (val != null && val != _selectedUnit) {
+                  setState(() {
+                    _selectedUnit = val;
+                    _doseController.clear();
+                  });
                 }
               },
               items: ['mg', 'mcg', 'pumps', 'applicator']
@@ -1032,11 +1041,10 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
                     child: DropdownButton<String>(
                       value: _selectedUnit,
                       onChanged: (val) {
-                        if (val != null) {
+                        if (val != null && val != _selectedUnit) {
                           setState(() {
                             _selectedUnit = val;
-                            final doses = _getAvailableDoses(val);
-                            _doseController.text = doses[0].toStringAsFixed(doses[0] == doses[0].toInt() ? 0 : 2);
+                            _doseController.clear();
                           });
                         }
                       },

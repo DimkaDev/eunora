@@ -85,7 +85,9 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
       final start = DateTime(targetMonth.year, targetMonth.month, 1);
       final end = DateTime(targetMonth.year, targetMonth.month, daysInMonth, 23, 59, 59);
 
-      final dbLogs = await ref.read(firestoreServiceProvider).getDailyLogsHistory(user.uid, start, end);
+      final rawDbLogs = await ref.read(firestoreServiceProvider).getDailyLogsHistory(user.uid, start, end);
+      // Only show completed logs in the HRT tracker — drafts should not appear
+      final dbLogs = rawDbLogs.where((l) => l.isCompleted).toList();
       final allDoseChanges = await ref.read(firestoreServiceProvider).getHrtDoseChanges(user.uid);
 
       final Map<int, DailyLog> fetchedLogs = {};

@@ -21,7 +21,8 @@ class SuccessCheckmark extends StatefulWidget {
   State<SuccessCheckmark> createState() => _SuccessCheckmarkState();
 }
 
-class _SuccessCheckmarkState extends State<SuccessCheckmark> with SingleTickerProviderStateMixin {
+class _SuccessCheckmarkState extends State<SuccessCheckmark>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
 
@@ -33,8 +34,20 @@ class _SuccessCheckmarkState extends State<SuccessCheckmark> with SingleTickerPr
       duration: const Duration(milliseconds: 600),
     );
     _scaleAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.3).chain(CurveTween(curve: Curves.easeOut)), weight: 60),
-      TweenSequenceItem(tween: Tween(begin: 1.3, end: 1.0).chain(CurveTween(curve: Curves.easeIn)), weight: 40),
+      TweenSequenceItem(
+        tween: Tween(
+          begin: 0.0,
+          end: 1.3,
+        ).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 60,
+      ),
+      TweenSequenceItem(
+        tween: Tween(
+          begin: 1.3,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.easeIn)),
+        weight: 40,
+      ),
     ]).animate(_controller);
 
     _controller.forward();
@@ -56,11 +69,7 @@ class _SuccessCheckmarkState extends State<SuccessCheckmark> with SingleTickerPr
           color: Color(0xFF2D5A3E),
           shape: BoxShape.circle,
         ),
-        child: const Icon(
-          Icons.check,
-          color: Colors.white,
-          size: 14,
-        ),
+        child: const Icon(Icons.check, color: Colors.white, size: 14),
       ),
     );
   }
@@ -153,7 +162,8 @@ class CalendarHrtEditSheet extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<CalendarHrtEditSheet> createState() => _CalendarHrtEditSheetState();
+  ConsumerState<CalendarHrtEditSheet> createState() =>
+      _CalendarHrtEditSheetState();
 }
 
 class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
@@ -175,15 +185,21 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
       final firestore = ref.read(firestoreServiceProvider);
       // Fetch past 90 days to find last taken intakes
       final start = DateTime.now().subtract(const Duration(days: 90));
-      final logs = await firestore.getDailyLogsHistory(user.uid, start, DateTime.now());
+      final logs = await firestore.getDailyLogsHistory(
+        user.uid,
+        start,
+        DateTime.now(),
+      );
       // Sort oldest first to chronologically process intake logs
       logs.sort((a, b) => a.date.compareTo(b.date));
 
       final Map<String, DateTime> realLastTaken = {};
       for (final log in logs) {
         // check if this is not today's log draft we are currently editing
-        final logDateStr = "${log.date.year}-${log.date.month.toString().padLeft(2, '0')}-${log.date.day.toString().padLeft(2, '0')}";
-        final todayDateStr = "${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().day.toString().padLeft(2, '0')}";
+        final logDateStr =
+            "${log.date.year}-${log.date.month.toString().padLeft(2, '0')}-${log.date.day.toString().padLeft(2, '0')}";
+        final todayDateStr =
+            "${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().day.toString().padLeft(2, '0')}";
         if (logDateStr == todayDateStr) {
           continue;
         }
@@ -202,7 +218,8 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
           if (log.estradiolChecked) {
             final meds = ref.read(medicationsProvider).medications;
             for (final med in meds) {
-              if (med.name.toLowerCase().contains('estradiol') || med.name.toLowerCase().contains('estrogen')) {
+              if (med.name.toLowerCase().contains('estradiol') ||
+                  med.name.toLowerCase().contains('estrogen')) {
                 realLastTaken[med.id] = log.date;
                 realLastTaken[med.name.toLowerCase()] = log.date;
               }
@@ -211,7 +228,8 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
           if (log.progesteroneChecked) {
             final meds = ref.read(medicationsProvider).medications;
             for (final med in meds) {
-              if (med.name.toLowerCase().contains('progesterone') || med.name.toLowerCase().contains('utrogestan')) {
+              if (med.name.toLowerCase().contains('progesterone') ||
+                  med.name.toLowerCase().contains('utrogestan')) {
                 realLastTaken[med.id] = log.date;
                 realLastTaken[med.name.toLowerCase()] = log.date;
               }
@@ -239,7 +257,13 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
     final meds = ref.read(medicationsProvider).medications;
     final matchingMed = meds.firstWhere(
       (m) => m.name.toLowerCase() == name.toLowerCase() || (m.id == name),
-      orElse: () => Medication(name: name, type: MedicationType.other, dose: 50.0, unit: 'mcg', frequency: 'daily'),
+      orElse: () => Medication(
+        name: name,
+        type: MedicationType.other,
+        dose: 50.0,
+        unit: 'mcg',
+        frequency: 'daily',
+      ),
     );
 
     final freq = matchingMed.frequency;
@@ -275,7 +299,9 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
     if (entry.isTaken) {
       return HrtLogStatus.taken;
     }
-    final lastTaken = _lastTakenDates[entry.id ?? ''] ?? _lastTakenDates[entry.name.toLowerCase()];
+    final lastTaken =
+        _lastTakenDates[entry.id ?? ''] ??
+        _lastTakenDates[entry.name.toLowerCase()];
     final isScheduled = _isScheduledToday(entry.id ?? entry.name, lastTaken);
     return isScheduled ? HrtLogStatus.pending : HrtLogStatus.skipped;
   }
@@ -283,14 +309,30 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
   String _formatDateTime(DateTime dt, BuildContext context) {
     final dateStr = "${dt.day} ${_getMonthName(dt.month)}";
     if (context.mounted) {
-      final timeStr = TimeOfDay(hour: dt.hour, minute: dt.minute).format(context);
+      final timeStr = TimeOfDay(
+        hour: dt.hour,
+        minute: dt.minute,
+      ).format(context);
       return "$dateStr, $timeStr";
     }
     return dateStr;
   }
 
   String _getMonthName(int m) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return months[m - 1];
   }
 
@@ -303,8 +345,6 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
     if (diff == 1) return 'yesterday';
     return '$diff days ago';
   }
-
-
 
   void _setUnit(int index, String unit) {
     setState(() {
@@ -327,9 +367,41 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
   List<double> _getAvailableDoses(String unit) {
     final u = unit.toLowerCase();
     if (u == 'mcg') {
-      return [12.5, 25.0, 37.5, 50.0, 62.5, 75.0, 87.5, 100.0, 112.5, 125.0, 150.0, 175.0, 200.0, 250.0];
+      return [
+        12.5,
+        25.0,
+        37.5,
+        50.0,
+        62.5,
+        75.0,
+        87.5,
+        100.0,
+        112.5,
+        125.0,
+        150.0,
+        175.0,
+        200.0,
+        250.0,
+      ];
     } else if (u == 'mg') {
-      return [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 10.0, 20.0, 50.0, 100.0, 150.0, 200.0, 300.0, 400.0];
+      return [
+        0.5,
+        1.0,
+        1.5,
+        2.0,
+        2.5,
+        3.0,
+        4.0,
+        5.0,
+        10.0,
+        20.0,
+        50.0,
+        100.0,
+        150.0,
+        200.0,
+        300.0,
+        400.0,
+      ];
     } else if (u == 'pump' || u == 'pumps') {
       return [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
     } else {
@@ -380,7 +452,10 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                     onPressed: () => Navigator.pop(context),
                     child: Text(
                       'Cancel',
-                      style: GoogleFonts.manrope(fontWeight: FontWeight.bold, color: const Color(0xFF8A817C)),
+                      style: GoogleFonts.manrope(
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF8A817C),
+                      ),
                     ),
                   ),
                   Text(
@@ -393,23 +468,31 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                   ),
                   TextButton(
                     onPressed: () {
-                      final initialEntries = widget.initialHrt.map(HrtEditEntry.fromMap).toList();
+                      final initialEntries = widget.initialHrt
+                          .map(HrtEditEntry.fromMap)
+                          .toList();
                       double initialDose = 0;
                       if (index < initialEntries.length) {
-                        initialDose = double.tryParse(initialEntries[index].dose) ?? 0;
+                        initialDose =
+                            double.tryParse(initialEntries[index].dose) ?? 0;
                       }
 
-                      if (initialDose > 0 && (tempDose - initialDose).abs() > 0.01) {
+                      if (initialDose > 0 &&
+                          (tempDose - initialDose).abs() > 0.01) {
                         showDialog(
                           context: this.context,
                           barrierDismissible: false,
-                          barrierColor: const Color(0xFF1D1B1A).withOpacity(0.4),
+                          barrierColor: const Color(
+                            0xFF1D1B1A,
+                          ).withOpacity(0.4),
                           builder: (dialogContext) {
                             return DoseChangeAlert(
                               change: {
                                 'name': _entries[index].name,
-                                'oldDose': '${initialDose.toStringAsFixed(initialDose == initialDose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $unit',
-                                'newDose': '${tempDose.toStringAsFixed(tempDose == tempDose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $unit',
+                                'oldDose':
+                                    '${initialDose.toStringAsFixed(initialDose == initialDose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $unit',
+                                'newDose':
+                                    '${tempDose.toStringAsFixed(tempDose == tempDose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $unit',
                               },
                               onConfirm: () {
                                 Navigator.pop(dialogContext);
@@ -429,7 +512,10 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                     },
                     child: Text(
                       'Done',
-                      style: GoogleFonts.manrope(fontWeight: FontWeight.bold, color: AppTheme.primary),
+                      style: GoogleFonts.manrope(
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primary,
+                      ),
                     ),
                   ),
                 ],
@@ -438,7 +524,9 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
               SizedBox(
                 height: 200,
                 child: CupertinoPicker(
-                  scrollController: FixedExtentScrollController(initialItem: initialIndex),
+                  scrollController: FixedExtentScrollController(
+                    initialItem: initialIndex,
+                  ),
                   itemExtent: 44,
                   onSelectedItemChanged: (index) {
                     tempDose = doses[index];
@@ -446,7 +534,9 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                   children: doses.map((d) {
                     return Center(
                       child: Text(
-                        d.toStringAsFixed(d == d.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), ''),
+                        d
+                            .toStringAsFixed(d == d.toInt() ? 0 : 2)
+                            .replaceAll(RegExp(r'\.00$'), ''),
                         style: GoogleFonts.manrope(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -474,6 +564,32 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
           change: change,
           onConfirm: () {
             Navigator.pop(context);
+            // Apply the dose change via Medications notifier so HrtDoseChange timeline gets recorded
+            final meds = ref.read(medicationsProvider).medications;
+            for (final entry in _entries) {
+              final matchingMed = meds.firstWhere(
+                (m) =>
+                    m.name.toLowerCase() == entry.name.toLowerCase() ||
+                    (m.id == entry.id),
+                orElse: () => Medication(
+                  name: entry.name,
+                  type: MedicationType.other,
+                  dose: 50.0,
+                  unit: 'mcg',
+                  frequency: 'daily',
+                ),
+              );
+              final newDoseVal =
+                  double.tryParse(entry.dose) ?? matchingMed.dose;
+              if (newDoseVal != matchingMed.dose ||
+                  entry.unit != matchingMed.unit) {
+                ref
+                    .read(medicationsProvider.notifier)
+                    .updateMedication(
+                      matchingMed.copyWith(dose: newDoseVal, unit: entry.unit),
+                    );
+              }
+            }
             widget.onSave(_entries.map((e) => e.toMap()).toList());
             Navigator.pop(this.context);
           },
@@ -490,7 +606,8 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
     final initialEntries = widget.initialHrt.map(HrtEditEntry.fromMap).toList();
     for (int i = 0; i < _entries.length; i++) {
       if (i < initialEntries.length) {
-        if (_entries[i].dose != initialEntries[i].dose || _entries[i].unit != initialEntries[i].unit) {
+        if (_entries[i].dose != initialEntries[i].dose ||
+            _entries[i].unit != initialEntries[i].unit) {
           primaryChange = {
             'name': _entries[i].name,
             'oldDose': '${initialEntries[i].dose} ${initialEntries[i].unit}',
@@ -516,22 +633,31 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
       if (previous != null) {
         // Detect newly added medications not already present in _entries
         for (final med in next.medications) {
-          final exists = _entries.any((entry) => entry.name.toLowerCase() == med.name.toLowerCase());
+          final exists = _entries.any(
+            (entry) => entry.name.toLowerCase() == med.name.toLowerCase(),
+          );
           if (!exists) {
             final appType = med.type.displayName;
             setState(() {
-              _entries.add(HrtEditEntry(
-                name: med.name,
-                details: '${med.dose.toStringAsFixed(0)} ${med.unit} · $appType',
-                status: 'Not taken',
-                isTaken: false,
-                dose: med.dose.toStringAsFixed(0),
-                unit: med.unit,
-                applicationType: appType,
-                timeTaken: '08:00',
-              ));
-              _lastTakenDates[med.id] = DateTime.now().subtract(const Duration(days: 1));
-              _lastTakenDates[med.name.toLowerCase()] = DateTime.now().subtract(const Duration(days: 1));
+              _entries.add(
+                HrtEditEntry(
+                  name: med.name,
+                  details:
+                      '${med.dose.toStringAsFixed(0)} ${med.unit} · $appType',
+                  status: 'Not taken',
+                  isTaken: false,
+                  dose: med.dose.toStringAsFixed(0),
+                  unit: med.unit,
+                  applicationType: appType,
+                  timeTaken: '08:00',
+                ),
+              );
+              _lastTakenDates[med.id] = DateTime.now().subtract(
+                const Duration(days: 1),
+              );
+              _lastTakenDates[med.name.toLowerCase()] = DateTime.now().subtract(
+                const Duration(days: 1),
+              );
             });
           }
         }
@@ -596,8 +722,11 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                         color: const Color(0xFFF2EDEA),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.close,
-                          color: Color(0xFF9B8B7E), size: 20),
+                      child: const Icon(
+                        Icons.close,
+                        color: Color(0xFF9B8B7E),
+                        size: 20,
+                      ),
                     ),
                   ),
                 ),
@@ -648,7 +777,10 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppTheme.primary.withOpacity(0.2), width: 1.5),
+                        border: Border.all(
+                          color: AppTheme.primary.withOpacity(0.2),
+                          width: 1.5,
+                        ),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.02),
@@ -660,7 +792,11 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.add_circle_outline, color: AppTheme.primary, size: 18),
+                          const Icon(
+                            Icons.add_circle_outline,
+                            color: AppTheme.primary,
+                            size: 18,
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             'Add HRT Medication',
@@ -697,20 +833,31 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
     final status = _getEntryStatus(entry, index);
 
     final icon = _getMedIcon(entry.name);
-    final lastTaken = _lastTakenDates[entry.id ?? ''] ?? _lastTakenDates[entry.name.toLowerCase()];
+    final lastTaken =
+        _lastTakenDates[entry.id ?? ''] ??
+        _lastTakenDates[entry.name.toLowerCase()];
     // Resolve frequency from medications provider first
     final meds = ref.read(medicationsProvider).medications;
     final matchingMed = meds.firstWhere(
-      (m) => m.name.toLowerCase() == entry.name.toLowerCase() || (m.id == entry.id),
-      orElse: () => Medication(name: entry.name, type: MedicationType.other, dose: 50.0, unit: 'mcg', frequency: 'daily'),
+      (m) =>
+          m.name.toLowerCase() == entry.name.toLowerCase() ||
+          (m.id == entry.id),
+      orElse: () => Medication(
+        name: entry.name,
+        type: MedicationType.other,
+        dose: 50.0,
+        unit: 'mcg',
+        frequency: 'daily',
+      ),
     );
     final freq = matchingMed.frequency;
 
     final subtitle = entry.isTaken
         ? '${entry.dose} ${entry.unit} • ${entry.timeTaken} • $freq'
-        : '$freq • ' + (lastTaken == null
-            ? 'No information'
-            : 'Last taken: ${_formatDate(lastTaken)}');
+        : '$freq • ' +
+              (lastTaken == null
+                  ? 'No information'
+                  : 'Last taken: ${_formatDate(lastTaken)}');
 
     Color tileBgColor = Colors.white;
     Color tileBorderColor = const Color(0xFFF2EDEA);
@@ -800,7 +947,11 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.info_outline, color: Color(0xFF8C3A25), size: 10),
+                const Icon(
+                  Icons.info_outline,
+                  color: Color(0xFF8C3A25),
+                  size: 10,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   'Not scheduled today',
@@ -820,9 +971,7 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
     }
 
     Widget baseTile = Container(
-      decoration: BoxDecoration(
-        color: tileBgColor,
-      ),
+      decoration: BoxDecoration(color: tileBgColor),
       child: ListTile(
         onTap: () => _toggleExpanded(index),
         leading: Container(
@@ -832,8 +981,8 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
             color: status == HrtLogStatus.taken
                 ? const Color(0xFFC7E8D5).withValues(alpha: 0.4)
                 : status == HrtLogStatus.skipped
-                    ? const Color(0xFFFFDAD3).withValues(alpha: 0.4)
-                    : const Color(0xFFEDDDF5).withValues(alpha: 0.3),
+                ? const Color(0xFFFFDAD3).withValues(alpha: 0.4)
+                : const Color(0xFFEDDDF5).withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Icon(icon, color: iconColor, size: 20),
@@ -939,9 +1088,7 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
           child: Column(
             children: [
               baseTile,
-              if (isExpanded) ...[
-                _buildExpandedPanel(index, entry),
-              ],
+              if (isExpanded) ...[_buildExpandedPanel(index, entry)],
             ],
           ),
         ),
@@ -950,7 +1097,9 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
   }
 
   Widget _buildExpandedPanel(int index, HrtEditEntry entry) {
-    final lastTaken = _lastTakenDates[entry.id ?? ''] ?? _lastTakenDates[entry.name.toLowerCase()];
+    final lastTaken =
+        _lastTakenDates[entry.id ?? ''] ??
+        _lastTakenDates[entry.name.toLowerCase()];
     final onboardingMeds = _entries;
 
     List<String> unitOptions = ['mg', 'mcg'];
@@ -985,7 +1134,11 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
             children: [
               Text(
                 'Taken today?',
-                style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.onSurface),
+                style: GoogleFonts.manrope(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.onSurface,
+                ),
               ),
               CupertinoSwitch(
                 value: entry.isTaken,
@@ -995,7 +1148,8 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                     entry.isTaken = val;
                     if (val) {
                       final now = TimeOfDay.now();
-                      entry.timeTaken = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+                      entry.timeTaken =
+                          '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
                     }
                   });
                 },
@@ -1013,12 +1167,18 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                     children: [
                       Text(
                         'DOSE',
-                        style: GoogleFonts.manrope(fontSize: 8, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C), letterSpacing: 1),
+                        style: GoogleFonts.manrope(
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF8A817C),
+                          letterSpacing: 1,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       GestureDetector(
                         onTap: () {
-                          final currentDose = double.tryParse(entry.dose) ?? 1.0;
+                          final currentDose =
+                              double.tryParse(entry.dose) ?? 1.0;
                           _openDosePicker(
                             index: index,
                             unit: entry.unit,
@@ -1026,7 +1186,11 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                             onDoseChanged: (newDose) {
                               _setDose(
                                 index,
-                                newDose.toStringAsFixed(newDose == newDose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), ''),
+                                newDose
+                                    .toStringAsFixed(
+                                      newDose == newDose.toInt() ? 0 : 2,
+                                    )
+                                    .replaceAll(RegExp(r'\.00$'), ''),
                               );
                             },
                           );
@@ -1036,13 +1200,21 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFFD0C4BC).withValues(alpha: 0.4)),
+                            border: Border.all(
+                              color: const Color(
+                                0xFFD0C4BC,
+                              ).withValues(alpha: 0.4),
+                            ),
                           ),
                           alignment: Alignment.center,
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: Text(
                             entry.dose,
-                            style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.onSurface),
+                            style: GoogleFonts.manrope(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.onSurface,
+                            ),
                           ),
                         ),
                       ),
@@ -1057,7 +1229,12 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                     children: [
                       Text(
                         'UNIT',
-                        style: GoogleFonts.manrope(fontSize: 8, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C), letterSpacing: 1),
+                        style: GoogleFonts.manrope(
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF8A817C),
+                          letterSpacing: 1,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       Container(
@@ -1087,7 +1264,12 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                     children: [
                       Text(
                         'TIME',
-                        style: GoogleFonts.manrope(fontSize: 8, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C), letterSpacing: 1),
+                        style: GoogleFonts.manrope(
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF8A817C),
+                          letterSpacing: 1,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       GestureDetector(
@@ -1098,17 +1280,29 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFFD0C4BC).withValues(alpha: 0.4)),
+                            border: Border.all(
+                              color: const Color(
+                                0xFFD0C4BC,
+                              ).withValues(alpha: 0.4),
+                            ),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.schedule, size: 14, color: AppTheme.primary),
+                              const Icon(
+                                Icons.schedule,
+                                size: 14,
+                                color: AppTheme.primary,
+                              ),
                               const SizedBox(width: 6),
                               Expanded(
                                 child: Text(
                                   entry.timeTaken,
-                                  style: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.onSurface),
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.onSurface,
+                                  ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -1131,14 +1325,21 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                     children: [
                       Text(
                         'Not scheduled for today',
-                        style: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C)),
+                        style: GoogleFonts.manrope(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF8A817C),
+                        ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         lastTaken == null
                             ? 'No last taken date recorded'
                             : 'Last taken: ${_formatDateTime(lastTaken, context)} (${_daysAgo(lastTaken)})',
-                        style: GoogleFonts.manrope(fontSize: 11, color: AppTheme.outline),
+                        style: GoogleFonts.manrope(
+                          fontSize: 11,
+                          color: AppTheme.outline,
+                        ),
                       ),
                     ],
                   ),
@@ -1146,6 +1347,208 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
               ],
             ),
           ],
+          const SizedBox(height: 16),
+          const Divider(color: Color(0xFFEAE5DF), height: 1),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Expanded(
+                child: TextButton.icon(
+                  onPressed: () {
+                    // Soft-stop: mark the medication as ended as of today
+                    showDialog(
+                      context: context,
+                      builder: (dialogContext) => AlertDialog(
+                        title: Text(
+                          'Stop Tracking?',
+                          style: GoogleFonts.notoSerif(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        content: Text(
+                          'This will stop tracking this medication starting today. Your complete historical logging data, charts, and passport report history will be safely preserved. You can resume tracking it anytime.',
+                          style: GoogleFonts.manrope(),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(dialogContext),
+                            child: Text(
+                              'Cancel',
+                              style: GoogleFonts.manrope(
+                                color: AppTheme.outline,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(dialogContext);
+                              final matchingMed = ref
+                                  .read(medicationsProvider)
+                                  .medications
+                                  .firstWhere(
+                                    (m) =>
+                                        m.name.toLowerCase() ==
+                                            entry.name.toLowerCase() ||
+                                        (m.id == entry.id),
+                                    orElse: () => Medication(
+                                      name: entry.name,
+                                      type: MedicationType.other,
+                                      dose: 50.0,
+                                      unit: 'mcg',
+                                      frequency: 'daily',
+                                    ),
+                                  );
+                              ref
+                                  .read(medicationsProvider.notifier)
+                                  .endMedication(matchingMed.id);
+                              setState(() {
+                                _entries.removeAt(index);
+                                if (_expandedIndex == index) {
+                                  _expandedIndex = null;
+                                } else if (_expandedIndex != null &&
+                                    _expandedIndex! > index) {
+                                  _expandedIndex = _expandedIndex! - 1;
+                                }
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Stopped tracking ${entry.name}. History preserved.',
+                                  ),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              'Stop Tracking',
+                              style: GoogleFonts.manrope(
+                                color: AppTheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  icon: const Icon(
+                    Icons.stop_circle_outlined,
+                    size: 16,
+                    color: Color(0xFF8C3A25),
+                  ),
+                  label: Text(
+                    'Stop Tracking',
+                    style: GoogleFonts.manrope(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF8C3A25),
+                    ),
+                  ),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextButton.icon(
+                  onPressed: () {
+                    // Hard Delete: remove medication completely
+                    showDialog(
+                      context: context,
+                      builder: (dialogContext) => AlertDialog(
+                        title: Text(
+                          'Delete Medication?',
+                          style: GoogleFonts.notoSerif(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                          ),
+                        ),
+                        content: Text(
+                          'Are you sure you want to completely remove this medication and delete its configurations? This action is permanent.',
+                          style: GoogleFonts.manrope(),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(dialogContext),
+                            child: Text(
+                              'Cancel',
+                              style: GoogleFonts.manrope(
+                                color: AppTheme.outline,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(dialogContext);
+                              final matchingMed = ref
+                                  .read(medicationsProvider)
+                                  .medications
+                                  .firstWhere(
+                                    (m) =>
+                                        m.name.toLowerCase() ==
+                                            entry.name.toLowerCase() ||
+                                        (m.id == entry.id),
+                                    orElse: () => Medication(
+                                      name: entry.name,
+                                      type: MedicationType.other,
+                                      dose: 50.0,
+                                      unit: 'mcg',
+                                      frequency: 'daily',
+                                    ),
+                                  );
+                              ref
+                                  .read(medicationsProvider.notifier)
+                                  .removeMedication(matchingMed.id);
+                              setState(() {
+                                _entries.removeAt(index);
+                                if (_expandedIndex == index) {
+                                  _expandedIndex = null;
+                                } else if (_expandedIndex != null &&
+                                    _expandedIndex! > index) {
+                                  _expandedIndex = _expandedIndex! - 1;
+                                }
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Deleted ${entry.name}.'),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            },
+                            child: const Text(
+                              'Delete',
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  icon: const Icon(
+                    Icons.delete_forever_outlined,
+                    size: 16,
+                    color: Colors.red,
+                  ),
+                  label: Text(
+                    'Delete Completely',
+                    style: GoogleFonts.manrope(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
+                    ),
+                  ),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -1164,8 +1567,11 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.lightbulb_outline,
-              color: AppTheme.primary, size: 20),
+          const Icon(
+            Icons.lightbulb_outline,
+            color: AppTheme.primary,
+            size: 20,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -1277,17 +1683,25 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                 child: ElevatedButton.icon(
                   onPressed: () {
                     final now = TimeOfDay.now();
-                    final formatted = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+                    final formatted =
+                        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
                     setState(() {
                       _entries[index].timeTaken = formatted;
                       _entries[index].isTaken = true;
                     });
                     Navigator.pop(context);
                   },
-                  icon: const Icon(Icons.flash_on, color: Colors.white, size: 18),
+                  icon: const Icon(
+                    Icons.flash_on,
+                    color: Colors.white,
+                    size: 18,
+                  ),
                   label: Text(
                     'Set to Now (${TimeOfDay.now().format(context)})',
-                    style: GoogleFonts.manrope(fontWeight: FontWeight.bold, fontSize: 15),
+                    style: GoogleFonts.manrope(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primary,
@@ -1321,13 +1735,24 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                       });
                     }
                   },
-                  icon: const Icon(Icons.schedule, color: AppTheme.primary, size: 18),
+                  icon: const Icon(
+                    Icons.schedule,
+                    color: AppTheme.primary,
+                    size: 18,
+                  ),
                   label: Text(
                     'Choose Custom Time...',
-                    style: GoogleFonts.manrope(fontWeight: FontWeight.bold, fontSize: 15, color: AppTheme.primary),
+                    style: GoogleFonts.manrope(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: AppTheme.primary,
+                    ),
                   ),
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: AppTheme.primary.withOpacity(0.5), width: 1.5),
+                    side: BorderSide(
+                      color: AppTheme.primary.withOpacity(0.5),
+                      width: 1.5,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),

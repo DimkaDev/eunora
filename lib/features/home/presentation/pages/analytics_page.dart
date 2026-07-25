@@ -63,7 +63,8 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
       final firestore = ref.read(firestoreServiceProvider);
       // Fetch 180 days to fully cover 90-day threshold requirements and trend baselines
       final start = DateTime.now().subtract(const Duration(days: 180));
-      final logs = await firestore.getDailyLogsHistory(user.uid, start, DateTime.now());
+      final rawLogs = await firestore.getDailyLogsHistory(user.uid, start, DateTime.now());
+      final logs = rawLogs.where((l) => l.isCompleted).toList();
 
       // Sort logs oldest first
       logs.sort((a, b) => a.date.compareTo(b.date));

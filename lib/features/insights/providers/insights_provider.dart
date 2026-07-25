@@ -326,7 +326,7 @@ class Insights extends _$Insights {
     final symptoms = ref.read(symptomsProvider).frequentSymptomIds;
 
     // Serialize data for the isolate
-    final List<Map<String, dynamic>> serializedLogs = logs.map((log) => {
+    final List<Map<String, dynamic>> serializedLogs = logs.where((log) => log.isCompleted).map((log) => {
       'date': log.date,
       'triggers': log.triggers,
       'symptoms': log.symptoms.map((s) => {
