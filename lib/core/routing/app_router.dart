@@ -38,6 +38,7 @@ import 'package:eunora/features/home/presentation/pages/hrt_tracker_page.dart';
 import 'package:eunora/features/profile/presentation/pages/profile_page.dart';
 import 'package:eunora/features/profile/presentation/pages/help_center_page.dart';
 import 'package:eunora/features/profile/presentation/pages/notification_preferences_page.dart';
+import 'package:eunora/features/profile/presentation/pages/frequent_symptoms_settings_page.dart';
 import 'package:eunora/features/profile/presentation/pages/premium_upgrade_page.dart';
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -353,6 +354,14 @@ final GoRouter appRouter = GoRouter(
         context: context,
         state: state,
         child: const NotificationPreferencesPage(),
+      ),
+    ),
+    GoRoute(
+      path: '/frequent-symptoms-settings',
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const FrequentSymptomsSettingsPage(),
       ),
     ),
     GoRoute(

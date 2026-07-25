@@ -133,6 +133,15 @@ class FirestoreService {
       'updatedAt': DateTime.now().toIso8601String(),
     });
   }
+
+  /// Persists only the quick-access preference map — avoids a full profile write.
+  Future<void> updateSymptomQuickAccessPrefs(
+      String uid, Map<String, String> prefs) async {
+    await _db.collection('users').doc(uid).update({
+      'symptomQuickAccessPrefs': prefs,
+      'updatedAt': DateTime.now().toIso8601String(),
+    });
+  }
 }
 
 final firestoreServiceProvider = Provider<FirestoreService>((ref) {

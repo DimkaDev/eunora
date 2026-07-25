@@ -25,6 +25,7 @@ import 'package:eunora/features/home/presentation/pages/daily_logging/triggers_s
 import 'package:eunora/features/home/presentation/pages/daily_logging/trigger_details_step.dart';
 import 'package:eunora/features/home/presentation/pages/daily_logging/daily_entry_step.dart';
 import 'package:eunora/features/home/presentation/widgets/dose_change_alert.dart';
+import 'package:eunora/features/onboarding/presentation/providers/symptom_quick_access_provider.dart';
 import 'package:eunora/features/home/presentation/widgets/success_animation_widget.dart';
 
 import 'package:eunora/features/home/presentation/widgets/daily_logging/daily_logging_success_screen.dart';
@@ -604,6 +605,16 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
     if (user != null) {
       try {
         await ref.read(firestoreServiceProvider).saveDailyLog(user.uid, dailyLog);
+
+        // Run promotion check silently after save — user is already on success screen.
+        final thirtyDaysAgo =
+            DateTime.now().subtract(const Duration(days: kPromotionWindowDays));
+        final recentLogs = await ref
+            .read(firestoreServiceProvider)
+            .getDailyLogsHistory(user.uid, thirtyDaysAgo, DateTime.now());
+        await ref
+            .read(symptomQuickAccessProvider.notifier)
+            .runPromotionCheck(recentLogs);
       } catch (e) {
         debugPrint("Error saving daily log to firestore: $e");
       }

@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:eunora/core/utils/animation_system.dart';
 import 'package:eunora/features/onboarding/domain/models/symptom.dart';
-import 'package:eunora/features/onboarding/presentation/providers/symptoms_provider.dart';
+import 'package:eunora/features/onboarding/presentation/providers/symptom_quick_access_provider.dart';
 
 class SymptomsStep extends ConsumerWidget {
   final Set<String> selectedSymptomIds;
@@ -18,20 +18,9 @@ class SymptomsStep extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(symptomsProvider);
-    final library = ref.watch(symptomLibraryProvider);
-
-    // Get symptoms currently marked as "Frequent" (even if deselected)
-    final frequentSymptoms = state.frequentSymptomIds.map((id) {
-      return library.firstWhere(
-        (s) => s.id == id,
-        orElse: () => Symptom(
-          id: id,
-          name: id.replaceAll('s_', '').replaceAll('_', ' '),
-          iconName: 'medical_services',
-        ),
-      );
-    }).toList();
+    // Adaptive quick-access list: ≤8 chips, core pins always first, then
+    // onboarding selections, then frequency-promoted symptoms.
+    final frequentSymptoms = ref.watch(quickAccessChipListProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -29,6 +29,9 @@ class UserProfile {
   final String? procedureType;
   final String? hrtTiming;
   final List<String> selectedStageSymptoms;
+  /// Per-symptom quick-access preference.
+  /// Values: 'onboarding' | 'promoted' | 'removed'
+  final Map<String, String> symptomQuickAccessPrefs;
   final List<String> selectedTriggers;
   final int? overallFeeling;
 
@@ -87,6 +90,7 @@ class UserProfile {
     this.procedureType,
     this.hrtTiming,
     this.selectedStageSymptoms = const [],
+    this.symptomQuickAccessPrefs = const {},
     this.selectedTriggers = const [],
     this.overallFeeling,
     this.conditions = const [],
@@ -138,6 +142,7 @@ class UserProfile {
     String? procedureType,
     String? hrtTiming,
     List<String>? selectedStageSymptoms,
+    Map<String, String>? symptomQuickAccessPrefs,
     List<String>? selectedTriggers,
     int? overallFeeling,
     List<String>? conditions,
@@ -188,6 +193,7 @@ class UserProfile {
       procedureType: procedureType ?? this.procedureType,
       hrtTiming: hrtTiming ?? this.hrtTiming,
       selectedStageSymptoms: selectedStageSymptoms ?? this.selectedStageSymptoms,
+      symptomQuickAccessPrefs: symptomQuickAccessPrefs ?? this.symptomQuickAccessPrefs,
       selectedTriggers: selectedTriggers ?? this.selectedTriggers,
       overallFeeling: overallFeeling ?? this.overallFeeling,
       conditions: conditions ?? this.conditions,
@@ -241,6 +247,7 @@ class UserProfile {
       'procedureType': procedureType,
       'hrtTiming': hrtTiming,
       'selectedStageSymptoms': selectedStageSymptoms,
+      'symptomQuickAccessPrefs': symptomQuickAccessPrefs,
       'selectedTriggers': selectedTriggers,
       'overallFeeling': overallFeeling,
       'conditions': conditions,
@@ -294,6 +301,10 @@ class UserProfile {
       procedureType: map['procedureType'] as String?,
       hrtTiming: map['hrtTiming'] as String?,
       selectedStageSymptoms: List<String>.from(map['selectedStageSymptoms'] ?? const []),
+      symptomQuickAccessPrefs: Map<String, String>.from(
+          (map['symptomQuickAccessPrefs'] as Map?)?.map(
+                (k, v) => MapEntry(k as String, v as String)) ??
+              const {}),
       selectedTriggers: List<String>.from(map['selectedTriggers'] ?? const []),
       overallFeeling: map['overallFeeling'] as int?,
       conditions: List<String>.from(map['conditions'] ?? const []),

@@ -713,14 +713,21 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       ),
                     ),
                     onPressed: () {
-                      context.push('/menopause-stage');
+                      context.push('/frequent-symptoms-settings');
                     },
-                    child: Text(
-                      'Re-run Onboarding / Edit Health Profile',
-                      style: GoogleFonts.manrope(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.tune_rounded, size: 18),
+                        const SizedBox(width: 8),
+                        Text(
+                          'My Frequent Symptoms',
+                          style: GoogleFonts.manrope(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

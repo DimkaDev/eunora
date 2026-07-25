@@ -6,6 +6,7 @@ import 'package:eunora/features/onboarding/domain/models/user_profile.dart';
 import 'package:eunora/features/onboarding/presentation/providers/menopause_stage_provider.dart';
 import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
 import 'package:eunora/features/onboarding/presentation/providers/symptoms_provider.dart';
+import 'package:eunora/features/onboarding/presentation/providers/symptom_quick_access_provider.dart';
 import 'package:eunora/features/onboarding/presentation/providers/triggers_provider.dart';
 
 import 'package:eunora/features/onboarding/presentation/providers/other_medications_provider.dart';
@@ -47,6 +48,9 @@ class OnboardingProfileNotifier extends StateNotifier<UserProfile?> {
               : ['s_hot_flashes', 's_mood', 's_sleep', 's_dryness', 's_joint_pain'],
         );
 
+        // Seed quick-access ranking from persisted profile data.
+        ref.read(symptomQuickAccessProvider.notifier).loadFromProfile(profile);
+
         // Populate triggers
         ref.read(triggersProvider.notifier).state = ref.read(triggersProvider.notifier).state.copyWith(
           activeTriggerIds: [
@@ -65,7 +69,9 @@ class OnboardingProfileNotifier extends StateNotifier<UserProfile?> {
           ],
         );
       } else {
-        state = _createDefaultProfile(user.uid, email: user.email ?? '');
+        final defaultProfile = _createDefaultProfile(user.uid, email: user.email ?? '');
+        state = defaultProfile;
+        ref.read(symptomQuickAccessProvider.notifier).loadFromProfile(defaultProfile);
       }
     } catch (e) {
       debugPrint("Error loading/creating onboarding user profile: $e");
