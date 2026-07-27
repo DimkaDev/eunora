@@ -537,22 +537,28 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             }
           }
         }
+        final origMatching = orig.symptoms.where(
+          (ls) => ls.symptom.name.toLowerCase() == name.toLowerCase(),
+        ).firstOrNull;
+
         return LoggedSymptom(
           symptom: Symptom(
-            id: 's_${name.toLowerCase().replaceAll(' ', '_')}',
+            id: origMatching?.symptom.id ?? sanitizeSymptomId('s_${name.toLowerCase().replaceAll(' ', '_')}'),
             name: name,
-            iconName: name.toLowerCase().contains('flash')
-                ? 'thermostat'
-                : name.toLowerCase().contains('mood')
-                    ? 'mood'
-                    : name.toLowerCase().contains('sleep')
-                        ? 'dark_mode'
-                        : name.toLowerCase().contains('dry')
-                            ? 'opacity'
-                            : 'accessibility_new',
-            category: 'General',
+            iconName: origMatching?.symptom.iconName ??
+                (name.toLowerCase().contains('flash')
+                    ? 'thermostat'
+                    : name.toLowerCase().contains('mood')
+                        ? 'mood'
+                        : name.toLowerCase().contains('sleep')
+                            ? 'dark_mode'
+                            : name.toLowerCase().contains('dry')
+                                ? 'opacity'
+                                : 'accessibility_new'),
+            category: origMatching?.symptom.category ?? 'General',
           ),
           severity: severityStr,
+          durationMinutes: origMatching?.durationMinutes,
         );
       }).toList();
 
@@ -819,8 +825,8 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   }
 
 
-  List<Map<String, String>> _convertToEditSymptoms(List<String> list) {
-    return list.map<Map<String, String>>((s) {
+  List<Map<String, String>> _convertToEditSymptoms(MockDailyLog log) {
+    return log.symptoms.map<Map<String, String>>((s) {
       final parts = s.split(' · ');
       final name = parts.first.trim();
       String severity = 'Moderate';
@@ -839,12 +845,60 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           severity = parts[1].trim();
         }
       }
+
+      int duration = 15;
+      if (log.originalLog != null) {
+        final matching = log.originalLog!.symptoms.where(
+          (ls) => ls.symptom.name.toLowerCase() == name.toLowerCase(),
+        ).firstOrNull;
+        if (matching != null && matching.durationMinutes != null) {
+          duration = matching.durationMinutes!;
+        }
+      }
+
       return <String, String>{
         'name': name,
         'severity': severity,
-        'duration': '30',
+        'duration': duration.toString(),
       };
     }).toList();
+  }
+
+  void _updateLogSymptoms(MockDailyLog log, List<Map<String, String>> newSymptoms) {
+    log.symptoms = _convertFromEditSymptoms(newSymptoms);
+    log.itemsCount = log.symptoms.length + log.hrt.length + log.triggers.length;
+
+    if (log.originalLog != null) {
+      final List<LoggedSymptom> updatedLoggedSymptoms = [];
+      for (final s in newSymptoms) {
+        final name = s['name'] ?? '';
+        final severity = s['severity'] ?? 'Moderate';
+        final durationMinutes = int.tryParse(s['duration'] ?? '15');
+
+        final existing = log.originalLog!.symptoms.where(
+          (ls) => ls.symptom.name.toLowerCase() == name.toLowerCase(),
+        ).firstOrNull;
+
+        final id = existing?.symptom.id ?? sanitizeSymptomId('s_${name.toLowerCase().replaceAll(' ', '_')}');
+
+        updatedLoggedSymptoms.add(
+          LoggedSymptom(
+            symptom: Symptom(
+              id: id,
+              name: name,
+              iconName: existing?.symptom.iconName ?? 'medical_services',
+              category: existing?.symptom.category ?? 'General',
+            ),
+            severity: severity,
+            durationMinutes: durationMinutes,
+          ),
+        );
+      }
+
+      log.originalLog = log.originalLog!.copyWith(
+        symptoms: updatedLoggedSymptoms,
+      );
+    }
   }
 
   List<String> _convertFromEditSymptoms(List<Map<String, String>> list) {
@@ -915,10 +969,10 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => SymptomLoggingSheet(
-        loggedSymptoms: _convertToEditSymptoms(log.symptoms),
+        loggedSymptoms: _convertToEditSymptoms(log),
         onSave: (name, severity, duration) {
           setState(() {
-            final editList = _convertToEditSymptoms(log.symptoms);
+            final editList = _convertToEditSymptoms(log);
             final existingIndex = editList.indexWhere((s) => s['name'] == name);
             if (existingIndex != -1) {
               editList[existingIndex]['severity'] = severity;
@@ -930,8 +984,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                 'duration': duration.toString(),
               });
             }
-            log.symptoms = _convertFromEditSymptoms(editList);
-            log.itemsCount = log.symptoms.length + log.hrt.length + log.triggers.length;
+            _updateLogSymptoms(log, editList);
           });
           _saveLogToFirestore(_selectedDate!.day, log);
         },
@@ -945,11 +998,10 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => EditSymptomsModalSheet(
-        initialSymptoms: _convertToEditSymptoms(log.symptoms),
+        initialSymptoms: _convertToEditSymptoms(log),
         onSave: (newSymptoms) {
           setState(() {
-            log.symptoms = _convertFromEditSymptoms(newSymptoms);
-            log.itemsCount = log.symptoms.length + log.hrt.length + log.triggers.length;
+            _updateLogSymptoms(log, newSymptoms);
           });
           _saveLogToFirestore(_selectedDate!.day, log);
         },

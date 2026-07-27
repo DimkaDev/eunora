@@ -169,7 +169,14 @@ class _EditSymptomsModalSheetState extends ConsumerState<EditSymptomsModalSheet>
                     final symIcon = symptom.getIconData();
                     final symColor = symptom.getIconColor();
                     final symBg = symColor.withValues(alpha: 0.1);
-                    final hasDuration = symptom.id == 's_hot_flashes' || symptom.id == 's_night_sweats';
+                    final nameLower = name.toLowerCase();
+                    final symId = symptom.id.toLowerCase();
+                    final hasDuration = symId == 'hot_flash' ||
+                        symId == 'night_sweats' ||
+                        symId == 's_hot_flashes' ||
+                        symId == 's_hot_flash' ||
+                        nameLower == 'hot flashes' ||
+                        nameLower == 'night sweats';
 
                     return LoggingCardWrapper(
                       name: name,

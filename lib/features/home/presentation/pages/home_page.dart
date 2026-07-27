@@ -118,6 +118,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               _loggedSymptoms.add({
                 'name': s.symptom.name,
                 'severity': s.severity ?? 'Moderate',
+                'duration': (s.durationMinutes ?? 15).toString(),
               });
             }
 
@@ -189,6 +190,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     final List<LoggedSymptom> symptomsList = _loggedSymptoms.map((s) {
       final name = s['name'] ?? '';
       final severity = s['severity'] ?? 'Moderate';
+      final duration = int.tryParse(s['duration'] ?? '15');
       final id = sanitizeSymptomId('s_${name.toLowerCase().replaceAll(' ', '_')}');
       return LoggedSymptom(
         symptom: Symptom(
@@ -198,6 +200,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           category: 'General',
         ),
         severity: severity,
+        durationMinutes: duration,
       );
     }).toList();
 
