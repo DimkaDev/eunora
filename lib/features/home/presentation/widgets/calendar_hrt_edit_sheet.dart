@@ -554,76 +554,30 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
     );
   }
 
-  void _showDoseChangeWarningDialog(Map<String, dynamic> change) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      barrierColor: const Color(0xFF1D1B1A).withOpacity(0.4),
-      builder: (context) {
-        return DoseChangeAlert(
-          change: change,
-          onConfirm: () {
-            Navigator.pop(context);
-            // Apply the dose change via Medications notifier so HrtDoseChange timeline gets recorded
-            final meds = ref.read(medicationsProvider).medications;
-            for (final entry in _entries) {
-              final matchingMed = meds.firstWhere(
-                (m) =>
-                    m.name.toLowerCase() == entry.name.toLowerCase() ||
-                    (m.id == entry.id),
-                orElse: () => Medication(
-                  name: entry.name,
-                  type: MedicationType.other,
-                  dose: 50.0,
-                  unit: 'mcg',
-                  frequency: 'daily',
-                ),
-              );
-              final newDoseVal =
-                  double.tryParse(entry.dose) ?? matchingMed.dose;
-              if (newDoseVal != matchingMed.dose ||
-                  entry.unit != matchingMed.unit) {
-                ref
-                    .read(medicationsProvider.notifier)
-                    .updateMedication(
-                      matchingMed.copyWith(dose: newDoseVal, unit: entry.unit),
-                    );
-              }
-            }
-            widget.onSave(_entries.map((e) => e.toMap()).toList());
-            Navigator.pop(this.context);
-          },
-          onCancel: () {
-            Navigator.pop(context);
-          },
-        );
-      },
-    );
-  }
-
   void _save() {
-    Map<String, dynamic>? primaryChange;
-    final initialEntries = widget.initialHrt.map(HrtEditEntry.fromMap).toList();
-    for (int i = 0; i < _entries.length; i++) {
-      if (i < initialEntries.length) {
-        if (_entries[i].dose != initialEntries[i].dose ||
-            _entries[i].unit != initialEntries[i].unit) {
-          primaryChange = {
-            'name': _entries[i].name,
-            'oldDose': '${initialEntries[i].dose} ${initialEntries[i].unit}',
-            'newDose': '${_entries[i].dose} ${_entries[i].unit}',
-          };
-          break;
-        }
+    final meds = ref.read(medicationsProvider).medications;
+    for (final entry in _entries) {
+      final matchingMed = meds.firstWhere(
+        (m) =>
+            m.name.toLowerCase() == entry.name.toLowerCase() ||
+            (m.id == entry.id),
+        orElse: () => Medication(
+          name: entry.name,
+          type: MedicationType.other,
+          dose: 50.0,
+          unit: 'mcg',
+          frequency: 'daily',
+        ),
+      );
+      final newDoseVal = double.tryParse(entry.dose) ?? matchingMed.dose;
+      if (newDoseVal != matchingMed.dose || entry.unit != matchingMed.unit) {
+        ref.read(medicationsProvider.notifier).updateMedication(
+          matchingMed.copyWith(dose: newDoseVal, unit: entry.unit),
+        );
       }
     }
-
-    if (primaryChange != null) {
-      _showDoseChangeWarningDialog(primaryChange);
-    } else {
-      widget.onSave(_entries.map((e) => e.toMap()).toList());
-      Navigator.pop(context);
-    }
+    widget.onSave(_entries.map((e) => e.toMap()).toList());
+    Navigator.pop(context);
   }
 
   @override

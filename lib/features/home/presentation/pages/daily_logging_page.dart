@@ -433,52 +433,10 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
         curve: Curves.easeInOutCubic,
       );
     } else if (_currentStep == 4) {
-      Map<String, dynamic>? primaryChange;
-      final meds = ref.read(medicationsProvider).medications;
-      for (final med in meds) {
-        final checked = _hrtChecked[med.id] ?? false;
-        final dose = _hrtDoses[med.id] ?? med.dose;
-        final unit = _hrtUnits[med.id] ?? med.unit;
-        final initialDose = _initialHrtDoses[med.id];
-        final initialUnit = _initialHrtUnits[med.id];
-
-        if (checked && initialDose != null && (dose != initialDose || unit != initialUnit)) {
-          primaryChange = {
-            'name': med.name,
-            'oldDose': '${initialDose.toStringAsFixed(initialDose == initialDose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $initialUnit',
-            'newDose': '${dose.toStringAsFixed(dose == dose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $unit',
-          };
-          break;
-        }
-      }
-
-      if (primaryChange != null) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          barrierColor: const Color(0xFF1D1B1A).withOpacity(0.4),
-          builder: (context) {
-            return DoseChangeAlert(
-              change: primaryChange!,
-              onConfirm: () {
-                Navigator.pop(context);
-                _saveDraft(targetStep: 5);
-                setState(() {
-                  _currentStep = 5;
-                });
-              },
-              onCancel: () {
-                Navigator.pop(context);
-              },
-            );
-          },
-        );
-      } else {
-        _saveDraft(targetStep: 5);
-        setState(() {
-          _currentStep = 5;
-        });
-      }
+      _saveDraft(targetStep: 5);
+      setState(() {
+        _currentStep = 5;
+      });
     }
   }
 

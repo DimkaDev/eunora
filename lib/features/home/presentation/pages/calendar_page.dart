@@ -820,7 +820,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
 
 
   List<Map<String, String>> _convertToEditSymptoms(List<String> list) {
-    return list.map((s) {
+    return list.map<Map<String, String>>((s) {
       final parts = s.split(' · ');
       final name = parts.first.trim();
       String severity = 'Moderate';
@@ -839,7 +839,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           severity = parts[1].trim();
         }
       }
-      return {
+      return <String, String>{
         'name': name,
         'severity': severity,
         'duration': '30',
@@ -864,7 +864,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   }
 
   List<Map<String, dynamic>> _convertToEditTriggers(List<String> list) {
-    return list.map((t) {
+    return list.map<Map<String, dynamic>>((t) {
       final parsed = parseTriggerString(t);
       final triggerLib = ref.read(triggerLibraryProvider);
       final trigger = triggerLib.firstWhere(
@@ -878,7 +878,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         ),
       );
 
-      return {
+      return <String, dynamic>{
         'name': parsed.label,
         'value': parsed.value ?? 'Logged',
         'icon': trigger.getIconData(),
@@ -924,7 +924,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
               editList[existingIndex]['severity'] = severity;
               editList[existingIndex]['duration'] = duration.toString();
             } else {
-              editList.add({
+              editList.add(<String, String>{
                 'name': name,
                 'severity': severity,
                 'duration': duration.toString(),
@@ -971,7 +971,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             if (existingIndex != -1) {
               editList[existingIndex]['value'] = value;
             } else {
-              editList.add({'name': name, 'value': value, 'icon': icon});
+              editList.add(<String, dynamic>{'name': name, 'value': value, 'icon': icon});
             }
             log.triggers = _convertFromEditTriggers(editList);
             log.itemsCount = log.symptoms.length + log.hrt.length + log.triggers.length;
