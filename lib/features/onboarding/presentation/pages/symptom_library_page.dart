@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/utils/animation_system.dart';
 import '../providers/symptoms_provider.dart';
 import '../providers/symptom_quick_access_provider.dart';
@@ -431,20 +432,41 @@ class _SymptomLibraryPageState extends ConsumerState<SymptomLibraryPage> {
                 ],
               ),
             ),
-            // Quick-access badge: small star-like indicator in the top-right corner
+            // Quick-access badge: sleek pill tag in the top-right corner
             if (isInQA)
               Positioned(
                 top: 10,
-                right: 10,
+                right: 12,
                 child: Container(
-                  width: 20,
-                  height: 20,
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF67594E),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 1.5),
+                    color: const Color(0xFF67594E).withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFF67594E).withOpacity(0.2),
+                      width: 1,
+                    ),
                   ),
-                  child: const Icon(Icons.bolt, color: Colors.white, size: 12),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.bolt_rounded,
+                        size: 11,
+                        color: Color(0xFF67594E),
+                      ),
+                      const SizedBox(width: 3),
+                      Text(
+                        'QUICK',
+                        style: GoogleFonts.manrope(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF67594E),
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
           ],

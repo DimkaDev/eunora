@@ -353,11 +353,12 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
         });
       },
       child: Stack(
-        clipBehavior: Clip.none,
+        fit: StackFit.expand,
         children: [
-          Container(
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isAlreadyLogged ? Colors.white : const Color(0xFFFFFFFF),
               borderRadius: BorderRadius.circular(40),
               border: Border.all(
                 color: isAlreadyLogged ? const Color(0xFF9B8B7E) : Colors.transparent,
@@ -408,7 +409,7 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
           ),
           if (isAlreadyLogged)
             Positioned(
-              top: 12,
+              top: 10,
               right: 12,
               child: Container(
                 padding: const EdgeInsets.all(4),
