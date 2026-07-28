@@ -6,12 +6,14 @@ class DailyTriggersCard extends StatelessWidget {
   final List<Map<String, dynamic>> loggedTriggers;
   final VoidCallback onAddTrigger;
   final VoidCallback onEditTrigger;
+  final bool isLogCompleted;
 
   const DailyTriggersCard({
     super.key,
     required this.loggedTriggers,
     required this.onAddTrigger,
     required this.onEditTrigger,
+    this.isLogCompleted = true,
   });
 
   @override

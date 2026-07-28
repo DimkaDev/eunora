@@ -879,7 +879,7 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
 
   @override
   Widget build(BuildContext context) {
-    final medications = ref.watch(medicationsProvider).medications;
+    final medications = ref.watch(medicationsProvider).medications.where((m) => m.endedAt == null).toList();
     final otherMedications = ref.watch(otherMedicationsProvider).medications;
 
     return Column(

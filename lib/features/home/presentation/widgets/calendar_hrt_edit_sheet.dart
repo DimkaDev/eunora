@@ -153,11 +153,13 @@ class HrtEditEntry {
 
 class CalendarHrtEditSheet extends ConsumerStatefulWidget {
   final List<Map<String, String>> initialHrt;
+  final DateTime? selectedDate;
   final void Function(List<Map<String, String>> updated) onSave;
 
   const CalendarHrtEditSheet({
     super.key,
     required this.initialHrt,
+    this.selectedDate,
     required this.onSave,
   });
 
@@ -1050,20 +1052,81 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
     );
   }
 
+  bool _isMedActiveOnSelectedDate(HrtEditEntry entry) {
+    final date = widget.selectedDate ?? DateTime.now();
+    final target = DateTime(date.year, date.month, date.day);
+
+    final meds = ref.read(medicationsProvider).medications;
+    final matching = meds.firstWhere(
+      (m) => m.name.toLowerCase() == entry.name.toLowerCase() || (m.id.isNotEmpty && m.id == entry.id),
+      orElse: () => Medication(name: entry.name, type: MedicationType.other, dose: 50, unit: 'mcg', frequency: ''),
+    );
+
+    if (matching.startedAt != null) {
+      final start = DateTime(matching.startedAt!.year, matching.startedAt!.month, matching.startedAt!.day);
+      if (target.isBefore(start)) return false;
+    }
+    if (matching.endedAt != null) {
+      final end = DateTime(matching.endedAt!.year, matching.endedAt!.month, matching.endedAt!.day);
+      if (target.isAfter(end)) return false;
+    }
+    return true;
+  }
+
+  Widget _buildTakenToggle(HrtEditEntry entry) {
+    final isActive = _isMedActiveOnSelectedDate(entry);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          isActive ? 'Taken today?' : 'Not active on this date',
+          style: GoogleFonts.manrope(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: isActive ? AppTheme.onSurface : const Color(0xFF8C3A25),
+          ),
+        ),
+        Opacity(
+          opacity: isActive ? 1.0 : 0.4,
+          child: CupertinoSwitch(
+            value: isActive && entry.isTaken,
+            activeColor: AppTheme.primary,
+            onChanged: isActive
+                ? (val) {
+                    setState(() {
+                      entry.isTaken = val;
+                      if (val) {
+                        final now = TimeOfDay.now();
+                        entry.timeTaken =
+                            '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+                      }
+                    });
+                  }
+                : null,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildExpandedPanel(int index, HrtEditEntry entry) {
+    return _buildExpandedEditSection(entry, index);
+  }
+
+  Widget _buildExpandedEditSection(HrtEditEntry entry, int index) {
     final lastTaken =
         _lastTakenDates[entry.id ?? ''] ??
         _lastTakenDates[entry.name.toLowerCase()];
-    final onboardingMeds = _entries;
-
-    List<String> unitOptions = ['mg', 'mcg'];
-    if (entry.name.toLowerCase().contains('gel')) {
-      unitOptions = ['pumps', 'mg'];
-    }
+    final List<String> unitOptions = ['mg', 'mcg', 'pumps', 'applicator', 'g', 'sprays'];
+    final meds = ref.read(medicationsProvider).medications;
+    final matchingMed = meds.firstWhere(
+      (m) => m.name.toLowerCase() == entry.name.toLowerCase(),
+      orElse: () => Medication(name: entry.name, type: MedicationType.other, dose: 50, unit: 'mcg', frequency: ''),
+    );
     if (!unitOptions.contains(entry.unit)) {
       unitOptions.add(entry.unit);
     }
-    for (var m in onboardingMeds) {
+    for (final m in meds) {
       if (!unitOptions.contains(m.unit)) {
         unitOptions.add(m.unit);
       }
@@ -1083,33 +1146,7 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Taken today?',
-                style: GoogleFonts.manrope(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.onSurface,
-                ),
-              ),
-              CupertinoSwitch(
-                value: entry.isTaken,
-                activeColor: AppTheme.primary,
-                onChanged: (val) {
-                  setState(() {
-                    entry.isTaken = val;
-                    if (val) {
-                      final now = TimeOfDay.now();
-                      entry.timeTaken =
-                          '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-                    }
-                  });
-                },
-              ),
-            ],
-          ),
+          _buildTakenToggle(entry),
           const SizedBox(height: 12),
           if (entry.isTaken) ...[
             Row(

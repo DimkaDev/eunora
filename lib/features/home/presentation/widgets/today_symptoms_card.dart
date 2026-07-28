@@ -9,12 +9,14 @@ class TodaySymptomsCard extends ConsumerWidget {
   final List<Map<String, String>> loggedSymptoms;
   final VoidCallback onAddSymptom;
   final VoidCallback onEditSymptom;
+  final bool isLogCompleted;
 
   const TodaySymptomsCard({
     super.key,
     required this.loggedSymptoms,
     required this.onAddSymptom,
     required this.onEditSymptom,
+    this.isLogCompleted = true,
   });
 
   Map<String, dynamic> _getSymptomColors(String severity) {

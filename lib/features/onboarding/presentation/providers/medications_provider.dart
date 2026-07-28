@@ -75,9 +75,10 @@ class Medications extends _$Medications {
     _syncToFirestore();
   }
 
-  void endMedication(String id) {
+  void endMedication(String id, {DateTime? endDate}) {
+    final stopDate = endDate ?? DateTime.now();
     state = state.copyWith(
-      medications: state.medications.map((m) => m.id == id ? m.copyWith(endedAt: DateTime.now()) : m).toList(),
+      medications: state.medications.map((m) => m.id == id ? m.copyWith(endedAt: stopDate) : m).toList(),
     );
     _syncToFirestore();
   }

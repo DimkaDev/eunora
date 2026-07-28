@@ -16,8 +16,13 @@ import 'package:eunora/features/hrt_tracker/presentation/widgets/hrt_quick_add_c
 
 class AddMedicationModal extends ConsumerStatefulWidget {
   final dynamic initialData; // Can be Medication for edit or String for prefill name
+  final bool showDiscontinuedToggle;
 
-  const AddMedicationModal({super.key, this.initialData});
+  const AddMedicationModal({
+    super.key,
+    this.initialData,
+    this.showDiscontinuedToggle = true,
+  });
 
   @override
   ConsumerState<AddMedicationModal> createState() => _AddMedicationModalState();
@@ -38,6 +43,11 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
   bool _isCustomDose = false;
   String? _selectedQuickAddName;
 
+  bool _isNotCurrentlyTaking = false;
+  DateTime? _startDate;
+  DateTime? _endDate;
+  String? _dateError;
+
   // --- HRT Drug Library v2 state ---
   bool _isCombined = false;
   String? _combinedComponents;
@@ -47,6 +57,11 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
   /// Full library names for autocomplete (all 33 entries).
   static final List<String> _allLibraryNames =
       kHrtDrugLibrary.map((d) => d.name).toList();
+
+  final List<String> _monthsNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
 
   @override
   void initState() {
@@ -63,6 +78,9 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
       _selectedType = med.type;
       _selectedUnit = med.unit;
       _selectedFrequency = med.frequency;
+      _isNotCurrentlyTaking = med.endedAt != null;
+      _startDate = med.startedAt;
+      _endDate = med.endedAt;
 
       final presets = _getDosePresets(med.type);
       final formattedDose = med.dose.toStringAsFixed(med.dose == med.dose.toInt() ? 0 : 2);
@@ -348,6 +366,29 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
 
   void _save() {
     if (_formKey.currentState!.validate()) {
+      if (_isNotCurrentlyTaking) {
+        final now = DateTime.now();
+        final todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
+        final start = _startDate ?? now;
+        final end = _endDate ?? now;
+
+        if (start.isAfter(todayEnd) || end.isAfter(todayEnd)) {
+          setState(() {
+            _dateError = 'Dates cannot be in the future.';
+          });
+          return;
+        }
+
+        final startOnly = DateTime(start.year, start.month, start.day);
+        final endOnly = DateTime(end.year, end.month, end.day);
+        if (endOnly.isBefore(startOnly)) {
+          setState(() {
+            _dateError = 'End date cannot be before start date.';
+          });
+          return;
+        }
+      }
+
       // Auto-detect drug category from library if user typed the name manually
       final def = HrtQuickAddService.findByName(_nameController.text.trim());
       final finalCategory = def != null ? def.category.name : _drugCategory;
@@ -359,7 +400,7 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
 
       final medication = Medication(
         id: widget.initialData is Medication ? (widget.initialData as Medication).id : null,
-        name: _nameController.text,
+        name: _nameController.text.trim(),
         type: _selectedType,
         dose: double.tryParse(_doseController.text) ?? 0,
         unit: _selectedUnit,
@@ -369,6 +410,8 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
         isCombinedProduct: finalIsCombined,
         combinedComponents: finalComponents,
         market: finalMarket,
+        startedAt: _isNotCurrentlyTaking ? _startDate : (_startDate ?? (widget.initialData is Medication ? (widget.initialData as Medication).startedAt : null)),
+        endedAt: _isNotCurrentlyTaking ? (_endDate ?? DateTime.now()) : null,
       );
 
       if (widget.initialData is Medication) {
@@ -378,6 +421,183 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
       }
 
       context.pop();
+    }
+  }
+
+  Widget _buildDiscontinuedToggleSection() {
+    if (!widget.showDiscontinuedToggle) {
+      return const SizedBox.shrink();
+    }
+    final now = DateTime.now();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: _isNotCurrentlyTaking ? const Color(0xFF67594E) : const Color(0xFFE7E5E4),
+              width: _isNotCurrentlyTaking ? 1.5 : 1.0,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "I'm not currently taking this",
+                      style: GoogleFonts.manrope(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1D1B1A),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Record a discontinued or past medication for your history',
+                      style: GoogleFonts.manrope(
+                        fontSize: 12,
+                        color: const Color(0xFF78716C),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Switch.adaptive(
+                value: _isNotCurrentlyTaking,
+                activeColor: const Color(0xFF67594E),
+                onChanged: (val) {
+                  setState(() {
+                    _isNotCurrentlyTaking = val;
+                    _dateError = null;
+                    if (val) {
+                      _startDate ??= DateTime.now();
+                      _endDate ??= DateTime.now();
+                    }
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+        if (_isNotCurrentlyTaking) ...[
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionHeader('Start Date'),
+                    const SizedBox(height: 8),
+                    _buildDatePickerTile(
+                      date: _startDate ?? now,
+                      onTap: () => _selectDate(
+                        isStart: true,
+                        initial: _startDate ?? now,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionHeader('End Date'),
+                    const SizedBox(height: 8),
+                    _buildDatePickerTile(
+                      date: _endDate ?? now,
+                      onTap: () => _selectDate(
+                        isStart: false,
+                        initial: _endDate ?? now,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (_dateError != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              _dateError!,
+              style: GoogleFonts.manrope(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF8C3A25),
+              ),
+            ),
+          ],
+        ],
+      ],
+    );
+  }
+
+  Widget _buildDatePickerTile({required DateTime date, required VoidCallback onTap}) {
+    final formatted = "${_monthsNames[date.month - 1].substring(0, 3)} ${date.day}, ${date.year}";
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF2EDE9),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              formatted,
+              style: GoogleFonts.manrope(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF1D1B1A),
+              ),
+            ),
+            const Icon(Icons.calendar_today, size: 16, color: Color(0xFF8A817C)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _selectDate({required bool isStart, required DateTime initial}) async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial.isAfter(now) ? now : initial,
+      firstDate: DateTime(2000),
+      lastDate: now,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppTheme.primary,
+              onPrimary: Colors.white,
+              onSurface: const Color(0xFF1D1B1A),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _dateError = null;
+        if (isStart) {
+          _startDate = picked;
+        } else {
+          _endDate = picked;
+        }
+      });
     }
   }
 
@@ -503,7 +723,11 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
                     const SizedBox(height: 8),
                     _buildFrequencySelector(),
                     const SizedBox(height: 24),
-                    
+
+                    // Discontinued / Past medication toggle
+                    _buildDiscontinuedToggleSection(),
+                    const SizedBox(height: 24),
+
                     // Notes Input
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

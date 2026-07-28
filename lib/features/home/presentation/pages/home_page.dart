@@ -357,8 +357,8 @@ class _HomePageState extends ConsumerState<HomePage> {
       customTriggerCounters: customTriggerCounters,
       customTriggerTexts: customTriggerTexts,
       hrtIntakes: hrtIntakes,
-      isCompleted: true,
-      lastCompletedStep: 5,
+      isCompleted: _isLogCompleted,
+      lastCompletedStep: _isLogCompleted ? 5 : 0,
       createdAt: DateTime.now(),
     );
 
@@ -392,7 +392,29 @@ class _HomePageState extends ConsumerState<HomePage> {
     return progress;
   }
 
+  void _promptCompleteDailyLogFirst() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          "Complete your 60-second daily habit log first.",
+          style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: const Color(0xFF8C3A25),
+        action: SnackBarAction(
+          label: 'Start Log',
+          textColor: Colors.white,
+          onPressed: _handleStartOrResumeLogging,
+        ),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   void _showAddSymptomSheet() {
+    if (!_isLogCompleted) {
+      _promptCompleteDailyLogFirst();
+      return;
+    }
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -420,6 +442,10 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   void _showAddTriggerSheet() {
+    if (!_isLogCompleted) {
+      _promptCompleteDailyLogFirst();
+      return;
+    }
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -442,6 +468,10 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   void _showEditSymptomsSheet() {
+    if (!_isLogCompleted) {
+      _promptCompleteDailyLogFirst();
+      return;
+    }
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -460,6 +490,10 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   void _showEditTriggersSheet() {
+    if (!_isLogCompleted) {
+      _promptCompleteDailyLogFirst();
+      return;
+    }
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -686,6 +720,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     loggedSymptoms: _loggedSymptoms,
                     onAddSymptom: _showAddSymptomSheet,
                     onEditSymptom: _showEditSymptomsSheet,
+                    isLogCompleted: _isLogCompleted,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -695,6 +730,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     loggedTriggers: _loggedTriggers,
                     onAddTrigger: _showAddTriggerSheet,
                     onEditTrigger: _showEditTriggersSheet,
+                    isLogCompleted: _isLogCompleted,
                   ),
                 ),
                 const SizedBox(height: 24),

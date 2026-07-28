@@ -201,7 +201,10 @@ class YourMedicationsPage extends ConsumerWidget {
               context: context,
               isScrollControlled: true,
               backgroundColor: Colors.transparent,
-              builder: (context) => AddMedicationModal(initialData: medication),
+              builder: (context) => AddMedicationModal(
+                initialData: medication,
+                showDiscontinuedToggle: false,
+              ),
             );
           },
         );
@@ -216,7 +219,9 @@ class YourMedicationsPage extends ConsumerWidget {
           context: context,
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
-          builder: (context) => const AddMedicationModal(),
+          builder: (context) => const AddMedicationModal(
+            showDiscontinuedToggle: false,
+          ),
         );
       },
       child: Container(

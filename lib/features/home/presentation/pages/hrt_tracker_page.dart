@@ -13,6 +13,8 @@ import 'package:eunora/features/home/domain/entities/daily_log.dart';
 import 'package:eunora/features/home/domain/entities/hrt_dose_change.dart';
 
 import 'package:eunora/features/home/presentation/widgets/hrt_tracker/hrt_adherence_card.dart';
+import 'package:eunora/features/hrt_tracker/domain/adherence_constants.dart';
+import 'package:eunora/features/hrt_tracker/presentation/widgets/still_taking_check_in_card.dart';
 
 class HrtTrackerPage extends ConsumerStatefulWidget {
   const HrtTrackerPage({super.key});
@@ -36,11 +38,262 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
   // Cache for pre-fetched logs to ensure smooth side-by-side swipes
   final Map<String, Map<int, DailyLog>> _monthLogsCache = {};
   final Map<String, List<HrtDoseChange>> _monthDoseChangesCache = {};
+  final Set<String> _dismissedCheckIns = {};
 
   final List<String> _monthsNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
+
+  Map<Medication, int> _getUnmarkedCheckInMedications(List<Medication> activeMedications) {
+    final Map<Medication, int> checkIns = {};
+    final today = DateTime.now();
+
+    for (final med in activeMedications) {
+      if (med.endedAt != null) continue; // Already stopped medications NEVER trigger check-in
+      if (_dismissedCheckIns.contains(med.id)) continue;
+
+      int unmarkedStreak = 0;
+      // Check up to 14 days back starting from yesterday
+      for (int i = 1; i <= 14; i++) {
+        final date = today.subtract(Duration(days: i));
+        
+        if (med.startedAt != null) {
+          final startOnly = DateTime(med.startedAt!.year, med.startedAt!.month, med.startedAt!.day);
+          final dateOnly = DateTime(date.year, date.month, date.day);
+          if (dateOnly.isBefore(startOnly)) {
+            break;
+          }
+        }
+
+        final monthKey = _monthKey(date);
+        final monthLogs = _monthLogsCache[monthKey];
+        final dayLog = monthLogs?[date.day];
+
+        final intake = dayLog?.hrtIntakes.firstWhere(
+          (h) => h.medicationId == med.id || h.name.toLowerCase() == med.name.toLowerCase(),
+          orElse: () => HrtIntakeLog(medicationId: med.id, name: med.name, dose: med.dose, unit: med.unit, time: '', isTaken: false),
+        );
+
+        if (intake != null && intake.isTaken) {
+          break; // Streak broken by taken intake
+        } else {
+          unmarkedStreak++;
+        }
+      }
+
+      if (unmarkedStreak >= AdherenceConstants.kUnmarkedDaysCheckInThreshold) {
+        checkIns[med] = unmarkedStreak;
+      }
+    }
+
+    return checkIns;
+  }
+
+  List<Widget> _buildStillTakingCheckInBanners(List<Medication> activeMedications) {
+    final checkIns = _getUnmarkedCheckInMedications(activeMedications);
+    if (checkIns.isEmpty) return [];
+
+    return checkIns.entries.map((entry) {
+      final med = entry.key;
+      final consecutiveDays = entry.value;
+
+      return StillTakingCheckInCard(
+        medication: med,
+        consecutiveUnmarkedDays: consecutiveDays,
+        onConfirmStillTaking: () {
+          setState(() {
+            _dismissedCheckIns.add(med.id);
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Confirmed active for ${med.name}. Check-in reset.',
+                style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
+              ),
+              backgroundColor: AppTheme.primary,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        },
+        onConfirmStoppedTaking: () {
+          final today = DateTime.now();
+          final defaultStopDate = today.subtract(Duration(days: consecutiveDays));
+          _showStopMedicationModalSheet(context, ref, med, defaultStopDate);
+        },
+      );
+    }).toList();
+  }
+
+  void _showStopMedicationModalSheet(
+    BuildContext context,
+    WidgetRef ref,
+    Medication medication,
+    DateTime defaultStopDate,
+  ) {
+    final today = DateTime.now();
+    DateTime selectedStopDate = defaultStopDate;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) {
+          final isDefault = selectedStopDate.year == defaultStopDate.year &&
+              selectedStopDate.month == defaultStopDate.month &&
+              selectedStopDate.day == defaultStopDate.day;
+          final isToday = selectedStopDate.year == today.year &&
+              selectedStopDate.month == today.month &&
+              selectedStopDate.day == today.day;
+          final isCustom = !isDefault && !isToday;
+
+          return Container(
+            decoration: const BoxDecoration(
+              color: Color(0xFFFEF8F6),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            ),
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Stop Taking ${medication.name}',
+                        style: GoogleFonts.notoSerif(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF1D1B1A),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Color(0xFF9B8B7E)),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Select when you stopped taking this medication to archive it accurately.',
+                  style: GoogleFonts.manrope(
+                    fontSize: 14,
+                    color: const Color(0xFF78716C),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                _buildStopOptionTile(
+                  title: 'When logging stopped (${_monthsNames[defaultStopDate.month - 1].substring(0, 3)} ${defaultStopDate.day}, ${defaultStopDate.year})',
+                  isSelected: isDefault,
+                  onTap: () => setModalState(() => selectedStopDate = defaultStopDate),
+                ),
+                const SizedBox(height: 10),
+                _buildStopOptionTile(
+                  title: 'Today (${_monthsNames[today.month - 1].substring(0, 3)} ${today.day}, ${today.year})',
+                  isSelected: isToday,
+                  onTap: () => setModalState(() => selectedStopDate = today),
+                ),
+                const SizedBox(height: 10),
+                _buildStopOptionTile(
+                  title: isCustom
+                      ? 'Custom date (${_monthsNames[selectedStopDate.month - 1].substring(0, 3)} ${selectedStopDate.day}, ${selectedStopDate.year})'
+                      : 'Pick a custom date...',
+                  isSelected: isCustom,
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: defaultStopDate,
+                      firstDate: medication.startedAt ?? DateTime(2000),
+                      lastDate: today,
+                    );
+                    if (picked != null) {
+                      setModalState(() => selectedStopDate = picked);
+                    }
+                  },
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      ref.read(medicationsProvider.notifier).endMedication(
+                        medication.id,
+                        endDate: selectedStopDate,
+                      );
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            '${medication.name} stopped as of ${_monthsNames[selectedStopDate.month - 1].substring(0, 3)} ${selectedStopDate.day}, ${selectedStopDate.year}',
+                            style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
+                          ),
+                          backgroundColor: AppTheme.primary,
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF67594E),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 0,
+                    ),
+                    child: const Text('Confirm Stop Date', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildStopOptionTile({
+    required String title,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: isSelected ? AppTheme.primary.withOpacity(0.08) : Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected ? AppTheme.primary : const Color(0xFFE7E5E4),
+            width: isSelected ? 1.5 : 1.0,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+              color: isSelected ? AppTheme.primary : const Color(0xFFA8A29E),
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: GoogleFonts.manrope(
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  color: isSelected ? AppTheme.primary : const Color(0xFF1D1B1A),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   final List<String> _weekdays = [
     'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
@@ -154,12 +407,25 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     });
   }
 
-  Future<void> _saveTodayHrtLog(Medication med, bool isTaken) async {
+  bool _isMedicationActiveOnDate(Medication med, DateTime date) {
+    final target = DateTime(date.year, date.month, date.day);
+    if (med.startedAt != null) {
+      final start = DateTime(med.startedAt!.year, med.startedAt!.month, med.startedAt!.day);
+      if (target.isBefore(start)) return false;
+    }
+    if (med.endedAt != null) {
+      final end = DateTime(med.endedAt!.year, med.endedAt!.month, med.endedAt!.day);
+      if (target.isAfter(end)) return false;
+    }
+    return true;
+  }
+
+  Future<void> _saveHrtLogForSelectedDate(Medication med, bool isTaken) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    final today = DateTime.now();
-    final dateStr = "${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
+    final targetDate = DateTime(_focusedMonth.year, _focusedMonth.month, _selectedDay);
+    final dateStr = "${targetDate.year}-${targetDate.month.toString().padLeft(2, '0')}-${targetDate.day.toString().padLeft(2, '0')}";
 
     final currentLog = await ref.read(firestoreServiceProvider).getDailyLog(user.uid, dateStr);
 
@@ -169,7 +435,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     DailyLog dailyLog;
     if (currentLog != null) {
       final updatedIntakes = List<HrtIntakeLog>.from(currentLog.hrtIntakes);
-      final existingIndex = updatedIntakes.indexWhere((h) => h.medicationId == med.id);
+      final existingIndex = updatedIntakes.indexWhere((h) => h.medicationId == med.id || h.name.toLowerCase() == med.name.toLowerCase());
 
       if (existingIndex != -1) {
         updatedIntakes[existingIndex] = updatedIntakes[existingIndex].copyWith(
@@ -201,7 +467,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
       dailyLog = DailyLog(
         id: dateStr,
         userId: user.uid,
-        date: today,
+        date: targetDate,
         hrtIntakes: [hrtIntake],
         createdAt: DateTime.now(),
       );
@@ -319,6 +585,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
         maxChildSize: 0.95,
         builder: (_, scrollController) => CalendarHrtEditSheet(
           initialHrt: hrtList,
+          selectedDate: DateTime(_focusedMonth.year, _focusedMonth.month, _selectedDay),
           onSave: (updatedList) async {
             // Delete removed medications first
             final updatedIds = updatedList.map((e) => e['id']).where((id) => id != null).toSet();
@@ -399,16 +666,20 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     );
   }
 
+  bool _isArchivedExpanded = false;
+
   @override
   Widget build(BuildContext context) {
     final medicationsState = ref.watch(medicationsProvider);
-    final medications = medicationsState.medications;
+    final allMedications = medicationsState.medications;
+    final activeMedications = allMedications.where((m) => m.endedAt == null).toList();
+    final archivedMedications = allMedications.where((m) => m.endedAt != null).toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7F5F0),
-      body: medications.isEmpty 
+      body: allMedications.isEmpty 
           ? _buildEmptyState() 
-          : _buildDashboard(medications),
+          : _buildDashboard(activeMedications, archivedMedications),
     );
   }
 
@@ -566,7 +837,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
   }
 
   // --- DASHBOARD VIEW ---
-  Widget _buildDashboard(List<Medication> medications) {
+  Widget _buildDashboard(List<Medication> activeMedications, List<Medication> archivedMedications) {
     final currentMonthLabel = '${_monthsNames[_focusedMonth.month - 1]} ${_focusedMonth.year}';
 
     return SafeArea(
@@ -575,28 +846,69 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'HRT Tracker',
-              style: GoogleFonts.notoSerif(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.primary,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Track your medications and see dose impact on symptoms.',
-              style: GoogleFonts.manrope(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: AppTheme.onSurfaceVariant,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'HRT Tracker',
+                        style: GoogleFonts.notoSerif(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Track your medications and see dose impact on symptoms.',
+                        style: GoogleFonts.manrope(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: AppTheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) => const AddMedicationModal(),
+                    );
+                  },
+                  icon: const Icon(Icons.add, size: 16),
+                  label: Text('Add Med', style: GoogleFonts.manrope(fontWeight: FontWeight.bold, fontSize: 12)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 24),
 
-            // Today's Dose Section
-            _buildTodayDoseSection(medications),
+            // Still Taking Check-In Prompts
+            ..._buildStillTakingCheckInBanners(activeMedications),
+
+            // Today's Dose Section (Active Medications)
+            _buildTodayDoseSection(activeMedications),
             const SizedBox(height: 28),
+
+            // Archived & Stopped Section
+            if (archivedMedications.isNotEmpty) ...[
+              _buildArchivedSection(archivedMedications),
+              const SizedBox(height: 28),
+            ],
 
             // Monthly Schedule Section
             _buildMonthlyScheduleSection(currentMonthLabel),
@@ -626,6 +938,120 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildArchivedSection(List<Medication> archivedMedications) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFEAE6E0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          InkWell(
+            onTap: () {
+              setState(() {
+                _isArchivedExpanded = !_isArchivedExpanded;
+              });
+            },
+            borderRadius: BorderRadius.circular(20),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF9B8B7E).withOpacity(0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.archive_outlined, size: 18, color: Color(0xFF78716C)),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Archived & Stopped (${archivedMedications.length})',
+                        style: GoogleFonts.notoSerif(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF4D453F),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Icon(
+                    _isArchivedExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                    color: const Color(0xFF9B8B7E),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_isArchivedExpanded) ...[
+            const Divider(height: 1, color: Color(0xFFEAE6E0)),
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(12),
+              itemCount: archivedMedications.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 8),
+              itemBuilder: (context, index) {
+                final med = archivedMedications[index];
+                final stopDateStr = med.endedAt != null
+                    ? '${_monthsNames[med.endedAt!.month - 1].substring(0, 3)} ${med.endedAt!.day}, ${med.endedAt!.year}'
+                    : 'Stopped';
+                return ListTile(
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) => AddMedicationModal(initialData: med),
+                    );
+                  },
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  tileColor: const Color(0xFFF7F5F0),
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFEAE6E0),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.history, color: Color(0xFF78716C), size: 20),
+                  ),
+                  title: Text(
+                    med.name,
+                    style: GoogleFonts.manrope(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: const Color(0xFF4D453F),
+                    ),
+                  ),
+                  subtitle: Text(
+                    '${med.doseAndFrequency} • Stopped $stopDateStr',
+                    style: GoogleFonts.manrope(
+                      fontSize: 12,
+                      color: const Color(0xFF9B8B7E),
+                    ),
+                  ),
+                  trailing: const Icon(Icons.chevron_right, size: 20, color: Color(0xFFA8A29E)),
+                );
+              },
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -750,6 +1176,9 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
         ),
         const SizedBox(height: 12),
         ...medications.map((med) {
+          final selectedDate = DateTime(_focusedMonth.year, _focusedMonth.month, _selectedDay);
+          final isActiveOnDate = _isMedicationActiveOnDate(med, selectedDate);
+
           bool isTaken = false;
           String time = '';
 
@@ -770,119 +1199,149 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
               : const Color(0xFFD8C9E0);
           final iconBg = iconColor.withOpacity(0.12);
 
-          return Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  blurRadius: 16,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-              border: Border.all(color: const Color(0xFFEAE6E0)),
-            ),
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: () => _showHrtLoggingSheet(medications),
-                  child: Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: iconBg,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(icon, color: iconColor, size: 22),
+          String inactiveReason = '';
+          if (!isActiveOnDate) {
+            final target = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+            if (med.startedAt != null && target.isBefore(DateTime(med.startedAt!.year, med.startedAt!.month, med.startedAt!.day))) {
+              inactiveReason = 'Not started yet';
+            } else if (med.endedAt != null && target.isAfter(DateTime(med.endedAt!.year, med.endedAt!.month, med.endedAt!.day))) {
+              inactiveReason = 'Discontinued';
+            } else {
+              inactiveReason = 'Inactive on this date';
+            }
+          }
+
+          return Opacity(
+            opacity: isActiveOnDate ? 1.0 : 0.45,
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
                   ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => _showHrtLoggingSheet(medications),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          med.name,
-                          style: GoogleFonts.notoSerif(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${med.dose.toStringAsFixed(0)} ${med.unit} ${med.type.displayName.toLowerCase()} • Protocol dose',
-                          style: GoogleFonts.manrope(
-                            fontSize: 12,
-                            color: const Color(0xFF9B8B7E),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        if (isTaken)
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.check_circle,
-                                size: 14,
-                                color: Color(0xFF2D5A3E),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Taken at $time',
-                                style: GoogleFonts.manrope(
-                                  fontSize: 11,
-                                  color: const Color(0xFF2D5A3E),
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          )
-                        else
+                ],
+                border: Border.all(color: const Color(0xFFEAE6E0)),
+              ),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: isActiveOnDate ? () => _showHrtLoggingSheet(medications) : null,
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: iconBg,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(icon, color: iconColor, size: 22),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: isActiveOnDate ? () => _showHrtLoggingSheet(medications) : null,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Text(
-                            'Not logged yet',
-                            style: GoogleFonts.manrope(
-                              fontSize: 11,
-                              color: const Color(0xFF9B8B7E),
-                              fontStyle: FontStyle.italic,
+                            med.name,
+                            style: GoogleFonts.notoSerif(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.onSurface,
                             ),
                           ),
-                      ],
+                          const SizedBox(height: 2),
+                          Text(
+                            '${med.dose.toStringAsFixed(0)} ${med.unit} ${med.type.displayName.toLowerCase()} • Protocol dose',
+                            style: GoogleFonts.manrope(
+                              fontSize: 12,
+                              color: const Color(0xFF9B8B7E),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          if (!isActiveOnDate)
+                            Text(
+                              inactiveReason,
+                              style: GoogleFonts.manrope(
+                                fontSize: 11,
+                                color: const Color(0xFF8C3A25),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            )
+                          else if (isTaken)
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.check_circle,
+                                  size: 14,
+                                  color: Color(0xFF2D5A3E),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Taken at $time',
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 11,
+                                    color: const Color(0xFF2D5A3E),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            )
+                          else
+                            Text(
+                              'Not logged yet',
+                              style: GoogleFonts.manrope(
+                                fontSize: 11,
+                                color: const Color(0xFF9B8B7E),
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                GestureDetector(
-                  onTap: () async {
-                    await _saveTodayHrtLog(med, !isTaken);
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 44,
-                    height: 24,
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: isTaken ? AppTheme.primary : const Color(0xFFEAE6E0),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: AnimatedAlign(
+                  GestureDetector(
+                    onTap: isActiveOnDate
+                        ? () async {
+                            await _saveHrtLogForSelectedDate(med, !isTaken);
+                          }
+                        : null,
+                    child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
-                      alignment: isTaken ? Alignment.centerRight : Alignment.centerLeft,
-                      child: Container(
-                        width: 20,
-                        height: 20,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
+                      width: 44,
+                      height: 24,
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: (!isActiveOnDate)
+                            ? const Color(0xFFEAE6E0)
+                            : isTaken
+                                ? AppTheme.primary
+                                : const Color(0xFFEAE6E0),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: AnimatedAlign(
+                        duration: const Duration(milliseconds: 200),
+                        alignment: (isActiveOnDate && isTaken) ? Alignment.centerRight : Alignment.centerLeft,
+                        child: Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            color: isActiveOnDate ? Colors.white : const Color(0xFFD6CECB),
+                            shape: BoxShape.circle,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         }),
@@ -985,18 +1444,20 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
         const SizedBox(height: 12),
         GestureDetector(
           onHorizontalDragStart: (_) {
-            setState(() {
-              _isSwiping = true;
-              _dragOffset = 0.0;
-            });
+            _dragOffset = 0.0;
           },
           onHorizontalDragUpdate: (details) {
-            setState(() {
-              _dragOffset += details.primaryDelta ?? 0.0;
-            });
+            _dragOffset += details.primaryDelta ?? 0.0;
+            if (_dragOffset.abs() > 10.0 && !_isSwiping) {
+              setState(() {
+                _isSwiping = true;
+              });
+            } else if (_isSwiping) {
+              setState(() {});
+            }
           },
           onHorizontalDragEnd: (details) {
-            if (_dragOffset.abs() > 80.0) {
+            if (_dragOffset.abs() > 60.0) {
               if (_dragOffset < 0) {
                 _nextMonth();
               } else {
@@ -1213,18 +1674,22 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
       final isToday = today.year == targetMonth.year && today.month == targetMonth.month && today.day == day;
 
       final dayLog = targetLogs[day];
-      final isTaken = dayLog != null && dayLog.hrtIntakes.isNotEmpty && dayLog.hrtIntakes.any((h) => h.isTaken);
+      final hasLoggedMeds = dayLog != null && dayLog.hrtIntakes.isNotEmpty;
+      final isTaken = hasLoggedMeds && dayLog.hrtIntakes.any((h) => h.isTaken);
 
       final isDoseChange = targetChanges.any((change) => change.changeDate.day == day);
 
       dayWidgets.add(
         GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: () {
             if (targetMonth.year == _focusedMonth.year && targetMonth.month == _focusedMonth.month) {
               _selectDay(day);
             }
           },
-          child: Center(
+          child: Container(
+            color: Colors.transparent,
+            alignment: Alignment.center,
             child: Container(
               width: 34,
               height: 34,
@@ -1247,10 +1712,15 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                             )
                           : isTaken
                               ? BoxDecoration(
-                                  color: const Color(0xFFD8C9E0).withOpacity(0.15),
+                                  color: const Color(0xFFD8C9E0).withOpacity(0.22),
                                   shape: BoxShape.circle,
                                 )
-                              : null,
+                              : hasLoggedMeds
+                                  ? BoxDecoration(
+                                      color: const Color(0xFFEAE6E0),
+                                      shape: BoxShape.circle,
+                                    )
+                                  : null,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -1258,7 +1728,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                     '$day',
                     style: GoogleFonts.manrope(
                       fontSize: 12,
-                      fontWeight: (isSelected || isToday || isDoseChange || isTaken)
+                      fontWeight: (isSelected || isToday || isDoseChange || hasLoggedMeds)
                           ? FontWeight.bold
                           : FontWeight.w500,
                       color: isToday && isSelected
@@ -1270,13 +1740,13 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                                   : AppTheme.onSurface,
                     ),
                   ),
-                  if (isTaken && !isToday && !isSelected)
+                  if (hasLoggedMeds && !isToday && !isSelected)
                     Container(
                       margin: const EdgeInsets.only(top: 1),
-                      width: 3,
-                      height: 3,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFD8C9E0),
+                      width: 3.5,
+                      height: 3.5,
+                      decoration: BoxDecoration(
+                        color: isTaken ? const Color(0xFF67594E) : const Color(0xFF9B8B7E),
                         shape: BoxShape.circle,
                       ),
                     ),

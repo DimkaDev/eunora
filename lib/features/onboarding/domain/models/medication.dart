@@ -55,6 +55,7 @@ class Medication {
   final String? combinedComponents;
   /// Stores HrtMarket.name ('uk', 'us', 'both') — informational only.
   final String market;
+  final DateTime? startedAt;
   final DateTime? endedAt;
 
 
@@ -70,6 +71,7 @@ class Medication {
     this.isCombinedProduct = false,
     this.combinedComponents,
     this.market = 'uk',
+    this.startedAt,
     this.endedAt,
   }) : id = id ?? const Uuid().v4();
 
@@ -84,6 +86,7 @@ class Medication {
     bool? isCombinedProduct,
     String? combinedComponents,
     String? market,
+    DateTime? startedAt,
     DateTime? endedAt,
     bool clearEndedAt = false,
   }) {
@@ -99,6 +102,7 @@ class Medication {
       isCombinedProduct: isCombinedProduct ?? this.isCombinedProduct,
       combinedComponents: combinedComponents ?? this.combinedComponents,
       market: market ?? this.market,
+      startedAt: startedAt ?? this.startedAt,
       endedAt: clearEndedAt ? null : (endedAt ?? this.endedAt),
     );
   }
@@ -116,8 +120,8 @@ class Medication {
       'isCombinedProduct': isCombinedProduct,
       'combinedComponents': combinedComponents,
       'market': market,
+      'startedAt': startedAt?.toIso8601String(),
       'endedAt': endedAt?.toIso8601String(),
-
     };
   }
 
@@ -134,6 +138,7 @@ class Medication {
       isCombinedProduct: map['isCombinedProduct'] as bool? ?? false,
       combinedComponents: map['combinedComponents'] as String?,
       market: map['market'] as String? ?? 'uk',
+      startedAt: map['startedAt'] != null ? DateTime.tryParse(map['startedAt'] as String) : null,
       endedAt: map['endedAt'] != null ? DateTime.tryParse(map['endedAt'] as String) : null,
     );
   }
