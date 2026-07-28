@@ -102,7 +102,7 @@ class TodaySymptomsCard extends ConsumerWidget {
                   ),
                 ],
               ),
-              if (!isEmpty)
+              if (!isEmpty && isLogCompleted)
                 IconButton(
                   onPressed: onEditSymptom,
                   icon: const Icon(Icons.edit_note),
@@ -158,33 +158,37 @@ class TodaySymptomsCard extends ConsumerWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            "Track how you're feeling today",
+            isLogCompleted
+                ? "Track how you're feeling today"
+                : "Complete daily logging first to add symptoms",
             style: GoogleFonts.manrope(
               fontSize: 11,
               color: const Color(0xFFA8A29E),
             ),
           ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: onAddSymptom,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primary.withOpacity(0.1),
-              foregroundColor: AppTheme.primary,
-              shadowColor: Colors.transparent,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+          if (isLogCompleted) ...[
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: onAddSymptom,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primary.withOpacity(0.1),
+                foregroundColor: AppTheme.primary,
+                shadowColor: Colors.transparent,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              child: Text(
+                'Add Symptom',
+                style: GoogleFonts.manrope(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-            child: Text(
-              'Add Symptom',
-              style: GoogleFonts.manrope(
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+          ],
         ],
       ),
     );
@@ -192,7 +196,7 @@ class TodaySymptomsCard extends ConsumerWidget {
 
   // Grid State with trailing "+ Add New" dashed button
   Widget _buildGridState(BuildContext context, WidgetRef ref) {
-    final int itemsCount = loggedSymptoms.length + 1;
+    final int itemsCount = loggedSymptoms.length + (isLogCompleted ? 1 : 0);
     final library = ref.watch(symptomLibraryProvider);
 
     // Find symptom details by name

@@ -6,6 +6,9 @@ import 'package:eunora/core/utils/animation_system.dart';
 import 'package:eunora/features/onboarding/domain/models/symptom.dart';
 import 'package:eunora/features/onboarding/presentation/providers/symptom_quick_access_provider.dart';
 
+import 'package:eunora/core/utils/logging_helpers.dart';
+import 'package:eunora/features/onboarding/presentation/providers/symptoms_provider.dart';
+
 class SymptomsStep extends ConsumerWidget {
   final Set<String> selectedSymptomIds;
   final ValueChanged<String> onSymptomToggled;
@@ -20,7 +23,20 @@ class SymptomsStep extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Adaptive quick-access list: ≤8 chips, core pins always first, then
     // onboarding selections, then frequency-promoted symptoms.
-    final frequentSymptoms = ref.watch(quickAccessChipListProvider);
+    final quickAccess = ref.watch(quickAccessChipListProvider);
+    final library = ref.watch(symptomLibraryProvider);
+    final byId = {for (final s in library) s.id: s};
+
+    final List<Symptom> frequentSymptoms = List.from(quickAccess);
+    final Set<String> existingIds = frequentSymptoms.map((s) => s.id).toSet();
+
+    for (final id in selectedSymptomIds) {
+      final cleanId = sanitizeSymptomId(id);
+      if (!existingIds.contains(cleanId) && byId.containsKey(cleanId)) {
+        frequentSymptoms.add(byId[cleanId]!);
+        existingIds.add(cleanId);
+      }
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

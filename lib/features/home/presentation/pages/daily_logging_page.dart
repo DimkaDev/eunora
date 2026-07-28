@@ -47,17 +47,8 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   final List<String> _customSymptoms = [];
 
   // Step 2: Symptom Severities & Durations
-  final Map<String, String> _symptomSeverities = {
-    's_hot_flashes': 'Moderate',
-    's_mood': 'Mild',
-    's_sleep': 'Severe',
-    's_dryness': 'Mild',
-    's_joint_pain': 'Mild',
-  };
-  final Map<String, int> _symptomDurations = {
-    's_hot_flashes': 30,
-    's_night_sweats': 15,
-  };
+  final Map<String, String> _symptomSeverities = {};
+  final Map<String, int> _symptomDurations = {};
 
   // Step 3: Trigger Selection
   final Set<String> _selectedTriggerIds = {};
@@ -691,10 +682,12 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
         }
       }
       final symptomsState = ref.watch(symptomsProvider);
-      if (symptomsState.frequentSymptomIds.isNotEmpty) {
+      final loggedIds = symptomsState.loggedSymptoms.map((l) => l.symptom.id).toList();
+      final targetIds = loggedIds.isNotEmpty ? loggedIds : symptomsState.frequentSymptomIds;
+      if (targetIds.isNotEmpty) {
         _isSymptomsInitialized = true;
         _selectedSymptomIds.clear();
-        _selectedSymptomIds.addAll(symptomsState.frequentSymptomIds.map(sanitizeSymptomId));
+        _selectedSymptomIds.addAll(targetIds.map(sanitizeSymptomId));
         _selectedTriggerIds.clear();
       }
       final otherMeds = ref.watch(otherMedicationsProvider).medications;

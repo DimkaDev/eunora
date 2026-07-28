@@ -9,6 +9,7 @@ import 'package:eunora/features/onboarding/presentation/providers/symptoms_provi
 import 'package:eunora/features/onboarding/presentation/providers/symptom_quick_access_provider.dart';
 import 'package:eunora/features/onboarding/presentation/providers/triggers_provider.dart';
 
+import 'package:eunora/core/utils/logging_helpers.dart';
 import 'package:eunora/features/onboarding/presentation/providers/other_medications_provider.dart';
 
 class OnboardingProfileNotifier extends StateNotifier<UserProfile?> {
@@ -22,16 +23,16 @@ class OnboardingProfileNotifier extends StateNotifier<UserProfile?> {
       state = _createDefaultProfile('anonymous');
       return;
     }
-    
+
     try {
       final profile = await ref.read(firestoreServiceProvider).getUserProfile(user.uid);
       if (profile != null) {
         state = profile;
-        
+
         // Sync other providers with values from the loaded profile
         ref.read(menopauseStageProvider.notifier).selectStage(profile.menopauseStage);
-        
-        // Populate medications
+
+        // Populate HRT medications
         ref.read(medicationsProvider.notifier).state = ref.read(medicationsProvider.notifier).state.copyWith(
           medications: profile.medications,
         );
@@ -44,8 +45,8 @@ class OnboardingProfileNotifier extends StateNotifier<UserProfile?> {
         // Populate symptoms
         ref.read(symptomsProvider.notifier).state = ref.read(symptomsProvider.notifier).state.copyWith(
           frequentSymptomIds: profile.selectedStageSymptoms.isNotEmpty 
-              ? profile.selectedStageSymptoms 
-              : ['s_hot_flashes', 's_mood', 's_sleep', 's_dryness', 's_joint_pain'],
+              ? profile.selectedStageSymptoms.map(sanitizeSymptomId).toList()
+              : ['hot_flash', 'low_mood', 'night_wakings', 'vaginal_dryness', 'joint_pain'],
         );
 
         // Seed quick-access ranking from persisted profile data.
@@ -93,7 +94,9 @@ class OnboardingProfileNotifier extends StateNotifier<UserProfile?> {
 
   void updateProfile(UserProfile Function(UserProfile) updateFn) {
     if (state != null) {
-      state = updateFn(state!).copyWith(updatedAt: DateTime.now());
+      final updated = updateFn(state!).copyWith(updatedAt: DateTime.now());
+      state = updated;
+      ref.read(symptomQuickAccessProvider.notifier).loadFromProfile(updated);
     }
   }
 
@@ -104,7 +107,7 @@ class OnboardingProfileNotifier extends StateNotifier<UserProfile?> {
       // Gather active medications, symptoms, triggers from their respective providers to save
       final medications = ref.read(medicationsProvider).medications;
       final otherMedications = ref.read(otherMedicationsProvider).medications;
-      final symptoms = ref.read(symptomsProvider).loggedSymptoms.map((l) => l.symptom.id).toList();
+      final symptoms = ref.read(symptomsProvider).loggedSymptoms.map((l) => sanitizeSymptomId(l.symptom.id)).toList();
       final triggers = ref.read(triggersProvider).activeTriggerIds;
 
       final updatedProfile = state!.copyWith(
@@ -116,6 +119,8 @@ class OnboardingProfileNotifier extends StateNotifier<UserProfile?> {
         updatedAt: DateTime.now(),
       );
       state = updatedProfile;
+
+      ref.read(symptomQuickAccessProvider.notifier).loadFromProfile(updatedProfile);
 
       await ref.read(firestoreServiceProvider).saveUserProfile(updatedProfile);
     }

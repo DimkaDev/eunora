@@ -7,15 +7,25 @@ import 'package:eunora/features/symptom_log/data/trigger_library.dart';
 String sanitizeSymptomId(String id) {
   switch (id) {
     case 's_hot_flashes':
+    case 'hot_flashes':
       return 'hot_flash';
     case 's_mood':
+    case 'mood':
       return 'low_mood';
     case 's_sleep':
+    case 's_sleep_problem':
+    case 'sleep_problem':
+    case 'sleep':
       return 'night_wakings';
     case 's_dryness':
+    case 'dryness':
       return 'vaginal_dryness';
     case 's_joint_pain':
       return 'joint_pain';
+    case 's_night_sweats':
+      return 'night_sweats';
+    case 's_fatigue':
+      return 'fatigue';
     default:
       if (id.startsWith('s_')) {
         return id.substring(2);

@@ -69,31 +69,33 @@ class DailyTriggersCard extends StatelessWidget {
                       color: const Color(0xFFA8A29E),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    onPressed: onEditTrigger,
-                    icon: const Icon(Icons.edit_note),
-                    color: const Color(0xFFA8A29E),
-                    iconSize: 20,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    hoverColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                  ),
-                ],
-              ),
+              if (!isEmpty && isLogCompleted) ...[
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed: onEditTrigger,
+                  icon: const Icon(Icons.edit_note),
+                  color: const Color(0xFFA8A29E),
+                  iconSize: 20,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  hoverColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                ),
+              ],
             ],
           ),
-          const SizedBox(height: 16),
-
-          if (isEmpty)
-            _buildEmptyState(context)
-          else
-            _buildGridState(context),
         ],
       ),
-    );
-  }
+      const SizedBox(height: 16),
+
+      if (isEmpty)
+        _buildEmptyState(context)
+      else
+        _buildGridState(context),
+    ],
+  ),
+);
+}
 
   // Dashed Empty State Box
   Widget _buildEmptyState(BuildContext context) {
@@ -127,33 +129,37 @@ class DailyTriggersCard extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            "Keep track of habits and events",
+            isLogCompleted
+                ? "Keep track of habits and events"
+                : "Complete daily logging first to add triggers",
             style: GoogleFonts.manrope(
               fontSize: 11,
               color: const Color(0xFFA8A29E),
             ),
           ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: onAddTrigger,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primary.withOpacity(0.1),
-              foregroundColor: AppTheme.primary,
-              shadowColor: Colors.transparent,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+          if (isLogCompleted) ...[
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: onAddTrigger,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primary.withOpacity(0.1),
+                foregroundColor: AppTheme.primary,
+                shadowColor: Colors.transparent,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              child: Text(
+                'Add Trigger',
+                style: GoogleFonts.manrope(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-            child: Text(
-              'Add Trigger',
-              style: GoogleFonts.manrope(
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+          ],
         ],
       ),
     );
@@ -208,7 +214,7 @@ class DailyTriggersCard extends StatelessWidget {
 
   // Grid State with trailing "+ Add New" dashed button
   Widget _buildGridState(BuildContext context) {
-    final int itemsCount = loggedTriggers.length + 1; // Logged triggers + trailing add button
+    final int itemsCount = loggedTriggers.length + (isLogCompleted ? 1 : 0); // Logged triggers + trailing add button
 
     return GridView.builder(
       shrinkWrap: true,
