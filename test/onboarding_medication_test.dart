@@ -12,6 +12,9 @@ import 'package:eunora/features/hrt_tracker/data/hrt_drug_library.dart';
 import 'package:eunora/features/hrt_tracker/domain/adherence_constants.dart';
 import 'package:eunora/features/hrt_tracker/presentation/widgets/still_taking_check_in_card.dart';
 import 'package:eunora/features/home/presentation/widgets/hrt_tracker/hrt_adherence_card.dart';
+import 'package:eunora/features/onboarding/presentation/pages/frequent_symptoms_page.dart';
+import 'package:eunora/features/home/presentation/pages/daily_logging/symptoms_step.dart';
+import 'package:eunora/features/home/presentation/widgets/calendar_hrt_edit_sheet.dart';
 
 void main() {
   group('Onboarding & Medication Flow Improvements Tests', () {
@@ -265,7 +268,7 @@ void main() {
     });
 
     test('AdherenceConstants defines single configurable threshold value', () {
-      expect(AdherenceConstants.kUnmarkedDaysCheckInThreshold, equals(3));
+      expect(AdherenceConstants.kUnmarkedDaysCheckInThreshold, equals(14));
     });
 
     testWidgets('StillTakingCheckInCard displays medication prompt and triggers callbacks', (tester) async {
@@ -285,7 +288,7 @@ void main() {
           home: Scaffold(
             body: StillTakingCheckInCard(
               medication: med,
-              consecutiveUnmarkedDays: 3,
+              consecutiveUnmarkedDays: 14,
               onConfirmStillTaking: () => stillTakingTapped = true,
               onConfirmStoppedTaking: () => stoppedTakingTapped = true,
             ),
@@ -296,7 +299,7 @@ void main() {
 
       // Verify title and subtitle rendering
       expect(find.text('Still taking Utrogestan?'), findsOneWidget);
-      expect(find.text('Unlogged for 3 consecutive days'), findsOneWidget);
+      expect(find.text('Unlogged for 14 consecutive days'), findsOneWidget);
 
       // Verify buttons exist
       expect(find.text('Yes, still taking'), findsOneWidget);
@@ -370,6 +373,78 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Adherence this month: 100%'), findsOneWidget);
+    });
+
+    testWidgets('FrequentSymptomsPage expands library in-place on Other tap & shows CORE badge', (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: FrequentSymptomsPage(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify CORE badge is visible for core fixed pins
+      expect(find.text('CORE'), findsWidgets);
+      expect(find.text('Other'), findsOneWidget);
+
+      // Tap 'Other' card
+      await tester.ensureVisible(find.text('Other'));
+      await tester.tap(find.text('Other'));
+      await tester.pumpAndSettle();
+
+      // Verify 'Other' card is replaced by expanded library symptoms in-place
+      expect(find.text('Other'), findsNothing);
+    });
+
+    testWidgets('SymptomsStep renders CORE/QUICK badges, expands Other in-place, and handles long-press quick access', (tester) async {
+      tester.view.physicalSize = const Size(800, 1400);
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final selected = <String>{};
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: SymptomsStep(
+                  selectedSymptomIds: selected,
+                  onSymptomToggled: (id) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify tip banner is visible
+      expect(find.textContaining('Press & hold any symptom chip'), findsOneWidget);
+
+      // Verify CORE badge is rendered
+      expect(find.text('CORE'), findsWidgets);
+      expect(find.text('Other'), findsOneWidget);
+
+      // Tap 'Other' card to expand library in place
+      await tester.ensureVisible(find.text('Other'));
+      await tester.tap(find.text('Other'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Other'), findsNothing);
+
+      // Long press a CORE symptom chip
+      final hotFlashChip = find.text('Hot flashes');
+      expect(hotFlashChip, findsOneWidget);
+      await tester.longPress(hotFlashChip);
+      await tester.pumpAndSettle();
+
+      // Verify core pin SnackBar feedback
+      expect(find.text('Core symptoms are permanently pinned to Quick Access.'), findsOneWidget);
     });
   });
 }

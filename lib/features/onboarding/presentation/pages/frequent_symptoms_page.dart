@@ -9,13 +9,23 @@ import '../widgets/onboarding_header.dart';
 import 'package:eunora/features/onboarding/presentation/providers/menopause_stage_provider.dart';
 import 'package:eunora/features/onboarding/presentation/providers/onboarding_profile_provider.dart';
 
-class FrequentSymptomsPage extends ConsumerWidget {
+import 'package:eunora/core/utils/logging_helpers.dart';
+import 'package:eunora/features/onboarding/presentation/providers/symptom_quick_access_provider.dart';
+
+class FrequentSymptomsPage extends ConsumerStatefulWidget {
   final VoidCallback? onNext;
   final VoidCallback? onBack;
   const FrequentSymptomsPage({super.key, this.onNext, this.onBack});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FrequentSymptomsPage> createState() => _FrequentSymptomsPageState();
+}
+
+class _FrequentSymptomsPageState extends ConsumerState<FrequentSymptomsPage> {
+  bool _isLibraryExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(symptomsProvider);
     final notifier = ref.read(symptomsProvider.notifier);
     final library = ref.watch(symptomLibraryProvider);
@@ -69,6 +79,18 @@ class FrequentSymptomsPage extends ConsumerWidget {
       frequentSymptoms = list;
     }
 
+    // Append remaining library items if user tapped "Other"
+    final List<Symptom> displaySymptoms = List.from(frequentSymptoms);
+    if (_isLibraryExpanded) {
+      final Set<String> existingIds = displaySymptoms.map((s) => s.id).toSet();
+      for (final s in library) {
+        if (!existingIds.contains(s.id)) {
+          displaySymptoms.add(s);
+          existingIds.add(s.id);
+        }
+      }
+    }
+
     return Scaffold(
       backgroundColor: const Color(
         0xFFFEF8F6,
@@ -81,7 +103,7 @@ class FrequentSymptomsPage extends ConsumerWidget {
                 OnboardingHeader(
                   currentStep: 3,
                   subtitle: 'SYMPTOMS',
-                  onBack: onBack,
+                  onBack: widget.onBack,
                   onSkip: () => _showInfoDialog(context),
                 ),
                 Expanded(
@@ -123,12 +145,12 @@ class FrequentSymptomsPage extends ConsumerWidget {
                                 childAspectRatio: 1.1,
                               ),
                           itemCount:
-                              frequentSymptoms.length + 1, // +1 for Other card
+                              displaySymptoms.length + (_isLibraryExpanded ? 0 : 1), // +1 for Other card when collapsed
                           itemBuilder: (context, index) {
-                            if (index == frequentSymptoms.length) {
+                            if (!_isLibraryExpanded && index == displaySymptoms.length) {
                               return _buildOtherCard(context);
                             }
-                            final symptom = frequentSymptoms[index];
+                            final symptom = displaySymptoms[index];
                             final isSelected = notifier.isLogged(symptom.id);
                             return _buildSymptomCard(
                               context,
@@ -182,6 +204,42 @@ class FrequentSymptomsPage extends ConsumerWidget {
     );
   }
 
+  Widget _buildTierBadge(String symId) {
+    final cleanId = sanitizeSymptomId(symId);
+    final isCore = kCoreFixedPins.contains(cleanId);
+    final qaState = ref.watch(symptomQuickAccessProvider);
+    final isQuick = !isCore && (qaState.prefs[cleanId] == kPrefOnboarding || qaState.prefs[cleanId] == kPrefPromoted);
+
+    if (!isCore && !isQuick) {
+      return const SizedBox.shrink();
+    }
+
+    final Color badgeBg = isCore
+        ? const Color(0xFF9B8B7E).withOpacity(0.18)
+        : const Color(0xFF6B8E23).withOpacity(0.18);
+    final Color textColor = isCore
+        ? const Color(0xFF63564B)
+        : const Color(0xFF3F5A10);
+    final String label = isCore ? 'CORE' : 'QUICK';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: badgeBg,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 9,
+          fontWeight: FontWeight.w900,
+          color: textColor,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+
   Widget _buildSymptomCard(
     BuildContext context, {
     required Symptom symptom,
@@ -210,39 +268,50 @@ class FrequentSymptomsPage extends ConsumerWidget {
             ),
           ],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Stack(
           children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: isSelected ? iconColor.withOpacity(0.25) : iconBgColor,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                symptom.getIconData(),
-                color: iconColor,
-                size: 36,
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: isSelected ? iconColor.withOpacity(0.25) : iconBgColor,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      symptom.getIconData(),
+                      color: iconColor,
+                      size: 36,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      symptom.name,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: isSelected
+                            ? const Color(0xFF1D1B1A)
+                            : const Color(0xFF9B8B7E),
+                        height: 1.1,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text(
-                symptom.name,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: isSelected
-                      ? const Color(0xFF1D1B1A)
-                      : const Color(0xFF9B8B7E),
-                  height: 1.1,
-                ),
-              ),
+            Positioned(
+              top: 10,
+              right: 12,
+              child: _buildTierBadge(symptom.id),
             ),
           ],
         ),
@@ -252,7 +321,11 @@ class FrequentSymptomsPage extends ConsumerWidget {
 
   Widget _buildOtherCard(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.push('/symptom-library'),
+      onTap: () {
+        setState(() {
+          _isLibraryExpanded = true;
+        });
+      },
       child: Container(
         decoration: BoxDecoration(
           color: const Color(0xFFFAF9F6),
@@ -323,8 +396,8 @@ class FrequentSymptomsPage extends ConsumerWidget {
               children: [
                  ElevatedButton(
                   onPressed: () {
-                    if (onNext != null) {
-                      onNext!();
+                    if (widget.onNext != null) {
+                      widget.onNext!();
                     } else {
                       context.push('/other-medications');
                     }
@@ -344,8 +417,8 @@ class FrequentSymptomsPage extends ConsumerWidget {
                 const SizedBox(height: 12),
                 TextButton(
                   onPressed: () {
-                    if (onNext != null) {
-                      onNext!();
+                    if (widget.onNext != null) {
+                      widget.onNext!();
                     } else {
                       context.push('/other-medications');
                     }

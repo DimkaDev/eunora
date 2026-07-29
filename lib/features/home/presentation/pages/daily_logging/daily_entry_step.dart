@@ -407,15 +407,51 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
     );
   }
 
+  TimeOfDay _parseTimeOfDay(String timeStr) {
+    final clean = timeStr.trim();
+    if (clean.isEmpty) return TimeOfDay.now();
+
+    final amPmMatch = RegExp(r'(\d{1,2}):(\d{2})\s*(AM|PM|am|pm)', caseSensitive: false).firstMatch(clean);
+    if (amPmMatch != null) {
+      int hour = int.parse(amPmMatch.group(1)!);
+      final minute = int.parse(amPmMatch.group(2)!);
+      final period = amPmMatch.group(3)!.toUpperCase();
+      if (period == 'PM' && hour < 12) hour += 12;
+      if (period == 'AM' && hour == 12) hour = 0;
+      return TimeOfDay(hour: hour, minute: minute);
+    }
+
+    final match24 = RegExp(r'(\d{1,2}):(\d{2})').firstMatch(clean);
+    if (match24 != null) {
+      final hour = int.parse(match24.group(1)!);
+      final minute = int.parse(match24.group(2)!);
+      if (hour >= 0 && hour < 24 && minute >= 0 && minute < 60) {
+        return TimeOfDay(hour: hour, minute: minute);
+      }
+    }
+
+    return TimeOfDay.now();
+  }
+
+  String _formatTimeOfDay(TimeOfDay time, BuildContext context) {
+    final h = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
+    final m = time.minute.toString().padLeft(2, '0');
+    final period = time.period == DayPeriod.am ? 'AM' : 'PM';
+    return '${h.toString().padLeft(2, '0')}:$m $period';
+  }
+
   void _openTimeSelector({
     required BuildContext context,
     required String currentTime,
     required ValueChanged<String> onTimeChanged,
   }) {
+    final parentContext = context;
+    final initialTimeOfDay = _parseTimeOfDay(currentTime);
+
     showModalBottomSheet(
-      context: context,
+      context: parentContext,
       backgroundColor: Colors.transparent,
-      builder: (context) {
+      builder: (sheetContext) {
         return Container(
           decoration: const BoxDecoration(
             color: Color(0xFFFEF8F6),
@@ -451,13 +487,13 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                 child: ElevatedButton.icon(
                   onPressed: () {
                     final now = TimeOfDay.now();
-                    final formatted = now.format(context);
+                    final formatted = _formatTimeOfDay(now, parentContext);
                     onTimeChanged(formatted);
-                    Navigator.pop(context);
+                    Navigator.pop(sheetContext);
                   },
                   icon: const Icon(Icons.flash_on, color: Colors.white, size: 18),
                   label: Text(
-                    'Set to Now (${TimeOfDay.now().format(context)})',
+                    'Set to Now (${_formatTimeOfDay(TimeOfDay.now(), parentContext)})',
                     style: GoogleFonts.manrope(fontWeight: FontWeight.bold, fontSize: 15),
                   ),
                   style: ElevatedButton.styleFrom(
@@ -475,14 +511,14 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                 height: 52,
                 child: OutlinedButton.icon(
                   onPressed: () async {
-                    Navigator.pop(context);
+                    Navigator.pop(sheetContext);
                     final picked = await showTimePicker(
-                      context: context,
-                      initialTime: TimeOfDay.now(),
+                      context: parentContext,
+                      initialTime: initialTimeOfDay,
                     );
                     if (picked != null) {
-                      if (context.mounted) {
-                        onTimeChanged(picked.format(context));
+                      if (parentContext.mounted) {
+                        onTimeChanged(_formatTimeOfDay(picked, parentContext));
                       }
                     }
                   },

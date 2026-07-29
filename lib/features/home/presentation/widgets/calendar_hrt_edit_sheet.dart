@@ -1634,11 +1634,41 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
     );
   }
 
+  TimeOfDay _parseSheetTimeOfDay(String timeStr) {
+    final clean = timeStr.trim();
+    if (clean.isEmpty) return TimeOfDay.now();
+
+    final amPmMatch = RegExp(r'(\d{1,2}):(\d{2})\s*(AM|PM|am|pm)', caseSensitive: false).firstMatch(clean);
+    if (amPmMatch != null) {
+      int hour = int.parse(amPmMatch.group(1)!);
+      final minute = int.parse(amPmMatch.group(2)!);
+      final period = amPmMatch.group(3)!.toUpperCase();
+      if (period == 'PM' && hour < 12) hour += 12;
+      if (period == 'AM' && hour == 12) hour = 0;
+      return TimeOfDay(hour: hour, minute: minute);
+    }
+
+    final match24 = RegExp(r'(\d{1,2}):(\d{2})').firstMatch(clean);
+    if (match24 != null) {
+      final hour = int.parse(match24.group(1)!);
+      final minute = int.parse(match24.group(2)!);
+      if (hour >= 0 && hour < 24 && minute >= 0 && minute < 60) {
+        return TimeOfDay(hour: hour, minute: minute);
+      }
+    }
+
+    return TimeOfDay.now();
+  }
+
   void _showTimePicker(int index) {
+    final parentContext = context;
+    final currentTimeStr = _entries[index].timeTaken;
+    final initialTimeOfDay = _parseSheetTimeOfDay(currentTimeStr);
+
     showModalBottomSheet(
-      context: context,
+      context: parentContext,
       backgroundColor: Colors.transparent,
-      builder: (context) {
+      builder: (sheetContext) {
         return Container(
           decoration: const BoxDecoration(
             color: Color(0xFFFEF8F6),
@@ -1680,7 +1710,7 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                       _entries[index].timeTaken = formatted;
                       _entries[index].isTaken = true;
                     });
-                    Navigator.pop(context);
+                    Navigator.pop(sheetContext);
                   },
                   icon: const Icon(
                     Icons.flash_on,
@@ -1688,7 +1718,7 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                     size: 18,
                   ),
                   label: Text(
-                    'Set to Now (${TimeOfDay.now().format(context)})',
+                    'Set to Now (${TimeOfDay.now().format(parentContext)})',
                     style: GoogleFonts.manrope(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
@@ -1709,15 +1739,12 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                 height: 52,
                 child: OutlinedButton.icon(
                   onPressed: () async {
-                    Navigator.pop(context);
-                    final current = _entries[index].timeTaken.split(':');
-                    final hour = int.tryParse(current.first) ?? 8;
-                    final minute = int.tryParse(current.last) ?? 0;
+                    Navigator.pop(sheetContext);
                     final picked = await showTimePicker(
-                      context: this.context,
-                      initialTime: TimeOfDay(hour: hour, minute: minute),
+                      context: parentContext,
+                      initialTime: initialTimeOfDay,
                     );
-                    if (picked != null) {
+                    if (picked != null && parentContext.mounted) {
                       setState(() {
                         final h = picked.hour.toString().padLeft(2, '0');
                         final m = picked.minute.toString().padLeft(2, '0');

@@ -647,9 +647,8 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
       _isMedsInitialized = true;
       _isSymptomsInitialized = true;
 
-      // Initialize symptoms from profile
+      // Symptoms start unselected by default for fresh logging session
       _selectedSymptomIds.clear();
-      _selectedSymptomIds.addAll(profile.selectedStageSymptoms.map(sanitizeSymptomId));
 
       // Triggers start unchecked
       _selectedTriggerIds.clear();
@@ -669,8 +668,9 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
       for (final med in profile.otherMedications) {
         _otherMedsChecked[med.id] = true;
       }
-    } else if (profile == null && !_isMedsInitialized && !_isSymptomsInitialized) {
-      final meds = ref.watch(medicationsProvider).medications.where((m) => m.endedAt == null).toList();      if (meds.isNotEmpty) {
+    } else if (profile == null && !_isMedsInitialized && !_isSymptomsInitialized && !_existingLogLoaded) {
+      final meds = ref.watch(medicationsProvider).medications.where((m) => m.endedAt == null).toList();
+      if (meds.isNotEmpty) {
         _isMedsInitialized = true;
         for (final med in meds) {
           _hrtChecked[med.id] = false;
@@ -681,15 +681,9 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
           _initialHrtUnits[med.id] = med.unit;
         }
       }
-      final symptomsState = ref.watch(symptomsProvider);
-      final loggedIds = symptomsState.loggedSymptoms.map((l) => l.symptom.id).toList();
-      final targetIds = loggedIds.isNotEmpty ? loggedIds : symptomsState.frequentSymptomIds;
-      if (targetIds.isNotEmpty) {
-        _isSymptomsInitialized = true;
-        _selectedSymptomIds.clear();
-        _selectedSymptomIds.addAll(targetIds.map(sanitizeSymptomId));
-        _selectedTriggerIds.clear();
-      }
+      _isSymptomsInitialized = true;
+      _selectedSymptomIds.clear();
+      _selectedTriggerIds.clear();
       final otherMeds = ref.watch(otherMedicationsProvider).medications;
       if (otherMeds.isNotEmpty) {
         _otherMedsChecked.clear();

@@ -48,22 +48,28 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
   Map<Medication, int> _getUnmarkedCheckInMedications(List<Medication> activeMedications) {
     final Map<Medication, int> checkIns = {};
     final today = DateTime.now();
+    final todayOnly = DateTime(today.year, today.month, today.day);
 
     for (final med in activeMedications) {
       if (med.endedAt != null) continue; // Already stopped medications NEVER trigger check-in
       if (_dismissedCheckIns.contains(med.id)) continue;
 
+      // 1. Medication MUST have existed for at least 14 days
+      if (med.startedAt == null) continue;
+      final startOnly = DateTime(med.startedAt!.year, med.startedAt!.month, med.startedAt!.day);
+      final daysExisted = todayOnly.difference(startOnly).inDays;
+
+      if (daysExisted < AdherenceConstants.kUnmarkedDaysCheckInThreshold) {
+        // Younger than 14 days -> NEVER render check-in banner
+        continue;
+      }
+
       int unmarkedStreak = 0;
-      // Check up to 14 days back starting from yesterday
-      for (int i = 1; i <= 14; i++) {
-        final date = today.subtract(Duration(days: i));
-        
-        if (med.startedAt != null) {
-          final startOnly = DateTime(med.startedAt!.year, med.startedAt!.month, med.startedAt!.day);
-          final dateOnly = DateTime(date.year, date.month, date.day);
-          if (dateOnly.isBefore(startOnly)) {
-            break;
-          }
+      // 2. Check for a genuine 14-day gap in logged adherence
+      for (int i = 1; i <= AdherenceConstants.kUnmarkedDaysCheckInThreshold; i++) {
+        final date = todayOnly.subtract(Duration(days: i));
+        if (date.isBefore(startOnly)) {
+          break;
         }
 
         final monthKey = _monthKey(date);
