@@ -98,21 +98,19 @@ class HrtEditEntry {
     required this.timeTaken,
   });
 
-  /// Parse from the `Map<String, String>` format.
   factory HrtEditEntry.fromMap(Map<String, String> map) {
     final isTaken = map['isTaken'] == 'true';
     final details = map['details'] ?? '';
-    // Parse dose and unit from details like '50 mcg · Patch'
-    final detailParts = details.split('·');
-    String dose = '50';
-    String unit = 'mcg';
+    String dose = map['dose'] ?? '50';
+    String unit = map['unit'] ?? 'mcg';
     String applicationType = 'Patch';
+    final detailParts = details.split('·');
     if (detailParts.isNotEmpty) {
       final doseStr = detailParts.first.trim();
-      final doseMatch = RegExp(r'(\d+)\s*(\w+)').firstMatch(doseStr);
+      final doseMatch = RegExp(r'(\d+(?:\.\d+)?)\s*(\w+)').firstMatch(doseStr);
       if (doseMatch != null) {
-        dose = doseMatch.group(1) ?? '50';
-        unit = doseMatch.group(2) ?? 'mcg';
+        if (map['dose'] == null) dose = doseMatch.group(1) ?? '50';
+        if (map['unit'] == null) unit = doseMatch.group(2) ?? 'mcg';
       }
     }
     if (detailParts.length > 1) {
@@ -147,6 +145,8 @@ class HrtEditEntry {
       'details': '$dose $unit · $applicationType',
       'status': isTaken ? 'Taken $timeTaken' : 'Not taken',
       'isTaken': isTaken.toString(),
+      'dose': dose,
+      'unit': unit,
     };
   }
 }
@@ -351,12 +351,14 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
   void _setUnit(int index, String unit) {
     setState(() {
       _entries[index].unit = unit;
+      _entries[index].details = '${_entries[index].dose} $unit · ${_entries[index].applicationType}';
     });
   }
 
   void _setDose(int index, String dose) {
     setState(() {
       _entries[index].dose = dose;
+      _entries[index].details = '$dose ${_entries[index].unit} · ${_entries[index].applicationType}';
     });
   }
 
@@ -470,47 +472,8 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                   ),
                   TextButton(
                     onPressed: () {
-                      final initialEntries = widget.initialHrt
-                          .map(HrtEditEntry.fromMap)
-                          .toList();
-                      double initialDose = 0;
-                      if (index < initialEntries.length) {
-                        initialDose =
-                            double.tryParse(initialEntries[index].dose) ?? 0;
-                      }
-
-                      if (initialDose > 0 &&
-                          (tempDose - initialDose).abs() > 0.01) {
-                        showDialog(
-                          context: this.context,
-                          barrierDismissible: false,
-                          barrierColor: const Color(
-                            0xFF1D1B1A,
-                          ).withOpacity(0.4),
-                          builder: (dialogContext) {
-                            return DoseChangeAlert(
-                              change: {
-                                'name': _entries[index].name,
-                                'oldDose':
-                                    '${initialDose.toStringAsFixed(initialDose == initialDose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $unit',
-                                'newDose':
-                                    '${tempDose.toStringAsFixed(tempDose == tempDose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $unit',
-                              },
-                              onConfirm: () {
-                                Navigator.pop(dialogContext);
-                                onDoseChanged(tempDose);
-                                Navigator.pop(context);
-                              },
-                              onCancel: () {
-                                Navigator.pop(dialogContext);
-                              },
-                            );
-                          },
-                        );
-                      } else {
-                        onDoseChanged(tempDose);
-                        Navigator.pop(context);
-                      }
+                      onDoseChanged(tempDose);
+                      Navigator.pop(context);
                     },
                     child: Text(
                       'Done',
@@ -586,17 +549,30 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
   Widget build(BuildContext context) {
     // Dynamically listen to medicationsProvider updates
     ref.listen(medicationsProvider, (previous, next) {
-      if (previous != null) {
-        // Detect newly added medications not already present in _entries
-        for (final med in next.medications) {
-          final exists = _entries.any(
-            (entry) => entry.name.toLowerCase() == med.name.toLowerCase(),
-          );
-          if (!exists) {
+      // Detect newly added medications not already present in _entries
+      for (final med in next.medications) {
+        final exists = _entries.any(
+          (entry) => (entry.id != null && entry.id == med.id) || entry.name.toLowerCase() == med.name.toLowerCase(),
+        );
+        if (!exists) {
+          final selectedDate = widget.selectedDate ?? DateTime.now();
+          final target = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+          bool isActiveOnSelectedDate = true;
+          if (med.startedAt != null) {
+            final start = DateTime(med.startedAt!.year, med.startedAt!.month, med.startedAt!.day);
+            if (target.isBefore(start)) isActiveOnSelectedDate = false;
+          }
+          if (med.endedAt != null) {
+            final end = DateTime(med.endedAt!.year, med.endedAt!.month, med.endedAt!.day);
+            if (target.isAfter(end)) isActiveOnSelectedDate = false;
+          }
+
+          if (isActiveOnSelectedDate) {
             final appType = med.type.displayName;
             setState(() {
               _entries.add(
                 HrtEditEntry(
+                  id: med.id,
                   name: med.name,
                   details:
                       '${med.dose.toStringAsFixed(0)} ${med.unit} · $appType',
@@ -711,7 +687,7 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                   const SizedBox(height: 12),
 
                   // Medication cards
-                  ..._entries.asMap().entries.map((e) {
+                  ..._entries.asMap().entries.where((e) => _isMedActiveOnSelectedDate(e.value)).map((e) {
                     return _buildMedicationCard(e.key, e.value);
                   }),
 
@@ -720,11 +696,16 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                   // Button to add custom HRT medications
                   InkWell(
                     onTap: () {
+                      final now = DateTime.now();
+                      final isToday = widget.selectedDate == null ||
+                          (now.year == widget.selectedDate!.year &&
+                           now.month == widget.selectedDate!.month &&
+                           now.day == widget.selectedDate!.day);
                       showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
                         backgroundColor: Colors.transparent,
-                        builder: (context) => const AddMedicationModal(),
+                        builder: (context) => AddMedicationModal(showDiscontinuedToggle: !isToday),
                       );
                     },
                     child: Container(

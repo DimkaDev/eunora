@@ -185,7 +185,7 @@ void main() {
                   onPressed: () => showModalBottomSheet(
                     context: context,
                     isScrollControlled: true,
-                    builder: (_) => const AddMedicationModal(),
+                    builder: (_) => const AddMedicationModal(showDiscontinuedToggle: true),
                   ),
                   child: const Text('Open Add Modal'),
                 ),

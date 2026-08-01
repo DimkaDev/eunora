@@ -1065,6 +1065,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         maxChildSize: 0.95,
         builder: (_, scrollController) => CalendarHrtEditSheet(
           initialHrt: log.hrt.map((e) => Map<String, String>.from(e)).toList(),
+          selectedDate: _selectedDate,
           onSave: (updated) {
             // Delete removed medications first
             final updatedIds = updated.map((e) => e['id']).where((id) => id != null).toSet();

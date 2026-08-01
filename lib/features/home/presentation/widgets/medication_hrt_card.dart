@@ -7,7 +7,7 @@ class MedicationHrtCard extends StatelessWidget {
   final List<Medication> medications;
   final Map<String, bool> takenStatus;
   final Map<String, String> takenTime;
-  final ValueChanged<Map<String, bool>> onTakenStatusChanged;
+  final ValueChanged<Map<String, bool>>? onTakenStatusChanged;
   final VoidCallback? onManageTap;
 
   const MedicationHrtCard({
@@ -15,7 +15,7 @@ class MedicationHrtCard extends StatelessWidget {
     required this.medications,
     required this.takenStatus,
     required this.takenTime,
-    required this.onTakenStatusChanged,
+    this.onTakenStatusChanged,
     this.onManageTap,
   });
 
@@ -111,10 +111,10 @@ class MedicationHrtCard extends StatelessWidget {
                   activeBadgeText = 'Applied';
                 }
 
-                // Check frequency to see if it's daily
-                final isDaily = med.frequency.toLowerCase().contains('daily') ||
-                                med.frequency.toLowerCase().contains('bedtime');
-                final pendingText = isDaily ? 'PENDING' : 'OPTIONAL';
+                // Check frequency to see if it's scheduled today
+                final freq = med.frequency.toLowerCase();
+                final isScheduled = freq.isEmpty || freq.contains('daily') || freq.contains('bedtime') || freq.contains('every day');
+                final pendingText = isScheduled ? 'SCHEDULED TODAY' : 'NOT SCHEDULED TODAY';
 
                 final timeStr = takenTime[med.name] != null ? ' • ${takenTime[med.name]}' : '';
 
@@ -128,11 +128,7 @@ class MedicationHrtCard extends StatelessWidget {
                     schedule: isTaken ? '${med.doseAndFrequency}$timeStr' : med.doseAndFrequency,
                     isTaken: isTaken,
                     pendingText: pendingText,
-                    onChanged: (val) {
-                      final newStatus = Map<String, bool>.from(takenStatus);
-                      newStatus[med.name] = val;
-                      onTakenStatusChanged(newStatus);
-                    },
+                    onTap: onManageTap,
                     activeBadgeText: activeBadgeText,
                   ),
                 );
@@ -151,141 +147,123 @@ class MedicationHrtCard extends StatelessWidget {
     required String schedule,
     required bool isTaken,
     required String pendingText,
-    required ValueChanged<bool> onChanged,
+    required VoidCallback? onTap,
     required String activeBadgeText,
   }) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isTaken
-            ? const Color(0xFFEDDDF5).withOpacity(0.3)
-            : const Color(0xFFF8F2F0),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Left portion: Icon & details
-          Expanded(
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 4,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    icon,
-                    color: iconColor,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name,
-                        style: GoogleFonts.manrope(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: isTaken
-                              ? const Color(0xFF4D4355)
-                              : AppTheme.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        schedule,
-                        style: GoogleFonts.manrope(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                          color: isTaken
-                              ? const Color(0xFF4D4355).withOpacity(0.7)
-                              : const Color(0xFF78716C),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isTaken
+              ? const Color(0xFFE8F5ED)
+              : const Color(0xFFF8F2F0),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isTaken ? const Color(0xFFC7E8D5) : Colors.transparent,
           ),
-
-          // Right portion: Switch and status badge
-          Row(
-            children: [
-              // Status Badge
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: isTaken
-                      ? const Color(0xFFE8F0E8)
-                      : const Color(0xFFE7E1DF),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  isTaken ? activeBadgeText.toUpperCase() : pendingText,
-                  style: GoogleFonts.manrope(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.5,
-                    color: isTaken
-                        ? const Color(0xFF2D402D)
-                        : const Color(0xFF78716C),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-
-              // Custom Switch
-              GestureDetector(
-                onTap: () => onChanged(!isTaken),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: 40,
-                  height: 24,
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: isTaken ? AppTheme.primary : const Color(0xFFD6D3D1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: AnimatedAlign(
-                    duration: const Duration(milliseconds: 200),
-                    alignment: isTaken ? Alignment.centerRight : Alignment.centerLeft,
-                    child: Container(
-                      width: 20,
-                      height: 20,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black26,
-                            blurRadius: 2,
-                            offset: Offset(0, 1),
-                          ),
-                        ],
-                      ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Left portion: Icon & details
+            Expanded(
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: isTaken ? const Color(0xFFC7E8D5) : Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: isTaken
+                          ? []
+                          : const [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 4,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                    ),
+                    child: Icon(
+                      isTaken ? Icons.check : icon,
+                      color: isTaken ? const Color(0xFF2D5A3E) : iconColor,
+                      size: 20,
                     ),
                   ),
-                ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          name,
+                          style: GoogleFonts.manrope(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: isTaken
+                                ? const Color(0xFF1B432C)
+                                : AppTheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          schedule,
+                          style: GoogleFonts.manrope(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                            color: isTaken
+                                ? const Color(0xFF2D5A3E).withOpacity(0.8)
+                                : const Color(0xFF78716C),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ],
+            ),
+
+            // Right portion: Status badge indicating logged state
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: isTaken
+                    ? const Color(0xFFC7E8D5)
+                    : const Color(0xFFE7E1DF),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isTaken) ...[
+                    const Icon(
+                      Icons.check_circle,
+                      size: 12,
+                      color: Color(0xFF2D5A3E),
+                    ),
+                    const SizedBox(width: 4),
+                  ],
+                  Text(
+                    isTaken ? activeBadgeText.toUpperCase() : pendingText,
+                    style: GoogleFonts.manrope(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.5,
+                      color: isTaken
+                          ? const Color(0xFF2D5A3E)
+                          : const Color(0xFF78716C),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

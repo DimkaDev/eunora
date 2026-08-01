@@ -21,7 +21,7 @@ class AddMedicationModal extends ConsumerStatefulWidget {
   const AddMedicationModal({
     super.key,
     this.initialData,
-    this.showDiscontinuedToggle = true,
+    this.showDiscontinuedToggle = false,
   });
 
   @override

@@ -551,12 +551,30 @@ class _HomePageState extends ConsumerState<HomePage> {
                 }
               }
 
-              // 2. Update status and time for remaining medications
+              // 2. Update status, time, and dose for remaining medications
               for (final updated in updatedList) {
                 final name = updated['name'] ?? '';
                 final isTaken = updated['isTaken'] == 'true';
                 final status = updated['status'] ?? '';
-                
+                final doseStr = updated['dose'] ?? '';
+                final unitStr = updated['unit'] ?? '';
+
+                if (doseStr.isNotEmpty) {
+                  final newDose = double.tryParse(doseStr);
+                  if (newDose != null) {
+                    final currentMeds = ref.read(medicationsProvider).medications;
+                    final matchingMed = currentMeds.firstWhere(
+                      (m) => m.name.toLowerCase() == name.toLowerCase() || (updated['id'] != null && m.id == updated['id']),
+                      orElse: () => Medication(name: name, type: MedicationType.other, dose: newDose, unit: unitStr, frequency: 'daily'),
+                    );
+                    if (matchingMed.dose != newDose || (unitStr.isNotEmpty && matchingMed.unit != unitStr)) {
+                      ref.read(medicationsProvider.notifier).updateMedication(
+                        matchingMed.copyWith(dose: newDose, unit: unitStr.isNotEmpty ? unitStr : matchingMed.unit),
+                      );
+                    }
+                  }
+                }
+
                 String time = '08:00';
                 final match = RegExp(r'(\d{1,2}:\d{2})').firstMatch(status);
                 if (match != null) {

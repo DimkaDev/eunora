@@ -6,6 +6,7 @@ import 'package:eunora/features/onboarding/presentation/providers/medications_pr
 import 'package:eunora/features/onboarding/domain/models/medication.dart';
 import 'package:eunora/features/home/presentation/widgets/calendar_hrt_edit_sheet.dart';
 import 'package:eunora/features/onboarding/presentation/widgets/add_medication_modal.dart';
+import 'package:eunora/features/home/presentation/widgets/hrt_quick_edit_modal.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:eunora/core/services/firestore_service.dart';
@@ -554,8 +555,11 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
   }
 
   void _showHrtLoggingSheet(List<Medication> medications) {
+    final selectedDate = DateTime(_focusedMonth.year, _focusedMonth.month, _selectedDay);
+    final allMeds = ref.read(medicationsProvider).medications;
+    final relevantMeds = allMeds.where((m) => _isMedicationActiveOnDate(m, selectedDate)).toList();
     final targetLog = _monthlyLogs[_selectedDay];
-    final hrtList = medications.map((med) {
+    final hrtList = relevantMeds.map((med) {
       bool isTaken = false;
       String time = '08:00';
 
@@ -576,6 +580,8 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
         'details': '${med.dose.toStringAsFixed(0)} ${med.unit} · $appType',
         'status': isTaken ? 'Taken $time' : 'Not taken',
         'isTaken': isTaken.toString(),
+        'dose': med.dose.toStringAsFixed(0),
+        'unit': med.unit,
       };
     }).toList();
 
@@ -1024,7 +1030,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                       context: context,
                       isScrollControlled: true,
                       backgroundColor: Colors.transparent,
-                      builder: (context) => AddMedicationModal(initialData: med),
+                      builder: (context) => HrtQuickEditModal(medication: med),
                     );
                   },
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -1219,26 +1225,34 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
 
           return Opacity(
             opacity: isActiveOnDate ? 1.0 : 0.45,
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
-                    blurRadius: 16,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-                border: Border.all(color: const Color(0xFFEAE6E0)),
-              ),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: isActiveOnDate ? () => _showHrtLoggingSheet(medications) : null,
-                    child: Container(
+            child: InkWell(
+              onTap: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => HrtQuickEditModal(medication: med),
+                );
+              },
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                  border: Border.all(color: const Color(0xFFEAE6E0)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
@@ -1247,11 +1261,8 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                       ),
                       child: Icon(icon, color: iconColor, size: 22),
                     ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: isActiveOnDate ? () => _showHrtLoggingSheet(medications) : null,
+                    const SizedBox(width: 14),
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -1265,7 +1276,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            '${med.dose.toStringAsFixed(0)} ${med.unit} ${med.type.displayName.toLowerCase()} • Protocol dose',
+                            '${med.dose.toStringAsFixed(0)} ${med.unit} ${med.type.displayName.toLowerCase()} • ${med.frequency}',
                             style: GoogleFonts.manrope(
                               fontSize: 12,
                               color: const Color(0xFF9B8B7E),
@@ -1312,41 +1323,13 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                         ],
                       ),
                     ),
-                  ),
-                  GestureDetector(
-                    onTap: isActiveOnDate
-                        ? () async {
-                            await _saveHrtLogForSelectedDate(med, !isTaken);
-                          }
-                        : null,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: 44,
-                      height: 24,
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        color: (!isActiveOnDate)
-                            ? const Color(0xFFEAE6E0)
-                            : isTaken
-                                ? AppTheme.primary
-                                : const Color(0xFFEAE6E0),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: AnimatedAlign(
-                        duration: const Duration(milliseconds: 200),
-                        alignment: (isActiveOnDate && isTaken) ? Alignment.centerRight : Alignment.centerLeft,
-                        child: Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            color: isActiveOnDate ? Colors.white : const Color(0xFFD6CECB),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
+                    const Icon(
+                      Icons.chevron_right,
+                      color: Color(0xFF9B8B7E),
+                      size: 20,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
