@@ -238,13 +238,15 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         final List<Map<String, String>> hrtList = [];
         if (log.hrtIntakes.isNotEmpty) {
           for (final intake in log.hrtIntakes) {
-            hrtList.add({
-              'id': intake.medicationId,
-              'name': intake.name,
-              'details': '${intake.dose.toStringAsFixed(0)} ${intake.unit}',
-              'status': intake.isTaken ? 'Taken ${intake.time}' : 'Not taken',
-              'isTaken': intake.isTaken.toString(),
-            });
+            if (intake.isTaken) {
+              hrtList.add({
+                'id': intake.medicationId,
+                'name': intake.name,
+                'details': '${intake.dose.toStringAsFixed(0)} ${intake.unit}',
+                'status': 'Taken ${intake.time}',
+                'isTaken': 'true',
+              });
+            }
           }
         } else {
           if (log.estradiolChecked) {
@@ -1076,9 +1078,10 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
               }
             }
 
+            final takenOnly = updated.where((e) => e['isTaken'] == 'true').toList();
             setState(() {
               log.hrt.clear();
-              log.hrt.addAll(updated);
+              log.hrt.addAll(takenOnly);
             });
             _saveLogToFirestore(_selectedDate!.day, log);
           },

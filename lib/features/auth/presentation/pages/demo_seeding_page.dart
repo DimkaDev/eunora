@@ -13,6 +13,7 @@ import 'package:eunora/features/onboarding/domain/models/other_medication.dart';
 import 'package:eunora/features/onboarding/presentation/providers/menopause_stage_provider.dart';
 import 'package:eunora/features/home/domain/entities/daily_log.dart';
 import 'package:eunora/features/home/domain/entities/hrt_dose_change.dart';
+import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
 
 class DemoSeedingPage extends ConsumerStatefulWidget {
   const DemoSeedingPage({super.key});
@@ -48,14 +49,19 @@ class _DemoSeedingPageState extends ConsumerState<DemoSeedingPage> {
       final db = FirebaseFirestore.instance;
       final userDoc = db.collection('users').doc(user.uid);
 
-      // Step 3: Write user profile
+      // Step 3: Write user profile with full 90-day human HRT journey
+      final now = DateTime.now();
+      final ninetyDaysAgo = now.subtract(const Duration(days: 90));
+      final sixtyDaysAgo = now.subtract(const Duration(days: 60));
+      final thirtyDaysAgo = now.subtract(const Duration(days: 30));
+
       final profile = UserProfile(
         uid: user.uid,
         email: 'demo@eunora.test',
-        age: 45,
+        age: 48,
         menopauseStage: MenopauseStage.irregular,
         yearsInStage: '2',
-        selectedStageSymptoms: ['s_hot_flashes', 's_mood', 's_sleep', 's_dryness', 's_joint_pain'],
+        selectedStageSymptoms: ['s_hot_flashes', 's_night_sweats', 's_sleep', 's_fatigue', 's_mood', 's_brain_fog'],
         medications: [
           Medication(
             id: 'med_estradiol',
@@ -64,6 +70,10 @@ class _DemoSeedingPageState extends ConsumerState<DemoSeedingPage> {
             dose: 50.0,
             unit: 'mcg',
             frequency: 'Twice weekly',
+            drugCategory: 'estrogen',
+            isCombinedProduct: false,
+            market: 'US',
+            startedAt: ninetyDaysAgo,
           ),
           Medication(
             id: 'med_progesterone',
@@ -72,20 +82,36 @@ class _DemoSeedingPageState extends ConsumerState<DemoSeedingPage> {
             dose: 100.0,
             unit: 'mg',
             frequency: 'Daily',
+            drugCategory: 'progestogen',
+            isCombinedProduct: false,
+            market: 'US',
+            startedAt: ninetyDaysAgo,
+          ),
+          Medication(
+            id: 'med_estradiol_cream',
+            name: 'Estradiol Cream 0.01%',
+            type: MedicationType.cream,
+            dose: 0.5,
+            unit: 'mg',
+            frequency: 'Twice weekly',
+            drugCategory: 'estrogen',
+            isCombinedProduct: false,
+            market: 'US',
+            startedAt: thirtyDaysAgo,
           ),
         ],
         otherMedications: [
           OtherMedication(name: 'Vitamin D3', category: 'Supplement'),
-          OtherMedication(name: 'Magnesium', category: 'Supplement'),
+          OtherMedication(name: 'Magnesium Glycinate', category: 'Supplement'),
         ],
         isOnboardingCompleted: true,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+        createdAt: ninetyDaysAgo,
+        updatedAt: now,
       );
       await userDoc.set(profile.toMap());
 
-      // Step 4: Seed dose change
-      _update('Adding HRT history...', 0.15);
+      // Step 4: Seed HRT dose change history (Dose increase from 25 to 50 mcg 60 days ago)
+      _update('Adding HRT history & dose changes...', 0.15);
       final doseChange = HrtDoseChange(
         userId: user.uid,
         medicationId: 'med_estradiol',
@@ -93,65 +119,67 @@ class _DemoSeedingPageState extends ConsumerState<DemoSeedingPage> {
         oldDose: 25.0,
         newDose: 50.0,
         unit: 'mcg',
-        changeDate: DateTime.now().subtract(const Duration(days: 45)),
+        changeDate: sixtyDaysAgo,
       );
       await userDoc.collection('hrt_dose_changes').doc(doseChange.id).set(doseChange.toMap());
 
-      // Step 5: Seed 91 days of logs (write individually to avoid batch limits)
-      final random = Random(42); // fixed seed for reproducibility
+      // Step 5: Seed 91 days of realistic daily logs (write individually)
+      final random = Random(42); // fixed seed for realistic reproducibility
       final totalDays = 91;
 
-      // Available symptoms for diverse logging
+      // Available symptoms matching current app library
       final symptomsLib = [
-        {'id': 's_hot_flashes', 'name': 'Hot Flashes', 'iconName': 'thermostat', 'category': 'Vasomotor Symptoms'},
-        {'id': 's_sleep', 'name': 'Sleep quality', 'iconName': 'dark_mode', 'category': 'Sleep & Energy'},
-        {'id': 's_mood', 'name': 'Mood swings', 'iconName': 'mood', 'category': 'Emotional & Cognitive'},
-        {'id': 's_anxiety', 'name': 'Anxiety', 'iconName': 'psychology', 'category': 'Emotional & Cognitive'},
-        {'id': 's_irritability', 'name': 'Irritability', 'iconName': 'sentiment_dissatisfied', 'category': 'Emotional & Cognitive'},
-        {'id': 's_joint_pain', 'name': 'Joint pain', 'iconName': 'accessibility_new', 'category': 'Physical Wellbeing'},
-        {'id': 's_headaches', 'name': 'Headaches', 'iconName': 'skull', 'category': 'Physical Wellbeing'},
-        {'id': 's_fatigue', 'name': 'Fatigue', 'iconName': 'battery_low', 'category': 'Physical Wellbeing'},
+        {'id': 's_hot_flashes', 'name': 'Hot flashes', 'iconName': 'thermostat', 'category': 'Vasomotor'},
+        {'id': 's_night_sweats', 'name': 'Night sweats', 'iconName': 'water_drop', 'category': 'Vasomotor'},
+        {'id': 's_sleep', 'name': 'Sleep problems', 'iconName': 'dark_mode', 'category': 'Sleep & Energy'},
+        {'id': 's_fatigue', 'name': 'Fatigue', 'iconName': 'battery_low', 'category': 'Sleep & Energy'},
+        {'id': 's_mood', 'name': 'Mood swings', 'iconName': 'mood', 'category': 'Emotional'},
+        {'id': 's_brain_fog', 'name': 'Brain fog', 'iconName': 'psychology', 'category': 'Emotional'},
+        {'id': 's_joint_pain', 'name': 'Joint pain', 'iconName': 'accessibility_new', 'category': 'Physical'},
       ];
 
       for (int i = 90; i >= 0; i--) {
         final dayIndex = 90 - i;
-        final progressFraction = 0.15 + (dayIndex / totalDays) * 0.85;
+        final progressFraction = 0.15 + (dayIndex / totalDays) * 0.80;
         _update('Generating day ${dayIndex + 1} of $totalDays...', progressFraction);
 
         final logDate = DateTime.now().subtract(Duration(days: i));
         final logDateStr =
             '${logDate.year}-${logDate.month.toString().padLeft(2, '0')}-${logDate.day.toString().padLeft(2, '0')}';
 
-        // Triggers and logic
-        final hasAlcohol = random.nextDouble() < 0.25;
-        final hasCaffeine = random.nextDouble() < 0.55;
-        final isHighStress = random.nextDouble() < 0.40;
-        final hasExercise = random.nextDouble() < 0.35;
-        final isDehydrated = random.nextDouble() < 0.20;
+        // Real-world human trends over 90 days:
+        // Phase 1 (days 90-60 ago): Low HRT dose (25 mcg), high symptoms
+        // Phase 2 (days 59-30 ago): Increased HRT dose (50 mcg), symptoms improving
+        // Phase 3 (days 29-0 ago): Added Estradiol Cream, symptoms well-controlled
+        final bool isPhase1 = i > 60;
+        final bool isPhase2 = i <= 60 && i > 30;
+
+        final hasAlcohol = random.nextDouble() < (isPhase1 ? 0.30 : 0.20);
+        final hasCaffeine = random.nextDouble() < 0.50;
+        final isHighStress = random.nextDouble() < (isPhase1 ? 0.45 : 0.25);
+        final hasExercise = random.nextDouble() < (isPhase1 ? 0.25 : 0.45);
 
         final List<String> triggers = [];
-        if (hasAlcohol) triggers.add('Alcohol: ${random.nextInt(2) + 1} glasses');
-        if (hasCaffeine) triggers.add('Caffeine: ${random.nextInt(3) + 1} cups');
+        if (hasAlcohol) triggers.add('Alcohol');
+        if (hasCaffeine) triggers.add('Caffeine');
         if (isHighStress) triggers.add('Stress');
-        if (hasExercise) triggers.add('Exercise: 30+ min');
-        if (isDehydrated) triggers.add('Dehydration');
+        if (hasExercise) triggers.add('Exercise');
 
-        // Choose 2 to 7 random symptoms to report today
-        final int symptomCount = random.nextInt(6) + 2; // 2 to 7 symptoms
+        // Choose random symptoms based on current treatment phase
+        final int symptomCount = isPhase1 ? (random.nextInt(3) + 3) : (isPhase2 ? (random.nextInt(3) + 1) : (random.nextInt(2) + 1));
         final selectedSymptoms = (List<Map<String, dynamic>>.from(symptomsLib)..shuffle(random)).take(symptomCount).toList();
 
         final symptomsData = selectedSymptoms.map((sym) {
           final String id = sym['id']!;
-          double intensity = random.nextInt(3) + 1.0; // default mild-mod 1-3
+          // Phase 1 has higher base intensity than Phase 2 & 3
+          double baseIntensity = isPhase1 ? (random.nextInt(2) + 3.0) : (isPhase2 ? (random.nextInt(2) + 1.5) : (random.nextInt(2) + 1.0));
 
-          // Add realistic correlations:
-          if (id == 's_hot_flashes' && hasAlcohol) intensity = random.nextInt(2) + 4.0; // severe 4-5
-          if (id == 's_sleep' && hasCaffeine) intensity = random.nextInt(2) + 3.0;
-          if (id == 's_mood' && isHighStress) intensity = random.nextInt(2) + 4.0;
-          if (id == 's_hot_flashes' && hasExercise) intensity = max(1.0, intensity - 1.5); // exercise decreases flashes
+          if (id == 's_hot_flashes' && hasAlcohol) baseIntensity = max(1.0, min(5.0, baseIntensity + 1.5));
+          if (id == 's_sleep' && hasCaffeine) baseIntensity = max(1.0, min(5.0, baseIntensity + 1.0));
+          if (id == 's_mood' && isHighStress) baseIntensity = max(1.0, min(5.0, baseIntensity + 1.5));
 
-          final String severity = intensity >= 4.0 ? 'Severe' : (intensity >= 2.5 ? 'Moderate' : 'Mild');
-          final int duration = (random.nextInt(45) + 15); // 15 to 60 mins duration
+          final String severity = baseIntensity >= 4.0 ? 'Severe' : (baseIntensity >= 2.5 ? 'Moderate' : 'Mild');
+          final int duration = (random.nextInt(45) + 15);
 
           return {
             'id': id,
@@ -159,38 +187,48 @@ class _DemoSeedingPageState extends ConsumerState<DemoSeedingPage> {
             'iconName': sym['iconName']!,
             'category': sym['category']!,
             'isCustom': false,
-            'intensity': intensity,
+            'intensity': baseIntensity,
             'severity': severity,
             'durationMinutes': duration,
           };
         }).toList();
 
-        // Stable HRT dose - change dose from 25 to 50 mcg on day 45 (45 days ago)
-        final bool beforeDoseChange = i > 45;
-        final double currentEstradiolDose = beforeDoseChange ? 25.0 : 50.0;
+        // Active HRT intake for this specific historical day
+        final double currentEstradiolDose = isPhase1 ? 25.0 : 50.0;
+        final bool isTakenToday = random.nextDouble() < 0.95; // 95% realistic adherence
 
-        final hrtIntakes = [
+        final List<HrtIntakeLog> hrtIntakes = [
           HrtIntakeLog(
             medicationId: 'med_estradiol',
             name: 'Estradiol Patch',
             dose: currentEstradiolDose,
             unit: 'mcg',
-            time: '08:30 AM',
-            isTaken: true,
+            time: '08:30',
+            isTaken: isTakenToday,
           ),
           HrtIntakeLog(
             medicationId: 'med_progesterone',
             name: 'Progesterone',
             dose: 100.0,
             unit: 'mg',
-            time: '08:00 PM',
-            isTaken: true,
+            time: '21:00',
+            isTaken: isTakenToday,
           ),
         ];
 
-        // Diverse sleep hours
-        final double baseSleep = isHighStress ? 5.5 : 7.5;
-        final double sleepDuration = baseSleep + (random.nextDouble() * 2.0 - 1.0); // jitter sleep
+        if (i <= 30) {
+          hrtIntakes.add(HrtIntakeLog(
+            medicationId: 'med_estradiol_cream',
+            name: 'Estradiol Cream 0.01%',
+            dose: 0.5,
+            unit: 'mg',
+            time: '21:30',
+            isTaken: isTakenToday,
+          ));
+        }
+
+        final double baseSleep = isHighStress ? 5.5 : (isPhase1 ? 6.2 : 7.8);
+        final double sleepDuration = max(4.0, min(10.0, baseSleep + (random.nextDouble() * 1.5 - 0.75)));
 
         await userDoc.collection('daily_logs').doc(logDateStr).set({
           'id': logDateStr,
@@ -205,23 +243,29 @@ class _DemoSeedingPageState extends ConsumerState<DemoSeedingPage> {
           'foodsNotes': '',
           'customTriggerCounters': {},
           'customTriggerTexts': {},
-          'estradiolChecked': true,
+          'estradiolChecked': isTakenToday,
           'estradiolDose': currentEstradiolDose,
           'estradiolUnit': 'mcg',
-          'estradiolTime': '08:30 AM',
-          'progesteroneChecked': true,
+          'estradiolTime': '08:30',
+          'progesteroneChecked': isTakenToday,
           'progesteroneDose': 100.0,
           'progesteroneUnit': 'mg',
-          'progesteroneTime': '08:00 PM',
-          'vitaminDChecked': true,
-          'magnesiumChecked': true,
+          'progesteroneTime': '21:00',
+          'vitaminDChecked': isTakenToday,
+          'magnesiumChecked': isTakenToday,
           'sleepDuration': sleepDuration,
           'hydrationCups': 5 + random.nextInt(5),
-          'additionalNotes': 'Auto-generated demo log.',
+          'additionalNotes': isPhase1 ? 'Persistent hot flashes at night.' : (isPhase2 ? 'Feeling much better on 50mcg.' : 'Feeling stable and well-rested.'),
           'hrtIntakes': hrtIntakes.map((h) => h.toMap()).toList(),
+          'isCompleted': true,
+          'lastCompletedStep': 5,
           'createdAt': DateTime.now().toIso8601String(),
         });
       }
+
+      // Step 6: Refresh Riverpod providers so UI immediately loads seeded data
+      _update('Finalizing demo state...', 0.98);
+      await ref.read(medicationsProvider.notifier).loadFromFirestore();
 
       _update('Done! Opening your demo...', 1.0);
       await Future.delayed(const Duration(milliseconds: 600));
