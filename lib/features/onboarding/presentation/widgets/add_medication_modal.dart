@@ -37,7 +37,9 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
   MedicationType _selectedType = MedicationType.pill;
   String _selectedUnit = 'mg';
   String _selectedFrequency = 'Daily';
-  
+  List<int> _selectedWeekdays = [1, 2, 3, 4, 5, 6, 7];
+  String? _weekdayError;
+
   bool _showDropdown = false;
   List<String> _filteredMeds = [];
   bool _isCustomDose = false;
@@ -78,6 +80,7 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
       _selectedType = med.type;
       _selectedUnit = med.unit;
       _selectedFrequency = med.frequency;
+      _selectedWeekdays = List<int>.from(med.selectedWeekdays);
       _isNotCurrentlyTaking = med.endedAt != null;
       _startDate = med.startedAt;
       _endDate = med.endedAt;
@@ -89,6 +92,9 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
       }
     } else if (widget.initialData is String) {
       _nameController.text = widget.initialData as String;
+      _selectedWeekdays = [1, 2, 3, 4, 5, 6, 7];
+    } else {
+      _selectedWeekdays = [1, 2, 3, 4, 5, 6, 7];
     }
 
     _nameController.addListener(_onNameChanged);
@@ -389,6 +395,21 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
         }
       }
 
+      // Validate weekday selection for Weekly and Twice Weekly
+      final lowerFreq = _selectedFrequency.toLowerCase();
+      if (lowerFreq.contains('twice') && _selectedWeekdays.length != 2) {
+        setState(() {
+          _weekdayError = 'Please select exactly 2 days of the week.';
+        });
+        return;
+      }
+      if (lowerFreq.contains('weekly') && !lowerFreq.contains('twice') && _selectedWeekdays.length != 1) {
+        setState(() {
+          _weekdayError = 'Please select 1 day of the week.';
+        });
+        return;
+      }
+
       // Auto-detect drug category from library if user typed the name manually
       final def = HrtQuickAddService.findByName(_nameController.text.trim());
       final finalCategory = def != null ? def.category.name : _drugCategory;
@@ -405,6 +426,7 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
         dose: double.tryParse(_doseController.text) ?? 0,
         unit: _selectedUnit,
         frequency: _selectedFrequency,
+        selectedWeekdays: _selectedWeekdays,
         notes: _notesController.text.isEmpty ? null : _notesController.text,
         drugCategory: finalCategory,
         isCombinedProduct: finalIsCombined,
@@ -1296,36 +1318,135 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
 
   Widget _buildFrequencySelector() {
     final frequencies = ['Daily', 'Twice weekly', 'Weekly', 'As needed'];
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: frequencies.map((freq) {
-        final isSelected = _selectedFrequency == freq;
-        return ChoiceChip(
-          label: Text(freq),
-          selected: isSelected,
-          onSelected: (selected) {
-            if (selected) {
-              setState(() => _selectedFrequency = freq);
-            }
-          },
-          selectedColor: const Color(0xFF67594E),
-          backgroundColor: Colors.white,
-          labelStyle: TextStyle(
-            color: isSelected ? Colors.white : const Color(0xFF4D453F),
-            fontSize: 13,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(
-              color: isSelected ? const Color(0xFF67594E) : const Color(0xFFD0C4BC),
+    final lowerFreq = _selectedFrequency.toLowerCase();
+    final isTwice = lowerFreq.contains('twice');
+    final isWeekly = lowerFreq.contains('weekly') && !isTwice;
+
+    final weekdayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: frequencies.map((freq) {
+            final isSelected = _selectedFrequency == freq;
+            return ChoiceChip(
+              label: Text(freq),
+              selected: isSelected,
+              onSelected: (selected) {
+                if (selected) {
+                  setState(() {
+                    _selectedFrequency = freq;
+                    _weekdayError = null;
+                    if (freq.toLowerCase().contains('twice')) {
+                      if (_selectedWeekdays.length != 2) _selectedWeekdays = [1, 4];
+                    } else if (freq.toLowerCase().contains('weekly')) {
+                      if (_selectedWeekdays.length != 1) _selectedWeekdays = [1];
+                    } else if (freq.toLowerCase().contains('needed')) {
+                      _selectedWeekdays = [];
+                    } else {
+                      _selectedWeekdays = [1, 2, 3, 4, 5, 6, 7];
+                    }
+                  });
+                }
+              },
+              selectedColor: const Color(0xFF67594E),
+              backgroundColor: Colors.white,
+              labelStyle: TextStyle(
+                color: isSelected ? Colors.white : const Color(0xFF4D453F),
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: isSelected ? const Color(0xFF67594E) : const Color(0xFFD0C4BC),
+                ),
+              ),
+              showCheckmark: false,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            );
+          }).toList(),
+        ),
+        if (isTwice || isWeekly) ...[
+          const SizedBox(height: 14),
+          Text(
+            isTwice
+                ? 'Select Scheduled Days (Required: 2 days)'
+                : 'Select Scheduled Day (Required: 1 day)',
+            style: GoogleFonts.manrope(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF67594E),
             ),
           ),
-          showCheckmark: false,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        );
-      }).toList(),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: List.generate(7, (index) {
+              final weekday = index + 1; // 1 = Mon ... 7 = Sun
+              final isSelected = _selectedWeekdays.contains(weekday);
+
+              return ChoiceChip(
+                label: Text(weekdayNames[index]),
+                selected: isSelected,
+                onSelected: (_) {
+                  setState(() {
+                    _weekdayError = null;
+                    final newSelected = List<int>.from(_selectedWeekdays);
+                    if (isWeekly) {
+                      newSelected.clear();
+                      newSelected.add(weekday);
+                    } else {
+                      if (isSelected) {
+                        if (newSelected.length > 1) {
+                          newSelected.remove(weekday);
+                        }
+                      } else {
+                        if (newSelected.length >= 2) {
+                          newSelected.removeAt(0);
+                        }
+                        newSelected.add(weekday);
+                      }
+                    }
+                    newSelected.sort();
+                    _selectedWeekdays = newSelected;
+                  });
+                },
+                selectedColor: const Color(0xFF67594E),
+                backgroundColor: Colors.white,
+                labelStyle: TextStyle(
+                  color: isSelected ? Colors.white : const Color(0xFF4D453F),
+                  fontSize: 12,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: BorderSide(
+                    color: isSelected ? const Color(0xFF67594E) : const Color(0xFFD0C4BC),
+                  ),
+                ),
+                showCheckmark: false,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              );
+            }),
+          ),
+          if (_weekdayError != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              _weekdayError!,
+              style: GoogleFonts.manrope(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF8C3A25),
+              ),
+            ),
+          ],
+        ],
+      ],
     );
   }
 

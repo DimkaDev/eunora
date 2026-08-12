@@ -16,6 +16,7 @@ import 'package:eunora/features/home/domain/entities/hrt_dose_change.dart';
 
 import 'package:eunora/features/home/presentation/widgets/hrt_tracker/hrt_adherence_card.dart';
 import 'package:eunora/features/hrt_tracker/domain/adherence_constants.dart';
+import 'package:eunora/features/hrt_tracker/domain/hrt_schedule_service.dart';
 import 'package:eunora/features/hrt_tracker/presentation/widgets/still_taking_check_in_card.dart';
 
 class HrtTrackerPage extends ConsumerStatefulWidget {
@@ -1286,6 +1287,9 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     final today = DateTime.now();
     final isTodaySelected = today.year == selectedDate.year && today.month == selectedDate.month && today.day == selectedDate.day;
 
+    final scheduledMeds = medications.where((m) => !HrtScheduleService.isAsNeeded(m)).toList();
+    final asNeededMeds = medications.where((m) => HrtScheduleService.isAsNeeded(m)).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1295,7 +1299,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
             GestureDetector(
               onTap: () => _showHrtLoggingSheet(medications),
               child: Text(
-                isTodaySelected ? "TODAY'S DOSE" : "LOGGED DOSE",
+                isTodaySelected ? "TODAY'S SCHEDULED DOSES" : "SCHEDULED DOSES",
                 style: GoogleFonts.manrope(
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
@@ -1315,154 +1319,296 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
           ],
         ),
         const SizedBox(height: 12),
-        ...medications.map((med) {
-          final selectedDate = DateTime(_focusedMonth.year, _focusedMonth.month, _selectedDay);
-          final isActiveOnDate = _isMedicationActiveOnDate(med, selectedDate);
+        if (scheduledMeds.isEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text(
+              'No scheduled medications configured.',
+              style: GoogleFonts.manrope(fontSize: 13, color: const Color(0xFF78716C), fontStyle: FontStyle.italic),
+            ),
+          )
+        else
+          ...scheduledMeds.map((med) => _buildMedicationDoseTile(med: med, selectedDate: selectedDate, selectedLog: selectedLog)),
 
-          bool isTaken = false;
-          String time = '';
+        if (asNeededMeds.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Text(
+            "AS NEEDED MEDICATIONS",
+            style: GoogleFonts.manrope(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.2,
+              color: const Color(0xFF67594E),
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...asNeededMeds.map((med) => _buildAsNeededDoseTile(med: med, selectedDate: selectedDate, selectedLog: selectedLog)),
+        ],
+      ],
+    );
+  }
 
-          if (selectedLog != null) {
-            final logged = selectedLog.hrtIntakes.firstWhere(
-              (h) => h.medicationId == med.id || h.name.toLowerCase() == med.name.toLowerCase(),
-              orElse: () => HrtIntakeLog(medicationId: med.id, name: med.name, dose: med.dose, unit: med.unit, time: '', isTaken: false),
-            );
-            isTaken = logged.isTaken;
-            time = logged.time;
-          }
+  Widget _buildMedicationDoseTile({
+    required Medication med,
+    required DateTime selectedDate,
+    DailyLog? selectedLog,
+  }) {
+    final isActiveOnDate = _isMedicationActiveOnDate(med, selectedDate);
+    HrtIntakeLog? loggedIntake;
 
-          final icon = med.type == MedicationType.patch 
-              ? Icons.water_drop 
-              : Icons.medication;
-          final iconColor = med.type == MedicationType.patch 
-              ? const Color(0xFFE8A89B) 
-              : const Color(0xFFD8C9E0);
-          final iconBg = iconColor.withOpacity(0.12);
+    if (selectedLog != null) {
+      loggedIntake = selectedLog.hrtIntakes.firstWhere(
+        (h) => h.medicationId == med.id || h.name.toLowerCase() == med.name.toLowerCase(),
+        orElse: () => HrtIntakeLog(medicationId: med.id, name: med.name, dose: med.dose, unit: med.unit, time: '', isTaken: false),
+      );
+    }
 
-          String inactiveReason = '';
-          if (!isActiveOnDate) {
-            final target = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
-            if (med.startedAt != null && target.isBefore(DateTime(med.startedAt!.year, med.startedAt!.month, med.startedAt!.day))) {
-              inactiveReason = 'Not started yet';
-            } else if (med.endedAt != null && target.isAfter(DateTime(med.endedAt!.year, med.endedAt!.month, med.endedAt!.day))) {
-              inactiveReason = 'Discontinued';
-            } else {
-              inactiveReason = 'Inactive on this date';
-            }
-          }
+    final dailyState = HrtScheduleService.getDailyState(
+      med: med,
+      date: selectedDate,
+      loggedIntake: loggedIntake,
+    );
 
-          return Opacity(
-            opacity: isActiveOnDate ? 1.0 : 0.45,
-            child: InkWell(
-              onTap: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (context) => HrtQuickEditModal(medication: med),
-                );
-              },
-              borderRadius: BorderRadius.circular(20),
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(16),
+    final icon = med.type == MedicationType.patch ? Icons.water_drop : Icons.medication;
+    final iconColor = med.type == MedicationType.patch ? const Color(0xFFE8A89B) : const Color(0xFFD8C9E0);
+    final iconBg = iconColor.withOpacity(0.12);
+
+    String statusText = '';
+    Color statusColor = const Color(0xFF9B8B7E);
+    Widget? statusIcon;
+
+    if (!isActiveOnDate) {
+      final target = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+      if (med.startedAt != null && target.isBefore(DateTime(med.startedAt!.year, med.startedAt!.month, med.startedAt!.day))) {
+        statusText = 'Not started yet';
+      } else if (med.endedAt != null && target.isAfter(DateTime(med.endedAt!.year, med.endedAt!.month, med.endedAt!.day))) {
+        statusText = 'Discontinued';
+      } else {
+        statusText = 'Inactive on this date';
+      }
+      statusColor = const Color(0xFF8C3A25);
+    } else {
+      switch (dailyState) {
+        case DailyScheduledState.logged:
+          final actionWord = med.type == MedicationType.patch ? 'Applied' : 'Taken';
+          final timeVal = loggedIntake?.time ?? "";
+          statusText = timeVal.isNotEmpty ? '$actionWord at $timeVal' : actionWord;
+          statusColor = const Color(0xFF2D5A3E);
+          statusIcon = const Icon(Icons.check_circle, size: 14, color: Color(0xFF2D5A3E));
+          break;
+        case DailyScheduledState.readyToLog:
+          statusText = 'Ready to log';
+          statusColor = const Color(0xFF817266);
+          break;
+        case DailyScheduledState.notScheduledToday:
+          statusText = 'Not scheduled today';
+          statusColor = const Color(0xFF9B8B7E);
+          break;
+        case DailyScheduledState.asNeeded:
+          statusText = 'As Needed';
+          statusColor = const Color(0xFF67594E);
+          break;
+      }
+    }
+
+    return Opacity(
+      opacity: isActiveOnDate ? 1.0 : 0.45,
+      child: InkWell(
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (context) => HrtQuickEditModal(medication: med),
+          );
+        },
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
+            border: Border.all(color: const Color(0xFFEAE6E0)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                  border: Border.all(color: const Color(0xFFEAE6E0)),
+                  color: iconBg,
+                  shape: BoxShape.circle,
                 ),
-                child: Row(
+                child: Icon(icon, color: iconColor, size: 22),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: iconBg,
-                        shape: BoxShape.circle,
+                    Text(
+                      med.name,
+                      style: GoogleFonts.notoSerif(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.onSurface,
                       ),
-                      child: Icon(icon, color: iconColor, size: 22),
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            med.name,
-                            style: GoogleFonts.notoSerif(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.onSurface,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${med.dose.toStringAsFixed(0)} ${med.unit} ${med.type.displayName.toLowerCase()} • ${med.frequency}',
-                            style: GoogleFonts.manrope(
-                              fontSize: 12,
-                              color: const Color(0xFF9B8B7E),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          if (!isActiveOnDate)
-                            Text(
-                              inactiveReason,
-                              style: GoogleFonts.manrope(
-                                fontSize: 11,
-                                color: const Color(0xFF8C3A25),
-                                fontWeight: FontWeight.bold,
-                              ),
-                            )
-                          else if (isTaken)
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.check_circle,
-                                  size: 14,
-                                  color: Color(0xFF2D5A3E),
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'Taken at $time',
-                                  style: GoogleFonts.manrope(
-                                    fontSize: 11,
-                                    color: const Color(0xFF2D5A3E),
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            )
-                          else
-                            Text(
-                              'Not logged yet',
-                              style: GoogleFonts.manrope(
-                                fontSize: 11,
-                                color: const Color(0xFF9B8B7E),
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${med.dose.toStringAsFixed(med.dose == med.dose.toInt() ? 0 : 2)} ${med.unit} ${med.type.displayName.toLowerCase()} • ${med.formattedFrequency}',
+                      style: GoogleFonts.manrope(
+                        fontSize: 12,
+                        color: const Color(0xFF9B8B7E),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        if (statusIcon != null) ...[
+                          statusIcon,
+                          const SizedBox(width: 4),
                         ],
-                      ),
-                    ),
-                    const Icon(
-                      Icons.chevron_right,
-                      color: Color(0xFF9B8B7E),
-                      size: 20,
+                        Text(
+                          statusText,
+                          style: GoogleFonts.manrope(
+                            fontSize: 11,
+                            color: statusColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
+              const Icon(
+                Icons.chevron_right,
+                color: Color(0xFF9B8B7E),
+                size: 20,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAsNeededDoseTile({
+    required Medication med,
+    required DateTime selectedDate,
+    DailyLog? selectedLog,
+  }) {
+    bool isTaken = false;
+    String time = '';
+
+    if (selectedLog != null) {
+      final logged = selectedLog.hrtIntakes.firstWhere(
+        (h) => h.medicationId == med.id || h.name.toLowerCase() == med.name.toLowerCase(),
+        orElse: () => HrtIntakeLog(medicationId: med.id, name: med.name, dose: med.dose, unit: med.unit, time: '', isTaken: false),
+      );
+      isTaken = logged.isTaken;
+      time = logged.time;
+    }
+
+    final iconColor = const Color(0xFFB5A79E);
+    final iconBg = iconColor.withOpacity(0.12);
+
+    return InkWell(
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => HrtQuickEditModal(medication: med),
+        );
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFAF8F5),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0xFFEAE6E0)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: iconBg,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.medical_services, color: Color(0xFF67594E), size: 20),
             ),
-          );
-        }),
-      ],
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    med.name,
+                    style: GoogleFonts.notoSerif(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${med.dose.toStringAsFixed(med.dose == med.dose.toInt() ? 0 : 2)} ${med.unit} • As needed',
+                    style: GoogleFonts.manrope(
+                      fontSize: 12,
+                      color: const Color(0xFF9B8B7E),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  if (isTaken)
+                    Row(
+                      children: [
+                        const Icon(Icons.check_circle, size: 14, color: Color(0xFF2D5A3E)),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Logged at $time',
+                          style: GoogleFonts.manrope(fontSize: 11, color: const Color(0xFF2D5A3E), fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    )
+                  else
+                    Text(
+                      'Available on demand',
+                      style: GoogleFonts.manrope(fontSize: 11, color: const Color(0xFF67594E), fontStyle: FontStyle.italic),
+                    ),
+                ],
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => _showHrtLoggingSheet([med]),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isTaken ? const Color(0xFFEAE6E0) : const Color(0xFF67594E),
+                foregroundColor: isTaken ? const Color(0xFF4D453F) : Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: Text(
+                isTaken ? 'Edit' : 'Log dose',
+                style: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

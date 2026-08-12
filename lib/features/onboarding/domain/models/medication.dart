@@ -57,7 +57,8 @@ class Medication {
   final String market;
   final DateTime? startedAt;
   final DateTime? endedAt;
-
+  /// List of ISO weekday numbers (1 = Monday, ..., 7 = Sunday) on which this medication is scheduled.
+  final List<int> selectedWeekdays;
 
   Medication({
     String? id,
@@ -73,7 +74,21 @@ class Medication {
     this.market = 'uk',
     this.startedAt,
     this.endedAt,
-  }) : id = id ?? const Uuid().v4();
+    List<int>? selectedWeekdays,
+  })  : selectedWeekdays = selectedWeekdays ?? defaultWeekdaysForFrequency(frequency),
+        id = id ?? const Uuid().v4();
+
+  static List<int> defaultWeekdaysForFrequency(String freq) {
+    final lower = freq.toLowerCase();
+    if (lower.contains('twice')) {
+      return const [1, 4]; // Monday & Thursday
+    } else if (lower.contains('weekly')) {
+      return const [1]; // Monday
+    } else if (lower.contains('needed')) {
+      return const []; // As Needed
+    }
+    return const [1, 2, 3, 4, 5, 6, 7]; // Daily
+  }
 
   Medication copyWith({
     String? name,
@@ -89,6 +104,7 @@ class Medication {
     DateTime? startedAt,
     DateTime? endedAt,
     bool clearEndedAt = false,
+    List<int>? selectedWeekdays,
   }) {
     return Medication(
       id: id,
@@ -104,6 +120,7 @@ class Medication {
       market: market ?? this.market,
       startedAt: startedAt ?? this.startedAt,
       endedAt: clearEndedAt ? null : (endedAt ?? this.endedAt),
+      selectedWeekdays: selectedWeekdays ?? this.selectedWeekdays,
     );
   }
 
@@ -122,17 +139,24 @@ class Medication {
       'market': market,
       'startedAt': startedAt?.toIso8601String(),
       'endedAt': endedAt?.toIso8601String(),
+      'selectedWeekdays': selectedWeekdays,
     };
   }
 
   factory Medication.fromMap(Map<String, dynamic> map) {
+    final freq = map['frequency'] as String? ?? '';
+    final rawWeekdays = map['selectedWeekdays'] as List<dynamic>?;
+    final List<int>? parsedWeekdays = rawWeekdays != null
+        ? rawWeekdays.map((e) => (e as num).toInt()).toList()
+        : null;
+
     return Medication(
       id: map['id'] as String?,
       name: map['name'] as String? ?? '',
       type: MedicationType.values.byName(map['type'] as String? ?? 'other'),
       dose: (map['dose'] as num? ?? 0.0).toDouble(),
       unit: map['unit'] as String? ?? '',
-      frequency: map['frequency'] as String? ?? '',
+      frequency: freq,
       notes: map['notes'] as String?,
       drugCategory: map['drugCategory'] as String? ?? 'systemicEstrogen',
       isCombinedProduct: map['isCombinedProduct'] as bool? ?? false,
@@ -140,8 +164,33 @@ class Medication {
       market: map['market'] as String? ?? 'uk',
       startedAt: map['startedAt'] != null ? DateTime.tryParse(map['startedAt'] as String) : null,
       endedAt: map['endedAt'] != null ? DateTime.tryParse(map['endedAt'] as String) : null,
+      selectedWeekdays: parsedWeekdays,
     );
   }
 
-  String get doseAndFrequency => '${dose.toStringAsFixed(dose == dose.toInt() ? 0 : 2)} $unit • $frequency';
+  String get weekdaysString {
+    final lowerFreq = frequency.toLowerCase();
+    if (lowerFreq.contains('daily') ||
+        lowerFreq.contains('needed') ||
+        selectedWeekdays.isEmpty ||
+        selectedWeekdays.length == 7) {
+      return '';
+    }
+    final names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final sorted = List<int>.from(selectedWeekdays)..sort();
+    return sorted.map((w) => names[w - 1]).join(', ');
+  }
+
+  String get formattedFrequency {
+    final days = weekdaysString;
+    if (days.isNotEmpty) {
+      return '$frequency ($days)';
+    }
+    return frequency;
+  }
+
+  String get doseAndFrequency {
+    final formattedDose = dose.toStringAsFixed(dose == dose.toInt() ? 0 : 2);
+    return '$formattedDose $unit • $formattedFrequency';
+  }
 }

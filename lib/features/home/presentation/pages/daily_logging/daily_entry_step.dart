@@ -13,6 +13,8 @@ import 'package:eunora/features/home/presentation/widgets/dose_change_alert.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:eunora/core/services/firestore_service.dart';
 import 'package:eunora/features/home/domain/entities/daily_log.dart';
+import 'package:eunora/features/hrt_tracker/domain/hrt_schedule_service.dart';
+
 enum HrtLogStatus { pending, taken, skipped }
 
 class SuccessCheckmark extends StatefulWidget {
@@ -739,17 +741,19 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
     required String title,
     required String subtitle,
     required IconData icon,
-    required HrtLogStatus status,
+    required bool checked,
+    required DailyScheduledState dailyState,
     required VoidCallback onTap,
+    String activeBadgeText = 'Taken',
   }) {
-    Color tileBgColor = Colors.white;
-    Color tileBorderColor = const Color(0xFFF2EDEA);
-    Color textColor = AppTheme.onSurface;
-    Color subtitleColor = AppTheme.outline;
-    Color iconColor = AppTheme.primary;
+    Color tileBgColor;
+    Color tileBorderColor;
+    Color textColor;
+    Color subtitleColor;
+    Color iconColor;
     Widget? trailingWidget;
 
-    if (status == HrtLogStatus.taken) {
+    if (checked || dailyState == DailyScheduledState.logged) {
       tileBgColor = const Color(0xFFE8F5ED);
       tileBorderColor = const Color(0xFFC7E8D5);
       textColor = const Color(0xFF1B432C);
@@ -765,7 +769,7 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              'Taken',
+              activeBadgeText,
               style: GoogleFonts.manrope(
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
@@ -777,32 +781,71 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
           const SuccessCheckmark(),
         ],
       );
-    } else if (status == HrtLogStatus.pending) {
-      tileBgColor = Colors.white;
-      tileBorderColor = const Color(0xFFF2EDEA);
+    } else if (dailyState == DailyScheduledState.asNeeded) {
+      tileBgColor = const Color(0xFFF5F3FF);
+      tileBorderColor = const Color(0xFFE8E2FA);
       textColor = AppTheme.onSurface;
-      subtitleColor = AppTheme.outline;
-      iconColor = AppTheme.primary;
+      subtitleColor = const Color(0xFF6B52B6).withValues(alpha: 0.8);
+      iconColor = const Color(0xFF6B52B6);
       trailingWidget = Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: AppTheme.primary.withValues(alpha: 0.1),
+              color: const Color(0xFFE8E2FA),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.edit_calendar, color: AppTheme.primary, size: 10),
+                const Icon(
+                  Icons.medical_services,
+                  color: Color(0xFF6B52B6),
+                  size: 10,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'As needed',
+                  style: GoogleFonts.manrope(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF6B52B6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          const Icon(Icons.chevron_right, size: 16, color: Color(0xFF6B52B6)),
+        ],
+      );
+    } else if (dailyState == DailyScheduledState.readyToLog) {
+      tileBgColor = const Color(0xFFFFF9F5);
+      tileBorderColor = const Color(0xFFF5E6DD);
+      textColor = AppTheme.onSurface;
+      subtitleColor = const Color(0xFFC85A32).withValues(alpha: 0.8);
+      iconColor = const Color(0xFFC85A32);
+      trailingWidget = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFECE0),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.schedule, color: Color(0xFFC85A32), size: 10),
                 const SizedBox(width: 4),
                 Text(
                   'Ready to log',
                   style: GoogleFonts.manrope(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.primary,
+                    color: const Color(0xFFC85A32),
                   ),
                 ),
               ],
@@ -813,38 +856,43 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
         ],
       );
     } else {
-      tileBgColor = const Color(0xFFFFF6F4);
-      tileBorderColor = const Color(0xFFFFE3DC);
-      textColor = const Color(0xFF5A2518);
-      subtitleColor = const Color(0xFF8C3A25).withValues(alpha: 0.7);
-      iconColor = const Color(0xFF8C3A25);
+      // notScheduledToday
+      tileBgColor = const Color(0xFFF7F6F5);
+      tileBorderColor = const Color(0xFFEBE8E5);
+      textColor = const Color(0xFF7F756E);
+      subtitleColor = const Color(0xFF8C827A);
+      iconColor = const Color(0xFF8C827A);
       trailingWidget = Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFDAD3),
+              color: const Color(0xFFEBE8E5),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.info_outline, color: Color(0xFF8C3A25), size: 10),
+                const Icon(
+                  Icons.event_busy,
+                  color: Color(0xFF8C827A),
+                  size: 10,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   'Not scheduled today',
                   style: GoogleFonts.manrope(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFF8C3A25),
+                    color: const Color(0xFF8C827A),
                   ),
                 ),
               ],
             ),
           ),
           const SizedBox(width: 8),
-          const Icon(Icons.chevron_right, size: 16, color: Color(0xFF8C3A25)),
+          const Icon(Icons.chevron_right, size: 16, color: Color(0xFF8C827A)),
         ],
       );
     }
@@ -859,10 +907,10 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: status == HrtLogStatus.taken
+            color: (checked || dailyState == DailyScheduledState.logged)
                 ? const Color(0xFFC7E8D5).withValues(alpha: 0.4)
-                : status == HrtLogStatus.skipped
-                    ? const Color(0xFFFFDAD3).withValues(alpha: 0.4)
+                : dailyState == DailyScheduledState.notScheduledToday
+                    ? const Color(0xFFEBE8E5).withValues(alpha: 0.4)
                     : const Color(0xFFEDDDF5).withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(16),
           ),
@@ -964,24 +1012,40 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                   final time = widget.hrtTimes[med.id] ?? '08:00 AM';
                   final lastTaken = _medLastTaken[med.id] ?? _medLastTaken[med.name.toLowerCase()];
 
-                  final isScheduled = _isScheduledToday(med.frequency, lastTaken);
-                  final status = checked
-                      ? HrtLogStatus.taken
-                      : (isScheduled ? HrtLogStatus.pending : HrtLogStatus.skipped);
+                  final targetDate = widget.loggingDate ?? DateTime.now();
+
+                  final loggedIntake = checked
+                      ? HrtIntakeLog(
+                          medicationId: med.id,
+                          name: med.name,
+                          dose: dose,
+                          unit: unit,
+                          time: time,
+                          isTaken: true,
+                        )
+                      : null;
+
+                  final dailyState = HrtScheduleService.getDailyState(
+                    med: med,
+                    date: targetDate,
+                    loggedIntake: loggedIntake,
+                  );
 
                   return Column(
                     children: [
                       _buildMedRow(
                         title: med.name,
                         subtitle: checked
-                            ? '${dose.toStringAsFixed(dose == dose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $unit • $time • ${med.frequency}'
-                            : '${med.frequency} • ' + (lastTaken == null
+                            ? '${dose.toStringAsFixed(dose == dose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $unit • $time • ${med.formattedFrequency}'
+                            : '${med.formattedFrequency} • ' + (lastTaken == null
                                 ? 'No information'
                                 : 'Last taken: ${_formatDate(lastTaken)}'),
                         icon: med.type == MedicationType.gel
                             ? Icons.opacity
                             : Icons.medication,
-                        status: status,
+                        checked: checked,
+                        dailyState: dailyState,
+                        activeBadgeText: med.type == MedicationType.patch ? 'Applied' : 'Taken',
                         onTap: () {
                           setState(() {
                             _expandedIndex = _expandedIndex == index ? null : index;

@@ -3,6 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/features/onboarding/domain/models/medication.dart';
 
+import 'package:eunora/features/hrt_tracker/domain/hrt_schedule_service.dart';
+import 'package:eunora/features/home/domain/entities/daily_log.dart';
+
 class MedicationHrtCard extends StatelessWidget {
   final List<Medication> medications;
   final Map<String, bool> takenStatus;
@@ -111,10 +114,29 @@ class MedicationHrtCard extends StatelessWidget {
                   activeBadgeText = 'Applied';
                 }
 
-                // Check frequency to see if it's scheduled today
-                final freq = med.frequency.toLowerCase();
-                final isScheduled = freq.isEmpty || freq.contains('daily') || freq.contains('bedtime') || freq.contains('every day');
-                final pendingText = isScheduled ? 'SCHEDULED TODAY' : 'NOT SCHEDULED TODAY';
+                final loggedIntake = isTaken
+                    ? HrtIntakeLog(
+                        medicationId: med.id,
+                        name: med.name,
+                        dose: med.dose,
+                        unit: med.unit,
+                        time: takenTime[med.name] ?? '',
+                        isTaken: true,
+                      )
+                    : null;
+
+                final dailyState = HrtScheduleService.getDailyState(
+                  med: med,
+                  date: DateTime.now(),
+                  loggedIntake: loggedIntake,
+                );
+
+                String pendingText = 'SCHEDULED TODAY';
+                if (dailyState == DailyScheduledState.asNeeded) {
+                  pendingText = 'AS NEEDED';
+                } else if (dailyState == DailyScheduledState.notScheduledToday) {
+                  pendingText = 'NOT SCHEDULED TODAY';
+                }
 
                 final timeStr = takenTime[med.name] != null ? ' • ${takenTime[med.name]}' : '';
 
@@ -127,7 +149,7 @@ class MedicationHrtCard extends StatelessWidget {
                     name: med.name,
                     schedule: isTaken ? '${med.doseAndFrequency}$timeStr' : med.doseAndFrequency,
                     isTaken: isTaken,
-                    pendingText: pendingText,
+                    dailyState: dailyState,
                     onTap: onManageTap,
                     activeBadgeText: activeBadgeText,
                   ),
@@ -146,10 +168,48 @@ class MedicationHrtCard extends StatelessWidget {
     required String name,
     required String schedule,
     required bool isTaken,
-    required String pendingText,
+    required DailyScheduledState dailyState,
     required VoidCallback? onTap,
     required String activeBadgeText,
   }) {
+    Color containerBg;
+    Color containerBorder;
+    Color badgeBg;
+    Color badgeColor;
+    IconData? badgeIcon;
+    String badgeText;
+
+    if (isTaken || dailyState == DailyScheduledState.logged) {
+      containerBg = const Color(0xFFE8F5ED);
+      containerBorder = const Color(0xFFC7E8D5);
+      badgeBg = const Color(0xFFC7E8D5);
+      badgeColor = const Color(0xFF2D5A3E);
+      badgeIcon = Icons.check_circle;
+      badgeText = activeBadgeText.toUpperCase();
+    } else if (dailyState == DailyScheduledState.asNeeded) {
+      containerBg = const Color(0xFFF5F3FF);
+      containerBorder = const Color(0xFFE8E2FA);
+      badgeBg = const Color(0xFFE8E2FA);
+      badgeColor = const Color(0xFF6B52B6);
+      badgeIcon = Icons.medical_services;
+      badgeText = 'AS NEEDED';
+    } else if (dailyState == DailyScheduledState.notScheduledToday) {
+      containerBg = const Color(0xFFF7F6F5);
+      containerBorder = const Color(0xFFEBE8E5);
+      badgeBg = const Color(0xFFEBE8E5);
+      badgeColor = const Color(0xFF8C827A);
+      badgeIcon = Icons.event_busy;
+      badgeText = 'NOT SCHEDULED TODAY';
+    } else {
+      // readyToLog / SCHEDULED TODAY
+      containerBg = const Color(0xFFFFF9F5);
+      containerBorder = const Color(0xFFF5E6DD);
+      badgeBg = const Color(0xFFFFECE0);
+      badgeColor = const Color(0xFFC85A32);
+      badgeIcon = Icons.schedule;
+      badgeText = 'SCHEDULED TODAY';
+    }
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -157,13 +217,9 @@ class MedicationHrtCard extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isTaken
-              ? const Color(0xFFE8F5ED)
-              : const Color(0xFFF8F2F0),
+          color: containerBg,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isTaken ? const Color(0xFFC7E8D5) : Colors.transparent,
-          ),
+          border: Border.all(color: containerBorder),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -232,31 +288,27 @@ class MedicationHrtCard extends StatelessWidget {
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: isTaken
-                    ? const Color(0xFFC7E8D5)
-                    : const Color(0xFFE7E1DF),
+                color: badgeBg,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (isTaken) ...[
-                    const Icon(
-                      Icons.check_circle,
-                      size: 12,
-                      color: Color(0xFF2D5A3E),
+                  if (badgeIcon != null) ...[
+                    Icon(
+                      badgeIcon,
+                      size: 11,
+                      color: badgeColor,
                     ),
                     const SizedBox(width: 4),
                   ],
                   Text(
-                    isTaken ? activeBadgeText.toUpperCase() : pendingText,
+                    badgeText,
                     style: GoogleFonts.manrope(
                       fontSize: 9,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 0.5,
-                      color: isTaken
-                          ? const Color(0xFF2D5A3E)
-                          : const Color(0xFF78716C),
+                      color: badgeColor,
                     ),
                   ),
                 ],

@@ -3,7 +3,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
+import 'package:eunora/features/onboarding/domain/models/medication.dart';
 import 'package:eunora/features/home/domain/entities/daily_log.dart';
+
+import 'package:eunora/features/hrt_tracker/domain/hrt_schedule_service.dart';
 
 class HrtAdherenceCard extends ConsumerStatefulWidget {
   final DateTime focusedMonth;
@@ -24,7 +27,10 @@ class _HrtAdherenceCardState extends ConsumerState<HrtAdherenceCard> {
 
   @override
   Widget build(BuildContext context) {
-    final activeMeds = ref.watch(medicationsProvider).medications.where((m) => m.endedAt == null).toList();
+    final providerMeds = ref.watch(medicationsProvider).medications
+        .where((m) => m.endedAt == null)
+        .where((m) => !HrtScheduleService.isAsNeeded(m))
+        .toList();
     final totalDays = DateUtils.getDaysInMonth(widget.focusedMonth.year, widget.focusedMonth.month);
 
     final today = DateTime.now();
@@ -34,35 +40,61 @@ class _HrtAdherenceCardState extends ConsumerState<HrtAdherenceCard> {
     int totalScheduled = 0;
     int totalLogged = 0;
 
-    for (int day = 1; day <= limitDay; day++) {
-      final log = widget.monthlyLogs[day];
-      if (log != null) {
-        if (_selectedMedicationId == null) {
-          totalScheduled += log.hrtIntakes.length;
-          totalLogged += log.hrtIntakes.where((h) => h.isTaken).length;
-        } else {
-          final medIntakes = log.hrtIntakes.where(
-            (h) => h.medicationId == _selectedMedicationId || h.name.toLowerCase() == _selectedMedicationId!.toLowerCase(),
-          );
-          totalScheduled += medIntakes.length;
-          totalLogged += medIntakes.where((h) => h.isTaken).length;
+    if (providerMeds.isEmpty) {
+      for (int day = 1; day <= limitDay; day++) {
+        final log = widget.monthlyLogs[day];
+        if (log != null) {
+          if (_selectedMedicationId == null) {
+            totalScheduled += log.hrtIntakes.length;
+            totalLogged += log.hrtIntakes.where((h) => h.isTaken).length;
+          } else {
+            final medIntakes = log.hrtIntakes.where(
+              (h) => h.medicationId == _selectedMedicationId || h.name.toLowerCase() == _selectedMedicationId!.toLowerCase(),
+            );
+            totalScheduled += medIntakes.length;
+            totalLogged += medIntakes.where((h) => h.isTaken).length;
+          }
+        }
+      }
+    } else {
+      final targetMeds = _selectedMedicationId == null
+          ? providerMeds
+          : providerMeds.where((m) => m.id == _selectedMedicationId || m.name.toLowerCase() == _selectedMedicationId!.toLowerCase()).toList();
+
+      for (int day = 1; day <= limitDay; day++) {
+        final date = DateTime(widget.focusedMonth.year, widget.focusedMonth.month, day);
+        final log = widget.monthlyLogs[day];
+
+        for (final med in targetMeds) {
+          if (HrtScheduleService.isScheduledOnDate(med, date)) {
+            totalScheduled++;
+            if (log != null) {
+              final intake = log.hrtIntakes.firstWhere(
+                (h) => h.medicationId == med.id || h.name.toLowerCase() == med.name.toLowerCase(),
+                orElse: () => HrtIntakeLog(medicationId: med.id, name: med.name, dose: med.dose, unit: med.unit, time: '', isTaken: false),
+              );
+              if (intake.isTaken) {
+                totalLogged++;
+              }
+            }
+          }
         }
       }
     }
 
     int rate = 100;
-    if (totalScheduled > 0) {
+    if (totalScheduled > 0 && widget.monthlyLogs.isNotEmpty) {
       rate = ((totalLogged / totalScheduled) * 100).round();
     } else {
-      final hasMeds = activeMeds.isNotEmpty;
-      rate = hasMeds ? 100 : 0;
+      final hasMeds = providerMeds.isNotEmpty;
+      rate = hasMeds ? 100 : (totalScheduled > 0 ? ((totalLogged / totalScheduled) * 100).round() : 100);
     }
 
     final String selectedName = _selectedMedicationId == null
         ? 'Combined'
-        : (activeMeds.firstWhere(
+        : (providerMeds.firstWhere(
             (m) => m.id == _selectedMedicationId || m.name.toLowerCase() == _selectedMedicationId!.toLowerCase(),
-            orElse: () => activeMeds.isNotEmpty ? activeMeds.first : activeMeds.first,
+            orElse: () => providerMeds.isNotEmpty ? providerMeds.first : Medication(name: 'Medication', type: MedicationType.pill, dose: 1, unit: 'mg', frequency: 'Daily'),
           ).name);
 
     return Container(
@@ -132,7 +164,7 @@ class _HrtAdherenceCardState extends ConsumerState<HrtAdherenceCard> {
               ),
             ],
           ),
-          if (activeMeds.length > 1) ...[
+          if (providerMeds.length > 1) ...[
             const SizedBox(height: 14),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -143,7 +175,7 @@ class _HrtAdherenceCardState extends ConsumerState<HrtAdherenceCard> {
                     isSelected: _selectedMedicationId == null,
                     onTap: () => setState(() => _selectedMedicationId = null),
                   ),
-                  ...activeMeds.map((med) => Padding(
+                  ...providerMeds.map((med) => Padding(
                         padding: const EdgeInsets.only(left: 6),
                         child: _buildFilterChip(
                           label: med.name,

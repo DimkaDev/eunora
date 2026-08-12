@@ -299,7 +299,7 @@ void main() {
 
       // Verify title and subtitle rendering
       expect(find.text('Still taking Utrogestan?'), findsOneWidget);
-      expect(find.text('Unlogged for 14 consecutive days'), findsOneWidget);
+      expect(find.text('Unlogged for 14 scheduled occurrences'), findsOneWidget);
 
       // Verify buttons exist
       expect(find.text('Yes, still taking'), findsOneWidget);
