@@ -2103,7 +2103,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       }
     }
 
-    // Default unselected past/present days
+    // Default unselected past/present days (matching Severity Legend: white for No Data)
     return GestureDetector(
       onTap: onTap,
       child: Center(
@@ -2111,8 +2111,14 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           width: 34,
           height: 34,
           decoration: BoxDecoration(
-            color: backgroundColor ?? Colors.transparent,
+            color: backgroundColor ?? Colors.white,
             borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: backgroundColor != null
+                  ? Colors.transparent
+                  : const Color(0xFFE5DFD7),
+              width: 1,
+            ),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -2121,8 +2127,8 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                 '$day',
                 style: GoogleFonts.manrope(
                   fontSize: 13,
-                  fontWeight: hasData ? FontWeight.bold : FontWeight.w400,
-                  color: hasData ? AppTheme.onSurface : const Color(0xFFB0A89E),
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.onSurface,
                 ),
               ),
               if (hasData && backgroundColor == null) ...[

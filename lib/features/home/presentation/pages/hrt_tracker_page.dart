@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:math' as math;
 import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
 import 'package:eunora/features/onboarding/domain/models/medication.dart';
@@ -330,14 +331,23 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     if (user == null) return;
 
     final key = _monthKey(targetMonth);
+    final isFocusedMonth = targetMonth.year == _focusedMonth.year && targetMonth.month == _focusedMonth.month;
+
     if (_monthLogsCache.containsKey(key)) {
-      if (targetMonth.year == _focusedMonth.year && targetMonth.month == _focusedMonth.month) {
+      if (isFocusedMonth) {
         setState(() {
           _monthlyLogs = _monthLogsCache[key] ?? {};
           _monthlyDoseChanges = _monthDoseChangesCache[key] ?? [];
+          _isLoadingLogs = false;
         });
       }
       return;
+    }
+
+    if (isFocusedMonth && mounted) {
+      setState(() {
+        _isLoadingLogs = true;
+      });
     }
 
     try {
@@ -367,10 +377,16 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
         setState(() {
           _monthlyLogs = fetchedLogs;
           _monthlyDoseChanges = monthlyChanges;
+          _isLoadingLogs = false;
         });
       }
     } catch (e) {
       debugPrint("Error fetching HRT logs for $key: $e");
+      if (mounted && targetMonth.year == _focusedMonth.year && targetMonth.month == _focusedMonth.month) {
+        setState(() {
+          _isLoadingLogs = false;
+        });
+      }
     }
   }
 
@@ -392,11 +408,20 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
   }
 
   void _nextMonth() {
+    final now = DateTime.now();
+    if (_focusedMonth.year > now.year || (_focusedMonth.year == now.year && _focusedMonth.month >= now.month)) {
+      return; // Cannot navigate to future months
+    }
     setState(() {
       _isSwiping = true;
       _dragOffset = 0.0;
       _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1);
-      _selectedDay = 1;
+      final today = DateTime.now();
+      if (_focusedMonth.year == today.year && _focusedMonth.month == today.month) {
+        _selectedDay = math.min(_selectedDay, today.day);
+      } else {
+        _selectedDay = 1;
+      }
     });
     _fetchLogsForFocusedMonth();
     Future.delayed(const Duration(milliseconds: 450), () {
@@ -409,6 +434,11 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
   }
 
   void _selectDay(int day) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final targetDate = DateTime(_focusedMonth.year, _focusedMonth.month, day);
+    if (targetDate.isAfter(today)) return; // Disallow selecting future dates
+
     setState(() {
       _selectedDay = day;
     });
@@ -1147,7 +1177,105 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     );
   }
 
+  Widget _buildHrtDoseSkeleton(List<Medication> medications) {
+    final count = medications.isNotEmpty ? medications.length : 2;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              width: 100,
+              height: 14,
+              decoration: BoxDecoration(
+                color: const Color(0xFFEAE6E0),
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            Container(
+              width: 80,
+              height: 12,
+              decoration: BoxDecoration(
+                color: const Color(0xFFEAE6E0),
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        ...List.generate(count, (index) => Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
+            border: Border.all(color: const Color(0xFFEAE6E0)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF2EFEA),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 120,
+                      height: 14,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF2EFEA),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      width: 160,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF5F3EF),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      width: 80,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF2EFEA),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        )),
+      ],
+    );
+  }
+
   Widget _buildTodayDoseSection(List<Medication> medications) {
+    final isMonthLoaded = _monthLogsCache.containsKey(_monthKey(_focusedMonth));
+    if (!isMonthLoaded || _isLoadingLogs) {
+      return _buildHrtDoseSkeleton(medications);
+    }
+
     final selectedDate = DateTime(_focusedMonth.year, _focusedMonth.month, _selectedDay);
     final selectedLog = _monthlyLogs[_selectedDay];
 
@@ -1415,17 +1543,28 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                   ),
                 ),
                 const SizedBox(width: 4),
-                Container(
-                  width: 36,
-                  height: 36,
-                  child: InkWell(
-                    onTap: _nextMonth,
-                    borderRadius: BorderRadius.circular(18),
-                    child: const Center(
-                      child: Icon(Icons.chevron_right, size: 22, color: Color(0xFF9B8B7E)),
+                Builder(builder: (context) {
+                  final now = DateTime.now();
+                  final isCurrentOrFutureMonth = _focusedMonth.year > now.year ||
+                      (_focusedMonth.year == now.year && _focusedMonth.month >= now.month);
+                  return Container(
+                    width: 36,
+                    height: 36,
+                    child: InkWell(
+                      onTap: isCurrentOrFutureMonth ? null : _nextMonth,
+                      borderRadius: BorderRadius.circular(18),
+                      child: Center(
+                        child: Icon(
+                          Icons.chevron_right,
+                          size: 22,
+                          color: isCurrentOrFutureMonth
+                              ? const Color(0xFF9B8B7E).withOpacity(0.3)
+                              : const Color(0xFF9B8B7E),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                }),
               ],
             ),
           ],
@@ -1448,7 +1587,17 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
           onHorizontalDragEnd: (details) {
             if (_dragOffset.abs() > 60.0) {
               if (_dragOffset < 0) {
-                _nextMonth();
+                final now = DateTime.now();
+                final isCurrentOrFutureMonth = _focusedMonth.year > now.year ||
+                    (_focusedMonth.year == now.year && _focusedMonth.month >= now.month);
+                if (!isCurrentOrFutureMonth) {
+                  _nextMonth();
+                } else {
+                  setState(() {
+                    _isSwiping = false;
+                    _dragOffset = 0.0;
+                  });
+                }
               } else {
                 _previousMonth();
               }
@@ -1651,22 +1800,47 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
       dayWidgets.add(const SizedBox(width: 32, height: 32));
     }
 
-    final today = DateTime.now();
+    final now = DateTime.now();
+    final todayDate = DateTime(now.year, now.month, now.day);
     final targetMonthKey = _monthKey(targetMonth);
     final targetLogs = _monthLogsCache[targetMonthKey] ?? {};
     final targetChanges = _monthDoseChangesCache[targetMonthKey] ?? [];
 
     for (int day = 1; day <= totalDays; day++) {
+      final dayDate = DateTime(targetMonth.year, targetMonth.month, day);
+      final isFuture = dayDate.isAfter(todayDate);
+
       final isSelected = _selectedDay == day &&
           _focusedMonth.year == targetMonth.year &&
           _focusedMonth.month == targetMonth.month;
-      final isToday = today.year == targetMonth.year && today.month == targetMonth.month && today.day == day;
+      final isToday = todayDate.year == targetMonth.year && todayDate.month == targetMonth.month && todayDate.day == day;
 
       final dayLog = targetLogs[day];
       final hasLoggedMeds = dayLog != null && dayLog.hrtIntakes.isNotEmpty;
       final isTaken = hasLoggedMeds && dayLog.hrtIntakes.any((h) => h.isTaken);
 
       final isDoseChange = targetChanges.any((change) => change.changeDate.day == day);
+
+      if (isFuture) {
+        dayWidgets.add(
+          Center(
+            child: Container(
+              width: 34,
+              height: 34,
+              alignment: Alignment.center,
+              child: Text(
+                '$day',
+                style: GoogleFonts.manrope(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w300,
+                  color: const Color(0xFFD9D1CB),
+                ),
+              ),
+            ),
+          ),
+        );
+        continue;
+      }
 
       dayWidgets.add(
         GestureDetector(
@@ -1709,7 +1883,11 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                                       color: const Color(0xFFEAE6E0),
                                       shape: BoxShape.circle,
                                     )
-                                  : null,
+                                  : BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: const Color(0xFFE6E0D6), width: 1),
+                                    ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -1719,14 +1897,12 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                       fontSize: 12,
                       fontWeight: (isSelected || isToday || isDoseChange || hasLoggedMeds)
                           ? FontWeight.bold
-                          : FontWeight.w500,
+                          : FontWeight.w600,
                       color: isToday && isSelected
                           ? Colors.white
                           : isDoseChange
                               ? AppTheme.primary
-                              : (day > today.day && isToday)
-                                  ? const Color(0xFF9B8B7E).withOpacity(0.4)
-                                  : AppTheme.onSurface,
+                              : AppTheme.onSurface,
                     ),
                   ),
                   if (hasLoggedMeds && !isToday && !isSelected)

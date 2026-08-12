@@ -7,22 +7,24 @@ class SymptomFrequencyCard extends StatelessWidget {
   final List<DailyLog> allLogs;
   final double q1;
   final double q2;
+  final int periodDays;
 
   const SymptomFrequencyCard({
     super.key,
     required this.allLogs,
     required this.q1,
     required this.q2,
+    this.periodDays = 30,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Fixed 28-day window (4 rows x 7 cols)
+    final int days = periodDays > 0 ? periodDays : 30;
     final DateTime today = DateTime.now();
-    final DateTime startDate = today.subtract(const Duration(days: 27));
+    final DateTime startDate = today.subtract(Duration(days: days - 1));
 
     final Map<String, double?> dailyLoads = {};
-    for (int i = 0; i < 28; i++) {
+    for (int i = 0; i < days; i++) {
       final date = startDate.add(Duration(days: i));
       final dateKey = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
       dailyLoads[dateKey] = null;
@@ -45,7 +47,7 @@ class SymptomFrequencyCard extends StatelessWidget {
       }
     }
 
-    const periodLabel = "Last 28 Days";
+    final periodLabel = "Last $days Days";
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -93,7 +95,7 @@ class SymptomFrequencyCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '$loggedDaysCount/28',
+                    '$loggedDaysCount/$days',
                     style: GoogleFonts.manrope(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -115,16 +117,16 @@ class SymptomFrequencyCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // Heatmap grid (4 rows x 7 cols)
+          // Heatmap grid (adapt columns to period days)
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 7,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: days == 7 ? 7 : (days <= 30 ? 7 : 10),
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
             ),
-            itemCount: 28,
+            itemCount: days,
             itemBuilder: (context, index) {
               final cellDate = startDate.add(Duration(days: index));
               final cellKey = "${cellDate.year}-${cellDate.month.toString().padLeft(2, '0')}-${cellDate.day.toString().padLeft(2, '0')}";

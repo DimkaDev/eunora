@@ -49,7 +49,11 @@ List<Map<String, dynamic>> performInsightsCalculation(Map<String, dynamic> input
     final String query = triggerId.replaceAll('t_', '').toLowerCase();
     for (final t in triggers) {
       final lowerT = t.toLowerCase();
-      if (lowerT.startsWith(query) || lowerT.contains(query)) {
+      if (lowerT.startsWith(query) ||
+          lowerT.contains(query) ||
+          query.contains(lowerT) ||
+          (query == 'coffee' && (lowerT.contains('caffeine') || lowerT.contains('coffee'))) ||
+          (query == 'caffeine' && (lowerT.contains('caffeine') || lowerT.contains('coffee')))) {
         return true;
       }
     }
@@ -102,8 +106,8 @@ List<Map<String, dynamic>> performInsightsCalculation(Map<String, dynamic> input
         final List<double> xSeries = [];
         final List<double> ySeries = [];
 
-        // Build series for rolling 30 days
-        for (int offset = -30; offset <= 0; offset++) {
+        // Build series for rolling 90 days
+        for (int offset = -90; offset <= 0; offset++) {
           final DateTime dateD = currentDate.add(Duration(days: offset));
           final DateTime dateDLag = dateD.add(Duration(days: lag));
 
@@ -316,14 +320,24 @@ class Insights extends _$Insights {
       return snapshot.docs.map((doc) => InsightResult.fromJson(doc.data())).toList();
     }
 
-    // Fetch daily logs and dose changes from Firestore
-    final DateTime startLimit = DateTime.now().subtract(const Duration(days: 45));
+    // Fetch daily logs and dose changes from Firestore (120 days history)
+    final DateTime startLimit = DateTime.now().subtract(const Duration(days: 120));
     final List<DailyLog> logs = await firestore.getDailyLogsHistory(user.uid, startLimit, DateTime.now());
     final List<HrtDoseChange> changes = await firestore.getHrtDoseChanges(user.uid);
 
     // Get trigger and symptom options
     final triggers = ref.read(triggerLibraryProvider);
     final symptoms = ref.read(symptomsProvider).frequentSymptomIds;
+
+    // Collect all symptom IDs present across user's logs
+    final List<String> loggedSymptomIds = logs
+        .expand((log) => log.symptoms.map((s) => s.symptom.id))
+        .toSet()
+        .toList();
+
+    final List<String> symptomIdsToAnalyze = loggedSymptomIds.isNotEmpty
+        ? loggedSymptomIds
+        : (symptoms.isEmpty ? ['s_hot_flashes', 's_mood', 's_sleep', 's_dryness', 's_joint_pain'] : symptoms);
 
     // Serialize data for the isolate
     final List<Map<String, dynamic>> serializedLogs = logs.where((log) => log.isCompleted).map((log) => {
@@ -358,7 +372,7 @@ class Insights extends _$Insights {
       'dailyLogs': serializedLogs,
       'hrtDoseChanges': serializedChanges,
       'triggerOptions': triggers.map((t) => t.toMap()).toList(),
-      'symptomIds': symptoms.isEmpty ? ['s_hot_flashes', 's_mood', 's_sleep', 's_dryness', 's_joint_pain'] : symptoms,
+      'symptomIds': symptomIdsToAnalyze,
       'currentDate': DateTime.now().toIso8601String(),
       'hrtHistoryDaysBefore': hrtHistoryDaysBefore,
     };

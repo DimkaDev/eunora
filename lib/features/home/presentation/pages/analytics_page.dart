@@ -205,6 +205,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
                 allLogs: _allLogs,
                 q1: _q1,
                 q2: _q2,
+                periodDays: _getPeriodDays(),
               ),
               const SizedBox(height: 24),
 
@@ -409,11 +410,14 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, __) => const SizedBox.shrink(),
         data: (insights) {
-          // Filter displayable trigger correlations only
-          final displayableTriggers = insights.where((i) => i.type == InsightType.trigger && i.direction != null).take(3).toList();
-          
-          if (displayableTriggers.isEmpty) {
-            // Hide section entirely on dashboard teaser if 0 displayable correlations exist
+          // Include doseChange, trigger, and progress cards
+          final displayableList = insights.where((i) =>
+              i.type == InsightType.doseChange ||
+              (i.type == InsightType.trigger && i.direction != null) ||
+              i.type == InsightType.progress
+          ).take(3).toList();
+
+          if (displayableList.isEmpty) {
             return const SizedBox.shrink();
           }
 
@@ -460,8 +464,8 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
                 ),
                 const SizedBox(height: 16),
 
-                ...List.generate(displayableTriggers.length, (index) {
-                  final item = displayableTriggers[index];
+                ...List.generate(displayableList.length, (index) {
+                  final item = displayableList[index];
                   final bool needsLock = !isPremium;
 
                   IconData icon = Icons.auto_awesome;
@@ -514,7 +518,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
                   final bool isHighConfidence = (item.eventCount ?? 0) >= 14 && (item.correlationPercent ?? 0) >= 70;
 
                   return Padding(
-                    padding: EdgeInsets.only(bottom: index == displayableTriggers.length - 1 ? 0 : 20),
+                    padding: EdgeInsets.only(bottom: index == displayableList.length - 1 ? 0 : 20),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -1099,9 +1103,9 @@ extension _CorrelationWidgets on _AnalyticsPageState {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (_, __) => const SizedBox.shrink(),
       data: (insights) {
-        final displayableTriggers = insights.where((i) => i.type == InsightType.trigger && i.direction != null).take(3).toList();
+        final displayableList = insights.take(5).toList();
 
-        if (displayableTriggers.isEmpty) {
+        if (displayableList.isEmpty) {
           return const SizedBox.shrink();
         }
 
@@ -1112,7 +1116,7 @@ extension _CorrelationWidgets on _AnalyticsPageState {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'AI CORRELATIONS',
+                  'AI CORRELATIONS & HRT IMPACT',
                   style: GoogleFonts.manrope(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -1134,7 +1138,7 @@ extension _CorrelationWidgets on _AnalyticsPageState {
               ],
             ),
             const SizedBox(height: 16),
-            ...displayableTriggers.map((item) {
+            ...displayableList.map((item) {
               final bool needsLock = !isPremium;
 
               IconData icon = Icons.auto_awesome;
