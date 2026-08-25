@@ -43,7 +43,14 @@ import 'package:eunora/features/symptom_log/data/trigger_library.dart';
 import 'package:eunora/features/home/presentation/widgets/home/premium_toggle_widget.dart';
 
 class HomePage extends ConsumerStatefulWidget {
-  const HomePage({super.key});
+  final int? initialTabIndex;
+  final DateTime? initialSelectedDate;
+
+  const HomePage({
+    super.key,
+    this.initialTabIndex,
+    this.initialSelectedDate,
+  });
 
   @override
   ConsumerState<HomePage> createState() => _HomePageState();
@@ -66,6 +73,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   void initState() {
     super.initState();
+    _selectedIndex = widget.initialTabIndex ?? 0;
     // Choose a random InsightType once during load/initialization
     const types = InsightType.values;
     _insightType = types[Random().nextInt(types.length)];
@@ -81,6 +89,20 @@ class _HomePageState extends ConsumerState<HomePage> {
     });
   }
 
+  @override
+  void didUpdateWidget(covariant HomePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialTabIndex != null && widget.initialTabIndex != oldWidget.initialTabIndex) {
+      setState(() {
+        _selectedIndex = widget.initialTabIndex!;
+      });
+    } else if (widget.initialSelectedDate != null && widget.initialSelectedDate != oldWidget.initialSelectedDate) {
+      setState(() {
+        _selectedIndex = widget.initialTabIndex ?? 1;
+      });
+    }
+  }
+
   Future<void> _fetchTodayLog() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -94,6 +116,9 @@ class _HomePageState extends ConsumerState<HomePage> {
     final dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
 
     try {
+      // Finalize any past uncompleted drafts so previous days preserve whatever was logged
+      await ref.read(firestoreServiceProvider).finalizePastDayDrafts(user.uid);
+
       // Query log count for the last 7 days to evaluate if we have enough data for insights
       final start = date.subtract(const Duration(days: 7));
       final logsThisWeek = await ref.read(firestoreServiceProvider).getDailyLogsHistory(user.uid, start, date);
@@ -785,7 +810,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       case 0:
         return _buildHomeDashboard(progress, medications);
       case 1:
-        return const CalendarPage();
+        return CalendarPage(initialSelectedDate: widget.initialSelectedDate);
       case 2:
         return const AnalyticsPage();
       case 3:

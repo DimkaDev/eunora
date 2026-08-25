@@ -707,7 +707,15 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                         context: context,
                         isScrollControlled: true,
                         backgroundColor: Colors.transparent,
-                        builder: (context) => AddMedicationModal(showDiscontinuedToggle: !isToday),
+                        builder: (context) => AddMedicationModal(
+                          showDiscontinuedToggle: !isToday,
+                          isRetrospectiveOneOff: !isToday,
+                          onAddOneOffEntry: (entry) {
+                            setState(() {
+                              _entries.add(entry);
+                            });
+                          },
+                        ),
                       );
                     },
                     child: Container(

@@ -42,7 +42,8 @@ class MockDailyLog {
 }
 
 class CalendarPage extends ConsumerStatefulWidget {
-  const CalendarPage({super.key});
+  final DateTime? initialSelectedDate;
+  const CalendarPage({super.key, this.initialSelectedDate});
 
   @override
   ConsumerState<CalendarPage> createState() => _CalendarPageState();
@@ -50,8 +51,8 @@ class CalendarPage extends ConsumerStatefulWidget {
 
 class _CalendarPageState extends ConsumerState<CalendarPage> {
   // Navigation states
-  DateTime _focusedMonth = DateTime(DateTime.now().year, DateTime.now().month);
-  DateTime? _selectedDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+  late DateTime _focusedMonth;
+  late DateTime? _selectedDate;
   bool _legendExpanded = false;
 
   static const _weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -73,7 +74,6 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   bool _isLoadingDbLogs = false;
   
   // Track whether we have loaded at least once, or if currently loading.
-  // Instead of simple _isLoadingDbLogs, we separate cache states.
   bool _isFirstPageLoad = true;
 
   // Mock Database for April 2026
@@ -86,7 +86,9 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: _initialPage);
+    final initDate = widget.initialSelectedDate ?? DateTime.now();
+    _selectedDate = DateTime(initDate.year, initDate.month, initDate.day);
+    _focusedMonth = DateTime(initDate.year, initDate.month);
     _aprilLogs = {
       7: MockDailyLog(
         symptoms: ['Hot flashes · 2/5', 'Anxiety · 1/5'],
@@ -184,6 +186,19 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       _fetchLogsForMonth(DateTime(_focusedMonth.year, _focusedMonth.month - 1));
       _fetchLogsForMonth(DateTime(_focusedMonth.year, _focusedMonth.month + 1));
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant CalendarPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialSelectedDate != null && widget.initialSelectedDate != oldWidget.initialSelectedDate) {
+      final initDate = widget.initialSelectedDate!;
+      setState(() {
+        _selectedDate = DateTime(initDate.year, initDate.month, initDate.day);
+        _focusedMonth = DateTime(initDate.year, initDate.month);
+      });
+      _fetchLogsForMonth(_focusedMonth);
+    }
   }
 
   @override
@@ -1549,26 +1564,29 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       children: [
         Container(
           height: 40,
-          child: InkWell(
-            onTap: _previousMonth,
-            borderRadius: BorderRadius.circular(20),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.chevron_left, size: 22, color: AppTheme.primary),
-                  const SizedBox(width: 4),
-                  Text(
-                    prevLabel,
-                    style: GoogleFonts.manrope(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.outline,
-                      letterSpacing: 1.2,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: _previousMonth,
+              borderRadius: BorderRadius.circular(20),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.chevron_left, size: 22, color: AppTheme.primary),
+                    const SizedBox(width: 4),
+                    Text(
+                      prevLabel,
+                      style: GoogleFonts.manrope(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.outline,
+                        letterSpacing: 1.2,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -1610,26 +1628,29 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         ),
         Container(
           height: 40,
-          child: InkWell(
-            onTap: _nextMonth,
-            borderRadius: BorderRadius.circular(20),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    nextLabel,
-                    style: GoogleFonts.manrope(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.outline,
-                      letterSpacing: 1.2,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: _nextMonth,
+              borderRadius: BorderRadius.circular(20),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      nextLabel,
+                      style: GoogleFonts.manrope(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.outline,
+                        letterSpacing: 1.2,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.chevron_right, size: 22, color: AppTheme.primary),
-                ],
+                    const SizedBox(width: 4),
+                    const Icon(Icons.chevron_right, size: 22, color: AppTheme.primary),
+                  ],
+                ),
               ),
             ),
           ),
@@ -2424,35 +2445,38 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       ),
       child: Column(
         children: [
-          InkWell(
-            onTap: () => setState(() => _legendExpanded = !_legendExpanded),
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.info_outline, color: AppTheme.outline, size: 16),
-                      const SizedBox(width: 8),
-                      Text(
-                        'SEVERITY LEGEND',
-                        style: GoogleFonts.manrope(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          color: AppTheme.outline,
-                          letterSpacing: 1.2,
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => setState(() => _legendExpanded = !_legendExpanded),
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.info_outline, color: AppTheme.outline, size: 16),
+                        const SizedBox(width: 8),
+                        Text(
+                          'SEVERITY LEGEND',
+                          style: GoogleFonts.manrope(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: AppTheme.outline,
+                            letterSpacing: 1.2,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  Icon(
-                    _legendExpanded ? Icons.expand_less : Icons.expand_more,
-                    color: AppTheme.outline,
-                    size: 16,
-                  ),
-                ],
+                      ],
+                    ),
+                    Icon(
+                      _legendExpanded ? Icons.expand_less : Icons.expand_more,
+                      color: AppTheme.outline,
+                      size: 16,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -2703,20 +2727,23 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                   ),
                 ],
               ),
-              InkWell(
-                onTap: () => _showSymptomEditSheet(log),
-                child: Row(
-                  children: [
-                    Text(
-                      'Edit',
-                      style: GoogleFonts.manrope(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primary,
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => _showSymptomEditSheet(log),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Edit',
+                        style: GoogleFonts.manrope(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primary,
+                        ),
                       ),
-                    ),
-                    const Icon(Icons.chevron_right, size: 16, color: AppTheme.primary),
-                  ],
+                      const Icon(Icons.chevron_right, size: 16, color: AppTheme.primary),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -2883,20 +2910,23 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                   ),
                 ],
               ),
-              InkWell(
-                onTap: () => _showHrtEditSheet(log),
-                child: Row(
-                  children: [
-                    Text(
-                      'Edit',
-                      style: GoogleFonts.manrope(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primary,
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => _showHrtEditSheet(log),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Edit',
+                        style: GoogleFonts.manrope(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primary,
+                        ),
                       ),
-                    ),
-                    const Icon(Icons.chevron_right, size: 16, color: AppTheme.primary),
-                  ],
+                      const Icon(Icons.chevron_right, size: 16, color: AppTheme.primary),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -2994,20 +3024,23 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                   ),
                 ],
               ),
-              InkWell(
-                onTap: () => _showTriggerEditSheet(log),
-                child: Row(
-                  children: [
-                    Text(
-                      'Edit',
-                      style: GoogleFonts.manrope(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primary,
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => _showTriggerEditSheet(log),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Edit',
+                        style: GoogleFonts.manrope(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primary,
+                        ),
                       ),
-                    ),
-                    const Icon(Icons.chevron_right, size: 16, color: AppTheme.primary),
-                  ],
+                      const Icon(Icons.chevron_right, size: 16, color: AppTheme.primary),
+                    ],
+                  ),
                 ),
               ),
             ],

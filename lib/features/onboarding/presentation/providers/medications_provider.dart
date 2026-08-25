@@ -6,6 +6,9 @@ import 'package:eunora/features/home/domain/entities/hrt_dose_change.dart';
 import '../../domain/models/medication.dart';
 import 'onboarding_profile_provider.dart';
 
+import 'package:eunora/features/hrt_tracker/domain/hrt_schedule_service.dart';
+import 'package:eunora/features/home/domain/entities/daily_log.dart';
+
 part 'medications_provider.g.dart';
 
 class MedicationsState {
@@ -51,6 +54,22 @@ class Medications extends _$Medications {
     }
   }
 
+  /// Returns medications active on [targetDate] according to start_date and end_date.
+  List<Medication> getActiveMedicationsForDate(DateTime targetDate) {
+    final target = DateTime(targetDate.year, targetDate.month, targetDate.day);
+    return state.medications.where((med) {
+      if (med.startedAt != null) {
+        final start = DateTime(med.startedAt!.year, med.startedAt!.month, med.startedAt!.day);
+        if (target.isBefore(start)) return false;
+      }
+      if (med.endedAt != null) {
+        final end = DateTime(med.endedAt!.year, med.endedAt!.month, med.endedAt!.day);
+        if (target.isAfter(end)) return false;
+      }
+      return true;
+    }).toList();
+  }
+
   void _syncToFirestore() {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -83,6 +102,20 @@ class Medications extends _$Medications {
     _syncToFirestore();
   }
 
+  /// Enforces business rule: Hard delete if 0 history, Soft stop (endedAt) if >=1 history.
+  void removeOrStopMedication({
+    required Medication med,
+    required Iterable<DailyLog> logs,
+    DateTime? stopDate,
+  }) {
+    final hasHistory = HrtScheduleService.hasLoggedHistory(med, logs);
+    if (hasHistory) {
+      endMedication(med.id, endDate: stopDate ?? DateTime.now());
+    } else {
+      removeMedication(med.id);
+    }
+  }
+
   void updateMedication(Medication medication) {
     final oldMed = state.medications.firstWhere((m) => m.id == medication.id, orElse: () => medication);
 
@@ -92,21 +125,54 @@ class Medications extends _$Medications {
     _syncToFirestore();
 
     final isOnboardingCompleted = ref.read(onboardingProfileProvider)?.isOnboardingCompleted ?? false;
-    if (isOnboardingCompleted && oldMed.id == medication.id && oldMed.dose != medication.dose) {
+    if (isOnboardingCompleted && oldMed.id == medication.id) {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        final change = HrtDoseChange(
-          userId: user.uid,
-          medicationId: medication.id,
-          medicationName: medication.name,
-          oldDose: oldMed.dose,
-          newDose: medication.dose,
-          unit: medication.unit,
-          changeDate: DateTime.now(),
-        );
-        ref.read(firestoreServiceProvider).saveHrtDoseChange(user.uid, change).catchError((e) {
-          debugPrint("Error saving dose change: $e");
-        });
+        RegimenChangeType? changeType;
+        String prevVal = '';
+        String newVal = '';
+
+        final bool doseChanged = oldMed.dose != medication.dose || oldMed.unit != medication.unit;
+        final bool freqChanged = oldMed.frequency != medication.frequency;
+        final bool weekdaysChanged = !listEquals(oldMed.selectedWeekdays, medication.selectedWeekdays);
+
+        if (doseChanged && freqChanged) {
+          changeType = RegimenChangeType.doseChange;
+          final oldDoseStr = '${oldMed.dose.toStringAsFixed(oldMed.dose == oldMed.dose.toInt() ? 0 : 2)} ${oldMed.unit}'.trim();
+          final newDoseStr = '${medication.dose.toStringAsFixed(medication.dose == medication.dose.toInt() ? 0 : 2)} ${medication.unit}'.trim();
+          prevVal = '$oldDoseStr, ${oldMed.formattedFrequency}';
+          newVal = '$newDoseStr, ${medication.formattedFrequency}';
+        } else if (doseChanged) {
+          changeType = RegimenChangeType.doseChange;
+          prevVal = '${oldMed.dose.toStringAsFixed(oldMed.dose == oldMed.dose.toInt() ? 0 : 2)} ${oldMed.unit}'.trim();
+          newVal = '${medication.dose.toStringAsFixed(medication.dose == medication.dose.toInt() ? 0 : 2)} ${medication.unit}'.trim();
+        } else if (freqChanged) {
+          changeType = RegimenChangeType.frequencyChange;
+          prevVal = oldMed.formattedFrequency;
+          newVal = medication.formattedFrequency;
+        } else if (weekdaysChanged) {
+          changeType = RegimenChangeType.scheduleDayChange;
+          prevVal = oldMed.weekdaysString;
+          newVal = medication.weekdaysString;
+        }
+
+        if (changeType != null) {
+          final change = HrtDoseChange(
+            userId: user.uid,
+            medicationId: medication.id,
+            medicationName: medication.name,
+            oldDose: oldMed.dose,
+            newDose: medication.dose,
+            unit: medication.unit,
+            changeDate: DateTime.now(),
+            changeType: changeType,
+            previousValue: prevVal,
+            newValue: newVal,
+          );
+          ref.read(firestoreServiceProvider).saveHrtDoseChange(user.uid, change).catchError((e) {
+            debugPrint("Error saving regimen change: $e");
+          });
+        }
       }
     }
   }

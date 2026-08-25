@@ -13,15 +13,21 @@ import 'package:eunora/features/hrt_tracker/data/hrt_drug_library.dart';
 import 'package:eunora/features/hrt_tracker/data/hrt_quick_add_service.dart';
 import 'package:eunora/features/hrt_tracker/providers/hrt_quick_add_provider.dart';
 import 'package:eunora/features/hrt_tracker/presentation/widgets/hrt_quick_add_card.dart';
+import 'package:eunora/features/home/presentation/widgets/calendar_hrt_edit_sheet.dart';
+import 'package:uuid/uuid.dart';
 
 class AddMedicationModal extends ConsumerStatefulWidget {
   final dynamic initialData; // Can be Medication for edit or String for prefill name
   final bool showDiscontinuedToggle;
+  final bool isRetrospectiveOneOff;
+  final Function(HrtEditEntry entry)? onAddOneOffEntry;
 
   const AddMedicationModal({
     super.key,
     this.initialData,
     this.showDiscontinuedToggle = false,
+    this.isRetrospectiveOneOff = false,
+    this.onAddOneOffEntry,
   });
 
   @override
@@ -436,7 +442,25 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
         endedAt: _isNotCurrentlyTaking ? (_endDate ?? DateTime.now()) : null,
       );
 
-      if (widget.initialData is Medication) {
+      if (widget.isRetrospectiveOneOff) {
+        final parsedDose = double.tryParse(_doseController.text) ?? 0;
+        final oneOffEntry = HrtEditEntry(
+          id: const Uuid().v4(),
+          name: _nameController.text.trim(),
+          details: '${parsedDose.toStringAsFixed(parsedDose == parsedDose.toInt() ? 0 : 2)} $_selectedUnit · ${_selectedType.displayName}',
+          status: 'Taken',
+          isTaken: true,
+          dose: parsedDose.toStringAsFixed(parsedDose == parsedDose.toInt() ? 0 : 2),
+          unit: _selectedUnit,
+          applicationType: _selectedType.displayName,
+          timeTaken: '08:00',
+        );
+        widget.onAddOneOffEntry?.call(oneOffEntry);
+
+        if (_alsoAddToCurrentMedications) {
+          ref.read(medicationsProvider.notifier).addMedication(medication);
+        }
+      } else if (widget.initialData is Medication) {
         ref.read(medicationsProvider.notifier).updateMedication(medication);
       } else {
         ref.read(medicationsProvider.notifier).addMedication(medication);
@@ -444,6 +468,68 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
 
       context.pop();
     }
+  }
+
+  bool _alsoAddToCurrentMedications = false;
+
+  Widget _buildRetrospectiveOneOffToggleSection() {
+    if (!widget.isRetrospectiveOneOff) {
+      return const SizedBox.shrink();
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: _alsoAddToCurrentMedications ? AppTheme.primary : const Color(0xFFE7E5E4),
+              width: _alsoAddToCurrentMedications ? 1.5 : 1.0,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Also add to my current medications",
+                      style: GoogleFonts.manrope(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1D1B1A),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Default: Off. Enable to add to ongoing tracking schedule.',
+                      style: GoogleFonts.manrope(
+                        fontSize: 12,
+                        color: const Color(0xFF78716C),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Switch.adaptive(
+                value: _alsoAddToCurrentMedications,
+                activeColor: AppTheme.primary,
+                onChanged: (val) {
+                  setState(() {
+                    _alsoAddToCurrentMedications = val;
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
   }
 
   Widget _buildDiscontinuedToggleSection() {
@@ -741,10 +827,15 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
                     const SizedBox(height: 24),
 
                     // Frequency
-                    _buildSectionHeader('Frequency'),
-                    const SizedBox(height: 8),
-                    _buildFrequencySelector(),
-                    const SizedBox(height: 24),
+                    if (!widget.isRetrospectiveOneOff || _alsoAddToCurrentMedications) ...[
+                      _buildSectionHeader('Frequency'),
+                      const SizedBox(height: 8),
+                      _buildFrequencySelector(),
+                      const SizedBox(height: 24),
+                    ],
+
+                    // Retrospective One-Off Toggle
+                    _buildRetrospectiveOneOffToggleSection(),
 
                     // Discontinued / Past medication toggle
                     _buildDiscontinuedToggleSection(),

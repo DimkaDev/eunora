@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:math' as math;
+import 'package:go_router/go_router.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
 import 'package:eunora/features/onboarding/domain/models/medication.dart';
@@ -634,7 +635,10 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
             final updatedIds = updatedList.map((e) => e['id']).where((id) => id != null).toSet();
             for (final med in medications) {
               if (!updatedIds.contains(med.id)) {
-                ref.read(medicationsProvider.notifier).removeMedication(med.id);
+                ref.read(medicationsProvider.notifier).removeOrStopMedication(
+                  med: med,
+                  logs: _monthlyLogs.values,
+                );
               }
             }
 
@@ -1056,14 +1060,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                     ? '${_monthsNames[med.endedAt!.month - 1].substring(0, 3)} ${med.endedAt!.day}, ${med.endedAt!.year}'
                     : 'Stopped';
                 return ListTile(
-                  onTap: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (context) => HrtQuickEditModal(medication: med),
-                    );
-                  },
+                  onTap: () => _openMedicationManagementSheet(med),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   tileColor: const Color(0xFFF7F5F0),
                   leading: Container(
@@ -1095,6 +1092,188 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
             ),
           ],
         ],
+      ),
+    );
+  }
+
+  void _openMedicationManagementSheet(Medication med) {
+    final hasHistory = HrtScheduleService.hasLoggedHistory(med, _monthlyLogs.values);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: EdgeInsets.only(
+          top: 20,
+          left: 24,
+          right: 24,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        ),
+        decoration: const BoxDecoration(
+          color: Color(0xFFFEF8F6),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 48,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE2D6C8),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        med.name,
+                        style: GoogleFonts.notoSerif(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.onSurface,
+                        ),
+                      ),
+                      Text(
+                        '${med.doseAndFrequency}' +
+                            (med.startedAt != null
+                                ? ' • Started ${_monthsNames[med.startedAt!.month - 1].substring(0, 3)} ${med.startedAt!.day}, ${med.startedAt!.year}'
+                                : ''),
+                        style: GoogleFonts.manrope(
+                          fontSize: 13,
+                          color: const Color(0xFF78716C),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            // Edit Details Option
+            ListTile(
+              onTap: () {
+                Navigator.pop(context);
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => HrtQuickEditModal(
+                    medication: med,
+                    onNavigateToHrtTracker: () {
+                      _openMedicationManagementSheet(med);
+                    },
+                  ),
+                );
+              },
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              tileColor: Colors.white,
+              leading: const Icon(Icons.edit_outlined, color: AppTheme.primary),
+              title: Text('Edit Dose & Schedule', style: GoogleFonts.manrope(fontWeight: FontWeight.bold)),
+              subtitle: Text('Change dosage, unit, or intake frequency', style: GoogleFonts.manrope(fontSize: 12)),
+              trailing: const Icon(Icons.chevron_right, size: 18),
+            ),
+            const SizedBox(height: 12),
+
+            // Stop vs Delete Action Card based on logged history
+            if (!hasHistory) ...[
+              ListTile(
+                onTap: () async {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: Text('Delete Medication?', style: GoogleFonts.notoSerif(fontWeight: FontWeight.bold)),
+                      content: Text(
+                        'This medication has zero logged history. It will be permanently removed from your account.',
+                        style: GoogleFonts.manrope(),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, false),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, true),
+                          child: const Text('Delete', style: TextStyle(color: Color(0xFF8C3A25), fontWeight: FontWeight.bold)),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirm == true && mounted) {
+                    ref.read(medicationsProvider.notifier).removeMedication(med.id);
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Medication permanently deleted.', style: GoogleFonts.manrope(fontWeight: FontWeight.bold)),
+                        backgroundColor: const Color(0xFF8C3A25),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                },
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                tileColor: const Color(0xFFFFF6F4),
+                leading: const Icon(Icons.delete_forever_outlined, color: Color(0xFF8C3A25)),
+                title: Text('Delete Medication', style: GoogleFonts.manrope(fontWeight: FontWeight.bold, color: const Color(0xFF8C3A25))),
+                subtitle: Text('No logged history found • Permanent delete', style: GoogleFonts.manrope(fontSize: 12, color: const Color(0xFF8C3A25))),
+                trailing: const Icon(Icons.chevron_right, color: Color(0xFF8C3A25), size: 18),
+              ),
+            ] else ...[
+              ListTile(
+                onTap: () async {
+                  final pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: med.endedAt ?? DateTime.now(),
+                    firstDate: med.startedAt ?? DateTime(2020),
+                    lastDate: DateTime.now(),
+                  );
+                  if (pickedDate != null && mounted) {
+                    ref.read(medicationsProvider.notifier).endMedication(med.id, endDate: pickedDate);
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Medication discontinued. Past log history preserved!',
+                          style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
+                        ),
+                        backgroundColor: const Color(0xFF67594E),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                },
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                tileColor: const Color(0xFFFAF6F0),
+                leading: const Icon(Icons.pause_circle_outline, color: Color(0xFF67594E)),
+                title: Text(
+                  med.endedAt != null ? 'Update Discontinuation Date' : 'Stop Taking Medication',
+                  style: GoogleFonts.manrope(fontWeight: FontWeight.bold, color: const Color(0xFF4D453F)),
+                ),
+                subtitle: Text(
+                  'Preserves past adherence history & logs',
+                  style: GoogleFonts.manrope(fontSize: 12, color: const Color(0xFF78716C)),
+                ),
+                trailing: const Icon(Icons.chevron_right, color: Color(0xFF67594E), size: 18),
+              ),
+            ],
+            const SizedBox(height: 12),
+          ],
+        ),
       ),
     );
   }
@@ -1414,14 +1593,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     return Opacity(
       opacity: isActiveOnDate ? 1.0 : 0.45,
       child: InkWell(
-        onTap: () {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            backgroundColor: Colors.transparent,
-            builder: (context) => HrtQuickEditModal(medication: med),
-          );
-        },
+        onTap: () => _openMedicationManagementSheet(med),
         borderRadius: BorderRadius.circular(20),
         child: Container(
           margin: const EdgeInsets.only(bottom: 12),
@@ -1523,14 +1695,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     final iconBg = iconColor.withOpacity(0.12);
 
     return InkWell(
-      onTap: () {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (context) => HrtQuickEditModal(medication: med),
-        );
-      },
+      onTap: () => _openMedicationManagementSheet(med),
       borderRadius: BorderRadius.circular(20),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
@@ -2103,70 +2268,155 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
 
   Widget _buildActivityLogsForMonth() {
     final List<Map<String, dynamic>> activities = [];
+    final selectedDate = DateTime(_focusedMonth.year, _focusedMonth.month, _selectedDay);
+    final targetMonthKey = _monthKey(_focusedMonth);
+    final targetLogs = _monthLogsCache[targetMonthKey] ?? {};
+    final targetChanges = _monthDoseChangesCache[targetMonthKey] ?? [];
+    final allMeds = ref.watch(medicationsProvider).medications;
 
-    _monthlyLogs.forEach((day, log) {
-      if (day != _selectedDay) return;
-      final loggedMeds = log.hrtIntakes.where((h) => h.isTaken).map((h) => h.name).toList();
-      if (loggedMeds.isNotEmpty) {
-        final date = DateTime(_focusedMonth.year, _focusedMonth.month, day);
-        final dateLabel = "${_weekdays[date.weekday - 1]}, ${_monthsNames[_focusedMonth.month - 1].substring(0, 3)} $day";
-
-        activities.add({
-          'day': day,
-          'type': 'intake',
-          'color': AppTheme.primary,
-          'title': 'Intake: $dateLabel',
-          'description': '${log.hrtIntakes.length} medications scheduled. ${loggedMeds.length} logged (${loggedMeds.join(', ')}).',
-        });
+    // 1. Medication Starts / Discontinuations
+    for (final med in allMeds) {
+      if (med.startedAt != null) {
+        final s = med.startedAt!;
+        if (s.year == selectedDate.year && s.month == selectedDate.month && s.day == selectedDate.day) {
+          activities.add({
+            'day': _selectedDay,
+            'isClinical': true,
+            'color': const Color(0xFF4A6B5D),
+            'title': 'Medication Started',
+            'description': '${med.name} (${med.doseAndFrequency}) started.',
+          });
+        }
       }
-    });
-
-    for (final change in _monthlyDoseChanges) {
-      final day = change.changeDate.day;
-      if (day != _selectedDay) continue;
-      final date = change.changeDate;
-      final dateLabel = "${_weekdays[date.weekday - 1]}, ${_monthsNames[_focusedMonth.month - 1].substring(0, 3)} $day";
-      final direction = change.newDose > change.oldDose ? 'increased' : 'decreased';
-
-      activities.add({
-        'day': day,
-        'type': 'dose_change',
-        'color': const Color(0xFFE8A89B),
-        'title': 'Dose Change: $dateLabel',
-        'description': '${change.medicationName} $direction to ${change.newDose.toStringAsFixed(0)} ${change.unit}.',
-      });
+      if (med.endedAt != null) {
+        final e = med.endedAt!;
+        if (e.year == selectedDate.year && e.month == selectedDate.month && e.day == selectedDate.day) {
+          activities.add({
+            'day': _selectedDay,
+            'isClinical': true,
+            'color': const Color(0xFF8C3A25),
+            'title': 'Medication Discontinued',
+            'description': '${med.name} discontinued.',
+          });
+        }
+      }
     }
 
-    activities.sort((a, b) => (b['day'] as int).compareTo(a['day'] as int));
+    // 2. Regimen Changes (Dose, Frequency, Schedule Day)
+    for (final change in targetChanges) {
+      if (change.changeDate.year == selectedDate.year &&
+          change.changeDate.month == selectedDate.month &&
+          change.changeDate.day == selectedDate.day) {
+        final isClinical = change.isClinicalChange;
+        final title = change.changeType == RegimenChangeType.frequencyChange
+            ? 'Frequency Change'
+            : change.changeType == RegimenChangeType.scheduleDayChange
+                ? 'Schedule Change (Administrative)'
+                : 'Dose Change';
 
-    if (activities.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Text(
-            'No active logs for this day.',
-            style: GoogleFonts.manrope(
-              fontSize: 12,
-              color: const Color(0xFF9B8B7E),
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ),
+        activities.add({
+          'day': _selectedDay,
+          'isClinical': isClinical,
+          'color': isClinical ? const Color(0xFFE8A89B) : const Color(0xFF9B8B7E),
+          'title': title,
+          'description': '${change.medicationName}: ${change.previousValue} → ${change.newValue}',
+        });
+      }
+    }
+
+    // 3. Adherence for active medications on selectedDate
+    final dayLog = targetLogs[_selectedDay];
+    final activeMedsOnDate = allMeds.where((m) {
+      if (m.startedAt != null && selectedDate.isBefore(DateTime(m.startedAt!.year, m.startedAt!.month, m.startedAt!.day))) return false;
+      if (m.endedAt != null && selectedDate.isAfter(DateTime(m.endedAt!.year, m.endedAt!.month, m.endedAt!.day))) return false;
+      return true;
+    }).toList();
+
+    for (final med in activeMedsOnDate) {
+      final isScheduled = HrtScheduleService.isScheduledOnDate(med, selectedDate, doseChanges: targetChanges);
+      final intake = dayLog?.hrtIntakes.firstWhere(
+        (i) => (i.medicationId.isNotEmpty && i.medicationId == med.id) || i.name.toLowerCase() == med.name.toLowerCase(),
+        orElse: () => HrtIntakeLog(medicationId: med.id, name: med.name, dose: med.dose, unit: med.unit, time: '', isTaken: false),
       );
+      final hasLog = intake != null && (intake.isTaken || intake.time.isNotEmpty);
+      final taken = intake?.isTaken ?? false;
+
+      if (isScheduled || hasLog) {
+        final isPatch = med.type == MedicationType.patch;
+        final statusLabel = taken ? (isPatch ? 'Applied' : 'Taken') : 'Not taken';
+
+        activities.add({
+          'day': _selectedDay,
+          'isClinical': true,
+          'color': taken ? const Color(0xFF4A6B5D) : const Color(0xFFC47B62),
+          'title': '${med.name}: $statusLabel',
+          'description': '${med.doseAndFrequency}',
+        });
+      }
     }
 
     return Column(
-      children: activities.map((act) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: _buildActivityRow(
-            color: act['color'] as Color,
-            title: act['title'] as String,
-            description: act['description'] as String,
-            isActive: _selectedDay == act['day'] as int,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Retrospective Logging CTA Button
+        InkWell(
+          onTap: () {
+            context.go('/calendar', extra: selectedDate);
+          },
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            decoration: BoxDecoration(
+              color: AppTheme.primary,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.edit_calendar, color: Colors.white, size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  'Log this day',
+                  style: GoogleFonts.manrope(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
           ),
-        );
-      }).toList(),
+        ),
+        const SizedBox(height: 16),
+
+        if (activities.isEmpty)
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Text(
+                'No activity recorded for this day.',
+                style: GoogleFonts.manrope(
+                  fontSize: 12,
+                  color: const Color(0xFF9B8B7E),
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
+          )
+        else
+          ...activities.map((act) {
+            final isClinical = act['isClinical'] as bool? ?? true;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _buildActivityRow(
+                color: act['color'] as Color,
+                title: act['title'] as String,
+                description: act['description'] as String,
+                isActive: isClinical,
+              ),
+            );
+          }),
+      ],
     );
   }
 

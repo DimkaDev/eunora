@@ -1259,23 +1259,28 @@ extension _CorrelationWidgets on _AnalyticsPageState {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  if (emoji != null)
-                    Text(emoji, style: const TextStyle(fontSize: 28))
-                  else
-                    Icon(icon, color: iconColor, size: 28),
-                  const SizedBox(width: 12),
-                  Text(
-                    title,
-                    style: GoogleFonts.manrope(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.onSurface,
+              Expanded(
+                child: Row(
+                  children: [
+                    if (emoji != null)
+                      Text(emoji, style: const TextStyle(fontSize: 28))
+                    else
+                      Icon(icon, color: iconColor, size: 28),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: GoogleFonts.manrope(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.onSurface,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               if (isHighConfidence)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

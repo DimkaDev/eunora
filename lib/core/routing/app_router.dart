@@ -23,6 +23,7 @@ import 'package:eunora/features/onboarding/presentation/pages/postmenopause_prof
 import 'package:eunora/features/onboarding/presentation/pages/surgical_menopause_profile_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/pcos_profile_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/your_medications_page.dart';
+import 'package:eunora/features/home/presentation/pages/calendar_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/frequent_symptoms_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/symptom_library_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/trigger_library_page.dart';
@@ -232,6 +233,22 @@ final GoRouter appRouter = GoRouter(
         child: const YourMedicationsPage(),
       ),
     ),
+    GoRoute(
+      path: '/calendar',
+      pageBuilder: (BuildContext context, GoRouterState state) {
+        DateTime? initDate;
+        if (state.extra is DateTime) {
+          initDate = state.extra as DateTime;
+        } else if (state.extra is Map<String, dynamic>) {
+          initDate = (state.extra as Map<String, dynamic>)['date'] as DateTime?;
+        }
+        return buildSmoothPageTransition(
+          context: context,
+          state: state,
+          child: HomePage(initialTabIndex: 1, initialSelectedDate: initDate),
+        );
+      },
+    ),
 
     GoRoute(
       path: '/symptom-logging',
@@ -283,11 +300,30 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/home',
-      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
-        context: context,
-        state: state,
-        child: const HomePage(),
-      ),
+      pageBuilder: (BuildContext context, GoRouterState state) {
+        int? tabIndex;
+        DateTime? date;
+        if (state.extra is Map<String, dynamic>) {
+          final map = state.extra as Map<String, dynamic>;
+          tabIndex = map['tabIndex'] as int?;
+          date = map['date'] as DateTime?;
+        } else if (state.extra is int) {
+          tabIndex = state.extra as int;
+        } else if (state.extra is DateTime) {
+          date = state.extra as DateTime;
+          tabIndex = 1;
+        }
+
+        return buildSmoothPageTransition(
+          context: context,
+          state: state,
+          child: HomePage(
+            key: ValueKey('home_${tabIndex}_${date?.millisecondsSinceEpoch}'),
+            initialTabIndex: tabIndex,
+            initialSelectedDate: date,
+          ),
+        );
+      },
     ),
     GoRoute(
       path: '/daily-logging',

@@ -350,20 +350,23 @@ class Insights extends _$Insights {
       }).toList(),
     }).toList();
 
-    final List<Map<String, dynamic>> serializedChanges = changes.map((c) => {
+    final clinicalChanges = changes.where((c) => c.isClinicalChange).toList();
+
+    final List<Map<String, dynamic>> serializedChanges = clinicalChanges.map((c) => {
       'id': c.id,
       'medicationName': c.medicationName,
       'changeDate': c.changeDate,
       'oldDose': c.oldDose,
       'newDose': c.newDose,
+      'changeType': c.changeType.name,
     }).toList();
 
-    // Calculate HRT history days before the first change
+    // Calculate HRT history days before the first clinical change
     int hrtHistoryDaysBefore = 14;
     if (logs.isNotEmpty) {
       final earliestLogDate = logs.map((l) => l.date).reduce((a, b) => a.isBefore(b) ? a : b);
-      if (changes.isNotEmpty) {
-        final earliestChangeDate = changes.map((c) => c.changeDate).reduce((a, b) => a.isBefore(b) ? a : b);
+      if (clinicalChanges.isNotEmpty) {
+        final earliestChangeDate = clinicalChanges.map((c) => c.changeDate).reduce((a, b) => a.isBefore(b) ? a : b);
         hrtHistoryDaysBefore = earliestChangeDate.difference(earliestLogDate).inDays;
       }
     }

@@ -42,6 +42,41 @@ class FirestoreService {
     return DailyLog.fromMap(doc.data()!);
   }
 
+  Future<void> finalizePastDayDrafts(String uid) async {
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
+
+    final snapshot = await _db
+        .collection('users')
+        .doc(uid)
+        .collection('daily_logs')
+        .where('isCompleted', isEqualTo: false)
+        .get();
+
+    for (final doc in snapshot.docs) {
+      final log = DailyLog.fromMap(doc.data());
+      final logDate = DateTime(log.date.year, log.date.month, log.date.day);
+      if (logDate.isBefore(todayStart)) {
+        final hasData = log.lastCompletedStep > 0 ||
+            log.symptoms.isNotEmpty ||
+            log.triggers.isNotEmpty ||
+            log.hrtIntakes.any((i) => i.isTaken) ||
+            log.estradiolChecked ||
+            log.progesteroneChecked;
+
+        if (hasData) {
+          final finalizedLog = log.copyWith(isCompleted: true);
+          await _db
+              .collection('users')
+              .doc(uid)
+              .collection('daily_logs')
+              .doc(log.id)
+              .set(finalizedLog.toMap());
+        }
+      }
+    }
+  }
+
   Future<List<DailyLog>> getDailyLogsHistory(
       String uid, DateTime start, DateTime end) async {
     final snapshot = await _db
@@ -53,9 +88,25 @@ class FirestoreService {
         .orderBy('date', descending: true)
         .get();
 
-    return snapshot.docs
-        .map((doc) => DailyLog.fromMap(doc.data()))
-        .toList();
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
+
+    return snapshot.docs.map((doc) {
+      final log = DailyLog.fromMap(doc.data());
+      final logDate = DateTime(log.date.year, log.date.month, log.date.day);
+      if (!log.isCompleted && logDate.isBefore(todayStart)) {
+        final hasData = log.lastCompletedStep > 0 ||
+            log.symptoms.isNotEmpty ||
+            log.triggers.isNotEmpty ||
+            log.hrtIntakes.any((i) => i.isTaken) ||
+            log.estradiolChecked ||
+            log.progesteroneChecked;
+        if (hasData) {
+          return log.copyWith(isCompleted: true);
+        }
+      }
+      return log;
+    }).toList();
   }
 
   // --- AI Insights ---
