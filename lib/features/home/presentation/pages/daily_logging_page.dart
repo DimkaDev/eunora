@@ -27,6 +27,7 @@ import 'package:eunora/features/home/presentation/pages/daily_logging/daily_entr
 import 'package:eunora/features/home/presentation/widgets/dose_change_alert.dart';
 import 'package:eunora/features/onboarding/presentation/providers/symptom_quick_access_provider.dart';
 import 'package:eunora/features/home/presentation/widgets/success_animation_widget.dart';
+import 'package:eunora/features/home/presentation/widgets/calendar_hrt_edit_sheet.dart';
 
 import 'package:eunora/features/home/presentation/widgets/daily_logging/daily_logging_success_screen.dart';
 
@@ -70,6 +71,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   final Map<String, String> _hrtTimes = {};
   final Map<String, double> _initialHrtDoses = {};
   final Map<String, String> _initialHrtUnits = {};
+  final List<HrtEditEntry> _oneOffEntries = [];
 
   bool _vitaminDChecked = false;
   bool _magnesiumChecked = false;
@@ -266,7 +268,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
     final dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
 
     final List<HrtIntakeLog> hrtIntakes = [];
-    final meds = ref.read(medicationsProvider).medications;
+    final meds = ref.read(medicationsProvider.notifier).getActiveMedicationsForDate(date);
     
     bool estradiolChecked = false;
     double estradiolDose = 50.0;
@@ -293,6 +295,36 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
       ));
 
       final name = med.name.toLowerCase();
+      if (name.contains('estradiol') || name.contains('estrogen') || name.contains('estradot')) {
+        estradiolChecked = checked;
+        estradiolDose = dose;
+        estradiolUnit = unit;
+        estradiolTime = time;
+      } else if (name.contains('progesterone') || name.contains('utrogestan')) {
+        progesteroneChecked = checked;
+        progesteroneDose = dose;
+        progesteroneUnit = unit;
+        progesteroneTime = time;
+      }
+    }
+
+    for (final oneOff in _oneOffEntries) {
+      final id = oneOff.id ?? oneOff.name;
+      final checked = _hrtChecked[id] ?? true;
+      final dose = _hrtDoses[id] ?? (double.tryParse(oneOff.dose ?? '1') ?? 1.0);
+      final unit = _hrtUnits[id] ?? (oneOff.unit ?? 'mg');
+      final time = _hrtTimes[id] ?? (oneOff.timeTaken ?? '08:00 AM');
+
+      hrtIntakes.add(HrtIntakeLog(
+        medicationId: id,
+        name: oneOff.name,
+        dose: dose,
+        unit: unit,
+        time: time,
+        isTaken: checked,
+      ));
+
+      final name = oneOff.name.toLowerCase();
       if (name.contains('estradiol') || name.contains('estrogen') || name.contains('estradot')) {
         estradiolChecked = checked;
         estradiolDose = dose;
@@ -856,6 +888,12 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                     child: DailyEntryStep(
                       loggingDate: widget.initialDate,
+                      oneOffEntries: _oneOffEntries,
+                      onAddOneOffEntry: (entry) {
+                        setState(() {
+                          _oneOffEntries.add(entry);
+                        });
+                      },
                       hrtChecked: _hrtChecked,
                       hrtDoses: _hrtDoses,
                       hrtUnits: _hrtUnits,

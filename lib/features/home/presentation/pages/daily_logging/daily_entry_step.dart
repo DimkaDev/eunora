@@ -14,6 +14,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:eunora/core/services/firestore_service.dart';
 import 'package:eunora/features/home/domain/entities/daily_log.dart';
 import 'package:eunora/features/hrt_tracker/domain/hrt_schedule_service.dart';
+import 'package:eunora/features/home/presentation/widgets/calendar_hrt_edit_sheet.dart';
 
 enum HrtLogStatus { pending, taken, skipped }
 
@@ -126,7 +127,13 @@ class DailyEntryStep extends ConsumerStatefulWidget {
     required this.onHydrationCupsChanged,
     required this.onAdditionalNotesChanged,
     this.loggingDate,
+    this.oneOffEntries,
+    this.onAddOneOffEntry,
   });
+
+  /// The list of one-off medications added for this retrospective date session
+  final List<HrtEditEntry>? oneOffEntries;
+  final ValueChanged<HrtEditEntry>? onAddOneOffEntry;
 
   @override
   ConsumerState<DailyEntryStep> createState() => _DailyEntryStepState();
@@ -963,8 +970,15 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
 
   @override
   Widget build(BuildContext context) {
-    final medications = ref.watch(medicationsProvider).medications.where((m) => m.endedAt == null).toList();
+    final targetDate = widget.loggingDate ?? DateTime.now();
+    final medications = ref.watch(medicationsProvider.notifier).getActiveMedicationsForDate(targetDate);
     final otherMedications = ref.watch(otherMedicationsProvider).medications;
+    final oneOffs = widget.oneOffEntries ?? [];
+
+    final now = DateTime.now();
+    final isToday = targetDate.year == now.year &&
+        targetDate.month == now.month &&
+        targetDate.day == now.day;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -994,75 +1008,120 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
           style: GoogleFonts.manrope(fontSize: 9, fontWeight: FontWeight.bold, color: AppTheme.primary, letterSpacing: 1.5),
         ),
         const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppTheme.outlineVariant.withValues(alpha: 0.3)),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(23),
-            child: Column(
-              children: [
-                ...medications.map((med) {
-                  final index = medications.indexOf(med);
-                  final checked = widget.hrtChecked[med.id] ?? false;
-                  final dose = widget.hrtDoses[med.id] ?? med.dose;
-                  final unit = widget.hrtUnits[med.id] ?? med.unit;
-                  final time = widget.hrtTimes[med.id] ?? '08:00 AM';
-                  final lastTaken = _medLastTaken[med.id] ?? _medLastTaken[med.name.toLowerCase()];
+        if (medications.isEmpty && oneOffs.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: AppTheme.outlineVariant.withValues(alpha: 0.3)),
+            ),
+            child: Center(
+              child: Text(
+                'No HRT medications were active on this date.',
+                style: GoogleFonts.manrope(
+                  fontSize: 13,
+                  color: AppTheme.outline,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          )
+        else
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: AppTheme.outlineVariant.withValues(alpha: 0.3)),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(23),
+              child: Column(
+                children: [
+                  ...medications.map((med) {
+                    final index = medications.indexOf(med);
+                    final checked = widget.hrtChecked[med.id] ?? false;
+                    final dose = widget.hrtDoses[med.id] ?? med.dose;
+                    final unit = widget.hrtUnits[med.id] ?? med.unit;
+                    final time = widget.hrtTimes[med.id] ?? '08:00 AM';
+                    final lastTaken = _medLastTaken[med.id] ?? _medLastTaken[med.name.toLowerCase()];
 
-                  final targetDate = widget.loggingDate ?? DateTime.now();
+                    final loggedIntake = checked
+                        ? HrtIntakeLog(
+                            medicationId: med.id,
+                            name: med.name,
+                            dose: dose,
+                            unit: unit,
+                            time: time,
+                            isTaken: true,
+                          )
+                        : null;
 
-                  final loggedIntake = checked
-                      ? HrtIntakeLog(
-                          medicationId: med.id,
-                          name: med.name,
-                          dose: dose,
-                          unit: unit,
-                          time: time,
-                          isTaken: true,
-                        )
-                      : null;
+                    final dailyState = HrtScheduleService.getDailyState(
+                      med: med,
+                      date: targetDate,
+                      loggedIntake: loggedIntake,
+                    );
 
-                  final dailyState = HrtScheduleService.getDailyState(
-                    med: med,
-                    date: targetDate,
-                    loggedIntake: loggedIntake,
-                  );
+                    return Column(
+                      children: [
+                        _buildMedRow(
+                          title: med.name,
+                          subtitle: checked
+                              ? '${dose.toStringAsFixed(dose == dose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $unit • $time • ${med.formattedFrequency}'
+                              : '${med.formattedFrequency} • ' + (lastTaken == null
+                                  ? 'No information'
+                                  : 'Last taken: ${_formatDate(lastTaken)}'),
+                          icon: med.type == MedicationType.gel
+                              ? Icons.opacity
+                              : Icons.medication,
+                          checked: checked,
+                          dailyState: dailyState,
+                          activeBadgeText: med.type == MedicationType.patch ? 'Applied' : 'Taken',
+                          onTap: () {
+                            setState(() {
+                              _expandedIndex = _expandedIndex == index ? null : index;
+                            });
+                          },
+                        ),
+                        if (_expandedIndex == index)
+                          _buildInlineMedicationDetails(med, checked, dose, unit, time, lastTaken),
+                        if (index < medications.length - 1 || oneOffs.isNotEmpty)
+                          const Divider(color: Color(0xFFF2EDEA), height: 1),
+                      ],
+                    );
+                  }).toList(),
 
-                  return Column(
-                    children: [
-                      _buildMedRow(
-                        title: med.name,
-                        subtitle: checked
-                            ? '${dose.toStringAsFixed(dose == dose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $unit • $time • ${med.formattedFrequency}'
-                            : '${med.formattedFrequency} • ' + (lastTaken == null
-                                ? 'No information'
-                                : 'Last taken: ${_formatDate(lastTaken)}'),
-                        icon: med.type == MedicationType.gel
-                            ? Icons.opacity
-                            : Icons.medication,
-                        checked: checked,
-                        dailyState: dailyState,
-                        activeBadgeText: med.type == MedicationType.patch ? 'Applied' : 'Taken',
-                        onTap: () {
-                          setState(() {
-                            _expandedIndex = _expandedIndex == index ? null : index;
-                          });
-                        },
-                      ),
-                      if (_expandedIndex == index)
-                        _buildInlineMedicationDetails(med, checked, dose, unit, time, lastTaken),
-                      if (index < medications.length - 1)
-                        const Divider(color: Color(0xFFF2EDEA), height: 1),
-                    ],
-                  );
-                }).toList(),
-              ],
+                  ...oneOffs.map((oneOff) {
+                    final oneOffId = oneOff.id ?? oneOff.name;
+                    final checked = widget.hrtChecked[oneOffId] ?? true;
+                    final dose = widget.hrtDoses[oneOffId] ?? (double.tryParse(oneOff.dose ?? '1') ?? 1.0);
+                    final unit = widget.hrtUnits[oneOffId] ?? (oneOff.unit ?? 'mg');
+                    final time = widget.hrtTimes[oneOffId] ?? (oneOff.timeTaken ?? '08:00 AM');
+
+                    return Column(
+                      children: [
+                        _buildMedRow(
+                          title: oneOff.name,
+                          subtitle: checked
+                              ? '${dose.toStringAsFixed(dose == dose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} $unit • $time • One-off entry'
+                              : 'One-off entry (historical)',
+                          icon: oneOff.applicationType.toLowerCase().contains('gel')
+                              ? Icons.opacity
+                              : Icons.medication,
+                          checked: checked,
+                          dailyState: checked ? DailyScheduledState.logged : DailyScheduledState.readyToLog,
+                          activeBadgeText: 'Logged',
+                          onTap: () {},
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ],
+              ),
             ),
           ),
-        ),
         const SizedBox(height: 12),
         InkWell(
           onTap: () {
@@ -1070,7 +1129,26 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
               context: context,
               isScrollControlled: true,
               backgroundColor: Colors.transparent,
-              builder: (context) => const AddMedicationModal(),
+              builder: (context) => AddMedicationModal(
+                showDiscontinuedToggle: !isToday,
+                isRetrospectiveOneOff: !isToday,
+                loggingDate: targetDate,
+                onAddOneOffEntry: (entry) {
+                  final id = entry.id ?? entry.name;
+                  final d = double.tryParse(entry.dose ?? '1') ?? 1.0;
+                  widget.onHrtCheckedToggled(id, true);
+                  widget.onHrtDoseChanged(id, d);
+                  widget.onHrtUnitChanged(id, entry.unit ?? 'mg');
+                  widget.onHrtTimeChanged(id, entry.timeTaken ?? '08:00 AM');
+                  widget.onAddOneOffEntry?.call(entry);
+                },
+                onMedicationCreated: (med) {
+                  widget.onHrtCheckedToggled(med.id, true);
+                  widget.onHrtDoseChanged(med.id, med.dose);
+                  widget.onHrtUnitChanged(med.id, med.unit);
+                  widget.onHrtTimeChanged(med.id, '08:00 AM');
+                },
+              ),
             );
           },
           child: Container(

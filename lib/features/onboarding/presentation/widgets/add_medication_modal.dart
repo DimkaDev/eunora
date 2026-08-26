@@ -14,20 +14,31 @@ import 'package:eunora/features/hrt_tracker/data/hrt_quick_add_service.dart';
 import 'package:eunora/features/hrt_tracker/providers/hrt_quick_add_provider.dart';
 import 'package:eunora/features/hrt_tracker/presentation/widgets/hrt_quick_add_card.dart';
 import 'package:eunora/features/home/presentation/widgets/calendar_hrt_edit_sheet.dart';
+import 'package:eunora/features/hrt_tracker/domain/hrt_schedule_service.dart';
 import 'package:uuid/uuid.dart';
+
+enum RetrospectiveMedicationOption {
+  justForThisDay,
+  addToCurrent,
+  takingInThePast,
+}
 
 class AddMedicationModal extends ConsumerStatefulWidget {
   final dynamic initialData; // Can be Medication for edit or String for prefill name
   final bool showDiscontinuedToggle;
   final bool isRetrospectiveOneOff;
+  final DateTime? loggingDate;
   final Function(HrtEditEntry entry)? onAddOneOffEntry;
+  final Function(Medication medication)? onMedicationCreated;
 
   const AddMedicationModal({
     super.key,
     this.initialData,
     this.showDiscontinuedToggle = false,
     this.isRetrospectiveOneOff = false,
+    this.loggingDate,
     this.onAddOneOffEntry,
+    this.onMedicationCreated,
   });
 
   @override
@@ -39,6 +50,7 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
   late TextEditingController _nameController;
   late TextEditingController _doseController;
   late TextEditingController _notesController;
+  final FocusNode _nameFocusNode = FocusNode();
 
   MedicationType _selectedType = MedicationType.pill;
   String _selectedUnit = 'mg';
@@ -51,6 +63,7 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
   bool _isCustomDose = false;
   String? _selectedQuickAddName;
 
+  RetrospectiveMedicationOption _retroOption = RetrospectiveMedicationOption.justForThisDay;
   bool _isNotCurrentlyTaking = false;
   DateTime? _startDate;
   DateTime? _endDate;
@@ -99,8 +112,10 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
     } else if (widget.initialData is String) {
       _nameController.text = widget.initialData as String;
       _selectedWeekdays = [1, 2, 3, 4, 5, 6, 7];
+      _selectedFrequency = widget.isRetrospectiveOneOff ? '' : 'Daily';
     } else {
       _selectedWeekdays = [1, 2, 3, 4, 5, 6, 7];
+      _selectedFrequency = widget.isRetrospectiveOneOff ? '' : 'Daily';
     }
 
     _nameController.addListener(_onNameChanged);
@@ -113,6 +128,15 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
       _drugCategory = med.drugCategory;
       _drugMarket = med.market;
     }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _doseController.dispose();
+    _notesController.dispose();
+    _nameFocusNode.dispose();
+    super.dispose();
   }
 
   /// Pre-fills the modal from a Quick-Add card selection.
@@ -206,14 +230,6 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
       _filteredMeds = filtered;
       _showDropdown = filtered.isNotEmpty;
     });
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _doseController.dispose();
-    _notesController.dispose();
-    super.dispose();
   }
 
   List<String> _getDosePresets(MedicationType type) {
@@ -378,42 +394,65 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
 
   void _save() {
     if (_formKey.currentState!.validate()) {
-      if (_isNotCurrentlyTaking) {
+      final bool isPastPeriod = (widget.isRetrospectiveOneOff && _retroOption == RetrospectiveMedicationOption.takingInThePast) ||
+          (!widget.isRetrospectiveOneOff && _isNotCurrentlyTaking);
+
+      if (isPastPeriod) {
+        if (_startDate == null || _endDate == null) {
+          setState(() {
+            _dateError = 'Please select both start and end dates.';
+          });
+          return;
+        }
+
         final now = DateTime.now();
-        final todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
-        final start = _startDate ?? now;
-        final end = _endDate ?? now;
+        final todayStart = DateTime(now.year, now.month, now.day);
+        final startOnly = DateTime(_startDate!.year, _startDate!.month, _startDate!.day);
+        final endOnly = DateTime(_endDate!.year, _endDate!.month, _endDate!.day);
 
-        if (start.isAfter(todayEnd) || end.isAfter(todayEnd)) {
+        if (endOnly.isAfter(todayStart)) {
           setState(() {
-            _dateError = 'Dates cannot be in the future.';
+            _dateError = 'End date cannot be later than today.';
           });
           return;
         }
 
-        final startOnly = DateTime(start.year, start.month, start.day);
-        final endOnly = DateTime(end.year, end.month, end.day);
-        if (endOnly.isBefore(startOnly)) {
+        if (startOnly.isAfter(endOnly)) {
           setState(() {
-            _dateError = 'End date cannot be before start date.';
+            _dateError = 'Start date cannot be after end date.';
           });
           return;
         }
+
+        if (widget.isRetrospectiveOneOff && widget.loggingDate != null) {
+          final logOnly = DateTime(widget.loggingDate!.year, widget.loggingDate!.month, widget.loggingDate!.day);
+          if (logOnly.isBefore(startOnly) || logOnly.isAfter(endOnly)) {
+            setState(() {
+              _dateError = 'The date being logged (${logOnly.day}/${logOnly.month}/${logOnly.year}) must fall within the start and end date range.';
+            });
+            return;
+          }
+        }
       }
 
-      // Validate weekday selection for Weekly and Twice Weekly
-      final lowerFreq = _selectedFrequency.toLowerCase();
-      if (lowerFreq.contains('twice') && _selectedWeekdays.length != 2) {
-        setState(() {
-          _weekdayError = 'Please select exactly 2 days of the week.';
-        });
-        return;
-      }
-      if (lowerFreq.contains('weekly') && !lowerFreq.contains('twice') && _selectedWeekdays.length != 1) {
-        setState(() {
-          _weekdayError = 'Please select 1 day of the week.';
-        });
-        return;
+      // Validate weekday selection only for ongoing regimens
+      final bool requiresWeekdayValidation = (!widget.isRetrospectiveOneOff && !_isNotCurrentlyTaking) ||
+          (widget.isRetrospectiveOneOff && _retroOption == RetrospectiveMedicationOption.addToCurrent);
+
+      if (requiresWeekdayValidation) {
+        final lowerFreq = _selectedFrequency.toLowerCase();
+        if (lowerFreq.contains('twice') && _selectedWeekdays.length != 2) {
+          setState(() {
+            _weekdayError = 'Please select exactly 2 days of the week.';
+          });
+          return;
+        }
+        if (lowerFreq.contains('weekly') && !lowerFreq.contains('twice') && _selectedWeekdays.length != 1) {
+          setState(() {
+            _weekdayError = 'Please select 1 day of the week.';
+          });
+          return;
+        }
       }
 
       // Auto-detect drug category from library if user typed the name manually
@@ -426,7 +465,7 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
           : null;
 
       final medication = Medication(
-        id: widget.initialData is Medication ? (widget.initialData as Medication).id : null,
+        id: widget.initialData is Medication ? (widget.initialData as Medication).id : const Uuid().v4(),
         name: _nameController.text.trim(),
         type: _selectedType,
         dose: double.tryParse(_doseController.text) ?? 0,
@@ -438,14 +477,59 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
         isCombinedProduct: finalIsCombined,
         combinedComponents: finalComponents,
         market: finalMarket,
-        startedAt: _isNotCurrentlyTaking ? _startDate : (_startDate ?? (widget.initialData is Medication ? (widget.initialData as Medication).startedAt : null)),
-        endedAt: _isNotCurrentlyTaking ? (_endDate ?? DateTime.now()) : null,
+        startedAt: isPastPeriod
+            ? _startDate
+            : (_startDate ?? (widget.initialData is Medication ? (widget.initialData as Medication).startedAt : DateTime.now())),
+        endedAt: isPastPeriod
+            ? _endDate
+            : null,
       );
 
-      if (widget.isRetrospectiveOneOff) {
+      final isNewRegimenMed = widget.initialData is! Medication &&
+          ((widget.isRetrospectiveOneOff && _retroOption == RetrospectiveMedicationOption.addToCurrent) ||
+           (!widget.isRetrospectiveOneOff && !_isNotCurrentlyTaking));
+
+      if (isNewRegimenMed) {
+        final existingMeds = ref.read(medicationsProvider).medications;
+        final duplicate = HrtScheduleService.findExactActiveDuplicate(medication, existingMeds);
+
+        if (duplicate != null) {
+          _showDuplicateWarningDialog(
+            context: context,
+            duplicateMed: duplicate,
+            onAddAnyway: () {
+              _commitSave(medication);
+            },
+            onEditExisting: () {
+              Navigator.pop(context); // Close add modal
+              // Open edit modal for existing duplicate
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                isDismissible: true,
+                enableDrag: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) => AddMedicationModal(
+                  initialData: duplicate,
+                  showDiscontinuedToggle: true,
+                ),
+              );
+            },
+          );
+          return;
+        }
+      }
+
+      _commitSave(medication);
+    }
+  }
+
+  void _commitSave(Medication medication) {
+    if (widget.isRetrospectiveOneOff) {
+      if (_retroOption == RetrospectiveMedicationOption.justForThisDay) {
         final parsedDose = double.tryParse(_doseController.text) ?? 0;
         final oneOffEntry = HrtEditEntry(
-          id: const Uuid().v4(),
+          id: medication.id ?? const Uuid().v4(),
           name: _nameController.text.trim(),
           details: '${parsedDose.toStringAsFixed(parsedDose == parsedDose.toInt() ? 0 : 2)} $_selectedUnit · ${_selectedType.displayName}',
           status: 'Taken',
@@ -456,84 +540,313 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
           timeTaken: '08:00',
         );
         widget.onAddOneOffEntry?.call(oneOffEntry);
-
-        if (_alsoAddToCurrentMedications) {
-          ref.read(medicationsProvider.notifier).addMedication(medication);
-        }
-      } else if (widget.initialData is Medication) {
-        ref.read(medicationsProvider.notifier).updateMedication(medication);
       } else {
         ref.read(medicationsProvider.notifier).addMedication(medication);
+        widget.onMedicationCreated?.call(medication);
       }
-
-      context.pop();
+    } else if (widget.initialData is Medication) {
+      ref.read(medicationsProvider.notifier).updateMedication(medication);
+    } else {
+      ref.read(medicationsProvider.notifier).addMedication(medication);
+      widget.onMedicationCreated?.call(medication);
     }
+
+    context.pop();
   }
 
-  bool _alsoAddToCurrentMedications = false;
+  void _showDuplicateWarningDialog({
+    required BuildContext context,
+    required Medication duplicateMed,
+    required VoidCallback onAddAnyway,
+    required VoidCallback onEditExisting,
+  }) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: const Color(0xFF1D1B1A).withValues(alpha: 0.4),
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFFFF3E0),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.warning_amber_rounded,
+                        color: Color(0xFFE65100),
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Medication already active',
+                        style: GoogleFonts.manrope(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF1D1B1A),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'You already have an active entry for ${duplicateMed.name} (${duplicateMed.dose.toStringAsFixed(duplicateMed.dose == duplicateMed.dose.toInt() ? 0 : 2)} ${duplicateMed.unit}, ${duplicateMed.formattedFrequency}).',
+                  style: GoogleFonts.manrope(
+                    fontSize: 14,
+                    color: const Color(0xFF4D453F),
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Would you like to edit your existing entry, or add this as a second concurrent application?',
+                  style: GoogleFonts.manrope(
+                    fontSize: 13,
+                    color: const Color(0xFF78716C),
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.pop(dialogContext);
+                          onAddAnyway();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          side: const BorderSide(color: Color(0xFFD0C4BC)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          'Add anyway',
+                          style: GoogleFonts.manrope(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF4D453F),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(dialogContext);
+                          onEditExisting();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primary,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          'Edit existing',
+                          style: GoogleFonts.manrope(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   Widget _buildRetrospectiveOneOffToggleSection() {
     if (!widget.isRetrospectiveOneOff) {
       return const SizedBox.shrink();
     }
+    final now = DateTime.now();
+    final logDate = widget.loggingDate ?? now;
+    final logDateFormatted = "${_monthsNames[logDate.month - 1].substring(0, 3)} ${logDate.day}, ${logDate.year}";
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: _alsoAddToCurrentMedications ? AppTheme.primary : const Color(0xFFE7E5E4),
-              width: _alsoAddToCurrentMedications ? 1.5 : 1.0,
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        _buildSectionHeader('How should this medication be tracked?'),
+        const SizedBox(height: 10),
+        _buildRetroOptionCard(
+          option: RetrospectiveMedicationOption.justForThisDay,
+          title: 'Just for this day',
+          subtitle: 'Save only as a one-off historical entry for $logDateFormatted.',
+        ),
+        const SizedBox(height: 8),
+        _buildRetroOptionCard(
+          option: RetrospectiveMedicationOption.addToCurrent,
+          title: 'Add to my current medications',
+          subtitle: 'Add to ongoing regimen with active scheduling starting today.',
+        ),
+        const SizedBox(height: 8),
+        _buildRetroOptionCard(
+          option: RetrospectiveMedicationOption.takingInThePast,
+          title: 'I was taking this in the past (not currently)',
+          subtitle: 'Record a defined historical period that has already ended.',
+        ),
+        if (_retroOption == RetrospectiveMedicationOption.takingInThePast) ...[
+          const SizedBox(height: 16),
+          Row(
             children: [
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Also add to my current medications",
-                      style: GoogleFonts.manrope(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF1D1B1A),
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Default: Off. Enable to add to ongoing tracking schedule.',
-                      style: GoogleFonts.manrope(
-                        fontSize: 12,
-                        color: const Color(0xFF78716C),
+                    _buildSectionHeader('Start Date'),
+                    const SizedBox(height: 8),
+                    _buildDatePickerTile(
+                      date: _startDate ?? logDate,
+                      onTap: () => _selectDate(
+                        isStart: true,
+                        initial: _startDate ?? logDate,
                       ),
                     ),
                   ],
                 ),
               ),
-              Switch.adaptive(
-                value: _alsoAddToCurrentMedications,
-                activeColor: AppTheme.primary,
-                onChanged: (val) {
-                  setState(() {
-                    _alsoAddToCurrentMedications = val;
-                  });
-                },
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionHeader('End Date'),
+                    const SizedBox(height: 8),
+                    _buildDatePickerTile(
+                      date: _endDate ?? logDate,
+                      onTap: () => _selectDate(
+                        isStart: false,
+                        initial: _endDate ?? (logDate.isAfter(now) ? now : logDate),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-        ),
+          if (_dateError != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              _dateError!,
+              style: GoogleFonts.manrope(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF8C3A25),
+              ),
+            ),
+          ],
+        ],
         const SizedBox(height: 16),
       ],
     );
   }
 
+  Widget _buildRetroOptionCard({
+    required RetrospectiveMedicationOption option,
+    required String title,
+    required String subtitle,
+  }) {
+    final isSelected = _retroOption == option;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _retroOption = option;
+          _dateError = null;
+          _weekdayError = null;
+          if (option == RetrospectiveMedicationOption.takingInThePast) {
+            _selectedFrequency = '';
+            _selectedWeekdays = [];
+            _startDate ??= widget.loggingDate ?? DateTime.now();
+            _endDate ??= widget.loggingDate ?? DateTime.now();
+          } else if (option == RetrospectiveMedicationOption.addToCurrent) {
+            if (_selectedFrequency.isEmpty) _selectedFrequency = 'Daily';
+            if (_selectedWeekdays.isEmpty) _selectedWeekdays = [1, 2, 3, 4, 5, 6, 7];
+          } else {
+            _selectedFrequency = '';
+            _selectedWeekdays = [];
+          }
+        });
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? AppTheme.primary : const Color(0xFFE7E5E4),
+            width: isSelected ? 1.5 : 1.0,
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Icon(
+                isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+                size: 20,
+                color: isSelected ? AppTheme.primary : const Color(0xFFA8A29E),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.manrope(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1D1B1A),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.manrope(
+                      fontSize: 12,
+                      color: const Color(0xFF78716C),
+                      height: 1.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildDiscontinuedToggleSection() {
-    if (!widget.showDiscontinuedToggle) {
+    if (!widget.showDiscontinuedToggle || widget.isRetrospectiveOneOff) {
       return const SizedBox.shrink();
     }
     final now = DateTime.now();
@@ -584,8 +897,13 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
                     _isNotCurrentlyTaking = val;
                     _dateError = null;
                     if (val) {
+                      _selectedFrequency = '';
+                      _selectedWeekdays = [];
                       _startDate ??= DateTime.now();
                       _endDate ??= DateTime.now();
+                    } else {
+                      if (_selectedFrequency.isEmpty) _selectedFrequency = 'Daily';
+                      if (_selectedWeekdays.isEmpty) _selectedWeekdays = [1, 2, 3, 4, 5, 6, 7];
                     }
                   });
                 },
@@ -677,6 +995,9 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
   }
 
   Future<void> _selectDate({required bool isStart, required DateTime initial}) async {
+    _nameFocusNode.unfocus();
+    FocusScope.of(context).unfocus();
+
     final now = DateTime.now();
     final picked = await showDatePicker(
       context: context,
@@ -696,6 +1017,9 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
         );
       },
     );
+
+    _nameFocusNode.unfocus();
+    FocusScope.of(context).unfocus();
 
     if (picked != null) {
       setState(() {
@@ -826,20 +1150,43 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
                     _buildDoseSelector(),
                     const SizedBox(height: 24),
 
+                    // Retrospective Tracking / Discontinued Toggle
+                    _buildRetrospectiveOneOffToggleSection(),
+                    _buildDiscontinuedToggleSection(),
+
                     // Frequency
-                    if (!widget.isRetrospectiveOneOff || _alsoAddToCurrentMedications) ...[
-                      _buildSectionHeader('Frequency'),
+                    if ((!widget.isRetrospectiveOneOff && !_isNotCurrentlyTaking) ||
+                        (!widget.isRetrospectiveOneOff && _isNotCurrentlyTaking) ||
+                        (widget.isRetrospectiveOneOff && _retroOption == RetrospectiveMedicationOption.addToCurrent) ||
+                        (widget.isRetrospectiveOneOff && _retroOption == RetrospectiveMedicationOption.takingInThePast)) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _buildSectionHeader(
+                            ((!widget.isRetrospectiveOneOff && _isNotCurrentlyTaking) ||
+                                (widget.isRetrospectiveOneOff && _retroOption == RetrospectiveMedicationOption.takingInThePast))
+                                ? 'Frequency'
+                                : 'Frequency',
+                          ),
+                          if ((!widget.isRetrospectiveOneOff && _isNotCurrentlyTaking) ||
+                              (widget.isRetrospectiveOneOff && _retroOption == RetrospectiveMedicationOption.takingInThePast))
+                            const Text(
+                              'Optional',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontStyle: FontStyle.italic,
+                                color: Color(0xFFA8A29E),
+                              ),
+                            ),
+                        ],
+                      ),
                       const SizedBox(height: 8),
-                      _buildFrequencySelector(),
+                      _buildFrequencySelector(
+                        enforceWeekdays: (!widget.isRetrospectiveOneOff && !_isNotCurrentlyTaking) ||
+                            (widget.isRetrospectiveOneOff && _retroOption == RetrospectiveMedicationOption.addToCurrent),
+                      ),
                       const SizedBox(height: 24),
                     ],
-
-                    // Retrospective One-Off Toggle
-                    _buildRetrospectiveOneOffToggleSection(),
-
-                    // Discontinued / Past medication toggle
-                    _buildDiscontinuedToggleSection(),
-                    const SizedBox(height: 24),
 
                     // Notes Input
                     Row(
@@ -936,6 +1283,7 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
       ),
       child: TextFormField(
         controller: _nameController,
+        focusNode: _nameFocusNode,
         decoration: const InputDecoration(
           hintText: 'Search (e.g., Estradiol)',
           hintStyle: TextStyle(color: Color(0xFFA8A29E)),
@@ -1407,7 +1755,7 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
     );
   }
 
-  Widget _buildFrequencySelector() {
+  Widget _buildFrequencySelector({bool enforceWeekdays = true}) {
     final frequencies = ['Daily', 'Twice weekly', 'Weekly', 'As needed'];
     final lowerFreq = _selectedFrequency.toLowerCase();
     final isTwice = lowerFreq.contains('twice');
@@ -1422,13 +1770,13 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
           spacing: 8,
           runSpacing: 8,
           children: frequencies.map((freq) {
-            final isSelected = _selectedFrequency == freq;
+            final isSelected = _selectedFrequency.toLowerCase() == freq.toLowerCase();
             return ChoiceChip(
               label: Text(freq),
               selected: isSelected,
               onSelected: (selected) {
-                if (selected) {
-                  setState(() {
+                setState(() {
+                  if (selected) {
                     _selectedFrequency = freq;
                     _weekdayError = null;
                     if (freq.toLowerCase().contains('twice')) {
@@ -1440,8 +1788,11 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
                     } else {
                       _selectedWeekdays = [1, 2, 3, 4, 5, 6, 7];
                     }
-                  });
-                }
+                  } else if (!enforceWeekdays) {
+                    _selectedFrequency = '';
+                    _selectedWeekdays = [];
+                  }
+                });
               },
               selectedColor: const Color(0xFF67594E),
               backgroundColor: Colors.white,
@@ -1461,7 +1812,7 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
             );
           }).toList(),
         ),
-        if (isTwice || isWeekly) ...[
+        if (enforceWeekdays && (isTwice || isWeekly)) ...[
           const SizedBox(height: 14),
           Text(
             isTwice

@@ -1084,12 +1084,19 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           initialHrt: log.hrt.map((e) => Map<String, String>.from(e)).toList(),
           selectedDate: _selectedDate,
           onSave: (updated) {
-            // Delete removed medications first
-            final updatedIds = updated.map((e) => e['id']).where((id) => id != null).toSet();
-            final medications = ref.read(medicationsProvider).medications;
-            for (final med in medications) {
-              if (!updatedIds.contains(med.id)) {
-                ref.read(medicationsProvider.notifier).removeMedication(med.id);
+            final now = DateTime.now();
+            final isToday = _selectedDate == null ||
+                (_selectedDate!.year == now.year &&
+                 _selectedDate!.month == now.month &&
+                 _selectedDate!.day == now.day);
+
+            if (isToday) {
+              final updatedIds = updated.map((e) => e['id']).where((id) => id != null).toSet();
+              final medications = ref.read(medicationsProvider).medications;
+              for (final med in medications) {
+                if (!updatedIds.contains(med.id)) {
+                  ref.read(medicationsProvider.notifier).removeMedication(med.id);
+                }
               }
             }
 

@@ -688,10 +688,32 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                   ),
                   const SizedBox(height: 12),
 
-                  // Medication cards
-                  ..._entries.asMap().entries.where((e) => _isMedActiveOnSelectedDate(e.value)).map((e) {
-                    return _buildMedicationCard(e.key, e.value);
-                  }),
+                  // Medication cards or empty state
+                  if (_entries.where((e) => _isMedActiveOnSelectedDate(e)).isEmpty)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                      margin: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF9F7F5),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFFE7E5E4)),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'No HRT medications were active on this date.',
+                          style: GoogleFonts.manrope(
+                            fontSize: 13,
+                            color: const Color(0xFF78716C),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    ..._entries.asMap().entries.where((e) => _isMedActiveOnSelectedDate(e.value)).map((e) {
+                      return _buildMedicationCard(e.key, e.value);
+                    }),
 
                   const SizedBox(height: 12),
 
@@ -710,9 +732,25 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                         builder: (context) => AddMedicationModal(
                           showDiscontinuedToggle: !isToday,
                           isRetrospectiveOneOff: !isToday,
+                          loggingDate: widget.selectedDate,
                           onAddOneOffEntry: (entry) {
                             setState(() {
                               _entries.add(entry);
+                            });
+                          },
+                          onMedicationCreated: (med) {
+                            setState(() {
+                              _entries.add(HrtEditEntry(
+                                id: med.id,
+                                name: med.name,
+                                details: '${med.dose.toStringAsFixed(med.dose == med.dose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} ${med.unit} · ${med.type.displayName}',
+                                status: 'Taken',
+                                isTaken: true,
+                                dose: med.dose.toStringAsFixed(med.dose == med.dose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), ''),
+                                unit: med.unit,
+                                applicationType: med.type.displayName,
+                                timeTaken: '08:00',
+                              ));
                             });
                           },
                         ),
@@ -1108,10 +1146,16 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
     final target = DateTime(date.year, date.month, date.day);
 
     final meds = ref.read(medicationsProvider).medications;
-    final matching = meds.firstWhere(
-      (m) => m.name.toLowerCase() == entry.name.toLowerCase() || (m.id.isNotEmpty && m.id == entry.id),
-      orElse: () => Medication(name: entry.name, type: MedicationType.other, dose: 50, unit: 'mcg', frequency: ''),
+    final matchingIndex = meds.indexWhere(
+      (m) => (m.id.isNotEmpty && m.id == entry.id) || m.name.toLowerCase() == entry.name.toLowerCase(),
     );
+
+    if (matchingIndex == -1) {
+      // One-off entry explicitly added for this date or loaded from this date's log
+      return true;
+    }
+
+    final matching = meds[matchingIndex];
 
     if (matching.startedAt != null) {
       final start = DateTime(matching.startedAt!.year, matching.startedAt!.month, matching.startedAt!.day);
