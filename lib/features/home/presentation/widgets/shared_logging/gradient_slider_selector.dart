@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 
@@ -95,26 +96,35 @@ class GradientSliderSelector extends StatelessWidget {
                   final isSelected = val == currentValue;
                   return Expanded(
                     child: GestureDetector(
-                      onTap: () => onChanged(val),
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        onChanged(val);
+                      },
                       behavior: HitTestBehavior.opaque,
                       child: Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              emojiGetter(val),
-                              style: const TextStyle(fontSize: 18),
+                            AnimatedScale(
+                              scale: isSelected ? 1.15 : 1.0,
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeOutBack,
+                              child: Text(
+                                emojiGetter(val),
+                                style: const TextStyle(fontSize: 18),
+                              ),
                             ),
                             const SizedBox(height: 2),
-                            Text(
-                              val,
+                            AnimatedDefaultTextStyle(
+                              duration: const Duration(milliseconds: 180),
                               style: GoogleFonts.manrope(
                                 fontSize: 9,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                                 color: isSelected
                                     ? AppTheme.primary
                                     : const Color(0xFF8A817C),
                               ),
+                              child: Text(val),
                             ),
                           ],
                         ),

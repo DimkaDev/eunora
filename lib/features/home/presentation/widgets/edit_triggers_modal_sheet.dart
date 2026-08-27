@@ -49,6 +49,14 @@ class _EditTriggersModalSheetState extends State<EditTriggersModalSheet> {
 
       if (_isCaffeineName(name) || _isAlcoholName(name) || _isSmokingName(name)) {
         _counterState[i] = int.tryParse(value.replaceAll(RegExp(r'[^0-9]'), '')) ?? 1;
+      } else if (_isExerciseName(name)) {
+        int? mins;
+        if (value.contains('min')) {
+          mins = int.tryParse(value.replaceAll(RegExp(r'[^0-9]'), ''));
+        }
+        _counterState[i] = mins ?? 0;
+        final parts = value.replaceAll(RegExp(r'\d+\s*min'), '').replaceAll('·', '').trim();
+        _draftTriggers[i]['intensity'] = parts.isNotEmpty && parts != 'Logged' ? parts : 'Moderate';
       } else if (_isFoodName(name)) {
         // Foods: value may be the note text, or 'Noted' placeholder
         _textState[i] = (value == 'Noted') ? '' : value;
@@ -68,6 +76,9 @@ class _EditTriggersModalSheetState extends State<EditTriggersModalSheet> {
 
   bool _isSmokingName(String n) =>
       n.contains('smoking') || n.contains('tobacco');
+
+  bool _isExerciseName(String n) =>
+      n == 'exercise';
 
   bool _isFoodName(String n) =>
       n == 'foods' ||
@@ -121,6 +132,29 @@ class _EditTriggersModalSheetState extends State<EditTriggersModalSheet> {
       _counterState[index] = val;
       _draftTriggers[index]['value'] = '$val $unit';
     });
+  }
+
+  void _setExerciseDuration(int index, int minutes) {
+    setState(() {
+      _counterState[index] = minutes;
+      _updateExerciseValue(index);
+    });
+  }
+
+  void _setExerciseIntensity(int index, String intensity) {
+    setState(() {
+      _draftTriggers[index]['intensity'] = intensity;
+      _updateExerciseValue(index);
+    });
+  }
+
+  void _updateExerciseValue(int index) {
+    final mins = _counterState[index] ?? 0;
+    if (mins > 0) {
+      _draftTriggers[index]['value'] = '$mins min';
+    } else {
+      _draftTriggers[index]['value'] = 'Logged';
+    }
   }
 
   void _setText(int index, String text) {
@@ -493,6 +527,42 @@ class _EditTriggersModalSheetState extends State<EditTriggersModalSheet> {
             onChanged: (val) => _setSliderValue(index, val),
             label: 'INTENSITY LEVEL',
             emojiGetter: (val) => _getEmojiForValue(name, val),
+          ),
+        ],
+      );
+    }
+
+    // ── Exercise ──
+    if (_isExerciseName(nameLower)) {
+      final mins = _counterState[index] ?? 0;
+      final intensity = (_draftTriggers[index]['intensity'] as String?) ?? 'Moderate';
+      final List<String> exerciseVals = ['Light', 'Moderate', 'Intense'];
+      final safeIntensity = exerciseVals.contains(intensity) ? intensity : 'Moderate';
+
+      return LoggingCardWrapper(
+        name: name,
+        icon: icon,
+        color: trigColor,
+        backgroundColor: trigBg,
+        trailingAction: deleteBtn,
+        children: [
+          GradientSliderSelector(
+            values: exerciseVals,
+            currentValue: safeIntensity,
+            onChanged: (val) => _setExerciseIntensity(index, val),
+            label: 'INTENSITY',
+            emojiGetter: (val) => _getEmojiForValue(name, val),
+          ),
+          const SizedBox(height: 20),
+          const Divider(color: Color(0xFFF7F5F0), height: 1),
+          QuantityCounterSelector(
+            value: mins,
+            label: 'DURATION',
+            onChanged: (val) => _setExerciseDuration(index, val),
+            displayValueBuilder: (val) => val > 0 ? '$val min' : 'Not set',
+            stepValue: 5,
+            minValue: 0,
+            maxValue: 240,
           ),
         ],
       );

@@ -390,7 +390,7 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
                 ),
                 const SizedBox(height: 12),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
                   child: Text(
                     symptom.name,
                     textAlign: TextAlign.center,
@@ -437,7 +437,15 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
     final symIcon = symptom.getIconData();
     final symColor = symptom.getIconColor();
     final symBg = symColor.withValues(alpha: 0.1);
-    final hasDuration = symptom.id == 'hot_flash' || symptom.id == 'night_sweats';
+    final symId = symptom.id.toLowerCase();
+    final symNameLower = symName.toLowerCase();
+    final hasDuration = symId == 'hot_flash' ||
+        symId == 'night_sweats' ||
+        symId == 's_hot_flashes' ||
+        symId == 's_night_sweats' ||
+        symId == 's_hot_flash' ||
+        symNameLower == 'hot flashes' ||
+        symNameLower == 'night sweats';
 
     return LoggingCardWrapper(
       name: symName,
@@ -467,9 +475,10 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
                 _selectedDuration = val;
               });
             },
-            displayValueBuilder: (val) => '$val min',
+            displayValueBuilder: (val) => val > 0 ? '$val min' : 'Not set',
             stepValue: 5,
-            minValue: 5,
+            minValue: 0,
+            maxValue: 240,
           ),
         ],
       ],

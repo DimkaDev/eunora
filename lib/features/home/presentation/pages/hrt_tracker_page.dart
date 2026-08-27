@@ -2355,39 +2355,48 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
       }
     }
 
+    final bool isDayLogged = dayLog != null && (
+      dayLog.isCompleted ||
+      dayLog.hrtIntakes.isNotEmpty ||
+      dayLog.symptoms.isNotEmpty ||
+      dayLog.triggers.isNotEmpty
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Retrospective Logging CTA Button
-        InkWell(
-          onTap: () {
-            context.go('/calendar', extra: selectedDate);
-          },
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            decoration: BoxDecoration(
-              color: AppTheme.primary,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.edit_calendar, color: Colors.white, size: 18),
-                const SizedBox(width: 8),
-                Text(
-                  'Log this day',
-                  style: GoogleFonts.manrope(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+        if (!isDayLogged) ...[
+          // Retrospective Logging CTA Button
+          InkWell(
+            onTap: () {
+              context.go('/calendar', extra: selectedDate);
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              decoration: BoxDecoration(
+                color: AppTheme.primary,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.edit_calendar, color: Colors.white, size: 18),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Log this day',
+                    style: GoogleFonts.manrope(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 16),
+          const SizedBox(height: 16),
+        ],
 
         if (activities.isEmpty)
           Center(

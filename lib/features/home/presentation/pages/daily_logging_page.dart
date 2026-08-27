@@ -343,7 +343,8 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
       final sanitizedId = sanitizeSymptomId(id);
       final name = _getSymptomName(sanitizedId);
       final severityStr = _symptomSeverities[sanitizedId] ?? 'Mild';
-      final duration = _symptomDurations[sanitizedId];
+      final rawDuration = _symptomDurations[sanitizedId];
+      final duration = (rawDuration != null && rawDuration > 0) ? rawDuration : null;
       
       loggedSymptoms.add(
         LoggedSymptom(

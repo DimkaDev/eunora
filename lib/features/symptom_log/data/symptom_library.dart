@@ -55,7 +55,7 @@ const List<SymptomDefinition> kSymptomLibrary = [
   SymptomDefinition(id: 'fatigue', label: 'Fatigue', category: SymptomCategory.physical, tier: SymptomTier.core, inputMethod: 'severity'),
   SymptomDefinition(id: 'night_wakings', label: 'Night wakings', category: SymptomCategory.sleep, tier: SymptomTier.core, inputMethod: 'severity'),
   SymptomDefinition(id: 'hot_flash', label: 'Hot flashes', category: SymptomCategory.vasomotor, tier: SymptomTier.core, inputMethod: 'intensity_duration'),
-  SymptomDefinition(id: 'night_sweats', label: 'Night sweats', category: SymptomCategory.vasomotor, tier: SymptomTier.core, inputMethod: 'severity'),
+  SymptomDefinition(id: 'night_sweats', label: 'Night sweats', category: SymptomCategory.vasomotor, tier: SymptomTier.core, inputMethod: 'intensity_duration'),
   SymptomDefinition(id: 'memory_problems', label: 'Memory problems', category: SymptomCategory.moodCognitive, tier: SymptomTier.core, inputMethod: 'severity'),
   SymptomDefinition(id: 'brain_fog', label: 'Brain fog / concentration', category: SymptomCategory.moodCognitive, tier: SymptomTier.core, inputMethod: 'severity'),
   SymptomDefinition(id: 'irritability', label: 'Irritability', category: SymptomCategory.moodCognitive, tier: SymptomTier.core, inputMethod: 'severity'),

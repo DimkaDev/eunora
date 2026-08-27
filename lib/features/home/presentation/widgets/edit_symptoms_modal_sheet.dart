@@ -42,7 +42,7 @@ class _EditSymptomsModalSheetState extends ConsumerState<EditSymptomsModalSheet>
 
   void _updateDuration(int index, int duration) {
     setState(() {
-      _draftSymptoms[index]['duration'] = duration.toString();
+      _draftSymptoms[index]['duration'] = duration > 0 ? duration.toString() : '';
     });
   }
 
@@ -163,7 +163,7 @@ class _EditSymptomsModalSheetState extends ConsumerState<EditSymptomsModalSheet>
                     final symptomMapEntry = _draftSymptoms[index];
                     final String name = symptomMapEntry['name'] ?? '';
                     final String severity = symptomMapEntry['severity'] ?? 'Mild';
-                    final int duration = int.tryParse(symptomMapEntry['duration'] ?? '15') ?? 15;
+                    final int duration = int.tryParse(symptomMapEntry['duration'] ?? '0') ?? 0;
 
                     final symptom = findSymptomByName(name);
                     final symIcon = symptom.getIconData();
@@ -174,6 +174,7 @@ class _EditSymptomsModalSheetState extends ConsumerState<EditSymptomsModalSheet>
                     final hasDuration = symId == 'hot_flash' ||
                         symId == 'night_sweats' ||
                         symId == 's_hot_flashes' ||
+                        symId == 's_night_sweats' ||
                         symId == 's_hot_flash' ||
                         nameLower == 'hot flashes' ||
                         nameLower == 'night sweats';
@@ -205,9 +206,10 @@ class _EditSymptomsModalSheetState extends ConsumerState<EditSymptomsModalSheet>
                             value: duration,
                             label: 'DURATION',
                             onChanged: (val) => _updateDuration(index, val),
-                            displayValueBuilder: (val) => '$val min',
+                            displayValueBuilder: (val) => val > 0 ? '$val min' : 'Not set',
                             stepValue: 5,
-                            minValue: 5,
+                            minValue: 0,
+                            maxValue: 240,
                           ),
                         ],
                       ],

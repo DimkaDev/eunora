@@ -125,6 +125,8 @@ class TriggerDetailsStep extends ConsumerWidget {
             return _buildSmokingDetailCard(trigId);
           } else if (trigId == 't_stress') {
             return _buildStressDetailCard(context);
+          } else if (trigId == 't_exercise' || name.toLowerCase() == 'exercise') {
+            return _buildExerciseDetailCard(trigId, name, trigger.getIconData());
           } else {
             final currentVal =
                 customTriggerTexts[trigId] ?? _getTriggerValues(name)[1];
@@ -148,7 +150,7 @@ class TriggerDetailsStep extends ConsumerWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.lightbulb, color: AppTheme.primaryContainer),
+              const Icon(Icons.lightbulb_outline, color: Color(0xFF9B6B9E), size: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: RichText(
@@ -346,6 +348,50 @@ class TriggerDetailsStep extends ConsumerWidget {
           ),
           style: GoogleFonts.manrope(fontSize: 13),
           onChanged: (val) => onCustomTriggerTextChanged(trigId, val),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildExerciseDetailCard(
+    String trigId,
+    String name,
+    IconData icon,
+  ) {
+    final trigColor = _getTriggerColor(name);
+    final trigBg = trigColor.withValues(alpha: 0.1);
+    final values = _getTriggerValues(name);
+    final currentIntensity = customTriggerTexts[trigId] ?? values[1];
+    final currentDuration = customTriggerCounters[trigId] ??
+        customTriggerCounters['t_exercise'] ??
+        customTriggerCounters['exercise'] ??
+        0;
+
+    return LoggingCardWrapper(
+      name: name,
+      icon: icon,
+      color: trigColor,
+      backgroundColor: trigBg,
+      children: [
+        GradientSliderSelector(
+          values: values,
+          currentValue: values.contains(currentIntensity)
+              ? currentIntensity
+              : values[values.length ~/ 2],
+          onChanged: (val) => onCustomTriggerTextChanged(trigId, val),
+          label: 'INTENSITY',
+          emojiGetter: (val) => _getEmojiForValue(name, val),
+        ),
+        const SizedBox(height: 20),
+        const Divider(color: Color(0xFFF7F5F0), height: 1),
+        QuantityCounterSelector(
+          value: currentDuration,
+          label: 'DURATION',
+          onChanged: (val) => onCustomTriggerCounterChanged(trigId, val),
+          displayValueBuilder: (val) => val > 0 ? '$val min' : 'Not set',
+          stepValue: 5,
+          minValue: 0,
+          maxValue: 240,
         ),
       ],
     );

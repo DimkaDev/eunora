@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:eunora/core/utils/animation_system.dart';
 import '../providers/triggers_provider.dart';
@@ -239,19 +240,19 @@ class _TriggerLibraryPageState extends ConsumerState<TriggerLibraryPage> {
             ),
             const SizedBox(height: 12),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
               child: Text(
                 trigger.name,
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: GoogleFonts.manrope(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: isSelected
                       ? const Color(0xFF1D1B1A)
                       : const Color(0xFF9B8B7E),
-                  height: 1.1,
+                  height: 1.15,
                 ),
               ),
             ),

@@ -471,6 +471,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     String stressLevel = 'Moderate';
     bool foodsTriggered = false;
     String foodsNotes = '';
+    final Map<String, int> customCounters = Map<String, int>.from(mockLog.originalLog?.customTriggerCounters ?? {});
 
     for (final t in mockLog.triggers) {
       if (t.startsWith('Caffeine:')) {
@@ -485,6 +486,19 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       } else if (t.startsWith('Foods:')) {
         foodsTriggered = true;
         foodsNotes = t.replaceAll('Foods:', '').trim();
+      } else if (t.startsWith('Exercise:')) {
+        final val = t.replaceAll('Exercise:', '').trim();
+        final mins = int.tryParse(val.replaceAll(RegExp(r'[^0-9]'), ''));
+        if (mins != null && mins > 0) {
+          customCounters['t_exercise'] = mins;
+          customCounters['exercise'] = mins;
+        } else {
+          customCounters.remove('t_exercise');
+          customCounters.remove('exercise');
+        }
+      } else if (t.trim().toLowerCase() == 'exercise') {
+        customCounters.remove('t_exercise');
+        customCounters.remove('exercise');
       }
     }
 
@@ -639,6 +653,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         stressLevel: stressLevel,
         foodsTriggered: foodsTriggered,
         foodsNotes: foodsNotes,
+        customTriggerCounters: customCounters,
         estradiolChecked: estradiolChecked,
         estradiolDose: estradiolDose,
         estradiolUnit: estradiolUnit,
@@ -669,7 +684,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         }
         return LoggedSymptom(
           symptom: Symptom(
-            id: 's_${name.toLowerCase().replaceAll(' ', '_')}',
+            id: sanitizeSymptomId('s_${name.toLowerCase().replaceAll(' ', '_')}'),
             name: name,
             iconName: name.toLowerCase().contains('flash')
                 ? 'thermostat'
@@ -683,6 +698,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             category: 'General',
           ),
           severity: severityStr,
+          durationMinutes: null,
         );
       }).toList();
 
@@ -749,7 +765,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         stressLevel: stressLevel,
         foodsTriggered: foodsTriggered,
         foodsNotes: foodsNotes,
-        customTriggerCounters: {},
+        customTriggerCounters: customCounters,
         customTriggerTexts: {},
         estradiolChecked: estradiolChecked,
         estradiolDose: estradiolDose,
@@ -863,20 +879,20 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         }
       }
 
-      int duration = 15;
+      int? duration;
       if (log.originalLog != null) {
         final matching = log.originalLog!.symptoms.where(
           (ls) => ls.symptom.name.toLowerCase() == name.toLowerCase(),
         ).firstOrNull;
-        if (matching != null && matching.durationMinutes != null) {
-          duration = matching.durationMinutes!;
+        if (matching != null && matching.durationMinutes != null && matching.durationMinutes! > 0) {
+          duration = matching.durationMinutes;
         }
       }
 
       return <String, String>{
         'name': name,
         'severity': severity,
-        'duration': duration.toString(),
+        'duration': duration != null ? duration.toString() : '',
       };
     }).toList();
   }
@@ -890,7 +906,8 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       for (final s in newSymptoms) {
         final name = s['name'] ?? '';
         final severity = s['severity'] ?? 'Moderate';
-        final durationMinutes = int.tryParse(s['duration'] ?? '15');
+        final rawDuration = int.tryParse(s['duration'] ?? '');
+        final durationMinutes = (rawDuration != null && rawDuration > 0) ? rawDuration : null;
 
         final existing = log.originalLog!.symptoms.where(
           (ls) => ls.symptom.name.toLowerCase() == name.toLowerCase(),

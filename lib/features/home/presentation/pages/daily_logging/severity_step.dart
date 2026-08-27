@@ -86,8 +86,15 @@ class SeverityStep extends ConsumerWidget {
           final symColor = symptom.getIconColor();
           final symBg = symColor.withOpacity(0.1);
           final currentSeverity = symptomSeverities[id] ?? 'Mild';
-          final hasDuration = id == 's_hot_flashes' || id == 's_night_sweats';
-          final duration = symptomDurations[id] ?? 15;
+          final idLower = id.toLowerCase();
+          final symNameLower = symName.toLowerCase();
+          final hasDuration = idLower == 's_hot_flashes' ||
+              idLower == 's_night_sweats' ||
+              idLower == 'hot_flash' ||
+              idLower == 'night_sweats' ||
+              symNameLower == 'hot flashes' ||
+              symNameLower == 'night sweats';
+          final duration = symptomDurations[id] ?? 0;
 
           return LoggingCardWrapper(
             name: symName,
@@ -109,9 +116,10 @@ class SeverityStep extends ConsumerWidget {
                   value: duration,
                   label: 'DURATION',
                   onChanged: (val) => onDurationChanged(MapEntry(id, val)),
-                  displayValueBuilder: (val) => '$val min',
+                  displayValueBuilder: (val) => val > 0 ? '$val min' : 'Not set',
                   stepValue: 5,
-                  minValue: 5,
+                  minValue: 0,
+                  maxValue: 240,
                 ),
               ],
             ],

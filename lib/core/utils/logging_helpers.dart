@@ -78,7 +78,12 @@ String formatTriggerString(
   } else if (cleanId == 'stress') {
     value = stressLevel ?? 'Moderate';
   } else if (cleanId == 'exercise') {
-    value = '${customTriggerCounters['t_exercise'] ?? customTriggerCounters['exercise'] ?? 0} min';
+    final mins = customTriggerCounters['t_exercise'] ?? customTriggerCounters['exercise'];
+    if (mins != null && mins > 0) {
+      value = '$mins min';
+    } else {
+      value = null;
+    }
   } else if (cleanId == 'foods') {
     value = foodsNotes;
   } else {
@@ -103,7 +108,10 @@ String formatTriggerString(
 LoggedTriggerInfo parseTriggerString(String triggerStr) {
   final parts = triggerStr.split(':');
   final label = parts[0].trim();
-  final value = parts.length > 1 ? parts.sublist(1).join(':').trim() : null;
+  String? value = parts.length > 1 ? parts.sublist(1).join(':').trim() : null;
+  if (value != null && (value == '0 min' || value == '0' || value == 'None' || value.isEmpty)) {
+    value = null;
+  }
 
   // Find trigger by label (case-insensitive) or by ID
   final def = kTriggerLibrary.firstWhere(

@@ -63,6 +63,10 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
       _selectedTrigger?.id == 't_stress' ||
       _selectedTrigger?.name.toLowerCase() == 'stress';
 
+  bool get _isExercise =>
+      _selectedTrigger?.id == 't_exercise' ||
+      _selectedTrigger?.name.toLowerCase() == 'exercise';
+
   String get _foodHint {
     switch (_selectedTrigger?.id) {
       case 't_spicy_food':      return 'What spicy food did you eat?';
@@ -79,6 +83,7 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
     if (_isAlcohol)  return '$_counterValue glass${_counterValue != 1 ? 'es' : ''}';
     if (_isSmoking)  return '$_counterValue time${_counterValue != 1 ? 's' : ''}';
     if (_isFood)     return _textNote.isNotEmpty ? _textNote : 'Noted';
+    if (_isExercise) return _counterValue > 0 ? '$_counterValue min' : 'Logged';
     return _selectedValue ?? 'Moderate';
   }
 
@@ -111,9 +116,10 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
 
   void _selectTrigger(TriggerOption trigger) {
     final vals = _getTriggerValues(trigger.name);
+    final isEx = trigger.id == 't_exercise' || trigger.name.toLowerCase() == 'exercise';
     setState(() {
       _selectedTrigger = trigger;
-      _counterValue = 1;
+      _counterValue = isEx ? 0 : 1;
       _textNote = '';
       _selectedValue = vals.isNotEmpty ? vals[vals.length ~/ 2] : 'Moderate';
       _currentStep = 1;
@@ -361,12 +367,19 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
                         child: Icon(icon, color: trigColor, size: 32),
                       ),
                       const SizedBox(height: 12),
-                      Text(
-                        trigger.name,
-                        style: GoogleFonts.manrope(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF9B8B7E),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                        child: Text(
+                          trigger.name,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.manrope(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF9B8B7E),
+                            height: 1.15,
+                          ),
                         ),
                       ),
                     ],
@@ -469,7 +482,26 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
             label: 'INTENSITY LEVEL',
             emojiGetter: (val) => _getEmojiForValue(name, val),
           )
-        else
+        else if (_isExercise) ...[
+          GradientSliderSelector(
+            values: const ['Light', 'Moderate', 'Intense'],
+            currentValue: _selectedValue ?? 'Moderate',
+            onChanged: (val) => setState(() => _selectedValue = val),
+            label: 'INTENSITY',
+            emojiGetter: (val) => _getEmojiForValue(name, val),
+          ),
+          const SizedBox(height: 20),
+          const Divider(color: Color(0xFFF7F5F0), height: 1),
+          QuantityCounterSelector(
+            value: _counterValue,
+            label: 'DURATION',
+            onChanged: (val) => setState(() => _counterValue = val),
+            displayValueBuilder: (val) => val > 0 ? '$val min' : 'Not set',
+            stepValue: 5,
+            minValue: 0,
+            maxValue: 240,
+          ),
+        ] else
           GradientSliderSelector(
             values: _getTriggerValues(name),
             currentValue: _selectedValue ??
