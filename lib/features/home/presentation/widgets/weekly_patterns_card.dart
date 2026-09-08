@@ -3,10 +3,84 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 
 class WeeklyPatternsCard extends StatelessWidget {
-  const WeeklyPatternsCard({super.key});
+  final bool isInsufficientData;
+
+  const WeeklyPatternsCard({super.key, this.isInsufficientData = false});
 
   @override
   Widget build(BuildContext context) {
+    if (isInsufficientData) {
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0xFFF5F5F4)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "This Week's Patterns",
+              style: GoogleFonts.manrope(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+              decoration: BoxDecoration(
+                color: AppTheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppTheme.outlineVariant.withValues(alpha: 0.1),
+                ),
+              ),
+              child: Column(
+                children: [
+                  const Icon(
+                    Icons.auto_graph_outlined,
+                    color: Color(0xFF9B8B7E),
+                    size: 32,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'IN PROGRESS',
+                    style: GoogleFonts.manrope(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.1,
+                      color: AppTheme.outline,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Data is still being collected. Eunora will highlight meaningful patterns once enough daily entries have been recorded.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.manrope(
+                      fontSize: 13,
+                      color: AppTheme.onSurfaceVariant,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(

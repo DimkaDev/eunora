@@ -192,6 +192,7 @@ class TriggerDetailsStep extends ConsumerWidget {
       icon: Icons.coffee,
       color: trigColor,
       backgroundColor: trigBg,
+      triggerValue: caffeineCups,
       children: [
         QuantityCounterSelector(
           value: caffeineCups,
@@ -212,6 +213,7 @@ class TriggerDetailsStep extends ConsumerWidget {
       icon: Icons.local_bar,
       color: trigColor,
       backgroundColor: trigBg,
+      triggerValue: alcoholGlasses,
       children: [
         QuantityCounterSelector(
           value: alcoholGlasses,
@@ -232,6 +234,7 @@ class TriggerDetailsStep extends ConsumerWidget {
       icon: Icons.psychology,
       color: trigColor,
       backgroundColor: trigBg,
+      triggerValue: stressLevel,
       children: [
         GradientSliderSelector(
           values: const ['Calm', 'Moderate', 'High'],
@@ -257,6 +260,7 @@ class TriggerDetailsStep extends ConsumerWidget {
       icon: Icons.restaurant,
       color: trigColor,
       backgroundColor: trigBg,
+      triggerValue: initialNote,
       children: [
         const SizedBox(height: 12),
         TextFormField(
@@ -303,6 +307,7 @@ class TriggerDetailsStep extends ConsumerWidget {
       icon: Icons.smoke_free,
       color: trigColor,
       backgroundColor: trigBg,
+      triggerValue: counter,
       children: [
         QuantityCounterSelector(
           value: counter,
@@ -326,6 +331,7 @@ class TriggerDetailsStep extends ConsumerWidget {
       icon: Icons.stars,
       color: trigColor,
       backgroundColor: trigBg,
+      triggerValue: counter,
       children: [
         QuantityCounterSelector(
           value: counter,
@@ -372,6 +378,7 @@ class TriggerDetailsStep extends ConsumerWidget {
       icon: icon,
       color: trigColor,
       backgroundColor: trigBg,
+      triggerValue: '$currentIntensity-$currentDuration',
       children: [
         GradientSliderSelector(
           values: values,
@@ -412,6 +419,7 @@ class TriggerDetailsStep extends ConsumerWidget {
       icon: icon,
       color: trigColor,
       backgroundColor: trigBg,
+      triggerValue: value,
       children: [
         GradientSliderSelector(
           values: values,

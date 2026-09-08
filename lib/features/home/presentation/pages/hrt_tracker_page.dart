@@ -19,6 +19,8 @@ import 'package:eunora/features/home/presentation/widgets/hrt_tracker/hrt_adhere
 import 'package:eunora/features/hrt_tracker/domain/adherence_constants.dart';
 import 'package:eunora/features/hrt_tracker/domain/hrt_schedule_service.dart';
 import 'package:eunora/features/hrt_tracker/presentation/widgets/still_taking_check_in_card.dart';
+import 'package:eunora/features/passport/providers/passport_screen_controller.dart';
+import 'package:eunora/core/utils/time_formatter.dart';
 
 class HrtTrackerPage extends ConsumerStatefulWidget {
   const HrtTrackerPage({super.key});
@@ -321,21 +323,21 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
 
   String _monthKey(DateTime dt) => "${dt.year}-${dt.month}";
 
-  Future<void> _fetchLogsForFocusedMonth() async {
-    await _fetchLogsForMonth(_focusedMonth);
+  Future<void> _fetchLogsForFocusedMonth({bool forceRefresh = false}) async {
+    await _fetchLogsForMonth(_focusedMonth, forceRefresh: forceRefresh);
     // Prefetch surrounding months for seamless swiping
     _fetchLogsForMonth(DateTime(_focusedMonth.year, _focusedMonth.month - 1));
     _fetchLogsForMonth(DateTime(_focusedMonth.year, _focusedMonth.month + 1));
   }
 
-  Future<void> _fetchLogsForMonth(DateTime targetMonth) async {
+  Future<void> _fetchLogsForMonth(DateTime targetMonth, {bool forceRefresh = false}) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
     final key = _monthKey(targetMonth);
     final isFocusedMonth = targetMonth.year == _focusedMonth.year && targetMonth.month == _focusedMonth.month;
 
-    if (_monthLogsCache.containsKey(key)) {
+    if (!forceRefresh && _monthLogsCache.containsKey(key)) {
       if (isFocusedMonth) {
         setState(() {
           _monthlyLogs = _monthLogsCache[key] ?? {};
@@ -358,8 +360,8 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
       final end = DateTime(targetMonth.year, targetMonth.month, daysInMonth, 23, 59, 59);
 
       final rawDbLogs = await ref.read(firestoreServiceProvider).getDailyLogsHistory(user.uid, start, end);
-      // Only show completed logs in the HRT tracker — drafts should not appear
-      final dbLogs = rawDbLogs.where((l) => l.isCompleted).toList();
+      // Show completed logs or logs with recorded HRT intakes in the HRT tracker
+      final dbLogs = rawDbLogs.where((l) => l.isCompleted || l.hrtIntakes.isNotEmpty).toList();
       final allDoseChanges = await ref.read(firestoreServiceProvider).getHrtDoseChanges(user.uid);
 
       final Map<int, DailyLog> fetchedLogs = {};
@@ -508,12 +510,14 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
         userId: user.uid,
         date: targetDate,
         hrtIntakes: [hrtIntake],
+        isCompleted: true,
         createdAt: DateTime.now(),
       );
     }
 
     await ref.read(firestoreServiceProvider).saveDailyLog(user.uid, dailyLog);
-    _fetchLogsForFocusedMonth();
+    ref.invalidate(passportScreenControllerProvider);
+    _fetchLogsForFocusedMonth(forceRefresh: true);
   }
 
   Future<void> _saveHrtLoggingSheet(List<Map<String, String>> updatedList) async {
@@ -532,11 +536,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
       final status = updated['status'] ?? '';
       final details = updated['details'] ?? '';
 
-      String time = '08:00';
-      final match = RegExp(r'(\d{1,2}:\d{2})').firstMatch(status);
-      if (match != null) {
-        time = match.group(1) ?? '08:00';
-      }
+      final time = AppTimeFormatter.extractTimeFromStatus(status, defaultFallback: '08:00 AM');
 
       double dose = 50.0;
       String unit = 'mcg';
@@ -578,12 +578,14 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
         userId: user.uid,
         date: targetDate,
         hrtIntakes: hrtIntakes,
+        isCompleted: true,
         createdAt: DateTime.now(),
       );
     }
 
     await ref.read(firestoreServiceProvider).saveDailyLog(user.uid, dailyLog);
-    _fetchLogsForFocusedMonth();
+    ref.invalidate(passportScreenControllerProvider);
+    _fetchLogsForFocusedMonth(forceRefresh: true);
   }
 
   void _showHrtLoggingSheet(List<Medication> medications) {
@@ -591,31 +593,58 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     final allMeds = ref.read(medicationsProvider).medications;
     final relevantMeds = allMeds.where((m) => _isMedicationActiveOnDate(m, selectedDate)).toList();
     final targetLog = _monthlyLogs[_selectedDay];
-    final hrtList = relevantMeds.map((med) {
+
+    final List<Map<String, String>> hrtList = [];
+    final Set<String> addedMedNames = {};
+
+    for (final med in relevantMeds) {
       bool isTaken = false;
-      String time = '08:00';
+      String time = '08:00 AM';
 
       if (targetLog != null) {
         final logged = targetLog.hrtIntakes.firstWhere(
-          (h) => h.medicationId == med.id || h.name.toLowerCase() == med.name.toLowerCase(),
-          orElse: () => HrtIntakeLog(medicationId: med.id, name: med.name, dose: med.dose, unit: med.unit, time: '08:00', isTaken: false),
+          (h) => (h.medicationId.isNotEmpty && h.medicationId == med.id) || h.name.toLowerCase() == med.name.toLowerCase(),
+          orElse: () => HrtIntakeLog(medicationId: med.id, name: med.name, dose: med.dose, unit: med.unit, time: '08:00 AM', isTaken: false),
         );
         isTaken = logged.isTaken;
-        time = logged.time;
+        time = logged.time.isNotEmpty ? AppTimeFormatter.formatTimeString(logged.time) : '08:00 AM';
       }
 
       final appType = med.type.displayName;
+      final doseFormatted = med.dose.toStringAsFixed(med.dose == med.dose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '');
 
-      return {
+      hrtList.add({
         'id': med.id,
         'name': med.name,
-        'details': '${med.dose.toStringAsFixed(0)} ${med.unit} · $appType',
+        'details': '$doseFormatted ${med.unit} · $appType',
         'status': isTaken ? 'Taken $time' : 'Not taken',
         'isTaken': isTaken.toString(),
-        'dose': med.dose.toStringAsFixed(0),
+        'dose': doseFormatted,
         'unit': med.unit,
-      };
-    }).toList();
+      });
+      addedMedNames.add(med.name.toLowerCase());
+    }
+
+    // Also include any recorded intakes from targetLog not already in relevantMeds (e.g. one-offs or retrospective meds)
+    if (targetLog != null) {
+      for (final intake in targetLog.hrtIntakes) {
+        if (!addedMedNames.contains(intake.name.toLowerCase())) {
+          final time = intake.time.isNotEmpty ? AppTimeFormatter.formatTimeString(intake.time) : '08:00 AM';
+          final doseFormatted = intake.dose.toStringAsFixed(intake.dose == intake.dose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '');
+          hrtList.add({
+            'id': intake.medicationId,
+            'name': intake.name,
+            'details': '$doseFormatted ${intake.unit}',
+            'status': intake.isTaken ? 'Taken $time' : 'Not taken',
+            'isTaken': intake.isTaken.toString(),
+            'dose': doseFormatted,
+            'unit': intake.unit,
+            'isOneOff': 'true',
+          });
+          addedMedNames.add(intake.name.toLowerCase());
+        }
+      }
+    }
 
     showModalBottomSheet(
       context: context,
@@ -631,17 +660,6 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
           initialHrt: hrtList,
           selectedDate: DateTime(_focusedMonth.year, _focusedMonth.month, _selectedDay),
           onSave: (updatedList) async {
-            // Delete removed medications first
-            final updatedIds = updatedList.map((e) => e['id']).where((id) => id != null).toSet();
-            for (final med in medications) {
-              if (!updatedIds.contains(med.id)) {
-                ref.read(medicationsProvider.notifier).removeOrStopMedication(
-                  med: med,
-                  logs: _monthlyLogs.values,
-                );
-              }
-            }
-
             await _saveHrtLoggingSheet(updatedList);
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -1096,8 +1114,26 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     );
   }
 
-  void _openMedicationManagementSheet(Medication med) {
-    final hasHistory = HrtScheduleService.hasLoggedHistory(med, _monthlyLogs.values);
+  Future<void> _openMedicationManagementSheet(Medication med) async {
+    final allLoadedLogs = {
+      ..._monthlyLogs.values,
+      ..._monthLogsCache.values.expand((m) => m.values),
+    };
+    bool hasHistory = HrtScheduleService.hasLoggedHistory(med, allLoadedLogs);
+
+    if (!hasHistory) {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final dbLogs = await ref.read(firestoreServiceProvider).getDailyLogsHistory(
+          user.uid,
+          DateTime(2020),
+          DateTime.now(),
+        );
+        hasHistory = HrtScheduleService.hasLoggedHistory(med, dbLogs);
+      }
+    }
+
+    if (!mounted) return;
 
     showModalBottomSheet(
       context: context,
@@ -1469,6 +1505,33 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     final scheduledMeds = medications.where((m) => !HrtScheduleService.isAsNeeded(m)).toList();
     final asNeededMeds = medications.where((m) => HrtScheduleService.isAsNeeded(m)).toList();
 
+    final List<Medication> allDisplayedScheduled = List.from(scheduledMeds);
+    if (selectedLog != null) {
+      for (final intake in selectedLog.hrtIntakes) {
+        final alreadyPresent = medications.any((m) =>
+            (intake.medicationId.isNotEmpty && m.id == intake.medicationId) ||
+            m.name.toLowerCase() == intake.name.toLowerCase());
+        if (!alreadyPresent) {
+          allDisplayedScheduled.add(
+            Medication(
+              id: intake.medicationId.isNotEmpty ? intake.medicationId : 'one_off_${intake.name}',
+              name: intake.name,
+              dose: intake.dose,
+              unit: intake.unit,
+              type: intake.name.toLowerCase().contains('patch')
+                  ? MedicationType.patch
+                  : (intake.name.toLowerCase().contains('gel')
+                      ? MedicationType.gel
+                      : (intake.name.toLowerCase().contains('spray')
+                          ? MedicationType.spray
+                          : MedicationType.pill)),
+              frequency: 'One-off',
+            ),
+          );
+        }
+      }
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1498,7 +1561,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
           ],
         ),
         const SizedBox(height: 12),
-        if (scheduledMeds.isEmpty)
+        if (allDisplayedScheduled.isEmpty)
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Text(
@@ -1507,7 +1570,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
             ),
           )
         else
-          ...scheduledMeds.map((med) => _buildMedicationDoseTile(med: med, selectedDate: selectedDate, selectedLog: selectedLog)),
+          ...allDisplayedScheduled.map((med) => _buildMedicationDoseTile(med: med, selectedDate: selectedDate, selectedLog: selectedLog)),
 
         if (asNeededMeds.isNotEmpty) ...[
           const SizedBox(height: 16),
@@ -1537,10 +1600,12 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
 
     if (selectedLog != null) {
       loggedIntake = selectedLog.hrtIntakes.firstWhere(
-        (h) => h.medicationId == med.id || h.name.toLowerCase() == med.name.toLowerCase(),
+        (h) => (h.medicationId.isNotEmpty && h.medicationId == med.id) || h.name.toLowerCase() == med.name.toLowerCase(),
         orElse: () => HrtIntakeLog(medicationId: med.id, name: med.name, dose: med.dose, unit: med.unit, time: '', isTaken: false),
       );
     }
+
+    final isTaken = loggedIntake != null && loggedIntake.isTaken;
 
     final dailyState = HrtScheduleService.getDailyState(
       med: med,
@@ -1556,7 +1621,13 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     Color statusColor = const Color(0xFF9B8B7E);
     Widget? statusIcon;
 
-    if (!isActiveOnDate) {
+    if (isTaken) {
+      final actionWord = med.type == MedicationType.patch ? 'Applied' : 'Taken';
+      final timeVal = loggedIntake?.time ?? "";
+      statusText = timeVal.isNotEmpty ? '$actionWord at $timeVal' : actionWord;
+      statusColor = const Color(0xFF2D5A3E);
+      statusIcon = const Icon(Icons.check_circle, size: 14, color: Color(0xFF2D5A3E));
+    } else if (!isActiveOnDate) {
       final target = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
       if (med.startedAt != null && target.isBefore(DateTime(med.startedAt!.year, med.startedAt!.month, med.startedAt!.day))) {
         statusText = 'Not started yet';
@@ -1591,7 +1662,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     }
 
     return Opacity(
-      opacity: isActiveOnDate ? 1.0 : 0.45,
+      opacity: (isActiveOnDate || isTaken) ? 1.0 : 0.45,
       child: InkWell(
         onTap: () => _openMedicationManagementSheet(med),
         borderRadius: BorderRadius.circular(20),
@@ -2324,8 +2395,31 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
       }
     }
 
-    // 3. Adherence for active medications on selectedDate
+    // 3. Adherence and Intakes for selectedDate
     final dayLog = targetLogs[_selectedDay];
+    final Set<String> processedNames = {};
+
+    if (dayLog != null && dayLog.hrtIntakes.isNotEmpty) {
+      for (final intake in dayLog.hrtIntakes) {
+        final isPatch = intake.name.toLowerCase().contains('patch');
+        final statusLabel = intake.isTaken ? (isPatch ? 'Applied' : 'Taken') : 'Not taken';
+        final timeStr = (intake.isTaken && intake.time.isNotEmpty) ? ' at ${intake.time}' : '';
+        final doseFormatted = intake.dose.toStringAsFixed(intake.dose == intake.dose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '');
+
+        activities.add({
+          'day': _selectedDay,
+          'isClinical': true,
+          'color': intake.isTaken ? const Color(0xFF4A6B5D) : const Color(0xFFC47B62),
+          'title': '${intake.name}: $statusLabel$timeStr',
+          'description': '$doseFormatted ${intake.unit}',
+        });
+        processedNames.add(intake.name.toLowerCase());
+        if (intake.medicationId.isNotEmpty) {
+          processedNames.add(intake.medicationId.toLowerCase());
+        }
+      }
+    }
+
     final activeMedsOnDate = allMeds.where((m) {
       if (m.startedAt != null && selectedDate.isBefore(DateTime(m.startedAt!.year, m.startedAt!.month, m.startedAt!.day))) return false;
       if (m.endedAt != null && selectedDate.isAfter(DateTime(m.endedAt!.year, m.endedAt!.month, m.endedAt!.day))) return false;
@@ -2333,23 +2427,16 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     }).toList();
 
     for (final med in activeMedsOnDate) {
+      if (processedNames.contains(med.name.toLowerCase()) || (med.id != null && processedNames.contains(med.id!.toLowerCase()))) {
+        continue;
+      }
       final isScheduled = HrtScheduleService.isScheduledOnDate(med, selectedDate, doseChanges: targetChanges);
-      final intake = dayLog?.hrtIntakes.firstWhere(
-        (i) => (i.medicationId.isNotEmpty && i.medicationId == med.id) || i.name.toLowerCase() == med.name.toLowerCase(),
-        orElse: () => HrtIntakeLog(medicationId: med.id, name: med.name, dose: med.dose, unit: med.unit, time: '', isTaken: false),
-      );
-      final hasLog = intake != null && (intake.isTaken || intake.time.isNotEmpty);
-      final taken = intake?.isTaken ?? false;
-
-      if (isScheduled || hasLog) {
-        final isPatch = med.type == MedicationType.patch;
-        final statusLabel = taken ? (isPatch ? 'Applied' : 'Taken') : 'Not taken';
-
+      if (isScheduled) {
         activities.add({
           'day': _selectedDay,
           'isClinical': true,
-          'color': taken ? const Color(0xFF4A6B5D) : const Color(0xFFC47B62),
-          'title': '${med.name}: $statusLabel',
+          'color': const Color(0xFFC47B62),
+          'title': '${med.name}: Not taken',
           'description': '${med.doseAndFrequency}',
         });
       }

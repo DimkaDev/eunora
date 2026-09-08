@@ -66,16 +66,17 @@ class _HrtAdherenceCardState extends ConsumerState<HrtAdherenceCard> {
         final log = widget.monthlyLogs[day];
 
         for (final med in targetMeds) {
-          if (HrtScheduleService.isScheduledOnDate(med, date)) {
+          final isScheduled = HrtScheduleService.isScheduledOnDate(med, date);
+          final intake = log?.hrtIntakes.firstWhere(
+            (h) => h.medicationId == med.id || h.name.toLowerCase() == med.name.toLowerCase(),
+            orElse: () => HrtIntakeLog(medicationId: med.id, name: med.name, dose: med.dose, unit: med.unit, time: '', isTaken: false),
+          );
+          final isTaken = intake != null && intake.isTaken;
+
+          if (isScheduled || isTaken) {
             totalScheduled++;
-            if (log != null) {
-              final intake = log.hrtIntakes.firstWhere(
-                (h) => h.medicationId == med.id || h.name.toLowerCase() == med.name.toLowerCase(),
-                orElse: () => HrtIntakeLog(medicationId: med.id, name: med.name, dose: med.dose, unit: med.unit, time: '', isTaken: false),
-              );
-              if (intake.isTaken) {
-                totalLogged++;
-              }
+            if (isTaken) {
+              totalLogged++;
             }
           }
         }

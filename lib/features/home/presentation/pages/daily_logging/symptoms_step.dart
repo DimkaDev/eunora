@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
@@ -152,7 +153,10 @@ class _SymptomsStepState extends ConsumerState<SymptomsStep> {
             if (!_isLibraryExpanded && index == displaySymptoms.length) {
               // Add Custom Other Button (expands library in place)
               return Bounceable(
+                scaleFactor: 0.94,
+                duration: const Duration(milliseconds: 140),
                 onTap: () {
+                  HapticFeedback.lightImpact();
                   setState(() {
                     _isLibraryExpanded = true;
                   });
@@ -207,7 +211,12 @@ class _SymptomsStepState extends ConsumerState<SymptomsStep> {
             final iconBgColor = iconColor.withOpacity(0.1);
 
             return Bounceable(
-              onTap: () => widget.onSymptomToggled(symId),
+              scaleFactor: 0.94,
+              duration: const Duration(milliseconds: 140),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                widget.onSymptomToggled(symId);
+              },
               child: GestureDetector(
                 onLongPress: () async {
                   if (kCoreFixedPins.contains(cleanSymId)) {
@@ -245,16 +254,19 @@ class _SymptomsStepState extends ConsumerState<SymptomsStep> {
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOutBack,
                   decoration: BoxDecoration(
-                    color: isSelected ? Colors.white : const Color(0xFFFFFFFF),
+                    color: isSelected ? iconColor.withOpacity(0.12) : const Color(0xFFFFFFFF),
                     borderRadius: BorderRadius.circular(40),
                     border: Border.all(
-                      color: isSelected ? const Color(0xFF9B8B7E) : Colors.transparent,
+                      color: isSelected ? iconColor : Colors.transparent,
                       width: isSelected ? 2 : 0,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(isSelected ? 0.08 : 0.03),
+                        color: isSelected
+                            ? iconColor.withOpacity(0.18)
+                            : Colors.black.withOpacity(0.03),
                         blurRadius: isSelected ? 15 : 10,
                         offset: const Offset(0, 4),
                       ),
@@ -266,17 +278,23 @@ class _SymptomsStepState extends ConsumerState<SymptomsStep> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Container(
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
                               width: 64,
                               height: 64,
                               decoration: BoxDecoration(
-                                color: isSelected ? iconColor.withOpacity(0.2) : iconBgColor,
+                                color: isSelected ? iconColor.withOpacity(0.25) : iconBgColor,
                                 shape: BoxShape.circle,
                               ),
-                              child: Icon(
-                                symptom.getIconData(),
-                                color: iconColor,
-                                size: 36,
+                              child: AnimatedScale(
+                                scale: isSelected ? 1.15 : 1.0,
+                                duration: const Duration(milliseconds: 200),
+                                curve: Curves.easeOutBack,
+                                child: Icon(
+                                  symptom.getIconData(),
+                                  color: iconColor,
+                                  size: 36,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 12),

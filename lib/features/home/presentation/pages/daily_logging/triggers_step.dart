@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:eunora/core/theme/app_theme.dart';
+import 'package:eunora/core/utils/animation_system.dart';
 import 'package:eunora/features/onboarding/domain/models/trigger.dart';
 import 'package:eunora/features/onboarding/presentation/providers/triggers_provider.dart';
 
@@ -28,8 +30,8 @@ class TriggersStep extends ConsumerWidget {
         orElse: () => TriggerOption(
           id: id,
           name: id.replaceAll('t_', '').toUpperCase(),
-          description: 'Influence on daily routines',
-          iconName: 'spa',
+          description: '',
+          iconName: 'warning_amber',
           category: 'Other',
         ),
       );
@@ -40,12 +42,11 @@ class TriggersStep extends ConsumerWidget {
       children: [
         const SizedBox(height: 8),
         Text(
-          'What might have triggered your symptoms?',
+          'Daily Triggers',
           style: GoogleFonts.notoSerif(
-            fontSize: 26,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF333333),
-            height: 1.3,
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.onSurface,
           ),
         ),
         const SizedBox(height: 8),
@@ -67,11 +68,16 @@ class TriggersStep extends ConsumerWidget {
 
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
-            child: InkWell(
-              onTap: () => onTriggerToggled(trigId),
-              borderRadius: BorderRadius.circular(24),
+            child: Bounceable(
+              scaleFactor: 0.96,
+              duration: const Duration(milliseconds: 140),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                onTriggerToggled(trigId);
+              },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutBack,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: isSelected ? const Color(0xFFEDE8F4).withOpacity(0.4) : Colors.white,
@@ -91,14 +97,20 @@ class TriggersStep extends ConsumerWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: bg,
+                        color: isSelected ? trigger.getIconColor().withOpacity(0.22) : bg,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(icon, color: trigger.getIconColor(), size: 24),
+                      child: AnimatedScale(
+                        scale: isSelected ? 1.15 : 1.0,
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeOutBack,
+                        child: Icon(icon, color: trigger.getIconColor(), size: 24),
+                      ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(

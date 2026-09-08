@@ -512,7 +512,7 @@ class _HrtQuickEditModalState extends ConsumerState<HrtQuickEditModal> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Manage, Stop, or Delete',
+                              'Manage or Stop Taking',
                               style: GoogleFonts.manrope(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,

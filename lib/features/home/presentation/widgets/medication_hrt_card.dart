@@ -5,6 +5,7 @@ import 'package:eunora/features/onboarding/domain/models/medication.dart';
 
 import 'package:eunora/features/hrt_tracker/domain/hrt_schedule_service.dart';
 import 'package:eunora/features/home/domain/entities/daily_log.dart';
+import 'package:eunora/core/utils/time_formatter.dart';
 
 class MedicationHrtCard extends StatelessWidget {
   final List<Medication> medications;
@@ -138,7 +139,11 @@ class MedicationHrtCard extends StatelessWidget {
                   pendingText = 'NOT SCHEDULED TODAY';
                 }
 
-                final timeStr = takenTime[med.name] != null ? ' • ${takenTime[med.name]}' : '';
+                final rawTime = takenTime[med.name];
+                final formattedTime = (rawTime != null && rawTime.trim().isNotEmpty)
+                    ? AppTimeFormatter.formatTimeString(rawTime)
+                    : '';
+                final timeStr = formattedTime.isNotEmpty ? ' • $formattedTime' : '';
 
                 return Padding(
                   padding: EdgeInsets.only(bottom: idx == medications.length - 1 ? 0 : 12),

@@ -15,6 +15,7 @@ import 'package:eunora/features/hrt_tracker/providers/hrt_quick_add_provider.dar
 import 'package:eunora/features/hrt_tracker/presentation/widgets/hrt_quick_add_card.dart';
 import 'package:eunora/features/home/presentation/widgets/calendar_hrt_edit_sheet.dart';
 import 'package:eunora/features/hrt_tracker/domain/hrt_schedule_service.dart';
+import 'package:eunora/core/utils/time_formatter.dart';
 import 'package:uuid/uuid.dart';
 
 enum RetrospectiveMedicationOption {
@@ -64,6 +65,7 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
   String? _selectedQuickAddName;
 
   RetrospectiveMedicationOption _retroOption = RetrospectiveMedicationOption.justForThisDay;
+  TimeOfDay _retroTime = const TimeOfDay(hour: 8, minute: 0);
   bool _isNotCurrentlyTaking = false;
   DateTime? _startDate;
   DateTime? _endDate;
@@ -529,7 +531,7 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
       if (_retroOption == RetrospectiveMedicationOption.justForThisDay) {
         final parsedDose = double.tryParse(_doseController.text) ?? 0;
         final oneOffEntry = HrtEditEntry(
-          id: medication.id ?? const Uuid().v4(),
+          id: medication.id,
           name: _nameController.text.trim(),
           details: '${parsedDose.toStringAsFixed(parsedDose == parsedDose.toInt() ? 0 : 2)} $_selectedUnit · ${_selectedType.displayName}',
           status: 'Taken',
@@ -537,7 +539,8 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
           dose: parsedDose.toStringAsFixed(parsedDose == parsedDose.toInt() ? 0 : 2),
           unit: _selectedUnit,
           applicationType: _selectedType.displayName,
-          timeTaken: '08:00',
+          timeTaken: AppTimeFormatter.formatTimeOfDay(_retroTime),
+          isOneOff: true,
         );
         widget.onAddOneOffEntry?.call(oneOffEntry);
       } else {
@@ -551,7 +554,7 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
       widget.onMedicationCreated?.call(medication);
     }
 
-    context.pop();
+    Navigator.pop(context);
   }
 
   void _showDuplicateWarningDialog({
@@ -698,6 +701,32 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
           title: 'Just for this day',
           subtitle: 'Save only as a one-off historical entry for $logDateFormatted.',
         ),
+        if (_retroOption == RetrospectiveMedicationOption.justForThisDay) ...[
+          const SizedBox(height: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSectionHeader('Time Taken'),
+              const SizedBox(height: 8),
+              _buildTimePickerTile(
+                time: _retroTime,
+                onTap: () async {
+                  _nameFocusNode.unfocus();
+                  FocusScope.of(context).unfocus();
+                  final picked = await showTimePicker(
+                    context: context,
+                    initialTime: _retroTime,
+                  );
+                  if (picked != null && mounted) {
+                    setState(() {
+                      _retroTime = picked;
+                    });
+                  }
+                },
+              ),
+            ],
+          ),
+        ],
         const SizedBox(height: 8),
         _buildRetroOptionCard(
           option: RetrospectiveMedicationOption.addToCurrent,
@@ -966,6 +995,34 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
     );
   }
 
+  Widget _buildTimePickerTile({required TimeOfDay time, required VoidCallback onTap}) {
+    final formatted = AppTimeFormatter.formatTimeOfDay(time);
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF2EDE9),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              formatted,
+              style: GoogleFonts.manrope(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF1D1B1A),
+              ),
+            ),
+            const Icon(Icons.schedule, size: 16, color: Color(0xFF8A817C)),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildDatePickerTile({required DateTime date, required VoidCallback onTap}) {
     final formatted = "${_monthsNames[date.month - 1].substring(0, 3)} ${date.day}, ${date.year}";
     return GestureDetector(
@@ -1062,7 +1119,7 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.close, color: Color(0xFF67594E)),
-                  onPressed: () => context.pop(),
+                  onPressed: () => Navigator.pop(context),
                   style: IconButton.styleFrom(
                     backgroundColor: const Color(0xFFF2EDE9),
                     padding: const EdgeInsets.all(8),
@@ -1254,7 +1311,7 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
         ),
         const SizedBox(height: 12),
         TextButton(
-          onPressed: () => context.pop(),
+          onPressed: () => Navigator.pop(context),
           child: const Text(
             'CANCEL',
             style: TextStyle(color: Color(0xFF67594E), fontWeight: FontWeight.bold, letterSpacing: 1.5),
@@ -1540,12 +1597,16 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
                 size: 18,
               ),
               const SizedBox(width: 8),
-              Text(
-                type.displayName,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                  color: isSelected ? AppTheme.primary : const Color(0xFF4D453F),
+              Flexible(
+                child: Text(
+                  type.displayName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    color: isSelected ? AppTheme.primary : const Color(0xFF4D453F),
+                  ),
                 ),
               ),
             ],

@@ -42,6 +42,15 @@ class FirestoreService {
     return DailyLog.fromMap(doc.data()!);
   }
 
+  Future<void> deleteDailyLog(String uid, String dateStr) async {
+    await _db
+        .collection('users')
+        .doc(uid)
+        .collection('daily_logs')
+        .doc(dateStr)
+        .delete();
+  }
+
   Future<void> finalizePastDayDrafts(String uid) async {
     final now = DateTime.now();
     final todayStart = DateTime(now.year, now.month, now.day);

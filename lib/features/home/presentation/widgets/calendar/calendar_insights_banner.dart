@@ -133,7 +133,7 @@ class CalendarInsightsBanner extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'We are currently collecting data to find personalized correlations. Please log your symptoms, triggers, and medications for at least 3 days to build correlations.',
+            'Data is still being collected to find personalized correlations. Please log your symptoms, triggers, and medications for at least 3 days to build correlations.',
             style: GoogleFonts.manrope(
               fontSize: 14,
               color: AppTheme.onSurfaceVariant,

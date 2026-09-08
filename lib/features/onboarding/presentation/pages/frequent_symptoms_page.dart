@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:eunora/core/utils/animation_system.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../providers/symptoms_provider.dart';
 import '../../domain/models/symptom.dart';
@@ -249,10 +251,16 @@ class _FrequentSymptomsPageState extends ConsumerState<FrequentSymptomsPage> {
     final Color iconColor = symptom.getIconColor();
     final Color iconBgColor = iconColor.withOpacity(0.15);
 
-    return GestureDetector(
-      onTap: onTap,
+    return Bounceable(
+      scaleFactor: 0.94,
+      duration: const Duration(milliseconds: 140),
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onTap();
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutBack,
         decoration: BoxDecoration(
           color: isSelected ? iconColor.withOpacity(0.12) : iconColor.withOpacity(0.04),
           borderRadius: BorderRadius.circular(40),
@@ -262,7 +270,9 @@ class _FrequentSymptomsPageState extends ConsumerState<FrequentSymptomsPage> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(isSelected ? 0.08 : 0.03),
+              color: isSelected
+                  ? iconColor.withOpacity(0.2)
+                  : Colors.black.withOpacity(0.03),
               blurRadius: isSelected ? 15 : 10,
               offset: const Offset(0, 4),
             ),
@@ -274,17 +284,23 @@ class _FrequentSymptomsPageState extends ConsumerState<FrequentSymptomsPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
                     width: 64,
                     height: 64,
                     decoration: BoxDecoration(
                       color: isSelected ? iconColor.withOpacity(0.25) : iconBgColor,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(
-                      symptom.getIconData(),
-                      color: iconColor,
-                      size: 36,
+                    child: AnimatedScale(
+                      scale: isSelected ? 1.15 : 1.0,
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOutBack,
+                      child: Icon(
+                        symptom.getIconData(),
+                        color: iconColor,
+                        size: 36,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -320,8 +336,11 @@ class _FrequentSymptomsPageState extends ConsumerState<FrequentSymptomsPage> {
   }
 
   Widget _buildOtherCard(BuildContext context) {
-    return GestureDetector(
+    return Bounceable(
+      scaleFactor: 0.94,
+      duration: const Duration(milliseconds: 140),
       onTap: () {
+        HapticFeedback.lightImpact();
         setState(() {
           _isLibraryExpanded = true;
         });

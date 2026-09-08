@@ -9,6 +9,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:eunora/features/onboarding/presentation/providers/menopause_stage_provider.dart';
 import 'package:eunora/features/onboarding/presentation/widgets/profile_radio_card.dart';
 import 'package:eunora/features/onboarding/presentation/providers/onboarding_profile_provider.dart';
+import 'package:eunora/core/utils/date_formatter.dart';
+import 'package:eunora/core/utils/time_formatter.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -31,35 +33,99 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   int _age = 51;
   String _yearsInStage = '~2 years';
 
+  // Format preferences
+  AppDateFormatMode _dateFormatMode = AppDateFormatMode.dayMonthYear;
+  TimeFormatMode _timeFormatMode = TimeFormatMode.twelveHour;
+
   @override
   void initState() {
     super.initState();
-    _loadJourneyData();
+    _loadAllPreferences();
+  }
+
+  Future<void> _loadAllPreferences() async {
+    await _loadJourneyData();
+    await _loadFormatPreferences();
+  }
+
+  Future<void> _loadFormatPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedDate = prefs.getString(AppDateFormatter.prefKey);
+    if (savedDate != null) {
+      for (final mode in AppDateFormatMode.values) {
+        if (mode.name == savedDate) {
+          _dateFormatMode = mode;
+          AppDateFormatter.defaultMode = mode;
+          break;
+        }
+      }
+    }
+    final savedTime = prefs.getString(AppTimeFormatter.prefKey);
+    if (savedTime != null) {
+      for (final mode in TimeFormatMode.values) {
+        if (mode.name == savedTime) {
+          _timeFormatMode = mode;
+          AppTimeFormatter.defaultMode = mode;
+          break;
+        }
+      }
+    }
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> _updateDateFormat(AppDateFormatMode mode) async {
+    setState(() {
+      _dateFormatMode = mode;
+    });
+    await AppDateFormatter.setMode(mode);
+    ref.read(dateFormatConfigProvider.notifier).state = DateFormatConfig(mode: mode);
+  }
+
+  Future<void> _updateTimeFormat(TimeFormatMode mode) async {
+    setState(() {
+      _timeFormatMode = mode;
+    });
+    await AppTimeFormatter.setMode(mode);
+    ref.read(timeFormatConfigProvider.notifier).state = TimeFormatConfig(mode: mode);
+  }
+
+  User? get _currentUser {
+    try {
+      return FirebaseAuth.instance.currentUser;
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<void> _loadJourneyData() async {
     final prefs = await SharedPreferences.getInstance();
-    final user = FirebaseAuth.instance.currentUser;
+    final user = _currentUser;
     final uid = user?.uid ?? 'anon';
-    setState(() {
-      _stage = prefs.getString('journey_stage_$uid') ?? 'Early Menopause';
-      _age = prefs.getInt('journey_age_$uid') ?? 51;
-      _yearsInStage = prefs.getString('journey_years_in_stage_$uid') ?? '~2 years';
-    });
+    if (mounted) {
+      setState(() {
+        _stage = prefs.getString('journey_stage_$uid') ?? 'Early Menopause';
+        _age = prefs.getInt('journey_age_$uid') ?? 51;
+        _yearsInStage = prefs.getString('journey_years_in_stage_$uid') ?? '~2 years';
+      });
+    }
   }
 
   Future<void> _saveJourneyData(String stage, int age, String yearsInStage) async {
     final prefs = await SharedPreferences.getInstance();
-    final user = FirebaseAuth.instance.currentUser;
+    final user = _currentUser;
     final uid = user?.uid ?? 'anon';
     await prefs.setString('journey_stage_$uid', stage);
     await prefs.setInt('journey_age_$uid', age);
     await prefs.setString('journey_years_in_stage_$uid', yearsInStage);
-    setState(() {
-      _stage = stage;
-      _age = age;
-      _yearsInStage = yearsInStage;
-    });
+    if (mounted) {
+      setState(() {
+        _stage = stage;
+        _age = age;
+        _yearsInStage = yearsInStage;
+      });
+    }
   }
 
   void _showUpdateSituationWizard() {
@@ -174,7 +240,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final userProfile = ref.watch(onboardingProfileProvider);
-    final firebaseUser = FirebaseAuth.instance.currentUser;
+    final firebaseUser = _currentUser;
 
     String displayName = 'Sarah Johnson';
     if (userProfile != null && userProfile.email.isNotEmpty) {
@@ -794,6 +860,48 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
             const SizedBox(height: 32),
 
+            // Section 3.5: Display & Format
+            Text(
+              'Display & Format',
+              style: GoogleFonts.notoSerif(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              decoration: BoxDecoration(
+                color: AppTheme.surfaceContainerLowest,
+                borderRadius: BorderRadius.circular(32),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.onSurface.withOpacity(0.04),
+                    blurRadius: 24,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  _buildValueNavigationRow(
+                    icon: Icons.calendar_month_outlined,
+                    title: 'Date Format',
+                    value: '${_dateFormatMode.label} (${AppDateFormatter.formatDate(DateTime.now(), mode: _dateFormatMode)})',
+                    onTap: _showDateFormatPicker,
+                  ),
+                  const Divider(height: 1, color: AppTheme.surfaceContainerLow, indent: 24, endIndent: 24),
+                  _buildValueNavigationRow(
+                    icon: Icons.schedule_outlined,
+                    title: 'Time Format',
+                    value: '${_timeFormatMode.label} (${_timeFormatMode.sample})',
+                    onTap: _showTimeFormatPicker,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+
             // Section 4: Data & Privacy
             Text(
               'Data & Privacy',
@@ -1288,6 +1396,277 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildValueNavigationRow({
+    required IconData icon,
+    required String title,
+    required String value,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppTheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: AppTheme.primary, size: 20),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.manrope(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    value,
+                    style: GoogleFonts.manrope(
+                      fontSize: 13,
+                      color: AppTheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: AppTheme.onSurfaceVariant),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDateFormatPicker() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Container(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+              decoration: const BoxDecoration(
+                color: Color(0xFFFEF8F6),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 48,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Date Format',
+                    style: GoogleFonts.notoSerif(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Choose how dates are displayed throughout the app.',
+                    style: GoogleFonts.manrope(
+                      fontSize: 13,
+                      color: AppTheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ...AppDateFormatMode.values.map((mode) {
+                    final isSelected = _dateFormatMode == mode;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: InkWell(
+                        onTap: () {
+                          _updateDateFormat(mode);
+                          setSheetState(() {});
+                          Navigator.pop(context);
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          decoration: BoxDecoration(
+                            color: isSelected ? AppTheme.primaryFixed.withOpacity(0.4) : AppTheme.surfaceContainerLowest,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isSelected ? AppTheme.primary : AppTheme.surfaceContainerLow,
+                              width: isSelected ? 1.5 : 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    mode.label,
+                                    style: GoogleFonts.manrope(
+                                      fontSize: 15,
+                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                                      color: AppTheme.onSurface,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    AppDateFormatter.formatDate(DateTime.now(), mode: mode),
+                                    style: GoogleFonts.manrope(
+                                      fontSize: 13,
+                                      color: AppTheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Icon(
+                                isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+                                color: isSelected ? AppTheme.primary : AppTheme.outlineVariant,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showTimeFormatPicker() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Container(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+              decoration: const BoxDecoration(
+                color: Color(0xFFFEF8F6),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 48,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Time Format',
+                    style: GoogleFonts.notoSerif(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Choose how time is formatted for medication and logs.',
+                    style: GoogleFonts.manrope(
+                      fontSize: 13,
+                      color: AppTheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ...TimeFormatMode.values.map((mode) {
+                    final isSelected = _timeFormatMode == mode;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: InkWell(
+                        onTap: () {
+                          _updateTimeFormat(mode);
+                          setSheetState(() {});
+                          Navigator.pop(context);
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          decoration: BoxDecoration(
+                            color: isSelected ? AppTheme.primaryFixed.withOpacity(0.4) : AppTheme.surfaceContainerLowest,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isSelected ? AppTheme.primary : AppTheme.surfaceContainerLow,
+                              width: isSelected ? 1.5 : 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    mode.label,
+                                    style: GoogleFonts.manrope(
+                                      fontSize: 15,
+                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                                      color: AppTheme.onSurface,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    mode.sample,
+                                    style: GoogleFonts.manrope(
+                                      fontSize: 13,
+                                      color: AppTheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Icon(
+                                isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+                                color: isSelected ? AppTheme.primary : AppTheme.outlineVariant,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

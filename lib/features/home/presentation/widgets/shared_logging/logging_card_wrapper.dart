@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 
+import 'package:eunora/features/home/presentation/widgets/shared_logging/animated_logging_icon.dart';
+
 class LoggingCardWrapper extends StatelessWidget {
   final String name;
   final IconData icon;
   final Color color;
   final Color backgroundColor;
   final Widget? trailingAction;
+  final dynamic triggerValue;
   final List<Widget> children;
 
   const LoggingCardWrapper({
@@ -17,6 +20,7 @@ class LoggingCardWrapper extends StatelessWidget {
     required this.color,
     required this.backgroundColor,
     this.trailingAction,
+    this.triggerValue,
     required this.children,
   });
 
@@ -46,14 +50,12 @@ class LoggingCardWrapper extends StatelessWidget {
               Expanded(
                 child: Row(
                   children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: backgroundColor,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(icon, color: color, size: 22),
+                    AnimatedLoggingIcon(
+                      name: name,
+                      icon: icon,
+                      color: color,
+                      backgroundColor: backgroundColor,
+                      triggerValue: triggerValue,
                     ),
                     const SizedBox(width: 12),
                     Expanded(

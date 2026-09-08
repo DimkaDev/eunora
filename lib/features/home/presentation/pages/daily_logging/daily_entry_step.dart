@@ -15,6 +15,7 @@ import 'package:eunora/core/services/firestore_service.dart';
 import 'package:eunora/features/home/domain/entities/daily_log.dart';
 import 'package:eunora/features/hrt_tracker/domain/hrt_schedule_service.dart';
 import 'package:eunora/features/home/presentation/widgets/calendar_hrt_edit_sheet.dart';
+import 'package:eunora/core/utils/time_formatter.dart';
 
 enum HrtLogStatus { pending, taken, skipped }
 
@@ -129,18 +130,20 @@ class DailyEntryStep extends ConsumerStatefulWidget {
     this.loggingDate,
     this.oneOffEntries,
     this.onAddOneOffEntry,
+    this.onRemoveOneOffEntry,
   });
 
   /// The list of one-off medications added for this retrospective date session
   final List<HrtEditEntry>? oneOffEntries;
   final ValueChanged<HrtEditEntry>? onAddOneOffEntry;
+  final ValueChanged<HrtEditEntry>? onRemoveOneOffEntry;
 
   @override
   ConsumerState<DailyEntryStep> createState() => _DailyEntryStepState();
 }
 
 class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
-  int? _expandedIndex;
+  String? _expandedMedId;
   final Map<String, DateTime> _medLastTaken = {};
 
   bool _isScheduledToday(String frequency, DateTime? lastTaken) {
@@ -172,9 +175,9 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
   }
 
   Future<void> _loadRealLastTakenDates() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
     try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
       final firestore = ref.read(firestoreServiceProvider);
       // Use the actual logging date for retroactive entries, otherwise today
       final loggingDate = widget.loggingDate ?? DateTime.now();
@@ -417,36 +420,11 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
   }
 
   TimeOfDay _parseTimeOfDay(String timeStr) {
-    final clean = timeStr.trim();
-    if (clean.isEmpty) return TimeOfDay.now();
-
-    final amPmMatch = RegExp(r'(\d{1,2}):(\d{2})\s*(AM|PM|am|pm)', caseSensitive: false).firstMatch(clean);
-    if (amPmMatch != null) {
-      int hour = int.parse(amPmMatch.group(1)!);
-      final minute = int.parse(amPmMatch.group(2)!);
-      final period = amPmMatch.group(3)!.toUpperCase();
-      if (period == 'PM' && hour < 12) hour += 12;
-      if (period == 'AM' && hour == 12) hour = 0;
-      return TimeOfDay(hour: hour, minute: minute);
-    }
-
-    final match24 = RegExp(r'(\d{1,2}):(\d{2})').firstMatch(clean);
-    if (match24 != null) {
-      final hour = int.parse(match24.group(1)!);
-      final minute = int.parse(match24.group(2)!);
-      if (hour >= 0 && hour < 24 && minute >= 0 && minute < 60) {
-        return TimeOfDay(hour: hour, minute: minute);
-      }
-    }
-
-    return TimeOfDay.now();
+    return AppTimeFormatter.parseTimeOfDay(timeStr);
   }
 
   String _formatTimeOfDay(TimeOfDay time, BuildContext context) {
-    final h = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
-    final m = time.minute.toString().padLeft(2, '0');
-    final period = time.period == DayPeriod.am ? 'AM' : 'PM';
-    return '${h.toString().padLeft(2, '0')}:$m $period';
+    return AppTimeFormatter.formatTimeOfDay(time, context: context);
   }
 
   void _openTimeSelector({
@@ -551,16 +529,18 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
     );
   }
 
-  Widget _buildInlineMedicationDetails(
-    Medication med,
-    bool checked,
-    double dose,
-    String unit,
-    String time,
+  Widget _buildInlineMedicationDetails({
+    required String medId,
+    required String medName,
+    required bool checked,
+    required double dose,
+    required String unit,
+    required String time,
+    required double initialDose,
     DateTime? lastTaken,
-  ) {
-    final initialDose = widget.initialHrtDoses[med.id] ?? med.dose;
-
+    bool isOneOff = false,
+    VoidCallback? onDeleteOneOff,
+  }) {
     return Container(
       margin: EdgeInsets.zero,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -586,7 +566,7 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                 value: checked,
                 activeColor: AppTheme.primary,
                 onChanged: (val) {
-                  widget.onHrtCheckedToggled(med.id, val);
+                  widget.onHrtCheckedToggled(medId, val);
                 },
               ),
             ],
@@ -608,12 +588,12 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                       const SizedBox(height: 6),
                       GestureDetector(
                         onTap: () => _openDosePicker(
-                          medName: med.name,
+                          medName: medName,
                           unit: unit,
                           initialDose: initialDose,
                           currentDose: dose,
                           onDoseChanged: (newDose) {
-                            widget.onHrtDoseChanged(med.id, newDose);
+                            widget.onHrtDoseChanged(medId, newDose);
                           },
                         ),
                         child: Container(
@@ -682,7 +662,7 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                           context: context,
                           currentTime: time,
                           onTimeChanged: (formattedTime) {
-                            widget.onHrtTimeChanged(med.id, formattedTime);
+                            widget.onHrtTimeChanged(medId, formattedTime);
                           },
                         ),
                         child: Container(
@@ -723,17 +703,53 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.loggingDate != null ? 'Not scheduled for this day' : 'Not scheduled for today',
+                        isOneOff
+                            ? 'One-off medication not taken on this day'
+                            : (widget.loggingDate != null ? 'Not scheduled for this day' : 'Not scheduled for today'),
                         style: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C)),
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        lastTaken == null
-                            ? 'No information'
-                            : '${widget.loggingDate != null ? 'Last taken before this date' : 'Last taken'}: ${_formatDateTime(lastTaken, context)} (${_daysAgoRelative(lastTaken)})',
-                        style: GoogleFonts.manrope(fontSize: 11, color: AppTheme.outline),
-                      ),
+                      if (!isOneOff) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          lastTaken == null
+                              ? 'No information'
+                              : '${widget.loggingDate != null ? 'Last taken before this date' : 'Last taken'}: ${_formatDateTime(lastTaken, context)} (${_daysAgoRelative(lastTaken)})',
+                          style: GoogleFonts.manrope(fontSize: 11, color: AppTheme.outline),
+                        ),
+                      ],
                     ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+          if (isOneOff && onDeleteOneOff != null) ...[
+            const SizedBox(height: 14),
+            const Divider(color: Color(0xFFEAE5DF), height: 1),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                InkWell(
+                  onTap: onDeleteOneOff,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.delete_outline, size: 16, color: Color(0xFFC04B3E)),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Delete from this log',
+                          style: GoogleFonts.manrope(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFFC04B3E),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -1046,6 +1062,7 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                     final unit = widget.hrtUnits[med.id] ?? med.unit;
                     final time = widget.hrtTimes[med.id] ?? '08:00 AM';
                     final lastTaken = _medLastTaken[med.id] ?? _medLastTaken[med.name.toLowerCase()];
+                    final isExpanded = _expandedMedId == med.id;
 
                     final loggedIntake = checked
                         ? HrtIntakeLog(
@@ -1081,24 +1098,37 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                           activeBadgeText: med.type == MedicationType.patch ? 'Applied' : 'Taken',
                           onTap: () {
                             setState(() {
-                              _expandedIndex = _expandedIndex == index ? null : index;
+                              _expandedMedId = isExpanded ? null : med.id;
                             });
                           },
                         ),
-                        if (_expandedIndex == index)
-                          _buildInlineMedicationDetails(med, checked, dose, unit, time, lastTaken),
+                        if (isExpanded)
+                          _buildInlineMedicationDetails(
+                            medId: med.id,
+                            medName: med.name,
+                            checked: checked,
+                            dose: dose,
+                            unit: unit,
+                            time: time,
+                            initialDose: widget.initialHrtDoses[med.id] ?? med.dose,
+                            lastTaken: lastTaken,
+                            isOneOff: false,
+                          ),
                         if (index < medications.length - 1 || oneOffs.isNotEmpty)
                           const Divider(color: Color(0xFFF2EDEA), height: 1),
                       ],
                     );
                   }).toList(),
 
-                  ...oneOffs.map((oneOff) {
+                  ...oneOffs.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final oneOff = entry.value;
                     final oneOffId = oneOff.id ?? oneOff.name;
                     final checked = widget.hrtChecked[oneOffId] ?? true;
                     final dose = widget.hrtDoses[oneOffId] ?? (double.tryParse(oneOff.dose ?? '1') ?? 1.0);
                     final unit = widget.hrtUnits[oneOffId] ?? (oneOff.unit ?? 'mg');
                     final time = widget.hrtTimes[oneOffId] ?? (oneOff.timeTaken ?? '08:00 AM');
+                    final isExpanded = _expandedMedId == oneOffId;
 
                     return Column(
                       children: [
@@ -1113,8 +1143,33 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                           checked: checked,
                           dailyState: checked ? DailyScheduledState.logged : DailyScheduledState.readyToLog,
                           activeBadgeText: 'Logged',
-                          onTap: () {},
+                          onTap: () {
+                            setState(() {
+                              _expandedMedId = isExpanded ? null : oneOffId;
+                            });
+                          },
                         ),
+                        if (isExpanded)
+                          _buildInlineMedicationDetails(
+                            medId: oneOffId,
+                            medName: oneOff.name,
+                            checked: checked,
+                            dose: dose,
+                            unit: unit,
+                            time: time,
+                            initialDose: widget.initialHrtDoses[oneOffId] ?? (double.tryParse(oneOff.dose ?? '1') ?? 1.0),
+                            isOneOff: true,
+                            onDeleteOneOff: () {
+                              setState(() {
+                                if (_expandedMedId == oneOffId) {
+                                  _expandedMedId = null;
+                                }
+                              });
+                              widget.onRemoveOneOffEntry?.call(oneOff);
+                            },
+                          ),
+                        if (index < oneOffs.length - 1)
+                          const Divider(color: Color(0xFFF2EDEA), height: 1),
                       ],
                     );
                   }).toList(),

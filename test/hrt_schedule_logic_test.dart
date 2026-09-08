@@ -257,6 +257,43 @@ void main() {
       ];
       expect(HrtScheduleService.hasLoggedHistory(med, logs), isTrue);
     });
+
+    test('hasLoggedHistory returns true when legacy flat flags are checked', () {
+      final estradiolMed = Medication(
+        name: 'Estradiol Gel',
+        type: MedicationType.gel,
+        dose: 1,
+        unit: 'pumps',
+        frequency: 'Daily',
+      );
+
+      final progesteroneMed = Medication(
+        name: 'Progesterone Pill',
+        type: MedicationType.pill,
+        dose: 100,
+        unit: 'mg',
+        frequency: 'Daily',
+      );
+
+      final logWithLegacyEstradiol = DailyLog(
+        id: 'log-legacy-1',
+        userId: 'user-1',
+        date: DateTime(2026, 8, 1),
+        createdAt: DateTime.now(),
+        estradiolChecked: true,
+      );
+
+      final logWithLegacyProgesterone = DailyLog(
+        id: 'log-legacy-2',
+        userId: 'user-1',
+        date: DateTime(2026, 8, 1),
+        createdAt: DateTime.now(),
+        progesteroneChecked: true,
+      );
+
+      expect(HrtScheduleService.hasLoggedHistory(estradiolMed, [logWithLegacyEstradiol]), isTrue);
+      expect(HrtScheduleService.hasLoggedHistory(progesteroneMed, [logWithLegacyProgesterone]), isTrue);
+    });
   });
 
   group('Task 7–11: Unified Regimen Changes & Retrospective Logging Rules', () {

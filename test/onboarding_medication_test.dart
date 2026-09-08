@@ -15,6 +15,22 @@ import 'package:eunora/features/home/presentation/widgets/hrt_tracker/hrt_adhere
 import 'package:eunora/features/onboarding/presentation/pages/frequent_symptoms_page.dart';
 import 'package:eunora/features/home/presentation/pages/daily_logging/symptoms_step.dart';
 import 'package:eunora/features/home/presentation/widgets/calendar_hrt_edit_sheet.dart';
+import 'package:eunora/features/home/domain/entities/daily_log.dart';
+import 'package:eunora/features/hrt_tracker/domain/hrt_schedule_service.dart';
+import 'package:eunora/features/home/presentation/widgets/shared_logging/logging_card_wrapper.dart';
+import 'package:eunora/features/home/presentation/widgets/shared_logging/animated_logging_icon.dart';
+import 'package:eunora/features/home/presentation/pages/daily_logging/daily_entry_step.dart';
+import 'package:eunora/features/onboarding/presentation/providers/other_medications_provider.dart';
+
+class MockMedicationsNotifier extends Medications {
+  final List<Medication> initialMeds;
+  MockMedicationsNotifier(this.initialMeds);
+
+  @override
+  MedicationsState build() {
+    return MedicationsState(medications: initialMeds);
+  }
+}
 
 void main() {
   group('Onboarding & Medication Flow Improvements Tests', () {
@@ -446,5 +462,303 @@ void main() {
       // Verify core pin SnackBar feedback
       expect(find.text('Core symptoms are permanently pinned to Quick Access.'), findsOneWidget);
     });
+
+    testWidgets('CalendarHrtEditSheet displays active medication added as retrospective one-off', (tester) async {
+      tester.view.physicalSize = const Size(1000, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final activeMed = Medication(
+        id: 'med_estradiol',
+        name: 'Estradiol Patch',
+        type: MedicationType.patch,
+        dose: 50.0,
+        unit: 'mcg',
+        frequency: 'Twice weekly',
+        startedAt: DateTime.now(), // started today
+      );
+
+      final retrospectiveDate = DateTime.now().subtract(const Duration(days: 7));
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            medicationsProvider.overrideWith(() => MockMedicationsNotifier([activeMed])),
+          ],
+          child: MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                height: 700,
+                child: CalendarHrtEditSheet(
+                  initialHrt: const [],
+                  selectedDate: retrospectiveDate,
+                  onSave: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Initially empty on retrospective date because startedAt is today
+      expect(find.text('No HRT medications were active on this date.'), findsOneWidget);
+
+      // Tap Add HRT Medication
+      final addBtn = find.text('Add HRT Medication');
+      await tester.ensureVisible(addBtn);
+      await tester.tap(addBtn);
+      await tester.pumpAndSettle();
+
+      // Enter medication name
+      final nameField = find.byType(TextFormField).first;
+      await tester.enterText(nameField, 'Estradiol Patch');
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+
+      // Tap save / add
+      final confirmBtn = find.text('CONFIRM & ADD');
+      await tester.ensureVisible(confirmBtn);
+      await tester.tap(confirmBtn);
+      await tester.pumpAndSettle();
+
+      // Verify the medication now appears in the active list on the sheet
+      expect(find.text('Estradiol Patch'), findsWidgets);
+      expect(find.text('No HRT medications were active on this date.'), findsNothing);
+    });
+
+    test('HrtScheduleService.getDailyState returns logged for retrospective intake taken before startedAt', () {
+      final med = Medication(
+        id: 'med_estradiol',
+        name: 'Estradiol Patch',
+        type: MedicationType.patch,
+        dose: 50.0,
+        unit: 'mcg',
+        frequency: 'Daily',
+        startedAt: DateTime.now(), // started today
+      );
+
+      final retrospectiveDate = DateTime.now().subtract(const Duration(days: 7));
+      final loggedIntake = HrtIntakeLog(
+        medicationId: 'med_estradiol',
+        name: 'Estradiol Patch',
+        dose: 50.0,
+        unit: 'mcg',
+        time: '08:00',
+        isTaken: true,
+      );
+
+      final state = HrtScheduleService.getDailyState(
+        med: med,
+        date: retrospectiveDate,
+        loggedIntake: loggedIntake,
+      );
+
+      expect(state, equals(DailyScheduledState.logged));
+    });
+
+    testWidgets('HrtAdherenceCard includes retrospective taken intake in adherence calculation', (tester) async {
+      final focusedMonth = DateTime(2026, 5, 1);
+      final med = Medication(
+        id: 'med_1',
+        name: 'Estradiol Patch',
+        type: MedicationType.patch,
+        dose: 50.0,
+        unit: 'mcg',
+        frequency: 'Daily',
+        startedAt: DateTime(2026, 6, 1), // canonical regimen starts next month
+      );
+
+      final pastLog = DailyLog(
+        id: 'log_past',
+        userId: 'user_1',
+        date: DateTime(2026, 5, 10), // retrospectively taken earlier in the month
+        isCompleted: true,
+        hrtIntakes: [
+          HrtIntakeLog(
+            medicationId: 'med_1',
+            name: 'Estradiol Patch',
+            dose: 50.0,
+            unit: 'mcg',
+            time: '08:00',
+            isTaken: true,
+          ),
+        ],
+        createdAt: DateTime(2026, 5, 10),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            medicationsProvider.overrideWith(() => MockMedicationsNotifier([med])),
+          ],
+          child: MaterialApp(
+            home: Scaffold(
+              body: HrtAdherenceCard(
+                focusedMonth: focusedMonth,
+                monthlyLogs: {
+                  10: pastLog,
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(HrtAdherenceCard), findsOneWidget);
+      expect(find.text('Adherence this month: 100%'), findsOneWidget);
+    });
+
+    testWidgets('AnimatedLoggingIcon renders and animates when triggerValue changes', (tester) async {
+      String currentSeverity = 'Mild';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) {
+                return Column(
+                  children: [
+                    LoggingCardWrapper(
+                      name: 'Exercise',
+                      icon: Icons.fitness_center,
+                      color: Colors.blue,
+                      backgroundColor: Colors.blue.withValues(alpha: 0.1),
+                      triggerValue: currentSeverity,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () => setState(() => currentSeverity = 'Intense'),
+                          child: const Text('Change to Intense'),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Exercise'), findsOneWidget);
+      expect(find.byType(AnimatedLoggingIcon), findsOneWidget);
+
+      // Tap change to trigger animation
+      await tester.tap(find.text('Change to Intense'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500)); // middle of walk/lift animation
+      await tester.pump(const Duration(milliseconds: 1000)); // barbell lifting phase
+      await tester.pump(const Duration(milliseconds: 1500)); // sprint & settle
+      await tester.pumpAndSettle();
+
+      expect(find.text('Exercise'), findsOneWidget);
+    });
+
+    testWidgets('DailyEntryStep allows time editing and deletion for one-off HRT, but prevents deletion for regular HRT', (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      HrtEditEntry? removedEntry;
+
+      final regularMed = Medication(
+        id: 'reg_1',
+        name: 'Estrogel',
+        type: MedicationType.gel,
+        dose: 2,
+        unit: 'pumps',
+        frequency: 'Daily',
+      );
+
+      final oneOffMed = HrtEditEntry(
+        id: 'one_1',
+        name: 'Utrogestan 100mg',
+        details: '100 mg · Oral Tablet',
+        status: 'Taken',
+        isTaken: true,
+        dose: '100',
+        unit: 'mg',
+        timeTaken: '09:30 PM',
+        applicationType: 'Oral Tablet',
+        isOneOff: true,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            medicationsProvider.overrideWith(() => MockMedicationsNotifier([regularMed])),
+            otherMedicationsProvider.overrideWith((ref) => OtherMedicationsNotifier()),
+          ],
+          child: MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: DailyEntryStep(
+                  loggingDate: DateTime.now().subtract(const Duration(days: 2)),
+                  oneOffEntries: [oneOffMed],
+                  onRemoveOneOffEntry: (entry) {
+                    removedEntry = entry;
+                  },
+                  hrtChecked: {'reg_1': true, 'one_1': true},
+                  hrtDoses: {'reg_1': 2.0, 'one_1': 100.0},
+                  hrtUnits: {'reg_1': 'pumps', 'one_1': 'mg'},
+                  hrtTimes: {'reg_1': '08:00 AM', 'one_1': '09:30 PM'},
+                  initialHrtDoses: {'reg_1': 2.0, 'one_1': 100.0},
+                  initialHrtUnits: {'reg_1': 'pumps', 'one_1': 'mg'},
+                  onHrtCheckedToggled: (id, val) {},
+                  onHrtDoseChanged: (id, val) {},
+                  onHrtUnitChanged: (id, val) {},
+                  onHrtTimeChanged: (id, val) {},
+                  vitaminDChecked: false,
+                  magnesiumChecked: false,
+                  otherMedsChecked: {},
+                  onOtherMedsChanged: (_) {},
+                  onVitaminDCheckedToggled: (_) {},
+                  onMagnesiumCheckedToggled: (_) {},
+                  sleepDuration: 8.0,
+                  hydrationCups: 5,
+                  additionalNotes: '',
+                  onSleepDurationChanged: (_) {},
+                  onHydrationCupsChanged: (_) {},
+                  onAdditionalNotesChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify both entries are visible
+      expect(find.text('Estrogel'), findsOneWidget);
+      expect(find.text('Utrogestan 100mg'), findsOneWidget);
+
+      // Expand regular medication
+      await tester.tap(find.text('Estrogel'));
+      await tester.pumpAndSettle();
+
+      // Regular medication does NOT have delete button
+      expect(find.text('Delete from this log'), findsNothing);
+
+      // Expand one-off entry
+      await tester.tap(find.text('Utrogestan 100mg'));
+      await tester.pumpAndSettle();
+
+      // One-off entry displays time and the "Delete from this log" button
+      expect(find.text('09:30 PM'), findsOneWidget);
+      expect(find.text('Delete from this log'), findsOneWidget);
+
+      // Tap Delete
+      await tester.tap(find.text('Delete from this log'));
+      await tester.pumpAndSettle();
+
+      expect(removedEntry, isNotNull);
+      expect(removedEntry!.id, equals('one_1'));
+    });
   });
 }
+

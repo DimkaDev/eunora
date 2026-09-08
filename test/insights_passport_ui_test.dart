@@ -167,8 +167,53 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.text('Baseline Established'), findsOneWidget);
+      expect(find.text('READY TO GENERATE'), findsOneWidget);
+      expect(find.text('30 days of data'), findsOneWidget);
       expect(find.text('Generate Passport PDF'), findsOneWidget);
+    });
+
+    testWidgets('Passport Tab updates readiness progress and days remaining when switching period', (tester) async {
+      const mockEligibility = PassportEligibility(
+        hasMinimumData: true,
+        daysRemaining: 0,
+        totalDays: 30,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            passportScreenControllerProvider.overrideWith(() => MockPassportScreenController(mockEligibility)),
+            premiumGuardProvider.overrideWith((ref) => true),
+          ],
+          child: const MaterialApp(
+            home: PassportScreen(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // At 30 days period: ready
+      expect(find.text('READY TO GENERATE'), findsOneWidget);
+      expect(find.text('30 days of data'), findsOneWidget);
+
+      // Tap 60 days
+      await tester.tap(find.text('60 days'));
+      await tester.pumpAndSettle();
+
+      // At 60 days period: 30 days to go, 30 / 60 logged
+      expect(find.text('DATA COLLECTION IN PROGRESS'), findsOneWidget);
+      expect(find.text('30 days to go'), findsOneWidget);
+      expect(find.text('30 / 60 logged'), findsOneWidget);
+
+      // Tap 90 days
+      await tester.tap(find.text('90 days'));
+      await tester.pumpAndSettle();
+
+      // At 90 days period: 60 days to go, 30 / 90 logged
+      expect(find.text('DATA COLLECTION IN PROGRESS'), findsOneWidget);
+      expect(find.text('60 days to go'), findsOneWidget);
+      expect(find.text('30 / 90 logged'), findsOneWidget);
     });
   });
 

@@ -134,6 +134,15 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
     }
   }
 
+  bool get _isTodayLogged {
+    final now = DateTime.now();
+    return _allLogs.any((log) =>
+        log.date.year == now.year &&
+        log.date.month == now.month &&
+        log.date.day == now.day &&
+        log.isCompleted);
+  }
+
   List<DailyLog> _getFilteredLogs() {
     final int days = _getPeriodDays();
     final DateTime cutoff = DateTime.now().subtract(Duration(days: days));
@@ -365,40 +374,42 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
                 valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryContainer),
               ),
             ),
-            const SizedBox(height: 24),
-
-            // Log Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  context.push('/daily-logging', extra: DateTime.now());
-                },
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  backgroundColor: AppTheme.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(100),
+            if (!_isTodayLogged) ...[
+              const SizedBox(height: 24),
+              // Log Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    await context.push('/daily-logging', extra: DateTime.now());
+                    _loadData();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    backgroundColor: AppTheme.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Log today',
+                        style: GoogleFonts.manrope(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Icon(Icons.arrow_forward, size: 16),
+                    ],
                   ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Log today',
-                      style: GoogleFonts.manrope(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    const Icon(Icons.arrow_forward, size: 16),
-                  ],
-                ),
               ),
-            ),
+            ],
           ],
         ),
       );
@@ -743,40 +754,42 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
                     valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFFDAD3)),
                   ),
                 ),
-                const SizedBox(height: 24),
-
-                // Log Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      context.push('/daily-logging', extra: DateTime.now());
-                    },
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: const Color(0xFFFFDAD3),
-                      foregroundColor: const Color(0xFF341009),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(100),
+                if (!_isTodayLogged) ...[
+                  const SizedBox(height: 24),
+                  // Log Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        await context.push('/daily-logging', extra: DateTime.now());
+                        _loadData();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: const Color(0xFFFFDAD3),
+                        foregroundColor: const Color(0xFF341009),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Log today',
+                            style: GoogleFonts.manrope(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          const Icon(Icons.arrow_forward, size: 16),
+                        ],
                       ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Log today',
-                          style: GoogleFonts.manrope(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        const Icon(Icons.arrow_forward, size: 16),
-                      ],
-                    ),
                   ),
-                ),
+                ],
               ],
             ),
           );

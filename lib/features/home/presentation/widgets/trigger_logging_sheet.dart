@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
@@ -27,6 +28,7 @@ class TriggerLoggingSheet extends ConsumerStatefulWidget {
 class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
   int _currentStep = 0; // 0: Select Trigger, 1: Configure details
   TriggerOption? _selectedTrigger;
+  String? _tappingTriggerId;
 
   // State for the detail step (mirrors daily logging)
   String? _selectedValue;   // For slider-based triggers
@@ -114,14 +116,24 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
     }
   }
 
-  void _selectTrigger(TriggerOption trigger) {
+  void _selectTrigger(TriggerOption trigger) async {
+    HapticFeedback.lightImpact();
     final vals = _getTriggerValues(trigger.name);
     final isEx = trigger.id == 't_exercise' || trigger.name.toLowerCase() == 'exercise';
     setState(() {
+      _tappingTriggerId = trigger.id;
       _selectedTrigger = trigger;
       _counterValue = isEx ? 0 : 1;
       _textNote = '';
       _selectedValue = vals.isNotEmpty ? vals[vals.length ~/ 2] : 'Moderate';
+    });
+
+    // Short micro-delay to let the card scale, fill, and checkmark animate
+    await Future.delayed(const Duration(milliseconds: 140));
+    if (!mounted) return;
+
+    setState(() {
+      _tappingTriggerId = null;
       _currentStep = 1;
     });
   }
@@ -182,7 +194,10 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
               children: [
                 if (_currentStep == 1)
                   IconButton(
-                    onPressed: () => setState(() => _currentStep = 0),
+                    onPressed: () => setState(() {
+                      _currentStep = 0;
+                      _selectedTrigger = null;
+                    }),
                     icon: const Icon(Icons.arrow_back),
                     style: IconButton.styleFrom(
                       backgroundColor: const Color(0xFFF2EDEA),
@@ -214,47 +229,72 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
 
           // Body
           Flexible(
-            child: _currentStep == 0
-                ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 8),
-                        child: TextField(
-                          onChanged: (val) =>
-                              setState(() => _searchQuery = val),
-                          decoration: InputDecoration(
-                            hintText: 'Search triggers...',
-                            prefixIcon: const Icon(Icons.search,
-                                color: Color(0xFF9B8B7E)),
-                            filled: true,
-                            fillColor: const Color(0xFFF2EDEA)
-                                .withValues(alpha: 0.5),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide.none,
-                            ),
-                            contentPadding:
-                                const EdgeInsets.symmetric(vertical: 14),
-                          ),
-                          style: GoogleFonts.manrope(),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Expanded(
-                        child: SingleChildScrollView(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 24),
-                          child: _buildTriggerSelection(displayTriggers),
-                        ),
-                      ),
-                    ],
-                  )
-                : SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: _buildDetailStep(),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 320),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                final isForward = _currentStep == 1;
+                final inOffset = isForward ? const Offset(0.08, 0.0) : const Offset(-0.08, 0.0);
+                return FadeTransition(
+                  opacity: CurvedAnimation(parent: animation, curve: Curves.easeInOut),
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: inOffset,
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
                   ),
+                );
+              },
+              child: _currentStep == 0
+                  ? KeyedSubtree(
+                      key: const ValueKey<int>(0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 8),
+                            child: TextField(
+                              onChanged: (val) =>
+                                  setState(() => _searchQuery = val),
+                              decoration: InputDecoration(
+                                hintText: 'Search triggers...',
+                                prefixIcon: const Icon(Icons.search,
+                                    color: Color(0xFF9B8B7E)),
+                                filled: true,
+                                fillColor: const Color(0xFFF2EDEA)
+                                    .withValues(alpha: 0.5),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  borderSide: BorderSide.none,
+                                ),
+                                contentPadding:
+                                    const EdgeInsets.symmetric(vertical: 14),
+                              ),
+                              style: GoogleFonts.manrope(),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 24),
+                              child: _buildTriggerSelection(displayTriggers),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : KeyedSubtree(
+                      key: const ValueKey<int>(1),
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: _buildDetailStep(),
+                      ),
+                    ),
+            ),
           ),
 
           // Save button (step 1 only)
@@ -339,51 +379,98 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
               final icon = trigger.getIconData();
               final trigColor = trigger.getIconColor();
               final trigBg = trigColor.withValues(alpha: 0.1);
+              final isSelected = (_selectedTrigger?.id == trigger.id) || (_tappingTriggerId == trigger.id);
 
               return Bounceable(
+                scaleFactor: 0.92,
+                duration: const Duration(milliseconds: 140),
                 onTap: () => _selectTrigger(trigger),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(40),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          color: trigBg,
-                          shape: BoxShape.circle,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOutBack,
+                      decoration: BoxDecoration(
+                        color: isSelected ? trigColor.withValues(alpha: 0.12) : Colors.white,
+                        borderRadius: BorderRadius.circular(40),
+                        border: Border.all(
+                          color: isSelected ? trigColor : Colors.transparent,
+                          width: isSelected ? 2.5 : 0,
                         ),
-                        child: Icon(icon, color: trigColor, size: 32),
+                        boxShadow: [
+                          BoxShadow(
+                            color: isSelected
+                                ? trigColor.withValues(alpha: 0.2)
+                                : Colors.black.withValues(alpha: 0.03),
+                            blurRadius: isSelected ? 16 : 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 12),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                        child: Text(
-                          trigger.name,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.manrope(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF9B8B7E),
-                            height: 1.15,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            width: 64,
+                            height: 64,
+                            decoration: BoxDecoration(
+                              color: isSelected ? trigColor.withValues(alpha: 0.28) : trigBg,
+                              shape: BoxShape.circle,
+                            ),
+                            child: AnimatedScale(
+                              scale: isSelected ? 1.15 : 1.0,
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeOutBack,
+                              child: Icon(icon, color: trigColor, size: 32),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                            child: Text(
+                              trigger.name,
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.manrope(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: isSelected ? const Color(0xFF1D1B1A) : const Color(0xFF9B8B7E),
+                                height: 1.15,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (isSelected)
+                      Positioned(
+                        top: 10,
+                        right: 12,
+                        child: TweenAnimationBuilder<double>(
+                          tween: Tween<double>(begin: 0.0, end: 1.0),
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.elasticOut,
+                          builder: (context, val, child) => Transform.scale(
+                            scale: val,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: trigColor,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.check,
+                                color: Colors.white,
+                                size: 14,
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
               );
             },

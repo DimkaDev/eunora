@@ -216,12 +216,12 @@ class HrtScheduleService {
       return DailyScheduledState.asNeeded;
     }
 
-    if (!isScheduledOnDate(med, date, doseChanges: doseChanges)) {
-      return DailyScheduledState.notScheduledToday;
-    }
-
     if (loggedIntake != null && loggedIntake.isTaken) {
       return DailyScheduledState.logged;
+    }
+
+    if (!isScheduledOnDate(med, date, doseChanges: doseChanges)) {
+      return DailyScheduledState.notScheduledToday;
     }
 
     return DailyScheduledState.readyToLog;
@@ -285,6 +285,12 @@ class HrtScheduleService {
     final targetNameLower = med.name.trim().toLowerCase();
 
     for (final log in logs) {
+      if (targetNameLower.contains('estradiol') && log.estradiolChecked) {
+        return true;
+      }
+      if (targetNameLower.contains('progesterone') && log.progesteroneChecked) {
+        return true;
+      }
       for (final intake in log.hrtIntakes) {
         final matches = (intake.medicationId.isNotEmpty && intake.medicationId == targetId) ||
             (intake.name.trim().toLowerCase() == targetNameLower);

@@ -184,6 +184,7 @@ class _EditSymptomsModalSheetState extends ConsumerState<EditSymptomsModalSheet>
                       icon: symIcon,
                       color: symColor,
                       backgroundColor: symBg,
+                      triggerValue: severity,
                       trailingAction: IconButton(
                         onPressed: () => _deleteSymptom(index),
                         icon: const Icon(Icons.delete_outline),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
@@ -29,11 +30,29 @@ class SymptomLoggingSheet extends ConsumerStatefulWidget {
 class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
   int _currentStep = 0; // 0: Select Symptom, 1: Select Severity
   Symptom? _selectedSymptom;
+  String? _tappingSymptomId;
   String _selectedSeverity = 'Mild';
   int _selectedDuration = 15;
   
   String _searchQuery = '';
   bool _showAllSymptoms = false;
+
+  void _selectSymptom(Symptom symptom) async {
+    HapticFeedback.lightImpact();
+    setState(() {
+      _tappingSymptomId = symptom.id;
+      _selectedSymptom = symptom;
+    });
+
+    // Short micro-delay to let the card scale, fill, and checkmark animate
+    await Future.delayed(const Duration(milliseconds: 140));
+    if (!mounted) return;
+
+    setState(() {
+      _tappingSymptomId = null;
+      _currentStep = 1;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,6 +127,7 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
                     onPressed: () {
                       setState(() {
                         _currentStep = 0;
+                        _selectedSymptom = null;
                       });
                     },
                     icon: const Icon(Icons.arrow_back),
@@ -141,45 +161,70 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
 
           // Body
           Flexible(
-            child: _currentStep == 0
-                ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                        child: TextField(
-                          onChanged: (val) {
-                            setState(() {
-                              _searchQuery = val;
-                            });
-                          },
-                          decoration: InputDecoration(
-                            hintText: 'Search symptoms...',
-                            prefixIcon: const Icon(Icons.search, color: Color(0xFF9B8B7E)),
-                            filled: true,
-                            fillColor: const Color(0xFFF2EDEA).withValues(alpha: 0.5),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide.none,
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                          ),
-                          style: GoogleFonts.manrope(),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Expanded(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: _buildSymptomSelection(displaySymptoms, isPerimenopause),
-                        ),
-                      ),
-                    ],
-                  )
-                : SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: _buildSeveritySelection(),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 320),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                final isForward = _currentStep == 1;
+                final inOffset = isForward ? const Offset(0.08, 0.0) : const Offset(-0.08, 0.0);
+                return FadeTransition(
+                  opacity: CurvedAnimation(parent: animation, curve: Curves.easeInOut),
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: inOffset,
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
                   ),
+                );
+              },
+              child: _currentStep == 0
+                  ? KeyedSubtree(
+                      key: const ValueKey<int>(0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                            child: TextField(
+                              onChanged: (val) {
+                                setState(() {
+                                  _searchQuery = val;
+                                });
+                              },
+                              decoration: InputDecoration(
+                                hintText: 'Search symptoms...',
+                                prefixIcon: const Icon(Icons.search, color: Color(0xFF9B8B7E)),
+                                filled: true,
+                                fillColor: const Color(0xFFF2EDEA).withValues(alpha: 0.5),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  borderSide: BorderSide.none,
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                              ),
+                              style: GoogleFonts.manrope(),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.symmetric(horizontal: 24),
+                              child: _buildSymptomSelection(displaySymptoms, isPerimenopause),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : KeyedSubtree(
+                      key: const ValueKey<int>(1),
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: _buildSeveritySelection(),
+                      ),
+                    ),
+            ),
           ),
 
           // Action button
@@ -344,30 +389,35 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
     final symBg = symColor.withValues(alpha: 0.1);
     final loggedNames = widget.loggedSymptoms.map((s) => s['name']?.toLowerCase()).toSet();
     final isAlreadyLogged = loggedNames.contains(symptom.name.toLowerCase());
+    final isSelected = (_selectedSymptom?.id == symptom.id) || (_tappingSymptomId == symptom.id);
 
     return Bounceable(
-      onTap: () {
-        setState(() {
-          _selectedSymptom = symptom;
-          _currentStep = 1;
-        });
-      },
+      scaleFactor: 0.92,
+      duration: const Duration(milliseconds: 140),
+      onTap: () => _selectSymptom(symptom),
       child: Stack(
         fit: StackFit.expand,
         children: [
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOutBack,
             decoration: BoxDecoration(
-              color: isAlreadyLogged ? Colors.white : const Color(0xFFFFFFFF),
+              color: isSelected
+                  ? symColor.withValues(alpha: 0.12)
+                  : (isAlreadyLogged ? Colors.white : const Color(0xFFFFFFFF)),
               borderRadius: BorderRadius.circular(40),
               border: Border.all(
-                color: isAlreadyLogged ? const Color(0xFF9B8B7E) : Colors.transparent,
-                width: isAlreadyLogged ? 2 : 0,
+                color: isSelected
+                    ? symColor
+                    : (isAlreadyLogged ? const Color(0xFF9B8B7E) : Colors.transparent),
+                width: isSelected ? 2.5 : (isAlreadyLogged ? 2 : 0),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: isAlreadyLogged ? 0.08 : 0.03),
-                  blurRadius: isAlreadyLogged ? 15 : 10,
+                  color: isSelected
+                      ? symColor.withValues(alpha: 0.2)
+                      : Colors.black.withValues(alpha: isAlreadyLogged ? 0.08 : 0.03),
+                  blurRadius: isSelected ? 16 : (isAlreadyLogged ? 15 : 10),
                   offset: const Offset(0, 4),
                 ),
               ],
@@ -375,17 +425,25 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
                   width: 64,
                   height: 64,
                   decoration: BoxDecoration(
-                    color: isAlreadyLogged ? symColor.withValues(alpha: 0.2) : symBg,
+                    color: isSelected
+                        ? symColor.withValues(alpha: 0.25)
+                        : (isAlreadyLogged ? symColor.withValues(alpha: 0.2) : symBg),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    symptom.getIconData(),
-                    color: symColor,
-                    size: 36,
+                  child: AnimatedScale(
+                    scale: isSelected ? 1.15 : 1.0,
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOutBack,
+                    child: Icon(
+                      symptom.getIconData(),
+                      color: symColor,
+                      size: 36,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -399,7 +457,7 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
                     style: GoogleFonts.manrope(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: isAlreadyLogged ? const Color(0xFF1D1B1A) : const Color(0xFF9B8B7E),
+                      color: (isSelected || isAlreadyLogged) ? const Color(0xFF1D1B1A) : const Color(0xFF9B8B7E),
                       height: 1.1,
                     ),
                   ),
@@ -407,7 +465,32 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
               ],
             ),
           ),
-          if (isAlreadyLogged)
+          if (isSelected && !isAlreadyLogged)
+            Positioned(
+              top: 10,
+              right: 12,
+              child: TweenAnimationBuilder<double>(
+                tween: Tween<double>(begin: 0.0, end: 1.0),
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.elasticOut,
+                builder: (context, val, child) => Transform.scale(
+                  scale: val,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: symColor,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 14,
+                    ),
+                  ),
+                ),
+              ),
+            )
+          else if (isAlreadyLogged)
             Positioned(
               top: 10,
               right: 12,
@@ -452,6 +535,7 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
       icon: symIcon,
       color: symColor,
       backgroundColor: symBg,
+      triggerValue: _selectedSeverity,
       children: [
         GradientSliderSelector(
           values: const ['Mild', 'Moderate', 'Severe'],

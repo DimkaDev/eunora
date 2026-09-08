@@ -101,6 +101,7 @@ class SeverityStep extends ConsumerWidget {
             icon: symIcon,
             color: symColor,
             backgroundColor: symBg,
+            triggerValue: currentSeverity,
             children: [
               GradientSliderSelector(
                 values: const ['Mild', 'Moderate', 'Severe'],

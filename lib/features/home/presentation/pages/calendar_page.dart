@@ -9,6 +9,8 @@ import 'package:eunora/features/home/presentation/widgets/edit_symptoms_modal_sh
 import 'package:eunora/features/home/presentation/widgets/trigger_logging_sheet.dart';
 import 'package:eunora/features/home/presentation/widgets/edit_triggers_modal_sheet.dart';
 import 'package:eunora/features/home/presentation/widgets/calendar_hrt_edit_sheet.dart';
+import 'package:eunora/features/home/presentation/widgets/edit_sleep_modal_sheet.dart';
+import 'package:eunora/features/home/presentation/widgets/edit_mood_modal_sheet.dart';
 import 'package:eunora/core/services/firestore_service.dart';
 import 'package:eunora/features/home/domain/entities/daily_log.dart';
 import 'package:eunora/features/onboarding/domain/models/symptom.dart';
@@ -20,11 +22,13 @@ import 'package:eunora/features/home/presentation/widgets/calendar/calendar_insi
 import 'package:eunora/features/onboarding/presentation/providers/triggers_provider.dart';
 import 'package:eunora/features/onboarding/domain/models/trigger.dart';
 import 'package:eunora/features/symptom_log/data/trigger_library.dart';
+import 'package:eunora/features/passport/providers/passport_screen_controller.dart';
+import 'package:eunora/core/utils/time_formatter.dart';
 
 class MockDailyLog {
   List<String> symptoms;
-  final String sleepInfo;
-  final String moodInfo;
+  String sleepInfo;
+  String moodInfo;
   List<Map<String, String>> hrt;
   List<String> triggers;
   int itemsCount;
@@ -221,10 +225,9 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     // If already loading or cached, skip double fetching
     if (_monthLogsCache.containsKey(key) && _monthDraftsCache.containsKey(key)) return;
 
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
     try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
       final daysInMonth = DateUtils.getDaysInMonth(targetMonth.year, targetMonth.month);
       final start = DateTime(targetMonth.year, targetMonth.month, 1);
       final end = DateTime(targetMonth.year, targetMonth.month, daysInMonth, 23, 59, 59);
@@ -608,14 +611,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         final isTaken = h['isTaken'] == 'true';
         final details = h['details'] ?? '';
         final status = h['status'] ?? '';
-
-        String time = '08:30 AM';
-        if (status.toLowerCase().contains('taken') && !status.toLowerCase().contains('not')) {
-          time = status.replaceAll(RegExp(r'taken\s*', caseSensitive: false), '').trim();
-          if (!time.contains('AM') && !time.contains('PM')) {
-            time = '$time AM';
-          }
-        }
+        final time = AppTimeFormatter.extractTimeFromStatus(status, defaultFallback: '08:30 AM');
 
         double dose = 50.0;
         String unit = 'mcg';
@@ -645,6 +641,12 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         }
       }
 
+      double sleepVal = orig.sleepDuration;
+      final sleepMatch = RegExp(r'(\d+(\.\d+)?)').firstMatch(mockLog.sleepInfo);
+      if (sleepMatch != null) {
+        sleepVal = double.tryParse(sleepMatch.group(1) ?? '$sleepVal') ?? sleepVal;
+      }
+
       dailyLog = orig.copyWith(
         symptoms: loggedSymptoms,
         triggers: mockLog.triggers,
@@ -662,6 +664,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         progesteroneDose: progesteroneDose,
         progesteroneUnit: progesteroneUnit,
         progesteroneTime: progesteroneTime,
+        sleepDuration: sleepVal,
         hrtIntakes: hrtIntakes,
       );
     } else {
@@ -717,14 +720,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         final isTaken = h['isTaken'] == 'true';
         final details = h['details'] ?? '';
         final status = h['status'] ?? '';
-
-        String time = '08:30 AM';
-        if (status.toLowerCase().contains('taken') && !status.toLowerCase().contains('not')) {
-          time = status.replaceAll(RegExp(r'taken\s*', caseSensitive: false), '').trim();
-          if (!time.contains('AM') && !time.contains('PM')) {
-            time = '$time AM';
-          }
-        }
+        final time = AppTimeFormatter.extractTimeFromStatus(status, defaultFallback: '08:30 AM');
 
         double dose = 50.0;
         String unit = 'mcg';
@@ -754,6 +750,12 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         }
       }
 
+      double sleepVal = 7.0;
+      final sleepMatch = RegExp(r'(\d+(\.\d+)?)').firstMatch(mockLog.sleepInfo);
+      if (sleepMatch != null) {
+        sleepVal = double.tryParse(sleepMatch.group(1) ?? '7.0') ?? 7.0;
+      }
+
       dailyLog = DailyLog(
         id: dateStr,
         userId: user.uid,
@@ -777,7 +779,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         progesteroneTime: progesteroneTime,
         vitaminDChecked: false,
         magnesiumChecked: false,
-        sleepDuration: 7.0,
+        sleepDuration: sleepVal,
         hydrationCups: 0,
         weight: null,
         additionalNotes: '',
@@ -795,7 +797,9 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       _monthLogsCache[cacheKey]![day] = mockLog;
     });
 
-    ref.read(firestoreServiceProvider).saveDailyLog(user.uid, dailyLog).catchError((e) {
+    ref.read(firestoreServiceProvider).saveDailyLog(user.uid, dailyLog).then((_) {
+      ref.invalidate(passportScreenControllerProvider);
+    }).catchError((e) {
       debugPrint("Error saving daily log: $e");
     });
   }
@@ -1101,22 +1105,6 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           initialHrt: log.hrt.map((e) => Map<String, String>.from(e)).toList(),
           selectedDate: _selectedDate,
           onSave: (updated) {
-            final now = DateTime.now();
-            final isToday = _selectedDate == null ||
-                (_selectedDate!.year == now.year &&
-                 _selectedDate!.month == now.month &&
-                 _selectedDate!.day == now.day);
-
-            if (isToday) {
-              final updatedIds = updated.map((e) => e['id']).where((id) => id != null).toSet();
-              final medications = ref.read(medicationsProvider).medications;
-              for (final med in medications) {
-                if (!updatedIds.contains(med.id)) {
-                  ref.read(medicationsProvider.notifier).removeMedication(med.id);
-                }
-              }
-            }
-
             final takenOnly = updated.where((e) => e['isTaken'] == 'true').toList();
             setState(() {
               log.hrt.clear();
@@ -1129,7 +1117,49 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     );
   }
 
+  void _showSleepEditSheet(MockDailyLog log) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => EditSleepModalSheet(
+        initialSleepInfo: log.sleepInfo,
+        initialDuration: log.originalLog?.sleepDuration,
+        selectedDate: _selectedDate,
+        onSave: (duration, quality, formattedSleepInfo) {
+          setState(() {
+            log.sleepInfo = formattedSleepInfo;
+            if (log.originalLog != null) {
+              log.originalLog = log.originalLog!.copyWith(sleepDuration: duration);
+            }
+          });
+          _saveLogToFirestore(_selectedDate!.day, log);
+        },
+      ),
+    );
+  }
 
+  void _showMoodEditSheet(MockDailyLog log) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => EditMoodModalSheet(
+        initialMoodInfo: log.moodInfo,
+        initialStressLevel: log.originalLog?.stressLevel,
+        selectedDate: _selectedDate,
+        onSave: (moodName, score, formattedMoodInfo, stressLevel) {
+          setState(() {
+            log.moodInfo = formattedMoodInfo;
+            if (log.originalLog != null) {
+              log.originalLog = log.originalLog!.copyWith(stressLevel: stressLevel);
+            }
+          });
+          _saveLogToFirestore(_selectedDate!.day, log);
+        },
+      ),
+    );
+  }
 
   Widget _buildCalendarSkeleton() {
     return Container(
@@ -2436,6 +2466,14 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           builder: (context) {
             final trends = _getWeeklyTrendsData();
             final hasData = trends['hasEnoughData'] as bool? ?? false;
+            return _buildPremiumPatternsCard(isInsufficientData: !hasData);
+          },
+        ),
+        const SizedBox(height: 24),
+        Builder(
+          builder: (context) {
+            final trends = _getWeeklyTrendsData();
+            final hasData = trends['hasEnoughData'] as bool? ?? false;
             return CalendarWeeklyTrendsCard(
               averageIntensity: trends['avgIntensity'],
               averageSleep: trends['avgSleep'],
@@ -2596,9 +2634,13 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         const SizedBox(height: 20),
         _buildLoggedTriggersCard(log),
         const SizedBox(height: 20),
-        _buildPremiumPatternsCard(),
-        const SizedBox(height: 20),
-        _buildTrendsChartCard(),
+        Builder(
+          builder: (context) {
+            final trends = _getWeeklyTrendsData();
+            final hasData = trends['hasEnoughData'] as bool? ?? false;
+            return _buildPremiumPatternsCard(isInsufficientData: !hasData);
+          },
+        ),
         const SizedBox(height: 24),
         Builder(
           builder: (context) {
@@ -2830,66 +2872,92 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           const SizedBox(height: 16),
           const Divider(height: 1, color: Color(0xFFF2EDEA)),
           const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
+          InkWell(
+            onTap: () => _showSleepEditSheet(log),
+            borderRadius: BorderRadius.circular(10),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Icon(Icons.bedtime, color: Colors.grey, size: 18),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Sleep',
-                    style: GoogleFonts.manrope(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.onSurface,
-                    ),
+                  Row(
+                    children: [
+                      const Icon(Icons.bedtime, color: Colors.grey, size: 18),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Sleep',
+                        style: GoogleFonts.manrope(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        log.sleepInfo,
+                        style: GoogleFonts.manrope(
+                          fontSize: 13,
+                          color: AppTheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.chevron_right, size: 16, color: Color(0xFFA8A29E)),
+                    ],
                   ),
                 ],
               ),
-              Text(
-                log.sleepInfo,
-                style: GoogleFonts.manrope(
-                  fontSize: 13,
-                  color: AppTheme.onSurfaceVariant,
-                ),
-              ),
-            ],
+            ),
           ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
+          const SizedBox(height: 8),
+          InkWell(
+            onTap: () => _showMoodEditSheet(log),
+            borderRadius: BorderRadius.circular(10),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    width: 6,
-                    height: 6,
-                    margin: const EdgeInsets.symmetric(horizontal: 6),
-                    decoration: const BoxDecoration(
-                      color: AppTheme.primary,
-                      shape: BoxShape.circle,
-                    ),
+                  Row(
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        margin: const EdgeInsets.symmetric(horizontal: 6),
+                        decoration: const BoxDecoration(
+                          color: AppTheme.primary,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Mood',
+                        style: GoogleFonts.manrope(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.onSurface,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Mood',
-                    style: GoogleFonts.manrope(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.onSurface,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        log.moodInfo,
+                        style: GoogleFonts.manrope(
+                          fontSize: 13,
+                          color: AppTheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.chevron_right, size: 16, color: Color(0xFFA8A29E)),
+                    ],
                   ),
                 ],
               ),
-              Text(
-                log.moodInfo,
-                style: GoogleFonts.manrope(
-                  fontSize: 13,
-                  color: AppTheme.onSurfaceVariant,
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),
@@ -3129,7 +3197,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     );
   }
 
-  Widget _buildPremiumPatternsCard() {
+  Widget _buildPremiumPatternsCard({bool isInsufficientData = false}) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -3139,21 +3207,8 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           color: AppTheme.outlineVariant.withValues(alpha: 0.2),
         ),
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 6,
-            height: 154,
-            decoration: const BoxDecoration(
-              color: AppTheme.primary,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(16),
-                bottomLeft: Radius.circular(16),
-              ),
-            ),
-          ),
-          Expanded(
-            child: Padding(
+      child: isInsufficientData
+          ? Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -3207,288 +3262,192 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                   ),
                   const SizedBox(height: 16),
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                     decoration: BoxDecoration(
                       color: AppTheme.surfaceContainerLow,
                       borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppTheme.outlineVariant.withValues(alpha: 0.1),
+                      ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Column(
                       children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        const Icon(
+                          Icons.auto_graph_outlined,
+                          color: Color(0xFF9B8B7E),
+                          size: 32,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'IN PROGRESS',
+                          style: GoogleFonts.manrope(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.1,
+                            color: AppTheme.outline,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Data is still being collected. Eunora will highlight meaningful patterns once enough daily entries have been recorded.',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.manrope(
+                            fontSize: 13,
+                            color: AppTheme.onSurfaceVariant,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : Row(
+              children: [
+                Container(
+                  width: 6,
+                  height: 154,
+                  decoration: const BoxDecoration(
+                    color: AppTheme.primary,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      bottomLeft: Radius.circular(16),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: const BoxDecoration(
+                                    color: AppTheme.primary,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Patterns',
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.onSurface,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFEDDDF5),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.lock, size: 12, color: Color(0xFF6C6074)),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'PREMIUM',
+                                    style: GoogleFonts.manrope(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color(0xFF6C6074),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppTheme.surfaceContainerLow,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                'Red wine (evening)',
-                                style: GoogleFonts.manrope(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.onSurface,
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Red wine (evening)',
+                                      style: GoogleFonts.manrope(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.onSurface,
+                                      ),
+                                    ),
+                                    Text(
+                                      '→ Hot flashes +4.2 next day',
+                                      style: GoogleFonts.manrope(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.primary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      '79% correlation',
+                                      style: GoogleFonts.manrope(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppTheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              Text(
-                                '→ Hot flashes +4.2 next day',
-                                style: GoogleFonts.manrope(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.primary,
+                              // Correlation meter bar
+                              Container(
+                                width: 8,
+                                height: 64,
+                                decoration: BoxDecoration(
+                                  color: AppTheme.outlineVariant.withValues(alpha: 0.4),
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                '79% correlation',
-                                style: GoogleFonts.manrope(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppTheme.onSurfaceVariant,
+                                alignment: Alignment.bottomCenter,
+                                child: Container(
+                                  height: 64 * 0.79,
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.primaryContainer,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        // Correlation meter bar
-                        Container(
-                          width: 8,
-                          height: 64,
-                          decoration: BoxDecoration(
-                            color: AppTheme.outlineVariant.withValues(alpha: 0.4),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          alignment: Alignment.bottomCenter,
-                          child: Container(
-                            height: 64 * 0.79,
-                            decoration: BoxDecoration(
-                              color: AppTheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Insights are based on your personal historical data over the last 90 days.',
+                          style: GoogleFonts.manrope(
+                            fontSize: 10,
+                            fontStyle: FontStyle.italic,
+                            color: AppTheme.onSurfaceVariant.withValues(alpha: 0.7),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Insights are based on your personal historical data over the last 90 days.',
-                    style: GoogleFonts.manrope(
-                      fontSize: 10,
-                      fontStyle: FontStyle.italic,
-                      color: AppTheme.onSurfaceVariant.withValues(alpha: 0.7),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTrendsChartCard() {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppTheme.outlineVariant.withValues(alpha: 0.2),
-        ),
-      ),
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Weekly trends',
-                style: GoogleFonts.manrope(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.onSurface,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppTheme.surfaceContainer,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      '30d',
-                      style: GoogleFonts.manrope(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primary,
-                      ),
-                    ),
-                    const Icon(Icons.chevron_right, size: 14, color: AppTheme.primary),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'HOT FLASH FREQUENCY — LAST 7 DAYS',
-            style: GoogleFonts.manrope(
-              fontSize: 10,
-              fontWeight: FontWeight.w800,
-              color: AppTheme.onSurfaceVariant,
-              letterSpacing: 1.0,
-            ),
-          ),
-          const SizedBox(height: 12),
-          // Curved Path Custom Painter
-          SizedBox(
-            height: 90,
-            width: double.infinity,
-            child: CustomPaint(
-              painter: FrequencyCurvePainter(),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) {
-              return Text(
-                day.toUpperCase(),
-                style: GoogleFonts.manrope(
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primary,
-                ),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 20),
-          const Divider(height: 1, color: Color(0xFFF2EDEA)),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'SLEEP QUALITY',
-                      style: GoogleFonts.manrope(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w800,
-                        color: AppTheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        _buildTrendBar(0.6),
-                        _buildTrendBar(0.8),
-                        _buildTrendBar(0.4),
-                        _buildTrendBar(1.0),
-                        _buildTrendBar(0.6),
-                        _buildTrendBar(0.8),
-                        _buildTrendBar(0.6),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 24),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'MOOD',
-                      style: GoogleFonts.manrope(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w800,
-                        color: AppTheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        _buildTrendBar(0.8, color: const Color(0xFFA8D5BA).withValues(alpha: 0.6)),
-                        _buildTrendBar(1.0, color: const Color(0xFFA8D5BA).withValues(alpha: 0.6)),
-                        _buildTrendBar(0.6, color: const Color(0xFFA8D5BA).withValues(alpha: 0.6)),
-                        _buildTrendBar(0.8, color: const Color(0xFFA8D5BA).withValues(alpha: 0.6)),
-                        _buildTrendBar(1.0, color: const Color(0xFFA8D5BA).withValues(alpha: 0.6)),
-                        _buildTrendBar(0.6, color: const Color(0xFFA8D5BA).withValues(alpha: 0.6)),
-                        _buildTrendBar(0.8, color: const Color(0xFFA8D5BA).withValues(alpha: 0.6)),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTrendBar(double factor, {Color color = const Color(0xFFEDDDF5)}) {
-    return Expanded(
-      child: Container(
-        height: 48 * factor,
-        margin: const EdgeInsets.symmetric(horizontal: 1.5),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(2),
-            topRight: Radius.circular(2),
-          ),
-        ),
-      ),
     );
   }
 }
 
-class FrequencyCurvePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppTheme.primary
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
-
-    final fillPaint = Paint()
-      ..color = AppTheme.primary.withValues(alpha: 0.1)
-      ..style = PaintingStyle.fill;
-
-    final path = Path();
-    
-    // We map relative coordinates (0-100 x, 0-40 y) to actual size.width and size.height
-    double getX(double p) => p * size.width / 100;
-    double getY(double p) => p * size.height / 40;
-
-    path.moveTo(getX(0), getY(35));
-    path.quadraticBezierTo(getX(7.5), getY(32.5), getX(15), getY(30));
-    path.quadraticBezierTo(getX(20), getY(34), getX(25), getY(38));
-    path.quadraticBezierTo(getX(32.5), getY(24), getX(40), getY(10));
-    path.quadraticBezierTo(getX(47.5), getY(17.5), getX(55), getY(25));
-    path.quadraticBezierTo(getX(62.5), getY(15), getX(70), getY(5));
-    path.quadraticBezierTo(getX(77.5), getY(10), getX(85), getY(15));
-    path.quadraticBezierTo(getX(92.5), getY(13.5), getX(100), getY(12));
-
-    final fillPath = Path.from(path)
-      ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height)
-      ..close();
-
-    canvas.drawPath(fillPath, fillPaint);
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}

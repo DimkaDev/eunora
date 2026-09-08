@@ -19,10 +19,12 @@ import 'package:eunora/features/home/presentation/widgets/edit_symptoms_modal_sh
 import 'package:eunora/features/home/presentation/widgets/edit_triggers_modal_sheet.dart';
 import 'package:eunora/features/home/presentation/pages/calendar_page.dart';
 import 'package:eunora/features/home/presentation/pages/analytics_page.dart';
-import 'package:eunora/features/home/presentation/pages/passport_page.dart';
+import 'package:eunora/features/passport/presentation/pages/passport_screen.dart';
+import 'package:eunora/features/passport/providers/passport_screen_controller.dart';
 import 'package:eunora/features/home/presentation/pages/hrt_tracker_page.dart';
 import 'package:eunora/core/utils/animation_system.dart';
 import 'package:eunora/core/utils/logging_helpers.dart';
+import 'package:eunora/core/utils/time_formatter.dart';
 import 'package:eunora/features/onboarding/presentation/providers/medications_provider.dart';
 import 'package:eunora/features/onboarding/domain/models/medication.dart';
 import 'package:eunora/features/home/presentation/widgets/calendar_hrt_edit_sheet.dart';
@@ -80,9 +82,9 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     // Initialize with standard logs for default mock medications
     _takenStatus['Estradiol Patch'] = false;
-    _takenTime['Estradiol Patch'] = '08:30';
+    _takenTime['Estradiol Patch'] = '08:30 AM';
     _takenStatus['Progesterone'] = false;
-    _takenTime['Progesterone'] = '21:00';
+    _takenTime['Progesterone'] = '09:00 PM';
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchTodayLog();
@@ -171,14 +173,14 @@ class _HomePageState extends ConsumerState<HomePage> {
 
             _takenStatus['Estradiol Patch'] = log.estradiolChecked;
             _takenStatus['Estradiol'] = log.estradiolChecked;
-            _takenTime['Estradiol Patch'] = log.estradiolTime.isEmpty ? '08:30' : log.estradiolTime;
+            _takenTime['Estradiol Patch'] = AppTimeFormatter.formatTimeString(log.estradiolTime.isEmpty ? '08:30 AM' : log.estradiolTime);
             _takenStatus['Progesterone'] = log.progesteroneChecked;
             _takenStatus['Utrogestan'] = log.progesteroneChecked;
-            _takenTime['Progesterone'] = log.progesteroneTime.isEmpty ? '21:00' : log.progesteroneTime;
+            _takenTime['Progesterone'] = AppTimeFormatter.formatTimeString(log.progesteroneTime.isEmpty ? '09:00 PM' : log.progesteroneTime);
 
             for (final intake in log.hrtIntakes) {
               _takenStatus[intake.name] = intake.isTaken;
-              _takenTime[intake.name] = intake.time;
+              _takenTime[intake.name] = AppTimeFormatter.formatTimeString(intake.time);
             }
           } else {
             // Draft exists but is not completed — clear displayed data
@@ -201,6 +203,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
+        ref.invalidate(passportScreenControllerProvider);
       }
     }
   }
@@ -301,7 +304,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     for (final med in meds) {
       final name = med.name.toLowerCase();
       final isTaken = _takenStatus[med.name] ?? false;
-      final time = _takenTime[med.name] ?? (name.contains('estradiol') ? '08:30' : '21:00');
+      final time = AppTimeFormatter.formatTimeString(_takenTime[med.name] ?? (name.contains('estradiol') ? '08:30 AM' : '09:00 PM'));
 
       if (name.contains('estradiol') || name.contains('estrogen') || name.contains('estradot')) {
         estradiolDose = med.dose;
@@ -344,7 +347,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           name: 'Estradiol',
           dose: estradiolDose,
           unit: estradiolUnit,
-          time: '08:30',
+          time: '08:30 AM',
           isTaken: true,
         ));
       }
@@ -354,7 +357,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           name: 'Progesterone',
           dose: progesteroneDose,
           unit: progesteroneUnit,
-          time: '21:00',
+          time: '09:00 PM',
           isTaken: true,
         ));
       }
@@ -374,11 +377,11 @@ class _HomePageState extends ConsumerState<HomePage> {
       estradiolChecked: estradiolChecked,
       estradiolDose: estradiolDose,
       estradiolUnit: estradiolUnit,
-      estradiolTime: _takenTime['Estradiol Patch'] ?? '08:30',
+      estradiolTime: AppTimeFormatter.formatTimeString(_takenTime['Estradiol Patch'] ?? '08:30 AM'),
       progesteroneChecked: progesteroneChecked,
       progesteroneDose: progesteroneDose,
       progesteroneUnit: progesteroneUnit,
-      progesteroneTime: _takenTime['Progesterone'] ?? '21:00',
+      progesteroneTime: AppTimeFormatter.formatTimeString(_takenTime['Progesterone'] ?? '09:00 PM'),
       customTriggerCounters: customTriggerCounters,
       customTriggerTexts: customTriggerTexts,
       hrtIntakes: hrtIntakes,
@@ -388,6 +391,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
 
     await ref.read(firestoreServiceProvider).saveDailyLog(user.uid, dailyLog);
+    ref.invalidate(passportScreenControllerProvider);
   }
 
 
@@ -540,7 +544,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   void _showHrtLoggingSheet(List<Medication> medications) {
     final hrtList = medications.map((med) {
       final isTaken = _takenStatus[med.name] ?? false;
-      final time = _takenTime[med.name] ?? '08:00';
+      final time = AppTimeFormatter.formatTimeString(_takenTime[med.name] ?? '08:00 AM');
       final appType = med.type.displayName;
       
       return {
@@ -564,19 +568,10 @@ class _HomePageState extends ConsumerState<HomePage> {
         maxChildSize: 0.95,
         builder: (_, scrollController) => CalendarHrtEditSheet(
           initialHrt: hrtList,
+          showAddButton: false,
           onSave: (updatedList) {
             setState(() {
-              // 1. Identify and delete medications deleted in the modal list
-              final updatedIds = updatedList.map((e) => e['id']).where((id) => id != null).toSet();
-              for (final med in medications) {
-                if (!updatedIds.contains(med.id)) {
-                  ref.read(medicationsProvider.notifier).removeMedication(med.id);
-                  _takenStatus.remove(med.name);
-                  _takenTime.remove(med.name);
-                }
-              }
-
-              // 2. Update status, time, and dose for remaining medications
+              // Update status, time, and dose for medications in the sheet
               for (final updated in updatedList) {
                 final name = updated['name'] ?? '';
                 final isTaken = updated['isTaken'] == 'true';
@@ -600,11 +595,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   }
                 }
 
-                String time = '08:00';
-                final match = RegExp(r'(\d{1,2}:\d{2})').firstMatch(status);
-                if (match != null) {
-                  time = match.group(1) ?? '08:00';
-                }
+                final time = AppTimeFormatter.extractTimeFromStatus(status);
 
                 _takenStatus[name] = isTaken;
                 _takenTime[name] = time;
@@ -652,6 +643,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         _takenStatus['Utrogestan'] = prog;
       });
     }
+    ref.invalidate(passportScreenControllerProvider);
     await _fetchTodayLog();
   }
 
@@ -814,7 +806,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       case 2:
         return const AnalyticsPage();
       case 3:
-        return const PassportPage();
+        return const PassportScreen();
       case 4:
         return const HrtTrackerPage();
       default:

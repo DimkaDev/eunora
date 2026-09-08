@@ -30,6 +30,8 @@ import 'package:eunora/features/home/presentation/widgets/success_animation_widg
 import 'package:eunora/features/home/presentation/widgets/calendar_hrt_edit_sheet.dart';
 
 import 'package:eunora/features/home/presentation/widgets/daily_logging/daily_logging_success_screen.dart';
+import 'package:eunora/features/passport/providers/passport_screen_controller.dart';
+import 'package:eunora/core/utils/time_formatter.dart';
 
 class DailyLoggingPage extends ConsumerStatefulWidget {
   final DateTime? initialDate;
@@ -181,14 +183,31 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
           _customTriggerTexts.addAll(existingLog.customTriggerTexts ?? {});
 
           // Populate medications
+          _oneOffEntries.clear();
           if (existingLog.hrtIntakes.isNotEmpty) {
+            final canonicalMedIds = ref.read(medicationsProvider).medications.map((m) => m.id).toSet();
             for (final intake in existingLog.hrtIntakes) {
               _hrtChecked[intake.medicationId] = intake.isTaken;
               _hrtDoses[intake.medicationId] = intake.dose;
               _hrtUnits[intake.medicationId] = intake.unit;
-              _hrtTimes[intake.medicationId] = intake.time;
+              _hrtTimes[intake.medicationId] = AppTimeFormatter.formatTimeString(intake.time);
               _initialHrtDoses[intake.medicationId] = intake.dose;
               _initialHrtUnits[intake.medicationId] = intake.unit;
+
+              if (!canonicalMedIds.contains(intake.medicationId)) {
+                _oneOffEntries.add(HrtEditEntry(
+                  id: intake.medicationId,
+                  name: intake.name,
+                  details: '${intake.dose} ${intake.unit}',
+                  status: intake.isTaken ? 'Taken' : 'Skipped',
+                  isTaken: intake.isTaken,
+                  dose: intake.dose.toStringAsFixed(intake.dose == intake.dose.toInt() ? 0 : 2),
+                  unit: intake.unit,
+                  applicationType: 'Oral Tablet',
+                  timeTaken: AppTimeFormatter.formatTimeString(intake.time),
+                  isOneOff: true,
+                ));
+              }
             }
           } else {
             // Backwards compatibility fallback from flat fields
@@ -199,14 +218,14 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
                 _hrtChecked[med.id] = existingLog.estradiolChecked;
                 _hrtDoses[med.id] = existingLog.estradiolDose;
                 _hrtUnits[med.id] = existingLog.estradiolUnit;
-                _hrtTimes[med.id] = existingLog.estradiolTime;
+                _hrtTimes[med.id] = AppTimeFormatter.formatTimeString(existingLog.estradiolTime);
                 _initialHrtDoses[med.id] = existingLog.estradiolDose;
                 _initialHrtUnits[med.id] = existingLog.estradiolUnit;
               } else if (name.contains('progesterone') || name.contains('utrogestan')) {
                 _hrtChecked[med.id] = existingLog.progesteroneChecked;
                 _hrtDoses[med.id] = existingLog.progesteroneDose;
                 _hrtUnits[med.id] = existingLog.progesteroneUnit;
-                _hrtTimes[med.id] = existingLog.progesteroneTime;
+                _hrtTimes[med.id] = AppTimeFormatter.formatTimeString(existingLog.progesteroneTime);
                 _initialHrtDoses[med.id] = existingLog.progesteroneDose;
                 _initialHrtUnits[med.id] = existingLog.progesteroneUnit;
               }
@@ -283,7 +302,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
       final checked = _hrtChecked[med.id] ?? false;
       final dose = _hrtDoses[med.id] ?? med.dose;
       final unit = _hrtUnits[med.id] ?? med.unit;
-      final time = _hrtTimes[med.id] ?? '08:00 AM';
+      final time = AppTimeFormatter.formatTimeString(_hrtTimes[med.id] ?? '08:00 AM');
 
       hrtIntakes.add(HrtIntakeLog(
         medicationId: med.id,
@@ -313,7 +332,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
       final checked = _hrtChecked[id] ?? true;
       final dose = _hrtDoses[id] ?? (double.tryParse(oneOff.dose ?? '1') ?? 1.0);
       final unit = _hrtUnits[id] ?? (oneOff.unit ?? 'mg');
-      final time = _hrtTimes[id] ?? (oneOff.timeTaken ?? '08:00 AM');
+      final time = AppTimeFormatter.formatTimeString(_hrtTimes[id] ?? (oneOff.timeTaken ?? '08:00 AM'));
 
       hrtIntakes.add(HrtIntakeLog(
         medicationId: id,
@@ -597,6 +616,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
         await ref
             .read(symptomQuickAccessProvider.notifier)
             .runPromotionCheck(recentLogs);
+        ref.invalidate(passportScreenControllerProvider);
       } catch (e) {
         debugPrint("Error saving daily log to firestore: $e");
       }
@@ -657,7 +677,27 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
     );
 
     if (leave == true && mounted) {
-      Navigator.pop(context);
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final date = widget.initialDate ?? DateTime.now();
+        final dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+        try {
+          if (_originalLog == null) {
+            // Nothing was logged before this session — delete any draft written during this session
+            await ref.read(firestoreServiceProvider).deleteDailyLog(user.uid, dateStr);
+          } else {
+            // Restore previous log state from before this session
+            await ref.read(firestoreServiceProvider).saveDailyLog(user.uid, _originalLog!);
+          }
+          ref.invalidate(passportScreenControllerProvider);
+        } catch (e) {
+          debugPrint("Error resetting log on discard: $e");
+        }
+      }
+
+      if (mounted) {
+        Navigator.pop(context);
+      }
     }
   }
 
@@ -893,6 +933,18 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
                       onAddOneOffEntry: (entry) {
                         setState(() {
                           _oneOffEntries.add(entry);
+                        });
+                      },
+                      onRemoveOneOffEntry: (entry) {
+                        setState(() {
+                          final id = entry.id ?? entry.name;
+                          _oneOffEntries.removeWhere((e) => (e.id ?? e.name) == id);
+                          _hrtChecked.remove(id);
+                          _hrtDoses.remove(id);
+                          _hrtUnits.remove(id);
+                          _hrtTimes.remove(id);
+                          _initialHrtDoses.remove(id);
+                          _initialHrtUnits.remove(id);
                         });
                       },
                       hrtChecked: _hrtChecked,

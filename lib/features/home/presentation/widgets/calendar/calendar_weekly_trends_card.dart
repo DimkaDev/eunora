@@ -200,7 +200,7 @@ class CalendarWeeklyTrendsCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Please log at least 3 days this week to generate weekly trends.',
+                'Data is still being collected. Please log at least 3 days this week to generate weekly trends.',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.manrope(
                   fontSize: 13,
