@@ -96,10 +96,11 @@ class _SeverityTrendCardState extends State<SeverityTrendCard> {
       }
     }
 
-    final bool showTrend = firstHalf.length >= 4 && secondHalf.length >= 4;
-    String trendText = "Keep logging to see your trend";
+    final bool hasData = rawPoints.any((p) => p != null);
+    final bool showTrend = hasData && firstHalf.length >= 4 && secondHalf.length >= 4;
+    String trendText = hasData ? "Keep logging to see your trend" : "No data available";
     Color trendColor = AppTheme.outline;
-    IconData trendIcon = Icons.trending_flat;
+    IconData trendIcon = hasData ? Icons.trending_flat : Icons.info_outline;
 
     if (showTrend) {
       final double avgFirst = firstHalf.reduce((a, b) => a + b) / firstHalf.length;
@@ -165,93 +166,137 @@ class _SeverityTrendCardState extends State<SeverityTrendCard> {
           ),
           const SizedBox(height: 16),
 
-          // Dynamic interactive trend painter
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final double width = constraints.maxWidth;
-              final double stepX = width / (processedPoints.length - 1);
-
-              return GestureDetector(
-                onPanUpdate: (details) {
-                  final double localX = details.localPosition.dx.clamp(0.0, width);
-                  final int index = (localX / stepX).round().clamp(0, processedPoints.length - 1);
-                  final double? val = processedPoints[index];
-                  if (val != null) {
-                    setState(() {
-                      _selectedTrendDayIndex = index;
-                      _selectedTrendValue = val;
-                    });
-                  }
-                },
-                onTapUp: (details) {
-                  final double localX = details.localPosition.dx.clamp(0.0, width);
-                  final int index = (localX / stepX).round().clamp(0, processedPoints.length - 1);
-                  final double? val = processedPoints[index];
-                  if (val != null) {
-                    setState(() {
-                      _selectedTrendDayIndex = index;
-                      _selectedTrendValue = val;
-                    });
-                  }
-                },
+          if (!hasData)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Center(
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    SizedBox(
-                      height: 112,
-                      width: double.infinity,
-                      child: CustomPaint(
-                        painter: DynamicTrendPainter(
-                          points: processedPoints,
-                          selectedIndex: _selectedTrendDayIndex,
-                        ),
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: const BoxDecoration(
+                        color: AppTheme.surfaceContainerLow,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.show_chart_rounded,
+                        color: AppTheme.outline,
+                        size: 24,
                       ),
                     ),
-                    if (_selectedTrendDayIndex != null && _selectedTrendValue != null) ...[
-                      const SizedBox(height: 10),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: AppTheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          '${widget.periodDays - 1 - _selectedTrendDayIndex!} days ago: Severity Load ${_selectedTrendValue!.toStringAsFixed(1)} (Average out of 5)',
-                          style: GoogleFonts.manrope(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.onSurfaceVariant,
+                    const SizedBox(height: 12),
+                    Text(
+                      'No data recorded for this period',
+                      style: GoogleFonts.manrope(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Log your daily symptoms to see your severity trend.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.manrope(
+                        fontSize: 12,
+                        color: AppTheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else ...[
+            // Dynamic interactive trend painter
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final double width = constraints.maxWidth;
+                final double stepX = width / (processedPoints.length - 1);
+
+                return GestureDetector(
+                  onPanUpdate: (details) {
+                    final double localX = details.localPosition.dx.clamp(0.0, width);
+                    final int index = (localX / stepX).round().clamp(0, processedPoints.length - 1);
+                    final double? val = processedPoints[index];
+                    if (val != null) {
+                      setState(() {
+                        _selectedTrendDayIndex = index;
+                        _selectedTrendValue = val;
+                      });
+                    }
+                  },
+                  onTapUp: (details) {
+                    final double localX = details.localPosition.dx.clamp(0.0, width);
+                    final int index = (localX / stepX).round().clamp(0, processedPoints.length - 1);
+                    final double? val = processedPoints[index];
+                    if (val != null) {
+                      setState(() {
+                        _selectedTrendDayIndex = index;
+                        _selectedTrendValue = val;
+                      });
+                    }
+                  },
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 112,
+                        width: double.infinity,
+                        child: CustomPaint(
+                          painter: DynamicTrendPainter(
+                            points: processedPoints,
+                            selectedIndex: _selectedTrendDayIndex,
                           ),
                         ),
                       ),
+                      if (_selectedTrendDayIndex != null && _selectedTrendValue != null) ...[
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: AppTheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '${widget.periodDays - 1 - _selectedTrendDayIndex!} days ago: Severity Load ${_selectedTrendValue!.toStringAsFixed(1)} (Average out of 5)',
+                            style: GoogleFonts.manrope(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
-                  ],
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 8),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 8),
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${widget.periodDays} days ago',
-                style: GoogleFonts.manrope(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.outline,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${widget.periodDays} days ago',
+                  style: GoogleFonts.manrope(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.outline,
+                  ),
                 ),
-              ),
-              Text(
-                'Today',
-                style: GoogleFonts.manrope(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.outline,
+                Text(
+                  'Today',
+                  style: GoogleFonts.manrope(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.outline,
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ],
       ),
     );

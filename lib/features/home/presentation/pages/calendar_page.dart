@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -24,6 +25,7 @@ import 'package:eunora/features/onboarding/domain/models/trigger.dart';
 import 'package:eunora/features/symptom_log/data/trigger_library.dart';
 import 'package:eunora/features/passport/providers/passport_screen_controller.dart';
 import 'package:eunora/core/utils/time_formatter.dart';
+import 'package:eunora/features/home/presentation/widgets/debug_export_sheet.dart';
 
 class MockDailyLog {
   List<String> symptoms;
@@ -90,6 +92,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   @override
   void initState() {
     super.initState();
+    _pageController = PageController(initialPage: _initialPage);
     final initDate = widget.initialSelectedDate ?? DateTime.now();
     _selectedDate = DateTime(initDate.year, initDate.month, initDate.day);
     _focusedMonth = DateTime(initDate.year, initDate.month);
@@ -216,6 +219,12 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       _monthDraftsCache.remove(currentKey);
       _fetchLogsForMonth(_focusedMonth);
     }
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   String _monthKey(DateTime m) => "${m.year}-${m.month.toString().padLeft(2, '0')}";
@@ -1228,6 +1237,18 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     );
   }
 
+  void _showDebugExportSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DebugExportSheet(
+        aprilLogs: _aprilLogs,
+        monthLogsCache: _monthLogsCache,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final activeLog = _getLogForSelectedDate();
@@ -1235,7 +1256,8 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     final isCurrentMonthLoaded = _monthLogsCache.containsKey(_monthKey(_focusedMonth));
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final isSelectedFuture = _selectedDate != null && _selectedDate!.isAfter(today);
+    final isSelectedFuture = _selectedDate != null &&
+        DateTime(_selectedDate!.year, _selectedDate!.month, _selectedDate!.day).isAfter(today);
 
     return Container(
       color: AppTheme.background,
@@ -1244,22 +1266,82 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Cycle Tracker',
-              style: GoogleFonts.notoSerif(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.primary,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              "Track your cycle, symptoms, and daily logs.",
-              style: GoogleFonts.manrope(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: AppTheme.onSurfaceVariant,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Cycle Tracker',
+                        style: GoogleFonts.notoSerif(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "Track your cycle, symptoms, and daily logs.",
+                        style: GoogleFonts.manrope(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: AppTheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Tooltip(
+                  message: 'Export & Share Debug JSON',
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _showDebugExportSheet,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: AppTheme.surfaceContainerLowest,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppTheme.outlineVariant.withValues(alpha: 0.3),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.03),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.data_object_rounded,
+                              size: 18,
+                              color: AppTheme.primary,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'JSON',
+                              style: GoogleFonts.manrope(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             _buildMonthNavigation(),
             const SizedBox(height: 16),
@@ -1473,6 +1555,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                   width: 200,
                   child: ElevatedButton(
                     onPressed: () async {
+                      HapticFeedback.lightImpact();
                       final targetDate = _selectedDate!;
                       await context.push('/daily-logging', extra: targetDate);
                       final targetMonth = DateTime(targetDate.year, targetDate.month);
@@ -1937,11 +2020,40 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       Color? backgroundIntensity;
       if (hasData && logForDay != null) {
         if (logForDay.symptoms.isNotEmpty) {
-          final firstSymptom = logForDay.symptoms.first.toLowerCase();
-          if (firstSymptom.contains('severe') || firstSymptom.contains('5/5') || firstSymptom.contains('4/5')) {
-            backgroundIntensity = const Color(0xFFF9B7A9).withValues(alpha: 0.6);
+          int maxSeverityLevel = 1; // 1: Mild, 2: Moderate, 3: Severe
+          for (final symptom in logForDay.symptoms) {
+            final sLower = symptom.toLowerCase();
+            if (sLower.contains('severe') ||
+                sLower.contains('5/5') ||
+                sLower.contains('4/5') ||
+                sLower.contains('7/10') ||
+                sLower.contains('8/10') ||
+                sLower.contains('9/10') ||
+                sLower.contains('10/10')) {
+              maxSeverityLevel = 3;
+              break;
+            } else if (sLower.contains('moderate') ||
+                sLower.contains('3/5') ||
+                sLower.contains('4/10') ||
+                sLower.contains('5/10') ||
+                sLower.contains('6/10')) {
+              if (maxSeverityLevel < 2) {
+                maxSeverityLevel = 2;
+              }
+            } else {
+              // Mild (e.g. '1/5', '2/5', 'mild', '1/10', '2/10', '3/10')
+              if (maxSeverityLevel < 1) {
+                maxSeverityLevel = 1;
+              }
+            }
+          }
+
+          if (maxSeverityLevel == 3) {
+            backgroundIntensity = const Color(0xFFF9B7A9).withValues(alpha: 0.6); // Severe
+          } else if (maxSeverityLevel == 2) {
+            backgroundIntensity = const Color(0xFFEDDDF5).withValues(alpha: 0.8); // Moderate
           } else {
-            backgroundIntensity = const Color(0xFFEDDDF5).withValues(alpha: 0.6);
+            backgroundIntensity = const Color(0xFFEDDDF5).withValues(alpha: 0.4); // Mild
           }
         } else {
           backgroundIntensity = const Color(0xFFEDDDF5).withValues(alpha: 0.4);
@@ -2388,6 +2500,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                           width: 200,
                           child: ElevatedButton(
                             onPressed: () async {
+                              HapticFeedback.lightImpact();
                               final targetDate = _selectedDate!;
                               await context.push('/daily-logging', extra: targetDate);
                               final targetMonth = DateTime(targetDate.year, targetDate.month);
@@ -2435,10 +2548,14 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                             if (isToday) return const SizedBox.shrink();
                             return TextButton(
                               onPressed: () {
+                                final now = DateTime.now();
                                 setState(() {
-                                  _focusedMonth = DateTime(DateTime.now().year, DateTime.now().month);
-                                  _selectedDate = DateTime.now();
+                                  _focusedMonth = DateTime(now.year, now.month);
+                                  _selectedDate = DateTime(now.year, now.month, now.day);
                                 });
+                                if (_pageController.hasClients) {
+                                  _pageController.jumpToPage(_initialPage);
+                                }
                                 _fetchLogsForFocusedMonth();
                               },
                               child: Text(

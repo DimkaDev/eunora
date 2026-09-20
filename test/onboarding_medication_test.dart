@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:eunora/features/onboarding/domain/models/medication.dart';
@@ -15,6 +16,7 @@ import 'package:eunora/features/home/presentation/widgets/hrt_tracker/hrt_adhere
 import 'package:eunora/features/onboarding/presentation/pages/frequent_symptoms_page.dart';
 import 'package:eunora/features/home/presentation/pages/daily_logging/symptoms_step.dart';
 import 'package:eunora/features/home/presentation/widgets/calendar_hrt_edit_sheet.dart';
+import 'package:eunora/features/home/presentation/widgets/edit_triggers_modal_sheet.dart';
 import 'package:eunora/features/home/domain/entities/daily_log.dart';
 import 'package:eunora/features/hrt_tracker/domain/hrt_schedule_service.dart';
 import 'package:eunora/features/home/presentation/widgets/shared_logging/logging_card_wrapper.dart';
@@ -530,6 +532,176 @@ void main() {
       expect(find.text('No HRT medications were active on this date.'), findsNothing);
     });
 
+    testWidgets('CalendarHrtEditSheet auto-syncs changes without Save changes button', (tester) async {
+      tester.view.physicalSize = const Size(1000, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final activeMed = Medication(
+        id: 'med_estradiol',
+        name: 'Estradiol Patch',
+        type: MedicationType.patch,
+        dose: 50.0,
+        unit: 'mcg',
+        frequency: 'Daily',
+      );
+
+      List<Map<String, dynamic>>? savedEntries;
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            medicationsProvider.overrideWith(() => MockMedicationsNotifier([activeMed])),
+          ],
+          child: MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                height: 700,
+                child: CalendarHrtEditSheet(
+                  initialHrt: [
+                    {
+                      'id': 'med_estradiol',
+                      'name': 'Estradiol Patch',
+                      'details': '50 mcg · Patch',
+                      'status': 'Not taken',
+                      'isTaken': 'false',
+                      'dose': '50',
+                      'unit': 'mcg',
+                      'applicationType': 'Patch',
+                      'timeTaken': '08:00',
+                    }
+                  ],
+                  selectedDate: DateTime.now(),
+                  onSave: (entries) {
+                    savedEntries = entries;
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify "Save changes" button does NOT exist
+      expect(find.text('Save changes'), findsNothing);
+
+      // Tap to expand medication card
+      await tester.tap(find.text('Estradiol Patch'));
+      await tester.pumpAndSettle();
+
+      // Toggle taken switch
+      final switchFinder = find.byType(CupertinoSwitch);
+      expect(switchFinder, findsOneWidget);
+      await tester.tap(switchFinder);
+      await tester.pumpAndSettle();
+
+      // Verify onSave was automatically called and isTaken is true
+      expect(savedEntries, isNotNull);
+      expect(savedEntries!.first['isTaken'], 'true');
+    });
+
+    testWidgets('EditTriggersModalSheet passes triggerValue to AnimatedLoggingIcon and updates on severity change', (tester) async {
+      tester.view.physicalSize = const Size(1000, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              height: 700,
+              child: EditTriggersModalSheet(
+                initialTriggers: const [
+                  {
+                    'name': 'Stress',
+                    'value': 'Moderate',
+                  },
+                  {
+                    'name': 'Caffeine',
+                    'value': '2 cups',
+                  },
+                ],
+                onSave: (_) {},
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify AnimatedLoggingIcons are rendered
+      final animatedIcons = find.byType(AnimatedLoggingIcon);
+      expect(animatedIcons, findsNWidgets(2));
+
+      // First icon (Stress) has triggerValue == 'Moderate'
+      final firstWidget = tester.widget<AnimatedLoggingIcon>(animatedIcons.first);
+      expect(firstWidget.triggerValue, 'Moderate');
+
+      // Second icon (Caffeine) has triggerValue == 2
+      final secondWidget = tester.widget<AnimatedLoggingIcon>(animatedIcons.at(1));
+      expect(secondWidget.triggerValue, 2);
+
+      // Change Stress to 'High'
+      await tester.tap(find.text('High'));
+      await tester.pump();
+
+      // Verify triggerValue updated to 'High'
+      final updatedFirstWidget = tester.widget<AnimatedLoggingIcon>(animatedIcons.first);
+      expect(updatedFirstWidget.triggerValue, 'High');
+    });
+
+    testWidgets('EditTriggersModalSheet displays cups counter for Coffee and Coffee / caffeine triggers', (tester) async {
+      tester.view.physicalSize = const Size(1000, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              height: 700,
+              child: EditTriggersModalSheet(
+                initialTriggers: const [
+                  {
+                    'name': 'Coffee / caffeine',
+                    'value': '2 cups',
+                  },
+                  {
+                    'name': 'Coffee',
+                    'value': '1 cup',
+                  },
+                  {
+                    'name': 'Spicy food',
+                    'value': 'Tacos',
+                  },
+                ],
+                onSave: (_) {},
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify that cups counter is displayed for both coffee triggers, NOT smiley sliders
+      expect(find.text('HOW MUCH TODAY?'), findsNWidgets(2));
+      expect(find.text('2 cups'), findsOneWidget);
+      expect(find.text('1 cup'), findsOneWidget);
+
+      // Verify food note field is displayed for Spicy food
+      expect(find.byType(TextFormField), findsOneWidget);
+    });
+
     test('HrtScheduleService.getDailyState returns logged for retrospective intake taken before startedAt', () {
       final med = Medication(
         id: 'med_estradiol',
@@ -758,6 +930,73 @@ void main() {
 
       expect(removedEntry, isNotNull);
       expect(removedEntry!.id, equals('one_1'));
+    });
+
+    testWidgets('DailyEntryStep shows "Scheduled for today — Not logged yet" when scheduled medication is unlogged', (tester) async {
+      final scheduledMed = Medication(
+        id: 'reg_2',
+        name: 'Estradiol Patch',
+        dose: 100,
+        unit: 'mcg',
+        type: MedicationType.patch,
+        frequency: 'Daily',
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          medicationsProvider.overrideWith(() => MockMedicationsNotifier([scheduledMed])),
+          otherMedicationsProvider.overrideWith((ref) => OtherMedicationsNotifier()),
+        ],
+      );
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: DailyEntryStep(
+                  oneOffEntries: [],
+                  hrtChecked: {'reg_2': false}, // Not yet checked / taken
+                  hrtDoses: {'reg_2': 100.0},
+                  hrtUnits: {'reg_2': 'mcg'},
+                  hrtTimes: {'reg_2': '08:00 AM'},
+                  initialHrtDoses: {'reg_2': 100.0},
+                  initialHrtUnits: {'reg_2': 'mcg'},
+                  onHrtCheckedToggled: (id, val) {},
+                  onHrtDoseChanged: (id, val) {},
+                  onHrtUnitChanged: (id, val) {},
+                  onHrtTimeChanged: (id, val) {},
+                  vitaminDChecked: false,
+                  magnesiumChecked: false,
+                  otherMedsChecked: {},
+                  onOtherMedsChanged: (_) {},
+                  onVitaminDCheckedToggled: (_) {},
+                  onMagnesiumCheckedToggled: (_) {},
+                  sleepDuration: 8.0,
+                  hydrationCups: 5,
+                  additionalNotes: '',
+                  onSleepDurationChanged: (_) {},
+                  onHydrationCupsChanged: (_) {},
+                  onAdditionalNotesChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify header has 'Ready to log'
+      expect(find.text('Ready to log'), findsOneWidget);
+
+      // Expand medication
+      await tester.tap(find.text('Estradiol Patch'));
+      await tester.pumpAndSettle();
+
+      // Verify that it correctly displays scheduled status, NOT 'Not scheduled for today'
+      expect(find.text('Scheduled for today — Not logged yet'), findsOneWidget);
+      expect(find.text('Not scheduled for today'), findsNothing);
     });
   });
 }

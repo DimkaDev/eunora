@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:math' as math;
@@ -11,6 +12,7 @@ import 'package:eunora/features/onboarding/presentation/widgets/add_medication_m
 import 'package:eunora/features/home/presentation/widgets/hrt_quick_edit_modal.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:eunora/core/services/firestore_service.dart';
 import 'package:eunora/features/home/domain/entities/daily_log.dart';
 import 'package:eunora/features/home/domain/entities/hrt_dose_change.dart';
@@ -21,6 +23,16 @@ import 'package:eunora/features/hrt_tracker/domain/hrt_schedule_service.dart';
 import 'package:eunora/features/hrt_tracker/presentation/widgets/still_taking_check_in_card.dart';
 import 'package:eunora/features/passport/providers/passport_screen_controller.dart';
 import 'package:eunora/core/utils/time_formatter.dart';
+import 'package:eunora/core/utils/date_formatter.dart';
+
+enum HrtActivityTreeMode {
+  timelineTree,    // Version 1: Continuous vertical timeline tree with connecting branches
+  flowTree,        // Version 2: Flow map tree with structured branch nodes and category badges
+  modernTree,      // Version 3: Modern UI Best Practices Tree with curved branch connectors & nested nodes
+  minimalTextTree, // Version 4: Clean Minimal Text Tree (pure text hierarchy without excess visual clutter)
+  nonTreeCards,    // Version 5: Separate Non-Tree Clean Summary Cards (flat, scannable daily regimen list)
+  smartStory,      // Version 6: AI Recommended Vision (Smart Medication Journey & Evolution Card)
+}
 
 class HrtTrackerPage extends ConsumerStatefulWidget {
   const HrtTrackerPage({super.key});
@@ -32,6 +44,8 @@ class HrtTrackerPage extends ConsumerStatefulWidget {
 class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
   DateTime _focusedMonth = DateTime.now();
   late int _selectedDay;
+
+  HrtActivityTreeMode _treeViewMode = HrtActivityTreeMode.timelineTree;
 
   Map<int, DailyLog> _monthlyLogs = {};
   List<HrtDoseChange> _monthlyDoseChanges = [];
@@ -50,6 +64,55 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
+
+  final List<String> _weekdays = [
+    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDay = DateTime.now().day;
+    _loadTreeViewMode();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await ref.read(medicationsProvider.notifier).loadFromFirestore();
+      _fetchLogsForFocusedMonth();
+    });
+  }
+
+  Future<void> _loadTreeViewMode() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getString('pref_hrt_activity_tree_mode');
+      if (saved != null && mounted) {
+        setState(() {
+          if (saved == HrtActivityTreeMode.flowTree.name) {
+            _treeViewMode = HrtActivityTreeMode.flowTree;
+          } else if (saved == HrtActivityTreeMode.modernTree.name) {
+            _treeViewMode = HrtActivityTreeMode.modernTree;
+          } else if (saved == HrtActivityTreeMode.minimalTextTree.name) {
+            _treeViewMode = HrtActivityTreeMode.minimalTextTree;
+          } else if (saved == HrtActivityTreeMode.nonTreeCards.name) {
+            _treeViewMode = HrtActivityTreeMode.nonTreeCards;
+          } else if (saved == HrtActivityTreeMode.smartStory.name) {
+            _treeViewMode = HrtActivityTreeMode.smartStory;
+          } else {
+            _treeViewMode = HrtActivityTreeMode.timelineTree;
+          }
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _setTreeViewMode(HrtActivityTreeMode mode) async {
+    setState(() {
+      _treeViewMode = mode;
+    });
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('pref_hrt_activity_tree_mode', mode.name);
+    } catch (_) {}
+  }
 
   Map<Medication, int> _getUnmarkedCheckInMedications(List<Medication> activeMedications) {
     final Map<Medication, int> checkIns = {};
@@ -307,20 +370,6 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     );
   }
 
-  final List<String> _weekdays = [
-    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedDay = DateTime.now().day;
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await ref.read(medicationsProvider.notifier).loadFromFirestore();
-      _fetchLogsForFocusedMonth();
-    });
-  }
-
   String _monthKey(DateTime dt) => "${dt.year}-${dt.month}";
 
   Future<void> _fetchLogsForFocusedMonth({bool forceRefresh = false}) async {
@@ -330,9 +379,26 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     _fetchLogsForMonth(DateTime(_focusedMonth.year, _focusedMonth.month + 1));
   }
 
+  User? get _currentUser {
+    try {
+      return FirebaseAuth.instance.currentUser;
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<void> _fetchLogsForMonth(DateTime targetMonth, {bool forceRefresh = false}) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    final user = _currentUser;
+    if (user == null) {
+      if (mounted) {
+        setState(() {
+          _monthLogsCache[_monthKey(targetMonth)] = {};
+          _monthDoseChangesCache[_monthKey(targetMonth)] = [];
+          _isLoadingLogs = false;
+        });
+      }
+      return;
+    }
 
     final key = _monthKey(targetMonth);
     final isFocusedMonth = targetMonth.year == _focusedMonth.year && targetMonth.month == _focusedMonth.month;
@@ -462,7 +528,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
   }
 
   Future<void> _saveHrtLogForSelectedDate(Medication med, bool isTaken) async {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = _currentUser;
     if (user == null) return;
 
     final targetDate = DateTime(_focusedMonth.year, _focusedMonth.month, _selectedDay);
@@ -521,7 +587,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
   }
 
   Future<void> _saveHrtLoggingSheet(List<Map<String, String>> updatedList) async {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = _currentUser;
     if (user == null) return;
 
     final targetDate = DateTime(_focusedMonth.year, _focusedMonth.month, _selectedDay);
@@ -1122,7 +1188,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
     bool hasHistory = HrtScheduleService.hasLoggedHistory(med, allLoadedLogs);
 
     if (!hasHistory) {
-      final user = FirebaseAuth.instance.currentUser;
+      final user = _currentUser;
       if (user != null) {
         final dbLogs = await ref.read(firestoreServiceProvider).getDailyLogsHistory(
           user.uid,
@@ -1762,6 +1828,12 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
       time = logged.time;
     }
 
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final targetDay = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+    final isPastDate = targetDay.isBefore(today);
+    final isButtonEnabled = !isPastDate || isTaken;
+
     final iconColor = const Color(0xFFB5A79E);
     final iconBg = iconColor.withOpacity(0.12);
 
@@ -1820,6 +1892,11 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                         ),
                       ],
                     )
+                  else if (isPastDate)
+                    Text(
+                      'Not logged on this day',
+                      style: GoogleFonts.manrope(fontSize: 11, color: const Color(0xFF9B8B7E), fontStyle: FontStyle.italic),
+                    )
                   else
                     Text(
                       'Available on demand',
@@ -1829,10 +1906,12 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
               ),
             ),
             ElevatedButton(
-              onPressed: () => _showHrtLoggingSheet([med]),
+              onPressed: isButtonEnabled ? () => _showHrtLoggingSheet([med]) : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: isTaken ? const Color(0xFFEAE6E0) : const Color(0xFF67594E),
                 foregroundColor: isTaken ? const Color(0xFF4D453F) : Colors.white,
+                disabledBackgroundColor: const Color(0xFFF0EBE6),
+                disabledForegroundColor: const Color(0xFFA89F97),
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -2129,15 +2208,19 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
                         color: AppTheme.primary,
                       ),
                     ),
-                    Row(
-                      children: [
-                        _buildLogTag('Meds', const Color(0xFFD8C9E0).withOpacity(0.3)),
-                        const SizedBox(width: 6),
-                        _buildLogTag('Dose \u2191', const Color(0xFFE8A89B).withOpacity(0.2)),
-                      ],
+                    Text(
+                      'VIEW STYLE',
+                      style: GoogleFonts.manrope(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.8,
+                        color: const Color(0xFF9B8B7E),
+                      ),
                     ),
                   ],
                 ),
+                const SizedBox(height: 10),
+                _buildViewModeToggle(),
                 const SizedBox(height: 16),
                 _buildActivityLogsForMonth(),
               ],
@@ -2338,109 +2421,14 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
   }
 
   Widget _buildActivityLogsForMonth() {
-    final List<Map<String, dynamic>> activities = [];
     final selectedDate = DateTime(_focusedMonth.year, _focusedMonth.month, _selectedDay);
     final targetMonthKey = _monthKey(_focusedMonth);
     final targetLogs = _monthLogsCache[targetMonthKey] ?? {};
     final targetChanges = _monthDoseChangesCache[targetMonthKey] ?? [];
     final allMeds = ref.watch(medicationsProvider).medications;
-
-    // 1. Medication Starts / Discontinuations
-    for (final med in allMeds) {
-      if (med.startedAt != null) {
-        final s = med.startedAt!;
-        if (s.year == selectedDate.year && s.month == selectedDate.month && s.day == selectedDate.day) {
-          activities.add({
-            'day': _selectedDay,
-            'isClinical': true,
-            'color': const Color(0xFF4A6B5D),
-            'title': 'Medication Started',
-            'description': '${med.name} (${med.doseAndFrequency}) started.',
-          });
-        }
-      }
-      if (med.endedAt != null) {
-        final e = med.endedAt!;
-        if (e.year == selectedDate.year && e.month == selectedDate.month && e.day == selectedDate.day) {
-          activities.add({
-            'day': _selectedDay,
-            'isClinical': true,
-            'color': const Color(0xFF8C3A25),
-            'title': 'Medication Discontinued',
-            'description': '${med.name} discontinued.',
-          });
-        }
-      }
-    }
-
-    // 2. Regimen Changes (Dose, Frequency, Schedule Day)
-    for (final change in targetChanges) {
-      if (change.changeDate.year == selectedDate.year &&
-          change.changeDate.month == selectedDate.month &&
-          change.changeDate.day == selectedDate.day) {
-        final isClinical = change.isClinicalChange;
-        final title = change.changeType == RegimenChangeType.frequencyChange
-            ? 'Frequency Change'
-            : change.changeType == RegimenChangeType.scheduleDayChange
-                ? 'Schedule Change (Administrative)'
-                : 'Dose Change';
-
-        activities.add({
-          'day': _selectedDay,
-          'isClinical': isClinical,
-          'color': isClinical ? const Color(0xFFE8A89B) : const Color(0xFF9B8B7E),
-          'title': title,
-          'description': '${change.medicationName}: ${change.previousValue} → ${change.newValue}',
-        });
-      }
-    }
-
-    // 3. Adherence and Intakes for selectedDate
     final dayLog = targetLogs[_selectedDay];
-    final Set<String> processedNames = {};
 
-    if (dayLog != null && dayLog.hrtIntakes.isNotEmpty) {
-      for (final intake in dayLog.hrtIntakes) {
-        final isPatch = intake.name.toLowerCase().contains('patch');
-        final statusLabel = intake.isTaken ? (isPatch ? 'Applied' : 'Taken') : 'Not taken';
-        final timeStr = (intake.isTaken && intake.time.isNotEmpty) ? ' at ${intake.time}' : '';
-        final doseFormatted = intake.dose.toStringAsFixed(intake.dose == intake.dose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '');
-
-        activities.add({
-          'day': _selectedDay,
-          'isClinical': true,
-          'color': intake.isTaken ? const Color(0xFF4A6B5D) : const Color(0xFFC47B62),
-          'title': '${intake.name}: $statusLabel$timeStr',
-          'description': '$doseFormatted ${intake.unit}',
-        });
-        processedNames.add(intake.name.toLowerCase());
-        if (intake.medicationId.isNotEmpty) {
-          processedNames.add(intake.medicationId.toLowerCase());
-        }
-      }
-    }
-
-    final activeMedsOnDate = allMeds.where((m) {
-      if (m.startedAt != null && selectedDate.isBefore(DateTime(m.startedAt!.year, m.startedAt!.month, m.startedAt!.day))) return false;
-      if (m.endedAt != null && selectedDate.isAfter(DateTime(m.endedAt!.year, m.endedAt!.month, m.endedAt!.day))) return false;
-      return true;
-    }).toList();
-
-    for (final med in activeMedsOnDate) {
-      if (processedNames.contains(med.name.toLowerCase()) || (med.id != null && processedNames.contains(med.id!.toLowerCase()))) {
-        continue;
-      }
-      final isScheduled = HrtScheduleService.isScheduledOnDate(med, selectedDate, doseChanges: targetChanges);
-      if (isScheduled) {
-        activities.add({
-          'day': _selectedDay,
-          'isClinical': true,
-          'color': const Color(0xFFC47B62),
-          'title': '${med.name}: Not taken',
-          'description': '${med.doseAndFrequency}',
-        });
-      }
-    }
+    final trees = _getMedicationTreesForDate(selectedDate, dayLog, targetChanges, allMeds);
 
     final bool isDayLogged = dayLog != null && (
       dayLog.isCompleted ||
@@ -2456,6 +2444,7 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
           // Retrospective Logging CTA Button
           InkWell(
             onTap: () {
+              HapticFeedback.lightImpact();
               context.go('/calendar', extra: selectedDate);
             },
             child: Container(
@@ -2485,82 +2474,1247 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
           const SizedBox(height: 16),
         ],
 
-        if (activities.isEmpty)
+        if (trees.isEmpty)
           Center(
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Text(
-                'No activity recorded for this day.',
-                style: GoogleFonts.manrope(
-                  fontSize: 12,
-                  color: const Color(0xFF9B8B7E),
-                  fontStyle: FontStyle.italic,
-                ),
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Column(
+                children: [
+                  Icon(Icons.medication_liquid_outlined, size: 36, color: const Color(0xFF9B8B7E).withOpacity(0.5)),
+                  const SizedBox(height: 8),
+                  Text(
+                    'No medication activity recorded for this day.',
+                    style: GoogleFonts.manrope(
+                      fontSize: 13,
+                      color: const Color(0xFF9B8B7E),
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
               ),
             ),
           )
         else
-          ...activities.map((act) {
-            final isClinical = act['isClinical'] as bool? ?? true;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: _buildActivityRow(
-                color: act['color'] as Color,
-                title: act['title'] as String,
-                description: act['description'] as String,
-                isActive: isClinical,
-              ),
-            );
+          ...trees.map((tree) {
+            switch (_treeViewMode) {
+              case HrtActivityTreeMode.timelineTree:
+                return _buildMedicationTreeCard(tree);
+              case HrtActivityTreeMode.flowTree:
+                return _buildMedicationFlowCard(tree);
+              case HrtActivityTreeMode.modernTree:
+                return _buildMedicationModernTreeCard(tree);
+              case HrtActivityTreeMode.minimalTextTree:
+                return _buildMedicationMinimalTextTreeCard(tree);
+              case HrtActivityTreeMode.nonTreeCards:
+                return _buildMedicationNonTreeCard(tree);
+              case HrtActivityTreeMode.smartStory:
+                return _buildMedicationSmartStoryCard(tree);
+            }
           }),
       ],
     );
   }
 
-  Widget _buildActivityRow({
-    required Color color,
-    required String title,
-    required String description,
-    required bool isActive,
-  }) {
+  List<_MedicationTreeData> _getMedicationTreesForDate(
+    DateTime selectedDate,
+    DailyLog? dayLog,
+    List<HrtDoseChange> targetChanges,
+    List<Medication> allMeds,
+  ) {
+    final List<_MedicationTreeData> trees = [];
+    final Set<String> processedMedKeys = {};
+
+    // 1. Process all configured medications
+    for (final med in allMeds) {
+      final medKey = (med.id != null && med.id!.isNotEmpty) ? med.id!.toLowerCase() : med.name.toLowerCase();
+      final List<_MedicationTreeEvent> events = [];
+
+      final isStartedOnDate = med.startedAt != null &&
+          med.startedAt!.year == selectedDate.year &&
+          med.startedAt!.month == selectedDate.month &&
+          med.startedAt!.day == selectedDate.day;
+
+      final isEndedOnDate = med.endedAt != null &&
+          med.endedAt!.year == selectedDate.year &&
+          med.endedAt!.month == selectedDate.month &&
+          med.endedAt!.day == selectedDate.day;
+
+      final isActiveOnDate = (med.startedAt == null || !selectedDate.isBefore(DateTime(med.startedAt!.year, med.startedAt!.month, med.startedAt!.day))) &&
+          (med.endedAt == null || !selectedDate.isAfter(DateTime(med.endedAt!.year, med.endedAt!.month, med.endedAt!.day)));
+
+      // Find dose changes on selectedDate for this med
+      final medChanges = targetChanges.where((c) {
+        final sameDate = c.changeDate.year == selectedDate.year &&
+            c.changeDate.month == selectedDate.month &&
+            c.changeDate.day == selectedDate.day;
+        final sameMed = (med.id != null && c.medicationId == med.id) ||
+            c.medicationName.toLowerCase() == med.name.toLowerCase();
+        return sameDate && sameMed;
+      }).toList();
+
+      // Find intake log on selectedDate for this med
+      HrtIntakeLog? intakeLog;
+      if (dayLog != null) {
+        for (final intake in dayLog.hrtIntakes) {
+          if ((med.id != null && intake.medicationId == med.id) ||
+              intake.name.toLowerCase() == med.name.toLowerCase()) {
+            intakeLog = intake;
+            break;
+          }
+        }
+      }
+
+      final isScheduled = isActiveOnDate && HrtScheduleService.isScheduledOnDate(med, selectedDate, doseChanges: targetChanges);
+
+      // Check if there is any relevant activity on selectedDate
+      final hasActivity = isStartedOnDate || isEndedOnDate || medChanges.isNotEmpty || intakeLog != null || isScheduled;
+      if (!hasActivity) continue;
+
+      processedMedKeys.add(medKey);
+      processedMedKeys.add(med.name.toLowerCase());
+
+      // 1. Start milestone
+      if (isStartedOnDate) {
+        events.add(_MedicationTreeEvent(
+          title: 'Regimen Started',
+          subtitle: 'Initial dosage: ${med.doseAndFrequency}',
+          nodeColor: const Color(0xFF4A6B5D),
+          nodeIcon: Icons.flag_rounded,
+          orderPriority: 1,
+        ));
+      }
+
+      // 2. Regimen Changes
+      for (final change in medChanges) {
+        final changeTitle = change.changeType == RegimenChangeType.frequencyChange
+            ? 'Frequency updated: ${change.previousValue} → ${change.newValue}'
+            : change.changeType == RegimenChangeType.scheduleDayChange
+                ? 'Schedule adjustment: ${change.newValue}'
+                : 'Dose adjustment: ${change.previousValue} → ${change.newValue}';
+
+        final changeSubtitle = change.isDoctorPrescribed == true ? 'Doctor prescribed' : 'Recorded regimen change';
+
+        events.add(_MedicationTreeEvent(
+          title: changeTitle,
+          subtitle: changeSubtitle,
+          nodeColor: const Color(0xFFE8A89B),
+          nodeIcon: Icons.trending_up_rounded,
+          orderPriority: 2,
+        ));
+      }
+
+      // 3. Intake Log
+      String statusSummary = 'Scheduled';
+      Color statusColor = AppTheme.primary;
+      Color statusBgColor = const Color(0xFFD8C9E0).withOpacity(0.3);
+
+      final isPatch = med.type == MedicationType.patch || med.name.toLowerCase().contains('patch');
+      final isGel = med.type == MedicationType.gel || med.name.toLowerCase().contains('gel');
+
+      if (intakeLog != null) {
+        if (intakeLog.isTaken) {
+          final verb = isPatch ? 'Applied' : (isGel ? 'Applied' : 'Taken');
+          final formattedTime = intakeLog.time.isNotEmpty ? AppTimeFormatter.formatTimeString(intakeLog.time) : '';
+          final timeSuffix = formattedTime.isNotEmpty ? ' at $formattedTime' : '';
+          final doseText = '${intakeLog.dose.toStringAsFixed(intakeLog.dose == intakeLog.dose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} ${intakeLog.unit}';
+
+          statusSummary = '$verb$timeSuffix';
+          statusColor = const Color(0xFF2E6B4F);
+          statusBgColor = const Color(0xFF4A6B5D).withOpacity(0.15);
+
+          events.add(_MedicationTreeEvent(
+            title: '$verb$timeSuffix',
+            subtitle: doseText,
+            timeString: formattedTime,
+            nodeColor: const Color(0xFF4A6B5D),
+            nodeIcon: Icons.check_circle_rounded,
+            orderPriority: 3,
+          ));
+        } else {
+          statusSummary = 'Not taken';
+          statusColor = const Color(0xFF8C3A25);
+          statusBgColor = const Color(0xFFC47B62).withOpacity(0.15);
+
+          events.add(_MedicationTreeEvent(
+            title: 'Not taken / Skipped',
+            subtitle: '${med.doseAndFrequency}',
+            nodeColor: const Color(0xFFC47B62),
+            nodeIcon: Icons.cancel_outlined,
+            orderPriority: 3,
+          ));
+        }
+      } else if (isScheduled) {
+        statusSummary = 'Scheduled';
+        statusColor = const Color(0xFF67594E);
+        statusBgColor = const Color(0xFFEAE6E0);
+
+        events.add(_MedicationTreeEvent(
+          title: 'Scheduled dose (Pending)',
+          subtitle: '${med.doseAndFrequency}',
+          nodeColor: const Color(0xFF9B8B7E),
+          nodeIcon: Icons.schedule_rounded,
+          orderPriority: 3,
+        ));
+      }
+
+      // 4. End milestone
+      if (isEndedOnDate) {
+        statusSummary = 'Discontinued';
+        statusColor = const Color(0xFF8C3A25);
+        statusBgColor = const Color(0xFF8C3A25).withOpacity(0.15);
+
+        events.add(_MedicationTreeEvent(
+          title: 'Medication Discontinued',
+          subtitle: 'Ended on ${AppDateFormatter.formatDate(selectedDate)}',
+          nodeColor: const Color(0xFF8C3A25),
+          nodeIcon: Icons.stop_circle_outlined,
+          orderPriority: 4,
+        ));
+      }
+
+      // Sort events chronologically / by priority
+      events.sort((a, b) => a.orderPriority.compareTo(b.orderPriority));
+
+      final typeLabel = _getMedicationTypeLabel(med.type);
+      final typeIcon = _getMedicationTypeIcon(med.type);
+
+      trees.add(_MedicationTreeData(
+        medication: med,
+        name: med.name,
+        typeLabel: typeLabel,
+        regimenLabel: med.doseAndFrequency,
+        typeIcon: typeIcon,
+        statusSummary: statusSummary,
+        statusColor: statusColor,
+        statusBgColor: statusBgColor,
+        events: events,
+      ));
+    }
+
+    // 2. Process one-off intakes from dayLog that are not already in processedMedKeys
+    if (dayLog != null) {
+      for (final intake in dayLog.hrtIntakes) {
+        final key = intake.medicationId.isNotEmpty ? intake.medicationId.toLowerCase() : intake.name.toLowerCase();
+        if (processedMedKeys.contains(key) || processedMedKeys.contains(intake.name.toLowerCase())) {
+          continue;
+        }
+
+        final isPatch = intake.name.toLowerCase().contains('patch');
+        final isGel = intake.name.toLowerCase().contains('gel');
+        final verb = isPatch ? 'Applied' : (isGel ? 'Applied' : 'Taken');
+        final formattedTime = intake.time.isNotEmpty ? AppTimeFormatter.formatTimeString(intake.time) : '';
+        final timeSuffix = formattedTime.isNotEmpty ? ' at $formattedTime' : '';
+        final doseText = '${intake.dose.toStringAsFixed(intake.dose == intake.dose.toInt() ? 0 : 2).replaceAll(RegExp(r'\.00$'), '')} ${intake.unit}';
+
+        final syntheticMed = Medication(
+          id: intake.medicationId.isNotEmpty ? intake.medicationId : 'one_off_${intake.name}',
+          name: intake.name,
+          dose: intake.dose,
+          unit: intake.unit,
+          type: isPatch ? MedicationType.patch : (isGel ? MedicationType.gel : MedicationType.pill),
+          frequency: 'One-off',
+        );
+
+        trees.add(_MedicationTreeData(
+          medication: syntheticMed,
+          name: intake.name,
+          typeLabel: 'One-off Entry',
+          regimenLabel: doseText,
+          typeIcon: isPatch ? Icons.branding_watermark_outlined : Icons.medication_outlined,
+          statusSummary: intake.isTaken ? '$verb$timeSuffix' : 'Not taken',
+          statusColor: intake.isTaken ? const Color(0xFF2E6B4F) : const Color(0xFF8C3A25),
+          statusBgColor: intake.isTaken ? const Color(0xFF4A6B5D).withOpacity(0.15) : const Color(0xFFC47B62).withOpacity(0.15),
+          events: [
+            _MedicationTreeEvent(
+              title: intake.isTaken ? '$verb$timeSuffix (One-off)' : 'Not taken (One-off)',
+              subtitle: doseText,
+              timeString: formattedTime,
+              nodeColor: intake.isTaken ? const Color(0xFF4A6B5D) : const Color(0xFFC47B62),
+              nodeIcon: intake.isTaken ? Icons.check_circle_rounded : Icons.cancel_outlined,
+              orderPriority: 1,
+            ),
+          ],
+        ));
+      }
+    }
+
+    return trees;
+  }
+
+  String _getMedicationTypeLabel(MedicationType type) {
+    switch (type) {
+      case MedicationType.pill:
+        return 'Oral Tablet';
+      case MedicationType.patch:
+        return 'Transdermal Patch';
+      case MedicationType.gel:
+        return 'Transdermal Gel';
+      case MedicationType.spray:
+        return 'Transdermal Spray';
+      case MedicationType.pessary:
+        return 'Vaginal Pessary';
+      case MedicationType.cream:
+        return 'Cream';
+      case MedicationType.ring:
+        return 'Vaginal Ring';
+      case MedicationType.other:
+        return 'Medication';
+    }
+  }
+
+  IconData _getMedicationTypeIcon(MedicationType type) {
+    switch (type) {
+      case MedicationType.pill:
+        return Icons.medication_outlined;
+      case MedicationType.patch:
+        return Icons.branding_watermark_outlined;
+      case MedicationType.gel:
+        return Icons.water_drop_outlined;
+      case MedicationType.spray:
+        return Icons.shower_outlined;
+      case MedicationType.pessary:
+      case MedicationType.cream:
+        return Icons.spa_outlined;
+      case MedicationType.ring:
+        return Icons.adjust_rounded;
+      case MedicationType.other:
+        return Icons.medical_information_outlined;
+    }
+  }
+
+  Widget _buildMedicationTreeCard(_MedicationTreeData tree) {
     return Container(
-      padding: EdgeInsets.all(isActive ? 12 : 0),
-      decoration: isActive
-          ? BoxDecoration(
-              color: const Color(0xFFF2EDEA).withOpacity(0.5),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFEAE6E0)),
-            )
-          : null,
-      child: Row(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFEF8F6),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFEAE6E0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 4,
-            height: 38,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(2),
+          // Medication Header
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEDDDF5),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(tree.typeIcon, color: AppTheme.primary, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        tree.name,
+                        style: GoogleFonts.notoSerif(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${tree.typeLabel} • ${tree.regimenLabel}',
+                        style: GoogleFonts.manrope(
+                          fontSize: 12,
+                          color: const Color(0xFF78716C),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: tree.statusBgColor,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    tree.statusSummary,
+                    style: GoogleFonts.manrope(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: tree.statusColor,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
+
+          // Divider between header and timeline
+          const Divider(height: 1, color: Color(0xFFF2EDE9)),
+
+          // Tree / Chronological Events
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+            child: Column(
+              children: List.generate(tree.events.length, (index) {
+                final event = tree.events[index];
+                final isLast = index == tree.events.length - 1;
+
+                return IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Timeline node + vertical connecting line
+                      Column(
+                        children: [
+                          Container(
+                            width: 22,
+                            height: 22,
+                            decoration: BoxDecoration(
+                              color: event.nodeColor.withOpacity(0.12),
+                              shape: BoxShape.circle,
+                              border: Border.all(color: event.nodeColor, width: 1.5),
+                            ),
+                            child: Center(
+                              child: Icon(event.nodeIcon, size: 12, color: event.nodeColor),
+                            ),
+                          ),
+                          if (!isLast)
+                            Expanded(
+                              child: Container(
+                                width: 2,
+                                margin: const EdgeInsets.symmetric(vertical: 2),
+                                color: const Color(0xFFE6E0D6),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(width: 12),
+                      // Event details
+                      Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                event.title,
+                                style: GoogleFonts.manrope(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.onSurface,
+                                ),
+                              ),
+                              if (event.subtitle != null && event.subtitle!.isNotEmpty) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  event.subtitle!,
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 12,
+                                    color: const Color(0xFF78716C),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildViewModeToggle() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Container(
+        padding: const EdgeInsets.all(3),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF2EDE9),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFEAE6E0)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildToggleOption(
+              key: 'tree_mode_timeline',
+              mode: HrtActivityTreeMode.timelineTree,
+              icon: Icons.account_tree_outlined,
+              label: 'Timeline Tree',
+            ),
+            const SizedBox(width: 2),
+            _buildToggleOption(
+              key: 'tree_mode_flow',
+              mode: HrtActivityTreeMode.flowTree,
+              icon: Icons.schema_outlined,
+              label: 'Flow Map',
+            ),
+            const SizedBox(width: 2),
+            _buildToggleOption(
+              key: 'tree_mode_modern',
+              mode: HrtActivityTreeMode.modernTree,
+              icon: Icons.hub_outlined,
+              label: 'Modern Tree',
+            ),
+            const SizedBox(width: 2),
+            _buildToggleOption(
+              key: 'tree_mode_minimal',
+              mode: HrtActivityTreeMode.minimalTextTree,
+              icon: Icons.format_align_left_rounded,
+              label: 'Clean Text',
+            ),
+            const SizedBox(width: 2),
+            _buildToggleOption(
+              key: 'tree_mode_nontree',
+              mode: HrtActivityTreeMode.nonTreeCards,
+              icon: Icons.view_agenda_outlined,
+              label: 'Non-Tree',
+            ),
+            const SizedBox(width: 2),
+            _buildToggleOption(
+              key: 'tree_mode_smart',
+              mode: HrtActivityTreeMode.smartStory,
+              icon: Icons.auto_awesome_outlined,
+              label: 'AI Journey',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildToggleOption({
+    required String key,
+    required HrtActivityTreeMode mode,
+    required IconData icon,
+    required String label,
+  }) {
+    final isSelected = _treeViewMode == mode;
+    return InkWell(
+      key: ValueKey(key),
+      onTap: () => _setTreeViewMode(mode),
+      borderRadius: BorderRadius.circular(12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 13,
+              color: isSelected ? AppTheme.primary : const Color(0xFF9B8B7E),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: GoogleFonts.manrope(
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                color: isSelected ? AppTheme.primary : const Color(0xFF9B8B7E),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMedicationFlowCard(_MedicationTreeData tree) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFEAE6E0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Flow Root Node Header
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
+              color: Color(0xFFFAF7F5),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              border: Border(bottom: BorderSide(color: Color(0xFFF2EDE9))),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.schema_rounded, size: 12, color: Colors.white),
+                      const SizedBox(width: 4),
+                      Text(
+                        'ROOT',
+                        style: GoogleFonts.manrope(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.8,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        tree.name,
+                        style: GoogleFonts.notoSerif(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.onSurface,
+                        ),
+                      ),
+                      Text(
+                        '${tree.typeLabel} • ${tree.regimenLabel}',
+                        style: GoogleFonts.manrope(
+                          fontSize: 12,
+                          color: const Color(0xFF78716C),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: tree.statusBgColor,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: tree.statusColor.withOpacity(0.3)),
+                  ),
+                  child: Text(
+                    tree.statusSummary,
+                    style: GoogleFonts.manrope(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: tree.statusColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Flow Branches / Sub-nodes
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: List.generate(tree.events.length, (index) {
+                final event = tree.events[index];
+                final isLast = index == tree.events.length - 1;
+
+                String categoryTag = 'EVENT';
+                if (event.orderPriority == 1) {
+                  categoryTag = 'MILESTONE';
+                } else if (event.orderPriority == 2) {
+                  categoryTag = 'REGIMEN CHANGE';
+                } else if (event.orderPriority == 3) {
+                  categoryTag = 'DAILY INTAKE';
+                } else if (event.orderPriority == 4) {
+                  categoryTag = 'STATUS';
+                }
+
+                return Padding(
+                  padding: EdgeInsets.only(bottom: isLast ? 0 : 10),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Branch connector symbol
+                      Container(
+                        padding: const EdgeInsets.only(top: 8, right: 8, left: 4),
+                        child: Text(
+                          isLast ? '└──' : '├──',
+                          style: GoogleFonts.firaCode(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFFB5A9A0),
+                          ),
+                        ),
+                      ),
+                      // Branch flow card
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFEF8F6),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: event.nodeColor.withOpacity(0.2)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: event.nodeColor.withOpacity(0.12),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(event.nodeIcon, size: 11, color: event.nodeColor),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          categoryTag,
+                                          style: GoogleFonts.manrope(
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 0.5,
+                                            color: event.nodeColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (event.timeString != null && event.timeString!.isNotEmpty) ...[
+                                    const Spacer(),
+                                    Text(
+                                      event.timeString!,
+                                      style: GoogleFonts.manrope(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: const Color(0xFF78716C),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                event.title,
+                                style: GoogleFonts.manrope(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.onSurface,
+                                ),
+                              ),
+                              if (event.subtitle != null && event.subtitle!.isNotEmpty) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  event.subtitle!,
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 11,
+                                    color: const Color(0xFF78716C),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMedicationModernTreeCard(_MedicationTreeData tree) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFFFF),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0xFFEAE6E0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Modern Header with Glass Tint
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
+              color: Color(0xFFFAF7F5),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+              border: Border(bottom: BorderSide(color: Color(0xFFF2EDE9))),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppTheme.primary.withOpacity(0.2)),
+                  ),
+                  child: Icon(tree.typeIcon, color: AppTheme.primary, size: 22),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        tree.name,
+                        style: GoogleFonts.notoSerif(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF0EBE6),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              tree.typeLabel,
+                              style: GoogleFonts.manrope(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF67594E),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              tree.regimenLabel,
+                              style: GoogleFonts.manrope(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF78716C),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: tree.statusBgColor,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: tree.statusColor.withOpacity(0.3)),
+                  ),
+                  child: Text(
+                    tree.statusSummary,
+                    style: GoogleFonts.manrope(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: tree.statusColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Curved Branches & Tree Nodes
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+            child: Column(
+              children: List.generate(tree.events.length, (index) {
+                final event = tree.events[index];
+                final isFirst = index == 0;
+                final isLast = index == tree.events.length - 1;
+
+                String categoryTag = 'EVENT';
+                if (event.orderPriority == 1) {
+                  categoryTag = 'MILESTONE';
+                } else if (event.orderPriority == 2) {
+                  categoryTag = 'REGIMEN CHANGE';
+                } else if (event.orderPriority == 3) {
+                  categoryTag = 'DAILY INTAKE';
+                } else if (event.orderPriority == 4) {
+                  categoryTag = 'STATUS';
+                }
+
+                return IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Curved Branch Painter
+                      CustomPaint(
+                        size: const Size(28, double.infinity),
+                        painter: _CurvedTreeBranchPainter(
+                          isFirst: isFirst,
+                          isLast: isLast,
+                          lineColor: const Color(0xFFD6C8B8),
+                          strokeWidth: 2.0,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      // Modern Pill / Glass Card
+                      Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(bottom: isLast ? 0 : 10),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFAF7F5),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: const Color(0xFFEFE8E1)),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 28,
+                                  height: 28,
+                                  decoration: BoxDecoration(
+                                    color: event.nodeColor.withOpacity(0.12),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: event.nodeColor, width: 1.5),
+                                  ),
+                                  child: Center(
+                                    child: Icon(event.nodeIcon, size: 14, color: event.nodeColor),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: event.nodeColor.withOpacity(0.12),
+                                              borderRadius: BorderRadius.circular(6),
+                                            ),
+                                            child: Text(
+                                              categoryTag,
+                                              style: GoogleFonts.manrope(
+                                                fontSize: 9,
+                                                fontWeight: FontWeight.w800,
+                                                letterSpacing: 0.5,
+                                                color: event.nodeColor,
+                                              ),
+                                            ),
+                                          ),
+                                          if (event.timeString != null && event.timeString!.isNotEmpty)
+                                            Text(
+                                              event.timeString!,
+                                              style: GoogleFonts.manrope(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.bold,
+                                                color: const Color(0xFF78716C),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        event.title,
+                                        style: GoogleFonts.manrope(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppTheme.onSurface,
+                                        ),
+                                      ),
+                                      if (event.subtitle != null && event.subtitle!.isNotEmpty) ...[
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          event.subtitle!,
+                                          style: GoogleFonts.manrope(
+                                            fontSize: 11,
+                                            color: const Color(0xFF78716C),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMedicationSmartStoryCard(_MedicationTreeData tree) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFEF8F6),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFEAE6E0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Hero Story Header
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFFF7EFF9),
+                  Color(0xFFFAF5F2),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              border: Border(bottom: BorderSide(color: Color(0xFFEFE8E1))),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppTheme.primary.withOpacity(0.3), width: 1.5),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.primary.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Icon(tree.typeIcon, color: AppTheme.primary, size: 22),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        tree.name,
+                        style: GoogleFonts.notoSerif(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.onSurface,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        '${tree.typeLabel} • ${tree.regimenLabel}',
+                        style: GoogleFonts.manrope(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF78716C),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: tree.statusBgColor,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: tree.statusColor.withOpacity(0.3)),
+                  ),
+                  child: Text(
+                    tree.statusSummary,
+                    style: GoogleFonts.manrope(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: tree.statusColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Story Timeline / Evolution Track
+          Padding(
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: GoogleFonts.manrope(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: isActive ? AppTheme.primary : AppTheme.onSurface,
-                  ),
+                Row(
+                  children: [
+                    Icon(Icons.history_edu_rounded, size: 14, color: AppTheme.primary),
+                    const SizedBox(width: 6),
+                    Text(
+                      'TREATMENT TIMELINE & TODAY',
+                      style: GoogleFonts.manrope(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.8,
+                        color: AppTheme.primary,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  description,
-                  style: GoogleFonts.manrope(
-                    fontSize: 11,
-                    color: const Color(0xFF78716C),
+                const SizedBox(height: 12),
+                ...List.generate(tree.events.length, (index) {
+                  final event = tree.events[index];
+                  final isLast = index == tree.events.length - 1;
+
+                  return Container(
+                    margin: EdgeInsets.only(bottom: isLast ? 0 : 8),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: const Color(0xFFF0EBE6)),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: event.nodeColor.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(event.nodeIcon, size: 16, color: event.nodeColor),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                event.title,
+                                style: GoogleFonts.manrope(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.onSurface,
+                                ),
+                              ),
+                              if (event.subtitle != null && event.subtitle!.isNotEmpty) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  event.subtitle!,
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 11,
+                                    color: const Color(0xFF78716C),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        if (event.timeString != null && event.timeString!.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF2EDE9),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              event.timeString!,
+                              style: GoogleFonts.manrope(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF67594E),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+
+          // Smart Journey Insight Footer
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: const BoxDecoration(
+              color: Color(0xFFFAF7F5),
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+              border: Border(top: BorderSide(color: Color(0xFFF2EDE9))),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.auto_awesome, size: 14, color: AppTheme.primary),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'Consistent hormone delivery fosters steady equilibrium and symptom relief.',
+                    style: GoogleFonts.manrope(
+                      fontSize: 11,
+                      fontStyle: FontStyle.italic,
+                      color: const Color(0xFF78716C),
+                    ),
                   ),
                 ),
               ],
@@ -2570,4 +3724,312 @@ class _HrtTrackerPageState extends ConsumerState<HrtTrackerPage> {
       ),
     );
   }
+
+  Widget _buildMedicationMinimalTextTreeCard(_MedicationTreeData tree) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFEAE6E0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header: Medication Name & info + Status
+          Row(
+            children: [
+              Text(
+                tree.name,
+                style: GoogleFonts.manrope(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF1D1B1A),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '• ${tree.typeLabel} (${tree.regimenLabel})',
+                style: GoogleFonts.manrope(
+                  fontSize: 12,
+                  color: const Color(0xFF78716C),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                tree.statusSummary,
+                style: GoogleFonts.manrope(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: tree.statusColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          // Clean text tree branches
+          Padding(
+            padding: const EdgeInsets.only(left: 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: List.generate(tree.events.length, (index) {
+                final event = tree.events[index];
+                final isLast = index == tree.events.length - 1;
+                final branch = isLast ? '└── ' : '├── ';
+
+                return Padding(
+                  padding: EdgeInsets.only(bottom: isLast ? 0 : 6),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        branch,
+                        style: GoogleFonts.firaCode(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFFB5A9A0),
+                        ),
+                      ),
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            style: GoogleFonts.manrope(
+                              fontSize: 12.5,
+                              color: const Color(0xFF2C2825),
+                              height: 1.35,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: event.title,
+                                style: const TextStyle(fontWeight: FontWeight.w600),
+                              ),
+                              if (event.subtitle != null && event.subtitle!.isNotEmpty)
+                                TextSpan(
+                                  text: ' • ${event.subtitle}',
+                                  style: const TextStyle(
+                                    color: Color(0xFF78716C),
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMedicationNonTreeCard(_MedicationTreeData tree) {
+    final extraEvents = tree.events.where((e) => e.orderPriority != 3).toList();
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFEF8F6),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFEAE6E0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(tree.typeIcon, color: AppTheme.primary, size: 18),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      tree.name,
+                      style: GoogleFonts.notoSerif(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.onSurface,
+                      ),
+                    ),
+                    Text(
+                      '${tree.typeLabel} • ${tree.regimenLabel}',
+                      style: GoogleFonts.manrope(
+                        fontSize: 11.5,
+                        color: const Color(0xFF78716C),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                decoration: BoxDecoration(
+                  color: tree.statusBgColor,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: tree.statusColor.withOpacity(0.25)),
+                ),
+                child: Text(
+                  tree.statusSummary,
+                  style: GoogleFonts.manrope(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: tree.statusColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (extraEvents.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: extraEvents.map((e) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: e.nodeColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: e.nodeColor.withOpacity(0.25)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(e.nodeIcon, size: 11, color: e.nodeColor),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${e.title}${e.subtitle != null && e.subtitle!.isNotEmpty ? " (${e.subtitle})" : ""}',
+                        style: GoogleFonts.manrope(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w600,
+                          color: e.nodeColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _CurvedTreeBranchPainter extends CustomPainter {
+  final bool isFirst;
+  final bool isLast;
+  final Color lineColor;
+  final double strokeWidth;
+
+  _CurvedTreeBranchPainter({
+    required this.isFirst,
+    required this.isLast,
+    this.lineColor = const Color(0xFFD6C8B8),
+    this.strokeWidth = 2.0,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = lineColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    final double trunkX = 14.0;
+    final double branchY = size.height / 2;
+    final double endX = size.width;
+
+    // Vertical line (trunk)
+    if (!isLast) {
+      canvas.drawLine(
+        Offset(trunkX, isFirst ? branchY : 0),
+        Offset(trunkX, size.height),
+        paint,
+      );
+    } else {
+      canvas.drawLine(
+        Offset(trunkX, 0),
+        Offset(trunkX, branchY),
+        paint,
+      );
+    }
+
+    // Smooth curved branch extending to the child node
+    final path = Path();
+    path.moveTo(trunkX, branchY);
+    path.cubicTo(
+      trunkX + 8, branchY,
+      endX - 4, branchY,
+      endX, branchY,
+    );
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _CurvedTreeBranchPainter oldDelegate) {
+    return oldDelegate.isFirst != isFirst ||
+        oldDelegate.isLast != isLast ||
+        oldDelegate.lineColor != lineColor ||
+        oldDelegate.strokeWidth != strokeWidth;
+  }
+}
+
+class _MedicationTreeData {
+  final Medication medication;
+  final String name;
+  final String typeLabel;
+  final String regimenLabel;
+  final IconData typeIcon;
+  final String statusSummary;
+  final Color statusColor;
+  final Color statusBgColor;
+  final List<_MedicationTreeEvent> events;
+
+  _MedicationTreeData({
+    required this.medication,
+    required this.name,
+    required this.typeLabel,
+    required this.regimenLabel,
+    required this.typeIcon,
+    required this.statusSummary,
+    required this.statusColor,
+    required this.statusBgColor,
+    required this.events,
+  });
+}
+
+class _MedicationTreeEvent {
+  final String title;
+  final String? subtitle;
+  final String? timeString;
+  final Color nodeColor;
+  final IconData nodeIcon;
+  final int orderPriority;
+
+  _MedicationTreeEvent({
+    required this.title,
+    this.subtitle,
+    this.timeString,
+    required this.nodeColor,
+    required this.nodeIcon,
+    this.orderPriority = 3,
+  });
 }

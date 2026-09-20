@@ -537,10 +537,20 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
     required String unit,
     required String time,
     required double initialDose,
+    DailyScheduledState dailyState = DailyScheduledState.readyToLog,
     DateTime? lastTaken,
     bool isOneOff = false,
     VoidCallback? onDeleteOneOff,
   }) {
+    final isRetro = widget.loggingDate != null;
+    final scheduledText = isOneOff
+        ? 'One-off medication not taken on this day'
+        : (dailyState == DailyScheduledState.readyToLog
+            ? (isRetro ? 'Scheduled for this day — Not logged yet' : 'Scheduled for today — Not logged yet')
+            : (dailyState == DailyScheduledState.asNeeded
+                ? 'Taken as needed — Not logged yet'
+                : (isRetro ? 'Not scheduled for this day' : 'Not scheduled for today')));
+
     return Container(
       margin: EdgeInsets.zero,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -703,17 +713,21 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isOneOff
-                            ? 'One-off medication not taken on this day'
-                            : (widget.loggingDate != null ? 'Not scheduled for this day' : 'Not scheduled for today'),
-                        style: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFF8A817C)),
+                        scheduledText,
+                        style: GoogleFonts.manrope(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: dailyState == DailyScheduledState.readyToLog
+                              ? const Color(0xFFC85A32)
+                              : const Color(0xFF8A817C),
+                        ),
                       ),
                       if (!isOneOff) ...[
                         const SizedBox(height: 2),
                         Text(
                           lastTaken == null
-                              ? 'No information'
-                              : '${widget.loggingDate != null ? 'Last taken before this date' : 'Last taken'}: ${_formatDateTime(lastTaken, context)} (${_daysAgoRelative(lastTaken)})',
+                              ? 'No previous intake recorded'
+                              : '${isRetro ? 'Last taken before this date' : 'Last taken'}: ${_formatDateTime(lastTaken, context)} (${_daysAgoRelative(lastTaken)})',
                           style: GoogleFonts.manrope(fontSize: 11, color: AppTheme.outline),
                         ),
                       ],
@@ -1111,6 +1125,7 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
                             unit: unit,
                             time: time,
                             initialDose: widget.initialHrtDoses[med.id] ?? med.dose,
+                            dailyState: dailyState,
                             lastTaken: lastTaken,
                             isOneOff: false,
                           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/core/utils/animation_system.dart';
@@ -117,7 +118,10 @@ class DailyLogCard extends StatelessWidget {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: onStartLog,
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      onStartLog();
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primary,
                       foregroundColor: Colors.white,
@@ -238,7 +242,10 @@ class DailyLogCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: onStartLog,
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    onStartLog();
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primary,
                     foregroundColor: Colors.white,

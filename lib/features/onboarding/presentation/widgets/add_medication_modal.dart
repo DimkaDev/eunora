@@ -1975,6 +1975,7 @@ class _AddMedicationModalState extends ConsumerState<AddMedicationModal> {
 
   Widget _buildQuickAddRow() {
     final quickAddDrugs = ref.watch(hrtQuickAddProvider);
+    if (quickAddDrugs.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

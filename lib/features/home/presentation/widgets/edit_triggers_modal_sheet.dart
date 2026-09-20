@@ -68,38 +68,57 @@ class _EditTriggersModalSheetState extends State<EditTriggersModalSheet> {
 
   // ─── name-based helpers (same logic as trigger_details_step) ──────────────
 
-  bool _isCaffeineName(String n) =>
-      n == 'caffeine' || n == 'coffee';
+  bool _isCaffeineName(String n) {
+    final lower = n.toLowerCase();
+    return lower.contains('caffeine') ||
+        lower.contains('coffee') ||
+        lower.contains('tea') ||
+        lower.contains('energy drink');
+  }
 
-  bool _isAlcoholName(String n) =>
-      n == 'alcohol';
+  bool _isAlcoholName(String n) {
+    final lower = n.toLowerCase();
+    return lower.contains('alcohol') ||
+        lower.contains('wine') ||
+        lower.contains('beer') ||
+        lower.contains('cocktail');
+  }
 
-  bool _isSmokingName(String n) =>
-      n.contains('smoking') || n.contains('tobacco');
+  bool _isSmokingName(String n) {
+    final lower = n.toLowerCase();
+    return lower.contains('smoking') ||
+        lower.contains('tobacco') ||
+        lower.contains('cigarette') ||
+        lower.contains('vape');
+  }
 
-  bool _isExerciseName(String n) =>
-      n == 'exercise';
+  bool _isExerciseName(String n) {
+    final lower = n.toLowerCase();
+    return lower.contains('exercise') || lower.contains('workout');
+  }
 
-  bool _isFoodName(String n) =>
-      n == 'foods' ||
-      n == 'food' ||
-      n == 'spicy food' ||
-      n == 'sugar & processed food' ||
-      n == 'hot drinks & food' ||
-      n == 'skipped meals' ||
-      n == 'sugar' ||
-      n == 'sugar & sweets';
+  bool _isFoodName(String n) {
+    final lower = n.toLowerCase();
+    return lower.contains('food') ||
+        lower.contains('spicy') ||
+        lower.contains('sugar') ||
+        lower.contains('sweet') ||
+        lower.contains('meal') ||
+        lower.contains('hot drinks');
+  }
 
-  bool _isStressName(String n) => n == 'stress';
+  bool _isStressName(String n) {
+    final lower = n.toLowerCase();
+    return lower.contains('stress') || lower.contains('anxiety');
+  }
 
   String _foodHint(String name) {
-    switch (name.toLowerCase()) {
-      case 'spicy food':            return 'What spicy food did you eat?';
-      case 'hot drinks & food':     return 'Hot tea, soup, coffee...';
-      case 'skipped meals':         return 'Which meal did you skip?';
-      case 'sugar & processed food':return 'Sweets, soda, processed snacks...';
-      default:                      return 'Spicy foods, heavy dinner...';
-    }
+    final lower = name.toLowerCase();
+    if (lower.contains('spicy')) return 'What spicy food did you eat?';
+    if (lower.contains('hot drinks') || lower.contains('hot drink')) return 'Hot tea, soup, warm drink...';
+    if (lower.contains('meal') || lower.contains('skipped')) return 'Which meal did you skip?';
+    if (lower.contains('sugar') || lower.contains('processed')) return 'Sweets, soda, processed snacks...';
+    return 'Spicy foods, heavy dinner, snacks...';
   }
 
   // ─── mutations ────────────────────────────────────────────────────────────
@@ -173,67 +192,61 @@ class _EditTriggersModalSheetState extends State<EditTriggersModalSheet> {
   // ─── colors / values ──────────────────────────────────────────────────────
 
   Color _getTriggerColor(String name) {
-    switch (name.toLowerCase()) {
-      case 'stress':            return const Color(0xFFB8A7C5);
-      case 'caffeine':
-      case 'coffee':            return const Color(0xFF9B8B7E);
-      case 'alcohol':           return const Color(0xFFD4A5A5);
-      case 'sugar':
-      case 'sugar & sweets':    return const Color(0xFFA9B388);
-      case 'lack of sleep':
-      case 'poor sleep':        return const Color(0xFFA7C5D8);
-      case 'spicy food':
-      case 'foods':
-      case 'food':              return const Color(0xFFE5989B);
-      default:                  return const Color(0xFF8EB8B5);
-    }
+    final n = name.toLowerCase();
+    if (n.contains('stress') || n.contains('anxiety')) return const Color(0xFFB8A7C5);
+    if (n.contains('caffeine') || n.contains('coffee')) return const Color(0xFF9B8B7E);
+    if (n.contains('alcohol')) return const Color(0xFFD4A5A5);
+    if (n.contains('sugar')) return const Color(0xFFA9B388);
+    if (n.contains('sleep') || n.contains('bedroom')) return const Color(0xFFA7C5D8);
+    if (n.contains('food') || n.contains('spicy') || n.contains('meal')) return const Color(0xFFE5989B);
+    if (n.contains('smoking') || n.contains('tobacco')) return const Color(0xFF8B9B90);
+    if (n.contains('weather') || n.contains('warm')) return const Color(0xFFE5A88B);
+    return const Color(0xFF8EB8B5);
   }
 
   List<String> _getSliderValues(String name) {
-    switch (name.toLowerCase()) {
-      case 'stress':            return ['Calm', 'Moderate', 'High'];
-      case 'poor sleep':
-      case 'lack of sleep':
-      case 'dehydration':       return ['Mild', 'Moderate', 'Severe'];
-      case 'exercise':          return ['Light', 'Moderate', 'Intense'];
-      case 'weather':           return ['Sunny', 'Humid', 'Cold/Change'];
-      case 'travel':            return ['Short', 'Medium', 'Long'];
-      case 'work':
-      case 'overworking':       return ['1-2 hours', '3-4 hours', '5+ hours'];
-      default:                  return ['Low', 'Moderate', 'High'];
+    final n = name.toLowerCase();
+    if (n.contains('stress')) return ['Calm', 'Moderate', 'High'];
+    if (n.contains('sleep') || n.contains('dehydration') || n.contains('bedroom') || n.contains('clothing')) {
+      return ['Mild', 'Moderate', 'Severe'];
     }
+    if (n.contains('exercise')) return ['Light', 'Moderate', 'Intense'];
+    if (n.contains('weather')) return ['Sunny', 'Humid', 'Cold/Change'];
+    if (n.contains('travel')) return ['Short', 'Medium', 'Long'];
+    if (n.contains('work') || n.contains('overworking')) return ['1-2 hours', '3-4 hours', '5+ hours'];
+    return ['Low', 'Moderate', 'High'];
   }
 
   String _getEmojiForValue(String name, String value) {
     final n = name.toLowerCase();
     final v = value.toLowerCase();
 
-    if (n == 'stress') {
+    if (n.contains('stress')) {
       if (v == 'calm') return '😊';
       if (v == 'moderate') return '😐';
       if (v == 'high') return '😟';
     }
-    if (n == 'poor sleep' || n == 'lack of sleep' || n == 'dehydration') {
-      if (v == 'mild') return '😊';
+    if (n.contains('sleep') || n.contains('dehydration') || n.contains('bedroom') || n.contains('clothing')) {
+      if (v == 'mild' || v == 'low') return '😊';
       if (v == 'moderate') return '😐';
-      if (v == 'severe') return '😟';
+      if (v == 'severe' || v == 'high') return '😟';
     }
-    if (n == 'exercise') {
+    if (n.contains('exercise')) {
       if (v == 'light') return '🚶';
       if (v == 'moderate') return '🏃';
       if (v == 'intense') return '🏋️';
     }
-    if (n == 'weather') {
+    if (n.contains('weather')) {
       if (v == 'sunny') return '☀️';
       if (v == 'humid') return '☁️';
       if (v.contains('cold')) return '❄️';
     }
-    if (n == 'travel') {
+    if (n.contains('travel')) {
       if (v == 'short') return '🚗';
       if (v == 'medium') return '✈️';
       if (v == 'long') return '🌍';
     }
-    if (n == 'work' || n == 'overworking') {
+    if (n.contains('work') || n.contains('overworking')) {
       if (v == '1-2 hours') return '⌚';
       if (v == '3-4 hours') return '⏰';
       if (v == '5+ hours') return '⏳';
@@ -417,6 +430,7 @@ class _EditTriggersModalSheetState extends State<EditTriggersModalSheet> {
         icon: icon,
         color: trigColor,
         backgroundColor: trigBg,
+        triggerValue: count,
         trailingAction: deleteBtn,
         children: [
           QuantityCounterSelector(
@@ -439,6 +453,7 @@ class _EditTriggersModalSheetState extends State<EditTriggersModalSheet> {
         icon: icon,
         color: trigColor,
         backgroundColor: trigBg,
+        triggerValue: count,
         trailingAction: deleteBtn,
         children: [
           QuantityCounterSelector(
@@ -462,6 +477,7 @@ class _EditTriggersModalSheetState extends State<EditTriggersModalSheet> {
         icon: icon,
         color: const Color(0xFF8B9B90),
         backgroundColor: const Color(0xFF8B9B90).withValues(alpha: 0.1),
+        triggerValue: count,
         trailingAction: deleteBtn,
         children: [
           QuantityCounterSelector(
@@ -485,6 +501,7 @@ class _EditTriggersModalSheetState extends State<EditTriggersModalSheet> {
         icon: icon,
         color: const Color(0xFFE5989B),
         backgroundColor: const Color(0xFFE5989B).withValues(alpha: 0.1),
+        triggerValue: note,
         trailingAction: deleteBtn,
         children: [
           const SizedBox(height: 12),
@@ -519,6 +536,7 @@ class _EditTriggersModalSheetState extends State<EditTriggersModalSheet> {
         icon: icon,
         color: trigColor,
         backgroundColor: trigBg,
+        triggerValue: safeVal,
         trailingAction: deleteBtn,
         children: [
           GradientSliderSelector(
@@ -544,6 +562,7 @@ class _EditTriggersModalSheetState extends State<EditTriggersModalSheet> {
         icon: icon,
         color: trigColor,
         backgroundColor: trigBg,
+        triggerValue: '$safeIntensity-$mins',
         trailingAction: deleteBtn,
         children: [
           GradientSliderSelector(
@@ -579,6 +598,7 @@ class _EditTriggersModalSheetState extends State<EditTriggersModalSheet> {
       icon: icon,
       color: trigColor,
       backgroundColor: trigBg,
+      triggerValue: safeVal,
       trailingAction: deleteBtn,
       children: [
         GradientSliderSelector(

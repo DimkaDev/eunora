@@ -362,6 +362,7 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
       _entries[index].unit = unit;
       _entries[index].details = '${_entries[index].dose} $unit · ${_entries[index].applicationType}';
     });
+    _syncChanges();
   }
 
   void _setDose(int index, String dose) {
@@ -369,6 +370,7 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
       _entries[index].dose = dose;
       _entries[index].details = '$dose ${_entries[index].unit} · ${_entries[index].applicationType}';
     });
+    _syncChanges();
   }
 
   void _toggleExpanded(int index) {
@@ -528,7 +530,7 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
     );
   }
 
-  void _save() {
+  void _syncChanges() {
     final meds = ref.read(medicationsProvider).medications;
     for (final entry in _entries) {
       if (entry.isOneOff) {
@@ -550,7 +552,6 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
       }
     }
     widget.onSave(_entries.map((e) => e.toMap()).toList());
-    Navigator.pop(context);
   }
 
   @override
@@ -604,75 +605,82 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
       }
     });
 
-    return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFFFEF8F6),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Handle
-          const SizedBox(height: 12),
-          Container(
-            width: 32,
-            height: 4,
-            decoration: BoxDecoration(
-              color: const Color(0xFFE0DEDA),
-              borderRadius: BorderRadius.circular(2),
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        _syncChanges();
+      },
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFFFEF8F6),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle
+            const SizedBox(height: 12),
+            Container(
+              width: 32,
+              height: 4,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE0DEDA),
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-          // Header
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Edit Medication',
-                      style: GoogleFonts.notoSerif(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF1D1B1A),
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Edit Medication',
+                        style: GoogleFonts.notoSerif(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF1D1B1A),
+                        ),
                       ),
-                    ),
-                    Text(
-                      'Tap a medication to edit details',
-                      style: GoogleFonts.manrope(
-                        fontSize: 13,
-                        color: const Color(0xFF7F756E),
+                      Text(
+                        'Tap a medication to edit details',
+                        style: GoogleFonts.manrope(
+                          fontSize: 13,
+                          color: const Color(0xFF7F756E),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => Navigator.pop(context),
-                    borderRadius: BorderRadius.circular(22),
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF2EDEA),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.close,
-                        color: Color(0xFF9B8B7E),
-                        size: 20,
+                    ],
+                  ),
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        _syncChanges();
+                        Navigator.pop(context);
+                      },
+                      borderRadius: BorderRadius.circular(22),
+                      child: Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF2EDEA),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close,
+                          color: Color(0xFF9B8B7E),
+                          size: 20,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
           const SizedBox(height: 20),
 
           // Scrollable content
@@ -750,6 +758,7 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                                   _entries.add(entry);
                                 }
                               });
+                              _syncChanges();
                             },
                             onMedicationCreated: (med) {
                               setState(() {
@@ -774,6 +783,7 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                                   _entries.add(newEntry);
                                 }
                               });
+                              _syncChanges();
                             },
                           ),
                         );
@@ -829,12 +839,16 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
             ),
           ),
 
-          // Footer
-          _buildFooter(),
+          // Safe bottom spacing
+          const SafeArea(
+            top: false,
+            child: SizedBox(height: 16),
+          ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildMedicationCard(int index, HrtEditEntry entry) {
     final isExpanded = _expandedIndex == index;
@@ -1163,6 +1177,7 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                         entry.timeTaken = AppTimeFormatter.formatTimeOfDay(TimeOfDay.now());
                       }
                     });
+                    _syncChanges();
                   }
                 : null,
           ),
@@ -1193,6 +1208,23 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
         unitOptions.add(m.unit);
       }
     }
+
+    final loggedIntake = entry.isTaken
+        ? HrtIntakeLog(
+            medicationId: matchingMed.id,
+            name: matchingMed.name,
+            dose: double.tryParse(entry.dose) ?? matchingMed.dose,
+            unit: entry.unit,
+            time: entry.timeTaken,
+            isTaken: true,
+          )
+        : null;
+
+    final dailyState = HrtScheduleService.getDailyState(
+      med: matchingMed,
+      date: widget.selectedDate ?? DateTime.now(),
+      loggedIntake: loggedIntake,
+    );
 
     return Container(
       margin: EdgeInsets.zero,
@@ -1377,11 +1409,17 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Not scheduled for today',
+                        dailyState == DailyScheduledState.readyToLog
+                            ? 'Scheduled for this day — Not logged yet'
+                            : (dailyState == DailyScheduledState.asNeeded
+                                ? 'Taken as needed — Not logged yet'
+                                : 'Not scheduled for today'),
                         style: GoogleFonts.manrope(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFF8A817C),
+                          color: dailyState == DailyScheduledState.readyToLog
+                              ? const Color(0xFFC85A32)
+                              : const Color(0xFF8A817C),
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -1464,6 +1502,7 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                                   _expandedIndex = _expandedIndex! - 1;
                                 }
                               });
+                              _syncChanges();
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
@@ -1577,6 +1616,7 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                                   _entries[index].isTaken = false;
                                   _entries[index].status = 'Stopped';
                                 });
+                                _syncChanges();
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
@@ -1640,6 +1680,7 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                                   _expandedIndex = _expandedIndex! - 1;
                                 }
                               });
+                              _syncChanges();
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text('Medication permanently deleted.'),
@@ -1718,61 +1759,6 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
     );
   }
 
-  Widget _buildFooter() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFF2EDEA))),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _save,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  elevation: 3,
-                  shadowColor: AppTheme.primary.withValues(alpha: 0.3),
-                ),
-                child: Text(
-                  'Save changes',
-                  style: GoogleFonts.manrope(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              style: TextButton.styleFrom(
-                foregroundColor: AppTheme.primary,
-                minimumSize: const Size(double.infinity, 48),
-              ),
-              child: Text(
-                'Cancel',
-                style: GoogleFonts.manrope(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   TimeOfDay _parseSheetTimeOfDay(String timeStr) {
     return AppTimeFormatter.parseTimeOfDay(timeStr);
   }
@@ -1826,6 +1812,7 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                       _entries[index].timeTaken = formatted;
                       _entries[index].isTaken = true;
                     });
+                    _syncChanges();
                     Navigator.pop(sheetContext);
                   },
                   icon: const Icon(
@@ -1865,6 +1852,7 @@ class _CalendarHrtEditSheetState extends ConsumerState<CalendarHrtEditSheet> {
                         _entries[index].timeTaken = AppTimeFormatter.formatTimeOfDay(picked);
                         _entries[index].isTaken = true;
                       });
+                      _syncChanges();
                     }
                   },
                   icon: const Icon(

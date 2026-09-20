@@ -8,7 +8,11 @@ import 'package:eunora/features/home/domain/entities/hrt_dose_change.dart';
 import 'package:eunora/features/onboarding/domain/models/medication.dart';
 
 class FirestoreService {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final FirebaseFirestore? _firestore;
+
+  FirestoreService([this._firestore]);
+
+  FirebaseFirestore get _db => _firestore ?? FirebaseFirestore.instance;
 
   // --- User Profile ---
   Future<void> saveUserProfile(UserProfile profile) async {
@@ -94,6 +98,35 @@ class FirestoreService {
         .collection('daily_logs')
         .where('date', isGreaterThanOrEqualTo: start.toIso8601String())
         .where('date', isLessThanOrEqualTo: end.toIso8601String())
+        .orderBy('date', descending: true)
+        .get();
+
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
+
+    return snapshot.docs.map((doc) {
+      final log = DailyLog.fromMap(doc.data());
+      final logDate = DateTime(log.date.year, log.date.month, log.date.day);
+      if (!log.isCompleted && logDate.isBefore(todayStart)) {
+        final hasData = log.lastCompletedStep > 0 ||
+            log.symptoms.isNotEmpty ||
+            log.triggers.isNotEmpty ||
+            log.hrtIntakes.any((i) => i.isTaken) ||
+            log.estradiolChecked ||
+            log.progesteroneChecked;
+        if (hasData) {
+          return log.copyWith(isCompleted: true);
+        }
+      }
+      return log;
+    }).toList();
+  }
+
+  Future<List<DailyLog>> getAllDailyLogs(String uid) async {
+    final snapshot = await _db
+        .collection('users')
+        .doc(uid)
+        .collection('daily_logs')
         .orderBy('date', descending: true)
         .get();
 

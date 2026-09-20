@@ -110,22 +110,36 @@ class TriggerDetailsStep extends ConsumerWidget {
 
           final trigger = triggerMap[trigId]!;
           final name = trigger.name;
+          final nameLower = name.toLowerCase();
 
-          if (trigId == 't_caffeine' || trigId == 't_coffee') {
+          if (trigId == 't_caffeine' ||
+              trigId == 't_coffee' ||
+              nameLower.contains('coffee') ||
+              nameLower.contains('caffeine')) {
             return _buildCaffeineDetailCard();
-          } else if (trigId == 't_alcohol') {
+          } else if (trigId == 't_alcohol' || nameLower.contains('alcohol')) {
             return _buildAlcoholDetailCard();
           } else if (trigId == 't_foods' ||
               trigId == 't_spicy_food' ||
               trigId == 't_sugar_processed_food' ||
               trigId == 't_hot_drinks_food' ||
-              trigId == 't_skipped_meals') {
+              trigId == 't_skipped_meals' ||
+              nameLower.contains('food') ||
+              nameLower.contains('spicy') ||
+              nameLower.contains('sugar') ||
+              nameLower.contains('meal')) {
             return _buildFoodsDetailCard(trigId, name);
-          } else if (trigId == 't_smoking') {
+          } else if (trigId == 't_smoking' ||
+              nameLower.contains('smoking') ||
+              nameLower.contains('tobacco')) {
             return _buildSmokingDetailCard(trigId);
-          } else if (trigId == 't_stress') {
+          } else if (trigId == 't_stress' ||
+              nameLower.contains('stress') ||
+              nameLower.contains('anxiety')) {
             return _buildStressDetailCard(context);
-          } else if (trigId == 't_exercise' || name.toLowerCase() == 'exercise') {
+          } else if (trigId == 't_exercise' ||
+              nameLower.contains('exercise') ||
+              nameLower.contains('workout')) {
             return _buildExerciseDetailCard(trigId, name, trigger.getIconData());
           } else {
             final currentVal =

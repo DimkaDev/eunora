@@ -82,14 +82,43 @@ class MostFrequentSymptomsCard extends StatelessWidget {
 
           if (top5.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20),
+              padding: const EdgeInsets.symmetric(vertical: 24),
               child: Center(
-                child: Text(
-                  'No symptoms logged in this period.',
-                  style: GoogleFonts.manrope(
-                    fontSize: 13,
-                    color: AppTheme.onSurfaceVariant,
-                  ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: const BoxDecoration(
+                        color: AppTheme.surfaceContainerLow,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.bar_chart_rounded,
+                        color: AppTheme.outline,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'No data recorded for this period',
+                      style: GoogleFonts.manrope(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Log your daily symptoms to track frequency.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.manrope(
+                        fontSize: 12,
+                        color: AppTheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             )

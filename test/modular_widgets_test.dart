@@ -14,6 +14,9 @@ import 'package:eunora/features/onboarding/domain/models/medication.dart';
 import 'package:eunora/features/hrt_tracker/data/hrt_drug_library.dart';
 import 'package:eunora/features/hrt_tracker/data/hrt_quick_add_service.dart';
 import 'package:eunora/features/insights/services/correlation_engine.dart';
+import 'package:eunora/features/home/presentation/widgets/analytics/severity_trend_card.dart';
+import 'package:eunora/features/home/presentation/widgets/analytics/most_frequent_symptoms_card.dart';
+import 'package:eunora/features/onboarding/domain/models/symptom.dart';
 
 void main() {
   setUpAll(() {
@@ -192,23 +195,42 @@ void main() {
       }
     });
 
-    test('Warm-start promotes user\'s own active medication to first slot', () {
-      final userMed = Medication(
-        name: 'Estradot',
+    test('Quick-Add excludes already added active medication and shifts in next frequent drug', () {
+      // Cold-start default top 4: Estradiol, Oestrogel, Evorel, Estradot
+      final coldStart = HrtQuickAddService.getQuickAddDrugs([]);
+      expect(coldStart.map((d) => d.name).toList(), equals(['Estradiol', 'Oestrogel', 'Evorel', 'Estradot']));
+
+      // Adding Estradiol: Estradiol is removed from quick access, Sandrena (next by frequency) is added
+      final userMed1 = Medication(
+        name: 'Estradiol',
         type: MedicationType.patch,
         dose: 50,
         unit: 'mcg',
-        frequency: 'Twice weekly',
+        frequency: 'Daily',
         drugCategory: 'systemicEstrogen',
       );
-      final result = HrtQuickAddService.getQuickAddDrugs([userMed]);
-      expect(result.first.name, equals('Estradot'));
-      expect(result.first.isFromUserHistory, isTrue);
+      final result1 = HrtQuickAddService.getQuickAddDrugs([userMed1]);
+      expect(result1.length, equals(4));
+      expect(result1.any((d) => d.name.toLowerCase() == 'estradiol'), isFalse);
+      expect(result1.map((d) => d.name).toList(), equals(['Oestrogel', 'Evorel', 'Estradot', 'Sandrena']));
+
+      // Adding both Estradiol and Oestrogel: both removed, Lenzetto shifts in
+      final userMed2 = Medication(
+        name: 'Oestrogel',
+        type: MedicationType.gel,
+        dose: 1,
+        unit: 'pumps',
+        frequency: 'Daily',
+        drugCategory: 'systemicEstrogen',
+      );
+      final result2 = HrtQuickAddService.getQuickAddDrugs([userMed1, userMed2]);
+      expect(result2.length, equals(4));
+      expect(result2.map((d) => d.name).toList(), equals(['Evorel', 'Estradot', 'Sandrena', 'Lenzetto']));
     });
 
-    test('Warm-start pads to 4 when user has only 1 distinct active drug', () {
+    test('Quick-Add handles prefix and case variations of added medications', () {
       final userMed = Medication(
-        name: 'Estradot',
+        name: 'Estradot Patch 50mcg',
         type: MedicationType.patch,
         dose: 50,
         unit: 'mcg',
@@ -217,9 +239,8 @@ void main() {
       );
       final result = HrtQuickAddService.getQuickAddDrugs([userMed]);
       expect(result.length, equals(4));
-      // First is from history, remaining 3 are static
-      expect(result.first.isFromUserHistory, isTrue);
-      expect(result.skip(1).every((d) => !d.isFromUserHistory), isTrue);
+      expect(result.any((d) => d.name.toLowerCase() == 'estradot'), isFalse);
+      expect(result.map((d) => d.name).toList(), equals(['Estradiol', 'Oestrogel', 'Evorel', 'Sandrena']));
     });
 
     test('search() returns results matching query', () {
@@ -317,6 +338,90 @@ void main() {
       expect(names, isNot(contains('Vagifem')));
       expect(names, isNot(contains('Utrogestan')));
       expect(filtered.length, equals(2));
+    });
+  });
+
+  group('Analytics Cards Empty & Data States Tests', () {
+    testWidgets('SeverityTrendCard renders empty state with icon and message when no data is available', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SeverityTrendCard(
+              filteredLogs: [],
+              periodDays: 7,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('SEVERITY TREND'), findsOneWidget);
+      expect(find.text('No data available'), findsOneWidget);
+      expect(find.text('No data recorded for this period'), findsOneWidget);
+      expect(find.byIcon(Icons.show_chart_rounded), findsOneWidget);
+      expect(find.text('Log your daily symptoms to see your severity trend.'), findsOneWidget);
+    });
+
+    testWidgets('MostFrequentSymptomsCard renders empty state with icon and message when no symptoms logged', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: MostFrequentSymptomsCard(
+              filteredLogs: [],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('MOST FREQUENT SYMPTOMS'), findsOneWidget);
+      expect(find.text('No data recorded for this period'), findsOneWidget);
+      expect(find.byIcon(Icons.bar_chart_rounded), findsOneWidget);
+      expect(find.text('Log your daily symptoms to track frequency.'), findsOneWidget);
+    });
+
+    testWidgets('SeverityTrendCard and MostFrequentSymptomsCard render data correctly when logs are present', (tester) async {
+      final symptomLog = DailyLog(
+        id: '2026-09-10',
+        userId: 'user1',
+        date: DateTime.now().subtract(const Duration(days: 1)),
+        symptoms: [
+          LoggedSymptom(
+            symptom: const Symptom(id: 'hot_flashes', name: 'Hot Flashes', iconName: 'local_fire_department', category: 'Vasomotor'),
+            severity: 'Severe',
+            intensity: 4,
+          ),
+        ],
+        isCompleted: true,
+        createdAt: DateTime.now(),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: Column(
+                children: [
+                  MostFrequentSymptomsCard(
+                    filteredLogs: [symptomLog],
+                  ),
+                  SeverityTrendCard(
+                    filteredLogs: [symptomLog],
+                    periodDays: 7,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Hot Flashes'), findsOneWidget);
+      expect(find.text('1 day'), findsOneWidget);
+      expect(find.text('Keep logging to see your trend'), findsOneWidget);
+      expect(find.text('7 days ago'), findsOneWidget);
+      expect(find.text('Today'), findsOneWidget);
     });
   });
 }

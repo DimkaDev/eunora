@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -464,6 +465,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   }
 
   void _nextStep() {
+    HapticFeedback.lightImpact();
     if (_currentStep < 4) {
       final nextStepIndex = _currentStep + 1;
       _saveDraft(targetStep: nextStepIndex);
@@ -484,6 +486,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   }
 
   void _prevStep() {
+    HapticFeedback.lightImpact();
     if (_currentStep > 0 && _currentStep <= 4) {
       final prevStepIndex = _currentStep - 1;
       _saveDraft(targetStep: prevStepIndex);
@@ -601,6 +604,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   }
 
   void _finishLoggingAndSync() async {
+    HapticFeedback.mediumImpact();
     final dailyLog = _buildDailyLog(isCompleted: true, lastCompletedStep: 5);
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {

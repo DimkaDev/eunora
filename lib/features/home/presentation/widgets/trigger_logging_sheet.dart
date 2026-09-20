@@ -40,43 +40,73 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
 
   // ─── helpers (mirrors trigger_details_step.dart) ─────────────────────────
 
-  bool get _isCaffeine =>
-      _selectedTrigger?.id == 't_caffeine' ||
-      _selectedTrigger?.id == 't_coffee' ||
-      _selectedTrigger?.name.toLowerCase() == 'caffeine';
+  bool get _isCaffeine {
+    final id = _selectedTrigger?.id ?? '';
+    final n = _selectedTrigger?.name.toLowerCase() ?? '';
+    return id == 't_caffeine' ||
+        id == 't_coffee' ||
+        n.contains('caffeine') ||
+        n.contains('coffee') ||
+        n.contains('tea') ||
+        n.contains('energy drink');
+  }
 
-  bool get _isAlcohol =>
-      _selectedTrigger?.id == 't_alcohol' ||
-      _selectedTrigger?.name.toLowerCase() == 'alcohol';
+  bool get _isAlcohol {
+    final id = _selectedTrigger?.id ?? '';
+    final n = _selectedTrigger?.name.toLowerCase() ?? '';
+    return id == 't_alcohol' ||
+        n.contains('alcohol') ||
+        n.contains('wine') ||
+        n.contains('beer') ||
+        n.contains('cocktail');
+  }
 
-  bool get _isSmoking =>
-      _selectedTrigger?.id == 't_smoking' ||
-      _selectedTrigger?.name.toLowerCase().contains('smoking') == true ||
-      _selectedTrigger?.name.toLowerCase().contains('tobacco') == true;
+  bool get _isSmoking {
+    final id = _selectedTrigger?.id ?? '';
+    final n = _selectedTrigger?.name.toLowerCase() ?? '';
+    return id == 't_smoking' ||
+        n.contains('smoking') ||
+        n.contains('tobacco') ||
+        n.contains('cigarette') ||
+        n.contains('vape');
+  }
 
-  bool get _isFood =>
-      _selectedTrigger?.id == 't_foods' ||
-      _selectedTrigger?.id == 't_spicy_food' ||
-      _selectedTrigger?.id == 't_sugar_processed_food' ||
-      _selectedTrigger?.id == 't_hot_drinks_food' ||
-      _selectedTrigger?.id == 't_skipped_meals';
+  bool get _isFood {
+    final id = _selectedTrigger?.id ?? '';
+    final n = _selectedTrigger?.name.toLowerCase() ?? '';
+    return id == 't_foods' ||
+        id == 't_spicy_food' ||
+        id == 't_sugar_processed_food' ||
+        id == 't_hot_drinks_food' ||
+        id == 't_skipped_meals' ||
+        n.contains('food') ||
+        n.contains('spicy') ||
+        n.contains('sugar') ||
+        n.contains('sweet') ||
+        n.contains('meal') ||
+        n.contains('hot drinks');
+  }
 
-  bool get _isStress =>
-      _selectedTrigger?.id == 't_stress' ||
-      _selectedTrigger?.name.toLowerCase() == 'stress';
+  bool get _isStress {
+    final id = _selectedTrigger?.id ?? '';
+    final n = _selectedTrigger?.name.toLowerCase() ?? '';
+    return id == 't_stress' || n.contains('stress') || n.contains('anxiety');
+  }
 
-  bool get _isExercise =>
-      _selectedTrigger?.id == 't_exercise' ||
-      _selectedTrigger?.name.toLowerCase() == 'exercise';
+  bool get _isExercise {
+    final id = _selectedTrigger?.id ?? '';
+    final n = _selectedTrigger?.name.toLowerCase() ?? '';
+    return id == 't_exercise' || n.contains('exercise') || n.contains('workout');
+  }
 
   String get _foodHint {
-    switch (_selectedTrigger?.id) {
-      case 't_spicy_food':      return 'What spicy food did you eat?';
-      case 't_hot_drinks_food': return 'Hot tea, soup, coffee...';
-      case 't_skipped_meals':   return 'Which meal did you skip?';
-      case 't_sugar_processed_food': return 'Sweets, soda, processed snacks...';
-      default:                  return 'Spicy foods, heavy dinner...';
-    }
+    final id = _selectedTrigger?.id ?? '';
+    final n = _selectedTrigger?.name.toLowerCase() ?? '';
+    if (id == 't_spicy_food' || n.contains('spicy')) return 'What spicy food did you eat?';
+    if (id == 't_hot_drinks_food' || n.contains('hot drinks') || n.contains('hot drink')) return 'Hot tea, soup, warm drink...';
+    if (id == 't_skipped_meals' || n.contains('meal') || n.contains('skipped')) return 'Which meal did you skip?';
+    if (id == 't_sugar_processed_food' || n.contains('sugar') || n.contains('processed')) return 'Sweets, soda, processed snacks...';
+    return 'Spicy foods, heavy dinner, snacks...';
   }
 
   /// Build the current saved value string from state, for the onSave callback.
@@ -95,25 +125,16 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
   }
 
   List<String> _getTriggerValues(String name) {
-    switch (name.toLowerCase()) {
-      case 'stress':
-        return ['Calm', 'Moderate', 'High'];
-      case 'poor sleep':
-      case 'lack of sleep':
-      case 'dehydration':
-        return ['Mild', 'Moderate', 'Severe'];
-      case 'exercise':
-        return ['Light', 'Moderate', 'Intense'];
-      case 'weather':
-        return ['Sunny', 'Humid', 'Cold/Change'];
-      case 'travel':
-        return ['Short', 'Medium', 'Long'];
-      case 'work':
-      case 'overworking':
-        return ['1-2 hours', '3-4 hours', '5+ hours'];
-      default:
-        return ['Low', 'Moderate', 'High'];
+    final n = name.toLowerCase();
+    if (n.contains('stress')) return ['Calm', 'Moderate', 'High'];
+    if (n.contains('sleep') || n.contains('dehydration') || n.contains('bedroom') || n.contains('clothing')) {
+      return ['Mild', 'Moderate', 'Severe'];
     }
+    if (n.contains('exercise')) return ['Light', 'Moderate', 'Intense'];
+    if (n.contains('weather')) return ['Sunny', 'Humid', 'Cold/Change'];
+    if (n.contains('travel')) return ['Short', 'Medium', 'Long'];
+    if (n.contains('work') || n.contains('overworking')) return ['1-2 hours', '3-4 hours', '5+ hours'];
+    return ['Low', 'Moderate', 'High'];
   }
 
   void _selectTrigger(TriggerOption trigger) async {
@@ -512,11 +533,20 @@ class _TriggerLoggingSheetState extends ConsumerState<TriggerLoggingSheet> {
     final trigColor = _selectedTrigger!.getIconColor();
     final trigBg = trigColor.withValues(alpha: 0.1);
 
+    final triggerValue = _isCaffeine || _isAlcohol || _isSmoking
+        ? _counterValue
+        : _isFood
+            ? _textNote
+            : _isExercise
+                ? '${_selectedValue ?? 'Moderate'}-$_counterValue'
+                : (_selectedValue ?? 'Moderate');
+
     return LoggingCardWrapper(
       name: name,
       icon: icon,
       color: trigColor,
       backgroundColor: trigBg,
+      triggerValue: triggerValue,
       children: [
         if (_isCaffeine)
           QuantityCounterSelector(

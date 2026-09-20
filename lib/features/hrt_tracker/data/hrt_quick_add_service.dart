@@ -25,12 +25,12 @@ class HrtDrugOption {
 class HrtQuickAddService {
   /// Returns up to 4 [HrtDrugOption] for the Quick-Add row.
   ///
-  /// Cold start (no active HRT history for this user): returns the static
-  /// frequency-ranked library — systemicEstrogen + progestogenOnly categories
-  /// only, [HrtDrugDefinition.isDiscontinued] == false.
+  /// Analyzes [activeMeds] (already added medications) and excludes them
+  /// so that already added medications are removed from Quick-Add.
   ///
-  /// Warm start: re-ranks by the user's own active medications first, then
-  /// pads remaining slots from the static list.
+  /// Fills the 4 slots with the most frequently prescribed HRT medications
+  /// from [kHrtDrugLibrary] (systemicEstrogen + progestogenOnly categories,
+  /// [HrtDrugDefinition.isDiscontinued] == false) in prescribing-frequency order.
   ///
   /// This is a pure synchronous function — active medications are already
   /// in-memory via [medicationsProvider].
@@ -38,25 +38,18 @@ class HrtQuickAddService {
     final seen = <String>{};
     final result = <HrtDrugOption>[];
 
-    // --- Warm start: promote user's own active meds ---
-    for (final med in activeMeds) {
-      if (result.length >= 4) break;
-      final def = kHrtDrugLibrary
-          .where((d) => d.name.toLowerCase() == med.name.toLowerCase())
-          .firstOrNull;
-      if (def == null || seen.contains(def.name)) continue;
-      result.add(HrtDrugOption(
-        name: def.name,
-        category: def.category,
-        commonForms: def.commonForms,
-        isCombinedProduct: def.isCombinedProduct,
-        market: def.market,
-        isFromUserHistory: true,
-      ));
-      seen.add(def.name);
+    bool isAlreadyAdded(HrtDrugDefinition def) {
+      final defName = def.name.toLowerCase().trim();
+      for (final med in activeMeds) {
+        final medName = med.name.toLowerCase().trim();
+        if (medName.isEmpty) continue;
+        if (medName == defName) return true;
+        if (medName.startsWith('$defName ') || medName.startsWith('$defName-')) return true;
+        if (defName.startsWith('$medName ') || defName.startsWith('$medName-')) return true;
+      }
+      return false;
     }
 
-    // --- Cold-start pad: fill remaining slots from static library ---
     for (final def in kHrtDrugLibrary) {
       if (result.length >= 4) break;
       if (seen.contains(def.name) || def.isDiscontinued) continue;
@@ -64,6 +57,8 @@ class HrtQuickAddService {
           def.category != HrtDrugCategory.progestogenOnly) {
         continue;
       }
+      if (isAlreadyAdded(def)) continue;
+
       result.add(HrtDrugOption(
         name: def.name,
         category: def.category,
