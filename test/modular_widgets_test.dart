@@ -35,7 +35,7 @@ void main() {
       );
       expect(find.text('Weekly Trends'), findsOneWidget);
       expect(find.text('SYMPTOM INTENSITY'), findsOneWidget);
-      expect(find.text('SLEEP QUALITY'), findsOneWidget);
+      expect(find.text('SLEEP'), findsOneWidget);
     });
 
     // CalendarInsightsBanner contains a non-uniform border with borderRadius

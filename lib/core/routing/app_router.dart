@@ -50,6 +50,8 @@ import 'package:eunora/features/passport/presentation/pages/passport_screen.dart
 import 'package:eunora/features/passport/presentation/pages/passport_preview_screen.dart';
 import 'package:eunora/features/passport/providers/passport_screen_controller.dart';
 import 'package:eunora/features/home/presentation/pages/notification_center_page.dart';
+import 'package:eunora/features/analysis/analysis.dart';
+import 'package:eunora/features/analysis/presentation/pages/trend_detail_page.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -246,6 +248,31 @@ final GoRouter appRouter = GoRouter(
           context: context,
           state: state,
           child: HomePage(initialTabIndex: 1, initialSelectedDate: initDate),
+        );
+      },
+    ),
+
+    GoRoute(
+      path: '/trend-detail',
+      pageBuilder: (BuildContext context, GoRouterState state) {
+        TrendDetailArgs args;
+        if (state.extra is TrendDetailArgs) {
+          args = state.extra as TrendDetailArgs;
+        } else if (state.extra is Map<String, dynamic>) {
+          final map = state.extra as Map<String, dynamic>;
+          args = TrendDetailArgs(
+            metric: map['metric'] as String? ?? 'overall_severity',
+            period: map['period'] as AnalysisPeriod? ?? AnalysisPeriod.days30,
+            insightToExplain: map['insight'] as HomeInsightCardData?,
+            metricDisplayName: map['metricDisplayName'] as String?,
+          );
+        } else {
+          args = const TrendDetailArgs();
+        }
+        return buildSmoothPageTransition(
+          context: context,
+          state: state,
+          child: TrendDetailPage(args: args),
         );
       },
     ),

@@ -20,6 +20,8 @@ import 'package:eunora/features/onboarding/presentation/providers/medications_pr
 import 'package:eunora/core/utils/logging_helpers.dart';
 import 'package:eunora/features/home/presentation/widgets/calendar/calendar_weekly_trends_card.dart';
 import 'package:eunora/features/home/presentation/widgets/calendar/calendar_insights_banner.dart';
+import 'package:eunora/features/home/presentation/widgets/calendar/calendar_patterns_card.dart';
+import 'package:eunora/features/analysis/analysis.dart';
 import 'package:eunora/features/onboarding/presentation/providers/triggers_provider.dart';
 import 'package:eunora/features/onboarding/domain/models/trigger.dart';
 import 'package:eunora/features/symptom_log/data/trigger_library.dart';
@@ -49,7 +51,12 @@ class MockDailyLog {
 
 class CalendarPage extends ConsumerStatefulWidget {
   final DateTime? initialSelectedDate;
-  const CalendarPage({super.key, this.initialSelectedDate});
+  final List<DailyLog>? customLogs;
+  const CalendarPage({
+    super.key,
+    this.initialSelectedDate,
+    this.customLogs,
+  });
 
   @override
   ConsumerState<CalendarPage> createState() => _CalendarPageState();
@@ -96,6 +103,9 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     final initDate = widget.initialSelectedDate ?? DateTime.now();
     _selectedDate = DateTime(initDate.year, initDate.month, initDate.day);
     _focusedMonth = DateTime(initDate.year, initDate.month);
+    if (widget.customLogs != null) {
+      _populateFromCustomLogs();
+    }
     _aprilLogs = {
       7: MockDailyLog(
         symptoms: ['Hot flashes · 2/5', 'Anxiety · 1/5'],
@@ -206,6 +216,46 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       });
       _fetchLogsForMonth(_focusedMonth);
     }
+    if (widget.customLogs != oldWidget.customLogs && widget.customLogs != null) {
+      _populateFromCustomLogs();
+    }
+  }
+
+  void _populateFromCustomLogs() {
+    if (widget.customLogs == null) return;
+    for (final log in widget.customLogs!) {
+      final key = _monthKey(log.date);
+      _monthLogsCache.putIfAbsent(key, () => {});
+      final symptomsList = log.symptoms.map((s) => '${s.symptom.name} · ${s.intensity ?? 0}/5').toList();
+      final hrtList = log.hrtIntakes.map((h) => <String, String>{
+        'name': h.name,
+        'details': '${h.dose.toStringAsFixed(0)} ${h.unit}',
+        'status': 'Taken',
+        'isTaken': 'true',
+      }).toList();
+      _monthLogsCache[key]![log.date.day] = MockDailyLog(
+        symptoms: symptomsList,
+        sleepInfo: '${log.sleepDuration} hours',
+        moodInfo: 'Logged',
+        hrt: hrtList,
+        triggers: log.triggers,
+        itemsCount: symptomsList.length + hrtList.length + log.triggers.length,
+        originalLog: log,
+      );
+    }
+  }
+
+  List<DailyLog> _getAllAvailableLogs() {
+    if (widget.customLogs != null) return widget.customLogs!;
+    final List<DailyLog> logs = [];
+    for (final monthMap in _monthLogsCache.values) {
+      for (final mock in monthMap.values) {
+        if (mock.originalLog != null && mock.originalLog!.isCompleted) {
+          logs.add(mock.originalLog!);
+        }
+      }
+    }
+    return logs;
   }
 
   @override
@@ -374,101 +424,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     return null;
   }
 
-  Map<String, dynamic> _getWeeklyTrendsData() {
-    if (_selectedDate == null) {
-      return {
-        'avgIntensity': 0.0,
-        'avgSleep': 0.0,
-        'intensityHeights': <double>[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-        'sleepHeights': <double>[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-        'intensityChange': '↓ 0%',
-        'sleepChange': '↓ 0%',
-        'isIntensityGood': true,
-        'isSleepGood': true,
-      };
-    }
 
-    // Find the Monday of the week containing _selectedDate
-    final weekday = _selectedDate!.weekday;
-    final monday = _selectedDate!.subtract(Duration(days: weekday - 1));
-
-    final List<double> intensities = [];
-    final List<double> sleepHours = [];
-
-    for (int i = 0; i < 7; i++) {
-      final date = monday.add(Duration(days: i));
-      final log = _getLogForDayAndMonth(date);
-
-      if (log != null) {
-        // Parse sleep
-        double sleepVal = 0.0;
-        if (log.originalLog != null) {
-          sleepVal = log.originalLog!.sleepDuration;
-        } else {
-          final match = RegExp(r'(\d+(\.\d+)?)').firstMatch(log.sleepInfo);
-          if (match != null) {
-            sleepVal = double.tryParse(match.group(1) ?? '0.0') ?? 0.0;
-          }
-        }
-        if (sleepVal > 0.0) {
-          sleepHours.add(sleepVal);
-        } else {
-          sleepHours.add(0.0);
-        }
-
-        // Parse intensity
-        double maxIntensity = 0.0;
-        for (final s in log.symptoms) {
-          final parts = s.split(' · ');
-          if (parts.length > 1) {
-            final scoreStr = parts[1].split('/').first.trim();
-            final score = double.tryParse(scoreStr) ?? 0.0;
-            if (score > maxIntensity) {
-              maxIntensity = score;
-            }
-          }
-        }
-        intensities.add(maxIntensity);
-      } else {
-        sleepHours.add(0.0);
-        intensities.add(0.0);
-      }
-    }
-
-    final totalIntensity = intensities.reduce((a, b) => a + b);
-    final totalSleep = sleepHours.reduce((a, b) => a + b);
-
-    final loggedDaysIntensity = intensities.where((v) => v > 0).length;
-    final loggedDaysSleep = sleepHours.where((v) => v > 0).length;
-
-    final avgIntensity = loggedDaysIntensity > 0 ? totalIntensity / loggedDaysIntensity : 0.0;
-    final avgSleep = loggedDaysSleep > 0 ? totalSleep / loggedDaysSleep : 0.0;
-
-    int loggedDaysThisWeek = 0;
-    for (int i = 0; i < 7; i++) {
-      final date = monday.add(Duration(days: i));
-      final log = _getLogForDayAndMonth(date);
-      if (log != null) {
-        loggedDaysThisWeek++;
-      }
-    }
-
-    // Scale heights to [0.0, 1.0] for sparklines (intensity scale max is 5, sleep max is 10)
-    final intensityHeights = intensities.map((v) => (v / 5.0).clamp(0.0, 1.0)).toList();
-    final sleepHeights = sleepHours.map((v) => (v / 10.0).clamp(0.0, 1.0)).toList();
-
-    return {
-      'avgIntensity': avgIntensity,
-      'avgSleep': avgSleep,
-      'intensityHeights': intensityHeights,
-      'sleepHeights': sleepHeights,
-      'intensityChange': avgIntensity > 3.0 ? '↑ 14%' : '↓ 12%',
-      'sleepChange': avgSleep < 6.0 ? '↓ 8%' : '↑ 4%',
-      'isIntensityGood': avgIntensity <= 3.0,
-      'isSleepGood': avgSleep >= 7.0,
-      'hasEnoughData': loggedDaysThisWeek >= 3,
-    };
-  }
 
 
   Future<void> _saveLogToFirestore(int day, MockDailyLog mockLog) async {
@@ -2578,40 +2534,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             ],
           ),
         ),
-        const SizedBox(height: 24),
-        Builder(
-          builder: (context) {
-            final trends = _getWeeklyTrendsData();
-            final hasData = trends['hasEnoughData'] as bool? ?? false;
-            return _buildPremiumPatternsCard(isInsufficientData: !hasData);
-          },
-        ),
-        const SizedBox(height: 24),
-        Builder(
-          builder: (context) {
-            final trends = _getWeeklyTrendsData();
-            final hasData = trends['hasEnoughData'] as bool? ?? false;
-            return CalendarWeeklyTrendsCard(
-              averageIntensity: trends['avgIntensity'],
-              averageSleep: trends['avgSleep'],
-              intensityHeights: trends['intensityHeights'],
-              sleepHeights: trends['sleepHeights'],
-              intensityChangeLabel: trends['intensityChange'],
-              sleepChangeLabel: trends['sleepChange'],
-              isIntensityChangeGood: trends['isIntensityGood'],
-              isSleepChangeGood: trends['isSleepGood'],
-              isInsufficientData: !hasData,
-            );
-          },
-        ),
-        const SizedBox(height: 24),
-        Builder(
-          builder: (context) {
-            final trends = _getWeeklyTrendsData();
-            final hasData = trends['hasEnoughData'] as bool? ?? false;
-            return CalendarInsightsBanner(isInsufficientData: !hasData);
-          },
-        ),
+        _buildTrackerAnalysisSections(),
       ],
     );
   }
@@ -2751,39 +2674,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         const SizedBox(height: 20),
         _buildLoggedTriggersCard(log),
         const SizedBox(height: 20),
-        Builder(
-          builder: (context) {
-            final trends = _getWeeklyTrendsData();
-            final hasData = trends['hasEnoughData'] as bool? ?? false;
-            return _buildPremiumPatternsCard(isInsufficientData: !hasData);
-          },
-        ),
-        const SizedBox(height: 24),
-        Builder(
-          builder: (context) {
-            final trends = _getWeeklyTrendsData();
-            final hasData = trends['hasEnoughData'] as bool? ?? false;
-            return CalendarWeeklyTrendsCard(
-              averageIntensity: trends['avgIntensity'],
-              averageSleep: trends['avgSleep'],
-              intensityHeights: trends['intensityHeights'],
-              sleepHeights: trends['sleepHeights'],
-              intensityChangeLabel: trends['intensityChange'],
-              sleepChangeLabel: trends['sleepChange'],
-              isIntensityChangeGood: trends['isIntensityGood'],
-              isSleepChangeGood: trends['isSleepGood'],
-              isInsufficientData: !hasData,
-            );
-          },
-        ),
-        const SizedBox(height: 24),
-        Builder(
-          builder: (context) {
-            final trends = _getWeeklyTrendsData();
-            final hasData = trends['hasEnoughData'] as bool? ?? false;
-            return CalendarInsightsBanner(isInsufficientData: !hasData);
-          },
-        ),
+        _buildTrackerAnalysisSections(),
       ],
     );
   }
@@ -2938,19 +2829,56 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             children: [
               ...log.symptoms.map((s) {
                 final colors = _getSymptomColorsForDisplay(s);
-                return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: colors['bg'],
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: colors['border']!),
-                  ),
-                  child: Text(
-                    s,
-                    style: GoogleFonts.manrope(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: colors['text'],
+                return InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () {
+                    final symptomName = s.split(' · ').first.trim();
+                    final allLogs = _getAllAvailableLogs();
+                    final analysis = const AnalysisEngine().analyzeWindow(
+                      logs: allLogs,
+                      period: AnalysisPeriod.days30,
+                    );
+                    final matchingLogged = log.originalLog?.symptoms.where(
+                      (ls) => ls.symptom.name.toLowerCase() == symptomName.toLowerCase(),
+                    ).firstOrNull;
+                    final metric = analysis.symptomRankings.where(
+                      (m) => m.displayName.toLowerCase() == symptomName.toLowerCase() ||
+                             (matchingLogged != null && m.symptomId.toLowerCase() == matchingLogged.symptom.id.toLowerCase()),
+                    ).firstOrNull ?? SymptomAnalysisMetric(
+                      symptomId: matchingLogged?.symptom.id ?? sanitizeSymptomId('s_${symptomName.toLowerCase().replaceAll(' ', '_')}'),
+                      displayName: symptomName,
+                      category: matchingLogged?.symptom.category ?? 'General',
+                      daysPresent: 1,
+                      dayRate: 1.0,
+                      averageSeverity: matchingLogged?.intensity?.toDouble() ?? 3.0,
+                      severityLabel: AnalysisEngine.severityLabelForScore(matchingLogged?.intensity?.toDouble() ?? 3.0),
+                      burden: 3.0,
+                    );
+                    SymptomDetailSheet.show(
+                      context,
+                      metric: metric,
+                      totalLoggedDays: analysis.loggedDaysCount > 0 ? analysis.loggedDaysCount : 1,
+                      logs: allLogs,
+                      period: AnalysisPeriod.days30,
+                      onOpenDayInCalendar: (date) {
+                        setState(() => _selectedDate = date);
+                      },
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: colors['bg'],
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: colors['border']!),
+                    ),
+                    child: Text(
+                      s,
+                      style: GoogleFonts.manrope(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: colors['text'],
+                      ),
                     ),
                   ),
                 );
@@ -3314,256 +3242,88 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     );
   }
 
-  Widget _buildPremiumPatternsCard({bool isInsufficientData = false}) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppTheme.outlineVariant.withValues(alpha: 0.2),
-        ),
-      ),
-      child: isInsufficientData
-          ? Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(
-                              color: AppTheme.primary,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Patterns',
-                            style: GoogleFonts.manrope(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.onSurface,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEDDDF5),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.lock, size: 12, color: Color(0xFF6C6074)),
-                            const SizedBox(width: 4),
-                            Text(
-                              'PREMIUM',
-                              style: GoogleFonts.manrope(
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF6C6074),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: AppTheme.surfaceContainerLow,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: AppTheme.outlineVariant.withValues(alpha: 0.1),
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        const Icon(
-                          Icons.auto_graph_outlined,
-                          color: Color(0xFF9B8B7E),
-                          size: 32,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'IN PROGRESS',
-                          style: GoogleFonts.manrope(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.1,
-                            color: AppTheme.outline,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Data is still being collected. Eunora will highlight meaningful patterns once enough daily entries have been recorded.',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.manrope(
-                            fontSize: 13,
-                            color: AppTheme.onSurfaceVariant,
-                            height: 1.4,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+  Widget _buildTrackerAnalysisSections() {
+    final allLogs = _getAllAvailableLogs();
+    final selected = _selectedDate ?? DateTime.now();
+
+    // Compute weekly trends
+    const trendsCalc = WeeklyTrendsCalculator();
+    final trendsData = trendsCalc.calculate(
+      logs: allLogs,
+      selectedDate: selected,
+    );
+
+    // Compute or watch patterns
+    PatternEngineResult? patternResult;
+    int loggedDays30d = 0;
+
+    if (widget.customLogs != null) {
+      const pEngine = PatternEngine();
+      patternResult = pEngine.analyze(
+        logs: widget.customLogs!,
+        period: AnalysisPeriod.days30,
+        today: selected,
+      );
+      const aEngine = AnalysisEngine();
+      final wResult = aEngine.analyzeWindow(
+        logs: widget.customLogs!,
+        period: AnalysisPeriod.days30,
+        today: selected,
+      );
+      loggedDays30d = wResult.loggedDaysCount;
+    } else {
+      final pAsync = ref.watch(patternResultProvider(AnalysisPeriod.days30));
+      patternResult = pAsync.valueOrNull;
+      final aAsync = ref.watch(analysisWindowProvider(AnalysisPeriod.days30));
+      loggedDays30d = aAsync.valueOrNull?.loggedDaysCount ?? 0;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        CalendarPatternsCard(
+          patternResult: patternResult ??
+              const PatternEngineResult(
+                requestedPeriod: AnalysisPeriod.days30,
+                effectiveDaysInWindow: 0,
+                patterns: [],
+                buildingItems: [],
+                emptyStateType: SD10EmptyType.notEnoughData,
               ),
-            )
-          : Row(
-              children: [
-                Container(
-                  width: 6,
-                  height: 154,
-                  decoration: const BoxDecoration(
-                    color: AppTheme.primary,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      bottomLeft: Radius.circular(16),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: const BoxDecoration(
-                                    color: AppTheme.primary,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Patterns',
-                                  style: GoogleFonts.manrope(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.onSurface,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFEDDDF5),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.lock, size: 12, color: Color(0xFF6C6074)),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'PREMIUM',
-                                    style: GoogleFonts.manrope(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color(0xFF6C6074),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: AppTheme.surfaceContainerLow,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Red wine (evening)',
-                                      style: GoogleFonts.manrope(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppTheme.onSurface,
-                                      ),
-                                    ),
-                                    Text(
-                                      '→ Hot flashes +4.2 next day',
-                                      style: GoogleFonts.manrope(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppTheme.primary,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      '79% correlation',
-                                      style: GoogleFonts.manrope(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w500,
-                                        color: AppTheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              // Correlation meter bar
-                              Container(
-                                width: 8,
-                                height: 64,
-                                decoration: BoxDecoration(
-                                  color: AppTheme.outlineVariant.withValues(alpha: 0.4),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                alignment: Alignment.bottomCenter,
-                                child: Container(
-                                  height: 64 * 0.79,
-                                  decoration: BoxDecoration(
-                                    color: AppTheme.primaryContainer,
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Insights are based on your personal historical data over the last 90 days.',
-                          style: GoogleFonts.manrope(
-                            fontSize: 10,
-                            fontStyle: FontStyle.italic,
-                            color: AppTheme.onSurfaceVariant.withValues(alpha: 0.7),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          onSeeAll: () => context.push('/insights'),
+        ),
+        const SizedBox(height: 24),
+        CalendarWeeklyTrendsCard(
+          trendsData: trendsData,
+          onTapIntensity: () {
+            context.push(
+              '/trend-detail',
+              extra: TrendDetailArgs(
+                metric: 'overall_severity',
+                period: AnalysisPeriod.days7,
+                customLogs: widget.customLogs,
+              ),
+            );
+          },
+          onTapSleep: () {
+            context.push(
+              '/trend-detail',
+              extra: TrendDetailArgs(
+                metric: 'sleep',
+                period: AnalysisPeriod.days7,
+                customLogs: widget.customLogs,
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 24),
+        CalendarInsightsBanner(
+          patternResult: patternResult,
+          loggedDaysCount: loggedDays30d,
+          onLearnMore: () => context.push('/insights'),
+        ),
+      ],
     );
   }
 }

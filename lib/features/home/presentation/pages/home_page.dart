@@ -39,9 +39,7 @@ import 'package:eunora/core/services/premium_guard_provider.dart';
 import 'package:eunora/features/onboarding/presentation/providers/triggers_provider.dart';
 import 'package:eunora/features/onboarding/domain/models/trigger.dart';
 import 'package:eunora/features/symptom_log/data/trigger_library.dart';
-
-
-
+import 'package:eunora/features/analysis/analysis.dart';
 import 'package:eunora/features/home/presentation/widgets/home/premium_toggle_widget.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -649,6 +647,8 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   Widget _buildHomeDashboard(double progress, List<Medication> medications) {
     final userProfile = ref.watch(onboardingProfileProvider);
+    final homeInsightsAsync = ref.watch(homeInsightsBundleProvider);
+    final homeBundle = homeInsightsAsync.valueOrNull;
     
     final firebaseUser = FirebaseAuth.instance.currentUser;
     String userName = 'Sarah';
@@ -772,8 +772,21 @@ class _HomePageState extends ConsumerState<HomePage> {
                 FadeInEntrance(
                   delay: const Duration(milliseconds: 120),
                   child: InsightCard(
+                    dailyInsight: homeBundle?.dailyInsight,
+                    weeklyInsight: homeBundle?.weeklyInsight,
+                    alertData: homeBundle?.highSeverityAlert,
+                    onViewTrendDetail: (data) {
+                      context.push(
+                        '/trend-detail',
+                        extra: TrendDetailArgs(
+                          metric: data.targetMetric,
+                          period: data.targetPeriod,
+                          insightToExplain: data,
+                        ),
+                      );
+                    },
                     type: _insightType,
-                    isInsufficientData: _loggedDaysCountThisWeek < 3,
+                    isInsufficientData: _loggedDaysCountThisWeek < 3 && homeBundle == null,
                   ),
                 ),
                 const SizedBox(height: 24),

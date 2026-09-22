@@ -1,14 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 import 'package:eunora/features/home/domain/entities/daily_log.dart';
+import 'package:eunora/features/analysis/domain/models/analysis_period.dart';
+import 'package:eunora/features/analysis/domain/models/symptom_metric.dart';
+import 'package:eunora/features/analysis/presentation/widgets/symptom_detail_sheet.dart';
+import 'package:eunora/features/analysis/services/analysis_engine.dart';
 
 class MostFrequentSymptomsCard extends StatelessWidget {
   final List<DailyLog> filteredLogs;
+  final int? periodDays;
+  final int? loggedDaysCount;
+  final void Function(String symptomId, String symptomName, double avgIntensity, int daysLogged)? onTapSymptom;
 
   const MostFrequentSymptomsCard({
     super.key,
     required this.filteredLogs,
+    this.periodDays,
+    this.loggedDaysCount,
+    this.onTapSymptom,
   });
 
   @override
@@ -17,13 +28,21 @@ class MostFrequentSymptomsCard extends StatelessWidget {
     final Map<String, double> symptomIntensitySum = {};
     final Map<String, String> symptomNames = {};
 
+    final completedLogs = filteredLogs.where((l) => l.isCompleted).toList();
+    final int effectiveLoggedDays = loggedDaysCount ?? completedLogs.length;
+
     for (final log in filteredLogs) {
       final Set<String> symptomsLoggedToday = {};
       for (final s in log.symptoms) {
         final id = s.symptom.id;
         symptomsLoggedToday.add(id);
         symptomNames[id] = s.symptom.name;
-        final intensity = s.intensity?.toDouble() ?? (s.severity == 'Mild' ? 1.0 : s.severity == 'Moderate' ? 3.0 : 5.0);
+        final intensity = s.intensity?.toDouble() ??
+            (s.severity == 'Mild'
+                ? 1.0
+                : s.severity == 'Moderate'
+                    ? 3.0
+                    : 5.0);
         symptomIntensitySum[id] = (symptomIntensitySum[id] ?? 0.0) + intensity;
       }
 
@@ -52,6 +71,7 @@ class MostFrequentSymptomsCard extends StatelessWidget {
 
     final top5 = ranks.take(5).toList();
     final topDaysCount = top5.isNotEmpty ? (top5.first['days_logged'] as int) : 1;
+    final int totalDays = periodDays ?? 30;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -69,14 +89,28 @@ class MostFrequentSymptomsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'MOST FREQUENT SYMPTOMS',
-            style: GoogleFonts.manrope(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.1,
-              color: AppTheme.onSurface,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'MOST FREQUENT SYMPTOMS',
+                style: GoogleFonts.manrope(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.1,
+                  color: AppTheme.onSurface,
+                ),
+              ),
+              if (periodDays != null || loggedDaysCount != null)
+                Text(
+                  'Logged $effectiveLoggedDays / $totalDays days',
+                  style: GoogleFonts.manrope(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.onSurfaceVariant,
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 20),
 
@@ -125,9 +159,14 @@ class MostFrequentSymptomsCard extends StatelessWidget {
           else
             ...List.generate(top5.length, (index) {
               final item = top5[index];
+              final String id = item['id'] as String;
               final String name = item['name'] as String;
               final int days = item['days_logged'] as int;
+              final double avgIntensity = item['avg_intensity'] as double;
               final double factor = days / topDaysCount;
+
+              final String severityLabel = AnalysisEngine.severityLabelForScore(avgIntensity);
+              final String severityDisplay = '$severityLabel · ${avgIntensity.toStringAsFixed(1)} / 5';
 
               Color color = AppTheme.primary;
               if (index == 1) {
@@ -140,11 +179,47 @@ class MostFrequentSymptomsCard extends StatelessWidget {
 
               return Padding(
                 padding: EdgeInsets.only(bottom: index == top5.length - 1 ? 0 : 16),
-                child: _buildSymptomBar(
-                  name,
-                  '$days day${days == 1 ? '' : 's'}',
-                  factor,
-                  color,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () {
+                    if (onTapSymptom != null) {
+                      onTapSymptom!(id, name, avgIntensity, days);
+                    } else {
+                      final double dayRate = effectiveLoggedDays > 0 ? days / effectiveLoggedDays : 0.0;
+                      final double dailyBurden = effectiveLoggedDays > 0 ? (avgIntensity * days) / effectiveLoggedDays : 0.0;
+                      final period = totalDays <= 7
+                          ? AnalysisPeriod.days7
+                          : totalDays <= 30
+                              ? AnalysisPeriod.days30
+                              : AnalysisPeriod.days90;
+                      SymptomDetailSheet.show(
+                        context,
+                        metric: SymptomAnalysisMetric(
+                          symptomId: id,
+                          displayName: name,
+                          category: 'General',
+                          daysPresent: days,
+                          dayRate: dayRate,
+                          averageSeverity: avgIntensity,
+                          severityLabel: severityLabel,
+                          burden: dailyBurden,
+                        ),
+                        totalLoggedDays: effectiveLoggedDays,
+                        logs: filteredLogs,
+                        period: period,
+                        onOpenDayInCalendar: (date) {
+                          context.push('/calendar', extra: date);
+                        },
+                      );
+                    }
+                  },
+                  child: _buildSymptomBar(
+                    name,
+                    severityDisplay,
+                    '$days day${days == 1 ? '' : 's'}',
+                    factor,
+                    color,
+                  ),
                 ),
               );
             }),
@@ -153,19 +228,42 @@ class MostFrequentSymptomsCard extends StatelessWidget {
     );
   }
 
-  Widget _buildSymptomBar(String label, String value, double factor, Color color) {
+  Widget _buildSymptomBar(
+    String label,
+    String severityDisplay,
+    String value,
+    double factor,
+    Color color,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              label,
-              style: GoogleFonts.manrope(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.onSurface,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: GoogleFonts.manrope(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    severityDisplay,
+                    style: GoogleFonts.manrope(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: AppTheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ),
             ),
             Text(
