@@ -1160,6 +1160,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ),
               child: Column(
                 children: [
+                  _buildNavigationRow('App Walkthrough / Tour', () => context.push('/product-tour')),
+                  const Divider(height: 1, color: AppTheme.surfaceContainerLow, indent: 20, endIndent: 20),
                   _buildNavigationRow('FAQ', () => context.push('/help-center')),
                   const Divider(height: 1, color: AppTheme.surfaceContainerLow, indent: 20, endIndent: 20),
                   _buildNavigationRow('Contact Support', () => context.push('/help-center')),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/services/auth_service.dart';
+import 'package:eunora/core/services/demo_generator_service.dart';
 import 'package:eunora/core/utils/animation_system.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -98,8 +99,8 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                       _buildHeader(),
                       const SizedBox(height: 32),
                       _buildFormCard(),
-                      const SizedBox(height: 12),
-                      _buildTestSeedButton(),
+                      const SizedBox(height: 16),
+                      _buildDemoButtons(),
                       const SizedBox(height: 24),
                       _buildSocialSection(),
                       const SizedBox(height: 40),
@@ -482,6 +483,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                       'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/3840px-Google_%22G%22_logo.svg.png',
                       width: 18,
                       height: 18,
+                      errorBuilder: (_, __, ___) => const Icon(Icons.g_mobiledata, size: 18, color: Color(0xFF1D1B1A)),
                     )
                   else
                     Icon(icon, size: 18, color: const Color(0xFF1D1B1A)),
@@ -563,22 +565,33 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     );
   }
 
-  Widget _buildTestSeedButton() {
+  Widget _buildDemoButtons() {
+    return Column(
+      children: [
+        for (final persona in DemoPersona.values) ...[
+          _buildDemoButton(persona),
+          const SizedBox(height: 8),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildDemoButton(DemoPersona persona) {
     return Container(
       width: double.infinity,
-      height: 52,
+      height: 48,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: const Color(0xFF817266).withOpacity(0.4), width: 1.5),
       ),
       child: Bounceable(
-        onTap: () => context.push('/demo'),
+        onTap: () => context.push('/demo?persona=${persona.code}'),
         child: Center(
           child: Text(
-            '🧪  Try Demo (90-Day Sample Data)',
+            persona.label,
             style: GoogleFonts.manrope(
-              fontSize: 14,
+              fontSize: 13,
               fontWeight: FontWeight.bold,
               color: const Color(0xFF67594E),
             ),

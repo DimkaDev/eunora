@@ -36,21 +36,59 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
   
   String _searchQuery = '';
   bool _showAllSymptoms = false;
+  late final PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _currentStep);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   void _selectSymptom(Symptom symptom) async {
     HapticFeedback.lightImpact();
+    FocusScope.of(context).unfocus();
     setState(() {
       _tappingSymptomId = symptom.id;
       _selectedSymptom = symptom;
     });
 
-    // Short micro-delay to let the card scale, fill, and checkmark animate
-    await Future.delayed(const Duration(milliseconds: 140));
+    // Smooth micro-delay to let the card scale, fill, and checkmark animate
+    await Future.delayed(const Duration(milliseconds: 160));
     if (!mounted) return;
 
     setState(() {
       _tappingSymptomId = null;
       _currentStep = 1;
+    });
+
+    _pageController.animateToPage(
+      1,
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  void _goToStep0() {
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _currentStep = 0;
+    });
+    _pageController.animateToPage(
+      0,
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+    ).then((_) {
+      if (mounted) {
+        setState(() {
+          _selectedSymptom = null;
+        });
+      }
     });
   }
 
@@ -122,28 +160,46 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                if (_currentStep == 1)
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _currentStep = 0;
-                        _selectedSymptom = null;
-                      });
-                    },
-                    icon: const Icon(Icons.arrow_back),
-                    style: IconButton.styleFrom(
-                      backgroundColor: const Color(0xFFF2EDEA),
-                      foregroundColor: AppTheme.onSurfaceVariant,
+                AnimatedOpacity(
+                  opacity: _currentStep == 1 ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 240),
+                  curve: Curves.easeInOut,
+                  child: IgnorePointer(
+                    ignoring: _currentStep != 1,
+                    child: IconButton(
+                      onPressed: _goToStep0,
+                      icon: const Icon(Icons.arrow_back),
+                      style: IconButton.styleFrom(
+                        backgroundColor: const Color(0xFFF2EDEA),
+                        foregroundColor: AppTheme.onSurfaceVariant,
+                      ),
                     ),
-                  )
-                else
-                  const SizedBox(width: 40),
-                Text(
-                  _currentStep == 0 ? 'Add Symptom' : 'Rate Symptom',
-                  style: GoogleFonts.notoSerif(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.onSurface,
+                  ),
+                ),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 240),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0.0, 0.12),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: Text(
+                    _currentStep == 0 ? 'Add Symptom' : 'Rate Symptom',
+                    key: ValueKey<int>(_currentStep),
+                    style: GoogleFonts.notoSerif(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.onSurface,
+                    ),
                   ),
                 ),
                 IconButton(
@@ -159,77 +215,76 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
           ),
           const SizedBox(height: 24),
 
-          // Body
+          // Body: Smooth PageView
           Flexible(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 320),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              transitionBuilder: (Widget child, Animation<double> animation) {
-                final isForward = _currentStep == 1;
-                final inOffset = isForward ? const Offset(0.08, 0.0) : const Offset(-0.08, 0.0);
-                return FadeTransition(
-                  opacity: CurvedAnimation(parent: animation, curve: Curves.easeInOut),
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: inOffset,
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: child,
+            child: PageView(
+              controller: _pageController,
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                // Step 0: Catalog
+                _KeepAlivePage(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                        child: TextField(
+                          onChanged: (val) {
+                            setState(() {
+                              _searchQuery = val;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            hintText: 'Search symptoms...',
+                            prefixIcon: const Icon(Icons.search, color: Color(0xFF9B8B7E)),
+                            filled: true,
+                            fillColor: const Color(0xFFF2EDEA).withValues(alpha: 0.5),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          style: GoogleFonts.manrope(),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          child: _buildSymptomSelection(displaySymptoms, isPerimenopause),
+                        ),
+                      ),
+                    ],
                   ),
-                );
-              },
-              child: _currentStep == 0
-                  ? KeyedSubtree(
-                      key: const ValueKey<int>(0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                            child: TextField(
-                              onChanged: (val) {
-                                setState(() {
-                                  _searchQuery = val;
-                                });
-                              },
-                              decoration: InputDecoration(
-                                hintText: 'Search symptoms...',
-                                prefixIcon: const Icon(Icons.search, color: Color(0xFF9B8B7E)),
-                                filled: true,
-                                fillColor: const Color(0xFFF2EDEA).withValues(alpha: 0.5),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                  borderSide: BorderSide.none,
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                              ),
-                              style: GoogleFonts.manrope(),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Expanded(
-                            child: SingleChildScrollView(
-                              padding: const EdgeInsets.symmetric(horizontal: 24),
-                              child: _buildSymptomSelection(displaySymptoms, isPerimenopause),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : KeyedSubtree(
-                      key: const ValueKey<int>(1),
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: _buildSeveritySelection(),
-                      ),
-                    ),
+                ),
+                // Step 1: Severity selection with smooth entrance
+                SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: TweenAnimationBuilder<double>(
+                    key: ValueKey<String?>(_selectedSymptom?.id),
+                    tween: Tween<double>(begin: 0.0, end: 1.0),
+                    duration: const Duration(milliseconds: 320),
+                    curve: Curves.easeOutCubic,
+                    builder: (context, val, child) {
+                      return Opacity(
+                        opacity: val,
+                        child: Transform.translate(
+                          offset: Offset(0, 16 * (1.0 - val)),
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: _buildSeveritySelection(),
+                  ),
+                ),
+              ],
             ),
           ),
 
-          // Action button
-          if (_currentStep == 1)
-            Padding(
+          // Action button (Save) with smooth AnimatedCrossFade
+          AnimatedCrossFade(
+            firstChild: const SizedBox(width: double.infinity, height: 0),
+            secondChild: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
               child: SizedBox(
                 width: double.infinity,
@@ -260,6 +315,12 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
                 ),
               ),
             ),
+            crossFadeState: _currentStep == 1 ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            duration: const Duration(milliseconds: 260),
+            firstCurve: Curves.easeInCubic,
+            secondCurve: Curves.easeOutCubic,
+            sizeCurve: Curves.easeOutCubic,
+          ),
         ],
       ),
     );
@@ -389,7 +450,7 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
     final symBg = symColor.withValues(alpha: 0.1);
     final loggedNames = widget.loggedSymptoms.map((s) => s['name']?.toLowerCase()).toSet();
     final isAlreadyLogged = loggedNames.contains(symptom.name.toLowerCase());
-    final isSelected = (_selectedSymptom?.id == symptom.id) || (_tappingSymptomId == symptom.id);
+    final isSelected = _tappingSymptomId == symptom.id;
 
     return Bounceable(
       scaleFactor: 0.92,
@@ -595,3 +656,24 @@ class _SymptomLoggingSheetState extends ConsumerState<SymptomLoggingSheet> {
     }
   }
 }
+
+class _KeepAlivePage extends StatefulWidget {
+  final Widget child;
+  const _KeepAlivePage({required this.child});
+
+  @override
+  State<_KeepAlivePage> createState() => _KeepAlivePageState();
+}
+
+class _KeepAlivePageState extends State<_KeepAlivePage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
+  }
+}
+

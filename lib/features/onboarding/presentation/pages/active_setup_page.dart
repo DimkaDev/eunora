@@ -700,7 +700,7 @@ class _ActiveSetupPageState extends ConsumerState<ActiveSetupPage> {
                       }
                     }
                     if (context.mounted) {
-                      context.go('/home');
+                      context.go('/product-tour');
                     }
                   },
                   style: ElevatedButton.styleFrom(

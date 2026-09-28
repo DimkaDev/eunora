@@ -9,6 +9,7 @@ import 'package:eunora/features/onboarding/presentation/pages/privacy_policy_pag
 import 'package:eunora/features/auth/presentation/pages/signup_page.dart';
 import 'package:eunora/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:eunora/features/auth/presentation/pages/demo_seeding_page.dart';
+import 'package:eunora/core/services/demo_generator_service.dart';
 import 'package:eunora/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:eunora/features/auth/presentation/pages/forgot_password_email_sent_page.dart';
 import 'package:eunora/features/auth/presentation/pages/forgot_password_otp_page.dart';
@@ -17,6 +18,7 @@ import 'package:eunora/features/auth/presentation/pages/reset_password_success_p
 import 'package:eunora/features/auth/presentation/pages/verify_email_page.dart';
 import 'package:eunora/features/auth/presentation/pages/account_confirmed_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/onboarding_flow_page.dart';
+import 'package:eunora/features/onboarding/presentation/pages/product_tour_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/perimenopause_profile_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/menopause_stage_profile_page.dart';
 import 'package:eunora/features/onboarding/presentation/pages/postmenopause_profile_page.dart';
@@ -114,11 +116,15 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/demo',
-      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
-        context: context,
-        state: state,
-        child: const DemoSeedingPage(),
-      ),
+      pageBuilder: (BuildContext context, GoRouterState state) {
+        final personaCode = state.uri.queryParameters['persona'];
+        final persona = DemoPersona.fromCode(personaCode);
+        return buildSmoothPageTransition(
+          context: context,
+          state: state,
+          child: DemoSeedingPage(persona: persona),
+        );
+      },
     ),
     GoRoute(
       path: '/forgot-password',
@@ -177,6 +183,14 @@ final GoRouter appRouter = GoRouter(
         context: context,
         state: state,
         child: const AccountConfirmedPage(),
+      ),
+    ),
+    GoRoute(
+      path: '/product-tour',
+      pageBuilder: (BuildContext context, GoRouterState state) => buildSmoothPageTransition(
+        context: context,
+        state: state,
+        child: const ProductTourPage(),
       ),
     ),
     GoRoute(
