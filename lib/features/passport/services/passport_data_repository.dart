@@ -187,7 +187,7 @@ class PassportDataRepository {
     for (final log in logs) {
       double intensity = 0.0;
       for (final s in log.symptoms) {
-        if (s.symptom.id == 's_hot_flashes') {
+        if (s.symptom.id == 's_hot_flashes' || s.symptom.id == 'hot_flash') {
           intensity = s.intensity?.toDouble() ?? (s.severity == 'Mild' ? 1.0 : s.severity == 'Moderate' ? 3.0 : 5.0);
           break;
         }
@@ -369,7 +369,7 @@ class PassportDataRepository {
       } else {
         double intensity = 0.0;
         for (final s in log.symptoms) {
-          if (s.symptom.id == type) {
+          if (s.symptom.id == type || (type == 's_hot_flashes' && s.symptom.id == 'hot_flash')) {
             intensity = s.intensity?.toDouble() ?? (s.severity == 'Mild' ? 1.0 : s.severity == 'Moderate' ? 3.0 : 5.0);
             break;
           }

@@ -2,6 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 
+class SleepQualityOption {
+  final int score;
+  final String emoji;
+  final String label;
+  final String subtitle;
+
+  const SleepQualityOption({
+    required this.score,
+    required this.emoji,
+    required this.label,
+    required this.subtitle,
+  });
+}
+
+const kSleepQualityOptions = [
+  SleepQualityOption(score: 1, emoji: '😫', label: 'Poor', subtitle: 'Disrupted / restless'),
+  SleepQualityOption(score: 2, emoji: '🥱', label: 'Fair', subtitle: 'Woke up multiple times'),
+  SleepQualityOption(score: 3, emoji: '😐', label: 'Moderate', subtitle: 'Average night sleep'),
+  SleepQualityOption(score: 4, emoji: '😊', label: 'Good', subtitle: 'Felt well-rested'),
+  SleepQualityOption(score: 5, emoji: '😴', label: 'Restful & Deep', subtitle: 'Optimal uninterrupted sleep'),
+];
+
+const kSleepDurationPresets = [5.0, 6.0, 7.0, 7.5, 8.0, 9.0];
+
 class EditSleepModalSheet extends StatefulWidget {
   final String initialSleepInfo;
   final double? initialDuration;
@@ -247,7 +271,7 @@ class _EditSleepModalSheetState extends State<EditSleepModalSheet> {
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
-                          children: [5.0, 6.0, 7.0, 7.5, 8.0, 9.0].map((preset) {
+                          children: kSleepDurationPresets.map((preset) {
                             final isSelected = (_duration - preset).abs() < 0.1;
                             return GestureDetector(
                               onTap: () {
@@ -325,15 +349,12 @@ class _EditSleepModalSheetState extends State<EditSleepModalSheet> {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        _buildQualityOption(1, '😫', 'Poor', 'Disrupted / restless'),
-                        const SizedBox(height: 8),
-                        _buildQualityOption(2, '🥱', 'Fair', 'Woke up multiple times'),
-                        const SizedBox(height: 8),
-                        _buildQualityOption(3, '😐', 'Moderate', 'Average night sleep'),
-                        const SizedBox(height: 8),
-                        _buildQualityOption(4, '😊', 'Good', 'Felt well-rested'),
-                        const SizedBox(height: 8),
-                        _buildQualityOption(5, '😴', 'Restful & Deep', 'Optimal uninterrupted sleep'),
+                        ...kSleepQualityOptions.map((opt) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: _buildQualityOption(opt.score, opt.emoji, opt.label, opt.subtitle),
+                          );
+                        }),
                       ],
                     ),
                   ),

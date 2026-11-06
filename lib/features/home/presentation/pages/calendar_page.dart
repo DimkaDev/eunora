@@ -235,8 +235,8 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       }).toList();
       _monthLogsCache[key]![log.date.day] = MockDailyLog(
         symptoms: symptomsList,
-        sleepInfo: '${log.sleepDuration} hours',
-        moodInfo: 'Logged',
+        sleepInfo: log.customTriggerTexts['sleep_info'] ?? '${log.sleepDuration} hours',
+        moodInfo: log.customTriggerTexts['mood_info'] ?? 'Logged',
         hrt: hrtList,
         triggers: log.triggers,
         itemsCount: symptomsList.length + hrtList.length + log.triggers.length,
@@ -346,8 +346,8 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
 
         fetchedMap[day] = MockDailyLog(
           symptoms: symptomsList,
-          sleepInfo: '${log.sleepDuration} hours',
-          moodInfo: 'Logged',
+          sleepInfo: log.customTriggerTexts['sleep_info'] ?? '${log.sleepDuration} hours',
+          moodInfo: log.customTriggerTexts['mood_info'] ?? 'Logged',
           hrt: hrtList,
           triggers: log.triggers,
           itemsCount: symptomsList.length + hrtList.length + log.triggers.length,
@@ -612,6 +612,10 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         sleepVal = double.tryParse(sleepMatch.group(1) ?? '$sleepVal') ?? sleepVal;
       }
 
+      final updatedTexts = Map<String, String>.from(orig.customTriggerTexts);
+      updatedTexts['sleep_info'] = mockLog.sleepInfo;
+      updatedTexts['mood_info'] = mockLog.moodInfo;
+
       dailyLog = orig.copyWith(
         symptoms: loggedSymptoms,
         triggers: mockLog.triggers,
@@ -621,6 +625,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         foodsTriggered: foodsTriggered,
         foodsNotes: foodsNotes,
         customTriggerCounters: customCounters,
+        customTriggerTexts: updatedTexts,
         estradiolChecked: estradiolChecked,
         estradiolDose: estradiolDose,
         estradiolUnit: estradiolUnit,
@@ -733,7 +738,10 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         foodsTriggered: foodsTriggered,
         foodsNotes: foodsNotes,
         customTriggerCounters: customCounters,
-        customTriggerTexts: {},
+        customTriggerTexts: {
+          'sleep_info': mockLog.sleepInfo,
+          'mood_info': mockLog.moodInfo,
+        },
         estradiolChecked: estradiolChecked,
         estradiolDose: estradiolDose,
         estradiolUnit: estradiolUnit,

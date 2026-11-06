@@ -16,6 +16,8 @@ import 'package:eunora/features/home/domain/entities/daily_log.dart';
 import 'package:eunora/features/hrt_tracker/domain/hrt_schedule_service.dart';
 import 'package:eunora/features/home/presentation/widgets/calendar_hrt_edit_sheet.dart';
 import 'package:eunora/core/utils/time_formatter.dart';
+import 'package:eunora/features/home/presentation/widgets/edit_sleep_modal_sheet.dart';
+import 'package:eunora/features/home/presentation/widgets/edit_mood_modal_sheet.dart';
 
 enum HrtLogStatus { pending, taken, skipped }
 
@@ -90,6 +92,13 @@ class DailyEntryStep extends ConsumerStatefulWidget {
   final int hydrationCups;
   final String additionalNotes;
 
+  final int? sleepQuality;
+  final ValueChanged<int?>? onSleepQualityChanged;
+  final String? selectedMood;
+  final ValueChanged<String?>? onSelectedMoodChanged;
+  final int? moodScore;
+  final ValueChanged<int?>? onMoodScoreChanged;
+
   final ValueChanged<bool> onVitaminDCheckedToggled;
   final ValueChanged<bool> onMagnesiumCheckedToggled;
   final ValueChanged<double> onSleepDurationChanged;
@@ -127,6 +136,12 @@ class DailyEntryStep extends ConsumerStatefulWidget {
     required this.onSleepDurationChanged,
     required this.onHydrationCupsChanged,
     required this.onAdditionalNotesChanged,
+    this.sleepQuality,
+    this.onSleepQualityChanged,
+    this.selectedMood,
+    this.onSelectedMoodChanged,
+    this.moodScore,
+    this.onMoodScoreChanged,
     this.loggingDate,
     this.oneOffEntries,
     this.onAddOneOffEntry,
@@ -1363,75 +1378,16 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
         ),
         const SizedBox(height: 24),
 
-        // SLIDERS SECTION (Sleep & Hydration)
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: AppTheme.surfaceContainer),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.brightness_3, color: Color(0xFF8B5CF6), size: 18),
-                      const SizedBox(width: 8),
-                      Text('Sleep Duration', style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.primary, letterSpacing: 1)),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text('${widget.sleepDuration}', style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.onSurface)),
-                      const SizedBox(width: 4),
-                      Text('hrs', style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.outline)),
-                    ],
-                  )
-                ],
-              ),
-              Slider(
-                value: widget.sleepDuration,
-                min: 0,
-                max: 12,
-                divisions: 24,
-                activeColor: AppTheme.primary,
-                onChanged: widget.onSleepDurationChanged,
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.water_drop, color: Color(0xFF0EA5E9), size: 18),
-                      const SizedBox(width: 8),
-                      Text('Hydration', style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.primary, letterSpacing: 1)),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text('${widget.hydrationCups}', style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.onSurface)),
-                      const SizedBox(width: 4),
-                      Text('cups', style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.outline)),
-                    ],
-                  )
-                ],
-              ),
-              Slider(
-                value: widget.hydrationCups.toDouble(),
-                min: 0,
-                max: 15,
-                divisions: 15,
-                activeColor: AppTheme.primary,
-                onChanged: (val) => widget.onHydrationCupsChanged(val.toInt()),
-              ),
-            ],
-          ),
-        ),
+        // SLEEP SECTION
+        _buildSleepCard(context),
+        const SizedBox(height: 24),
+
+        // MOOD & WELL-BEING SECTION
+        _buildMoodCard(context),
+        const SizedBox(height: 24),
+
+        // HYDRATION SECTION
+        _buildHydrationCard(context),
         const SizedBox(height: 24),
 
         // NOTES
@@ -1455,6 +1411,588 @@ class _DailyEntryStepState extends ConsumerState<DailyEntryStep> {
         ),
         const SizedBox(height: 32),
       ],
+    );
+  }
+
+  Widget _buildSleepCard(BuildContext context) {
+    const sleepPurple = Color(0xFF8B5CF6);
+    final duration = widget.sleepDuration;
+    final formattedHours = duration.toStringAsFixed(duration == duration.toInt() ? 0 : 1);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: AppTheme.outlineVariant.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header: Sleep Duration
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: sleepPurple.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.bedtime,
+                      color: sleepPurple,
+                      size: 18,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'SLEEP DURATION',
+                    style: GoogleFonts.manrope(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primary,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    formattedHours,
+                    style: GoogleFonts.manrope(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'hrs',
+                    style: GoogleFonts.manrope(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.outline,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              activeTrackColor: sleepPurple,
+              inactiveTrackColor: sleepPurple.withValues(alpha: 0.15),
+              thumbColor: sleepPurple,
+              overlayColor: sleepPurple.withValues(alpha: 0.2),
+              trackHeight: 6,
+            ),
+            child: Slider(
+              value: duration.clamp(0.0, 14.0),
+              min: 0,
+              max: 14,
+              divisions: 28,
+              onChanged: widget.onSleepDurationChanged,
+            ),
+          ),
+          const SizedBox(height: 8),
+          // Presets
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: kSleepDurationPresets.map((preset) {
+              final isSelected = (duration - preset).abs() < 0.1;
+              return GestureDetector(
+                onTap: () => widget.onSleepDurationChanged(preset),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isSelected ? sleepPurple : const Color(0xFFF7F5F2),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isSelected
+                          ? sleepPurple
+                          : AppTheme.outlineVariant.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: Text(
+                    '${preset == preset.toInt() ? preset.toInt() : preset}h',
+                    style: GoogleFonts.manrope(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: isSelected ? Colors.white : AppTheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+
+          const SizedBox(height: 20),
+          const Divider(color: Color(0xFFF2EDEA), height: 1),
+          const SizedBox(height: 16),
+
+          // Sleep Quality Section
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF59E0B).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.star_rounded,
+                      color: Color(0xFFF59E0B),
+                      size: 18,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'SLEEP QUALITY',
+                    style: GoogleFonts.manrope(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primary,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ],
+              ),
+              if (widget.sleepQuality != null)
+                GestureDetector(
+                  onTap: () => widget.onSleepQualityChanged?.call(null),
+                  child: Text(
+                    'Clear',
+                    style: GoogleFonts.manrope(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.outline,
+                    ),
+                  ),
+                )
+              else
+                Text(
+                  'Optional',
+                  style: GoogleFonts.manrope(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: AppTheme.outline,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Quality options
+          ...kSleepQualityOptions.map((opt) {
+            final isSelected = widget.sleepQuality == opt.score;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: InkWell(
+                onTap: () {
+                  if (isSelected) {
+                    widget.onSleepQualityChanged?.call(null);
+                  } else {
+                    widget.onSleepQualityChanged?.call(opt.score);
+                  }
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? sleepPurple.withValues(alpha: 0.08)
+                        : const Color(0xFFF9F7F5),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isSelected
+                          ? sleepPurple
+                          : AppTheme.outlineVariant.withValues(alpha: 0.25),
+                      width: isSelected ? 1.5 : 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(opt.emoji, style: const TextStyle(fontSize: 20)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              opt.label,
+                              style: GoogleFonts.manrope(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: isSelected ? sleepPurple : AppTheme.onSurface,
+                              ),
+                            ),
+                            Text(
+                              opt.subtitle,
+                              style: GoogleFonts.manrope(
+                                fontSize: 11,
+                                color: AppTheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: List.generate(5, (starIdx) {
+                          final filled = starIdx < opt.score;
+                          return Icon(
+                            filled ? Icons.star_rounded : Icons.star_outline_rounded,
+                            size: 15,
+                            color: filled
+                                ? const Color(0xFFF59E0B)
+                                : AppTheme.outlineVariant.withValues(alpha: 0.4),
+                          );
+                        }),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMoodCard(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: AppTheme.outlineVariant.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0EA5E9).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.sentiment_satisfied_alt,
+                      color: Color(0xFF0EA5E9),
+                      size: 18,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'MOOD & WELL-BEING',
+                    style: GoogleFonts.manrope(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primary,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ],
+              ),
+              if (widget.selectedMood != null)
+                GestureDetector(
+                  onTap: () {
+                    widget.onSelectedMoodChanged?.call(null);
+                    widget.onMoodScoreChanged?.call(null);
+                  },
+                  child: Text(
+                    'Clear',
+                    style: GoogleFonts.manrope(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.outline,
+                    ),
+                  ),
+                )
+              else
+                Text(
+                  'Optional',
+                  style: GoogleFonts.manrope(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: AppTheme.outline,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // 6 Mood Category Options
+          ...kMoodDefinitions.map((def) {
+            final isSelected = widget.selectedMood == def.name;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: InkWell(
+                onTap: () {
+                  if (isSelected) {
+                    widget.onSelectedMoodChanged?.call(null);
+                    widget.onMoodScoreChanged?.call(null);
+                  } else {
+                    widget.onSelectedMoodChanged?.call(def.name);
+                    widget.onMoodScoreChanged?.call(def.defaultScore);
+                  }
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? def.color.withValues(alpha: 0.08)
+                        : const Color(0xFFF9F7F5),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isSelected
+                          ? def.color
+                          : AppTheme.outlineVariant.withValues(alpha: 0.25),
+                      width: isSelected ? 1.5 : 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(def.emoji, style: const TextStyle(fontSize: 22)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              def.name,
+                              style: GoogleFonts.manrope(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: isSelected ? def.color : AppTheme.onSurface,
+                              ),
+                            ),
+                            Text(
+                              def.subtitle,
+                              style: GoogleFonts.manrope(
+                                fontSize: 11,
+                                color: AppTheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (isSelected)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: def.color,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${widget.moodScore ?? def.defaultScore}/5',
+                            style: GoogleFonts.manrope(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+
+          // Score Rating Selector (visible if a mood category is chosen)
+          if (widget.selectedMood != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFAF9F6),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppTheme.outlineVariant.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'SCORE RATING',
+                        style: GoogleFonts.manrope(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primary,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                      Text(
+                        '${widget.moodScore ?? 3} / 5',
+                        style: GoogleFonts.manrope(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: List.generate(5, (idx) {
+                      final rating = idx + 1;
+                      final isCurrent = (widget.moodScore ?? 3) == rating;
+                      return GestureDetector(
+                        onTap: () => widget.onMoodScoreChanged?.call(rating),
+                        child: Container(
+                          width: 44,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: isCurrent
+                                ? AppTheme.primary
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isCurrent
+                                  ? AppTheme.primary
+                                  : AppTheme.outlineVariant.withValues(alpha: 0.4),
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '$rating',
+                            style: GoogleFonts.manrope(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: isCurrent ? Colors.white : AppTheme.onSurface,
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHydrationCard(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: AppTheme.outlineVariant.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0EA5E9).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.water_drop,
+                      color: Color(0xFF0EA5E9),
+                      size: 18,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'HYDRATION',
+                    style: GoogleFonts.manrope(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primary,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    '${widget.hydrationCups}',
+                    style: GoogleFonts.manrope(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'cups',
+                    style: GoogleFonts.manrope(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.outline,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              activeTrackColor: const Color(0xFF0EA5E9),
+              inactiveTrackColor: const Color(0xFF0EA5E9).withValues(alpha: 0.15),
+              thumbColor: const Color(0xFF0EA5E9),
+              overlayColor: const Color(0xFF0EA5E9).withValues(alpha: 0.2),
+              trackHeight: 6,
+            ),
+            child: Slider(
+              value: widget.hydrationCups.toDouble().clamp(0.0, 15.0),
+              min: 0,
+              max: 15,
+              divisions: 15,
+              onChanged: (val) => widget.onHydrationCupsChanged(val.toInt()),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

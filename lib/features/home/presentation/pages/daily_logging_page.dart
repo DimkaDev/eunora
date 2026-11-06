@@ -33,6 +33,7 @@ import 'package:eunora/features/home/presentation/widgets/calendar_hrt_edit_shee
 import 'package:eunora/features/home/presentation/widgets/daily_logging/daily_logging_success_screen.dart';
 import 'package:eunora/features/passport/providers/passport_screen_controller.dart';
 import 'package:eunora/core/utils/time_formatter.dart';
+import 'package:eunora/features/home/presentation/widgets/edit_mood_modal_sheet.dart';
 
 class DailyLoggingPage extends ConsumerStatefulWidget {
   final DateTime? initialDate;
@@ -80,6 +81,9 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
   bool _magnesiumChecked = false;
 
   double _sleepDuration = 7.5;
+  int? _sleepQuality;
+  String? _selectedMood;
+  int? _moodScore;
   int _hydrationCups = 4;
   String _additionalNotes = '';
   final Map<String, bool> _otherMedsChecked = {};
@@ -237,6 +241,56 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
           _magnesiumChecked = existingLog.magnesiumChecked;
           _sleepDuration = existingLog.sleepDuration;
           _hydrationCups = existingLog.hydrationCups;
+
+          // Parse sleep quality from customTriggerTexts['sleep_info']
+          final existingSleepInfo = existingLog.customTriggerTexts['sleep_info'];
+          if (existingSleepInfo != null && existingSleepInfo.isNotEmpty) {
+            final qualityMatch = RegExp(r'quality\s*(\d)/5', caseSensitive: false).firstMatch(existingSleepInfo);
+            if (qualityMatch != null) {
+              _sleepQuality = int.tryParse(qualityMatch.group(1) ?? '');
+            } else {
+              final slashMatch = RegExp(r'(\d)/5').firstMatch(existingSleepInfo);
+              if (slashMatch != null) {
+                _sleepQuality = int.tryParse(slashMatch.group(1) ?? '');
+              } else {
+                _sleepQuality = null;
+              }
+            }
+            if (_sleepDuration == 0) {
+              final durMatch = RegExp(r'(\d+(\.\d+)?)').firstMatch(existingSleepInfo);
+              if (durMatch != null) {
+                _sleepDuration = double.tryParse(durMatch.group(1) ?? '') ?? _sleepDuration;
+              }
+            }
+          } else {
+            _sleepQuality = null;
+          }
+
+          // Parse mood category and score from customTriggerTexts['mood_info']
+          final existingMoodInfo = existingLog.customTriggerTexts['mood_info'];
+          if (existingMoodInfo != null && existingMoodInfo.isNotEmpty && existingMoodInfo != 'Logged') {
+            String? detectedMood;
+            int? detectedScore;
+            for (final def in kMoodDefinitions) {
+              if (existingMoodInfo.toLowerCase().contains(def.name.toLowerCase())) {
+                detectedMood = def.name;
+                detectedScore = def.defaultScore;
+                break;
+              }
+            }
+            final scoreMatch = RegExp(r'(\d)/5').firstMatch(existingMoodInfo);
+            if (scoreMatch != null) {
+              final s = int.tryParse(scoreMatch.group(1) ?? '');
+              if (s != null && s >= 1 && s <= 5) {
+                detectedScore = s;
+              }
+            }
+            _selectedMood = detectedMood;
+            _moodScore = detectedScore;
+          } else {
+            _selectedMood = null;
+            _moodScore = null;
+          }
 
           // Parse other medications from additional notes
           _otherMedsChecked.clear();
@@ -404,6 +458,30 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
       finalNotes = "${finalNotes.isNotEmpty ? '$finalNotes\n\n' : ''}Supplements taken today: ${loggedOtherMeds.join(', ')}";
     }
 
+    final updatedTexts = Map<String, String>.from(_customTriggerTexts);
+
+    // Persist sleep_info
+    final formattedHours = _sleepDuration.toStringAsFixed(_sleepDuration == _sleepDuration.toInt() ? 0 : 1);
+    if (_sleepQuality != null) {
+      updatedTexts['sleep_info'] = '$formattedHours hours · quality $_sleepQuality/5';
+    } else {
+      updatedTexts['sleep_info'] = '$formattedHours hours';
+    }
+
+    // Persist mood_info & sync stress level if mood selected
+    String finalStress = _stressLevel;
+    if (_selectedMood != null) {
+      final score = _moodScore ?? 3;
+      updatedTexts['mood_info'] = '$_selectedMood · $score/5';
+      final moodDef = kMoodDefinitions.firstWhere(
+        (m) => m.name.toLowerCase() == _selectedMood!.toLowerCase(),
+        orElse: () => kMoodDefinitions[1],
+      );
+      finalStress = moodDef.stress;
+    } else {
+      updatedTexts.remove('mood_info');
+    }
+
     return DailyLog(
       id: dateStr,
       userId: uid,
@@ -412,11 +490,11 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
       triggers: triggerNames,
       caffeineCups: _caffeineCups,
       alcoholGlasses: _alcoholGlasses,
-      stressLevel: _stressLevel,
+      stressLevel: finalStress,
       foodsTriggered: _foodsTriggered,
       foodsNotes: _foodsNotes,
       customTriggerCounters: _customTriggerCounters,
-      customTriggerTexts: _customTriggerTexts,
+      customTriggerTexts: updatedTexts,
       estradiolChecked: estradiolChecked,
       estradiolDose: estradiolDose,
       estradiolUnit: estradiolUnit,
@@ -529,7 +607,7 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
         break;
       case 4:
         title = 'Step 5 – Review / Daily Data Entry';
-        content = 'Log your daily medication (Hormone Replacement Therapy), sleep duration, and water intake. Recording these consistency habits helps visualize how HRT dosage, quality rest, and hydration correlate with your overall symptom patterns.';
+        content = 'Log your daily medication (Hormone Replacement Therapy), sleep (duration & quality), mood & well-being, and water intake. Recording these consistency habits helps visualize how HRT dosage, quality rest, and hydration correlate with your overall symptom patterns.';
         break;
       default:
         title = 'Help';
@@ -980,6 +1058,24 @@ class _DailyLoggingPageState extends ConsumerState<DailyLoggingPage> {
                       vitaminDChecked: _vitaminDChecked,
                       magnesiumChecked: _magnesiumChecked,
                       sleepDuration: _sleepDuration,
+                      sleepQuality: _sleepQuality,
+                      selectedMood: _selectedMood,
+                      moodScore: _moodScore,
+                      onSleepQualityChanged: (val) {
+                        setState(() {
+                          _sleepQuality = val;
+                        });
+                      },
+                      onSelectedMoodChanged: (val) {
+                        setState(() {
+                          _selectedMood = val;
+                        });
+                      },
+                      onMoodScoreChanged: (val) {
+                        setState(() {
+                          _moodScore = val;
+                        });
+                      },
                       hydrationCups: _hydrationCups,
                       additionalNotes: _additionalNotes,
                       otherMedsChecked: _otherMedsChecked,

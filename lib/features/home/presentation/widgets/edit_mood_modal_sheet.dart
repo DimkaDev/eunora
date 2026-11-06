@@ -2,6 +2,75 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eunora/core/theme/app_theme.dart';
 
+class MoodOption {
+  final String name;
+  final String emoji;
+  final int defaultScore;
+  final String subtitle;
+  final String stress;
+  final Color color;
+
+  const MoodOption({
+    required this.name,
+    required this.emoji,
+    required this.defaultScore,
+    required this.subtitle,
+    required this.stress,
+    required this.color,
+  });
+}
+
+const kMoodDefinitions = [
+  MoodOption(
+    name: 'Great',
+    emoji: '🌟',
+    defaultScore: 5,
+    subtitle: 'Energized, balanced & positive',
+    stress: 'Calm',
+    color: Color(0xFF10B981),
+  ),
+  MoodOption(
+    name: 'Good',
+    emoji: '😊',
+    defaultScore: 4,
+    subtitle: 'Feeling calm and in good spirits',
+    stress: 'Calm',
+    color: Color(0xFF0EA5E9),
+  ),
+  MoodOption(
+    name: 'Okay',
+    emoji: '😐',
+    defaultScore: 3,
+    subtitle: 'Neutral, managing daily tasks fine',
+    stress: 'Moderate',
+    color: Color(0xFFF59E0B),
+  ),
+  MoodOption(
+    name: 'Low',
+    emoji: '😔',
+    defaultScore: 2,
+    subtitle: 'Down, fatigued or emotionally drained',
+    stress: 'Moderate',
+    color: Color(0xFF8B5CF6),
+  ),
+  MoodOption(
+    name: 'Anxious',
+    emoji: '😰',
+    defaultScore: 2,
+    subtitle: 'Tense, restless or worried',
+    stress: 'High',
+    color: Color(0xFFEC4899),
+  ),
+  MoodOption(
+    name: 'Stressed',
+    emoji: '😫',
+    defaultScore: 1,
+    subtitle: 'Overwhelmed or high pressure',
+    stress: 'High',
+    color: Color(0xFFEF4444),
+  ),
+];
+
 class EditMoodModalSheet extends StatefulWidget {
   final String initialMoodInfo;
   final String? initialStressLevel;
@@ -32,58 +101,6 @@ class _EditMoodModalSheetState extends State<EditMoodModalSheet> {
   static const _weekdays = [
     'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
   ];
-
-  static const _moodDefinitions = [
-    {
-      'name': 'Great',
-      'emoji': '🌟',
-      'defaultScore': 5,
-      'subtitle': 'Energized, balanced & positive',
-      'stress': 'Calm',
-      'color': Color(0xFF10B981),
-    },
-    {
-      'name': 'Good',
-      'emoji': '😊',
-      'defaultScore': 4,
-      'subtitle': 'Feeling calm and in good spirits',
-      'stress': 'Calm',
-      'color': Color(0xFF0EA5E9),
-    },
-    {
-      'name': 'Okay',
-      'emoji': '😐',
-      'defaultScore': 3,
-      'subtitle': 'Neutral, managing daily tasks fine',
-      'stress': 'Moderate',
-      'color': Color(0xFFF59E0B),
-    },
-    {
-      'name': 'Low',
-      'emoji': '😔',
-      'defaultScore': 2,
-      'subtitle': 'Down, fatigued or emotionally drained',
-      'stress': 'Moderate',
-      'color': Color(0xFF8B5CF6),
-    },
-    {
-      'name': 'Anxious',
-      'emoji': '😰',
-      'defaultScore': 2,
-      'subtitle': 'Tense, restless or worried',
-      'stress': 'High',
-      'color': Color(0xFFEC4899),
-    },
-    {
-      'name': 'Stressed',
-      'emoji': '😫',
-      'defaultScore': 1,
-      'subtitle': 'Overwhelmed or high pressure',
-      'stress': 'High',
-      'color': Color(0xFFEF4444),
-    },
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -96,12 +113,12 @@ class _EditMoodModalSheetState extends State<EditMoodModalSheet> {
     int detectedScore = 4;
     String detectedStress = widget.initialStressLevel ?? 'Moderate';
 
-    for (final def in _moodDefinitions) {
-      final name = def['name'] as String;
+    for (final def in kMoodDefinitions) {
+      final name = def.name;
       if (raw.toLowerCase().contains(name.toLowerCase())) {
         detectedMood = name;
-        detectedScore = def['defaultScore'] as int;
-        detectedStress = def['stress'] as String;
+        detectedScore = def.defaultScore;
+        detectedStress = def.stress;
         break;
       }
     }
@@ -214,13 +231,13 @@ class _EditMoodModalSheetState extends State<EditMoodModalSheet> {
                   const SizedBox(height: 12),
 
                   // Mood list
-                  ..._moodDefinitions.map((def) {
-                    final name = def['name'] as String;
-                    final emoji = def['emoji'] as String;
-                    final subtitle = def['subtitle'] as String;
-                    final stress = def['stress'] as String;
-                    final defScore = def['defaultScore'] as int;
-                    final color = def['color'] as Color;
+                  ...kMoodDefinitions.map((def) {
+                    final name = def.name;
+                    final emoji = def.emoji;
+                    final subtitle = def.subtitle;
+                    final stress = def.stress;
+                    final defScore = def.defaultScore;
+                    final color = def.color;
                     final isSelected = _selectedMood == name;
 
                     return Padding(
